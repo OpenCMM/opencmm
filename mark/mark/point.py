@@ -39,3 +39,14 @@ def get_lines(stl_file_path: str, z: float):
         line for line in ground_parallel_lines if not np.all(line == 0)
     ]
     return ground_parallel_lines
+
+
+def get_unique_points(stl_file_path: str, z: float):
+    lines = get_lines(stl_file_path, z)
+    points = []
+    for line in lines:
+        for point in line:
+            points.append(point)
+    points = np.array(points)
+    unique_points = np.unique(points, axis=0)
+    return unique_points
