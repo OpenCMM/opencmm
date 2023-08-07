@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "mark"
+version = "0.1.0"
+description = ""
+authors = ["yuichiroaoki <45054071+yuichiroaoki@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+opencv-python-headless = "^4.8.0.74"
+numpy-stl = "^3.0.1"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+pytest = "^7.4.0"
+ruff = "^0.0.282"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
