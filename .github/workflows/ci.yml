@@ -49,7 +49,7 @@ jobs:
 
       - name: Format with black
         run: |
-          poetry run black --check cnceye tests
+          poetry run black --check mark tests
 
       - name: Lint with ruff
         run: |
