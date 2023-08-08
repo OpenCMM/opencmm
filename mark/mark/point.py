@@ -2,6 +2,17 @@ from stl import mesh
 import numpy as np
 import mysql.connector
 from mysql.connector.errors import IntegrityError
+import os
+
+
+# For github actions
+CI_MYSQL_CONFIG = dict(
+    host="localhost",
+    port=3306,
+    user="root",
+    password="root",
+)
+
 
 MYSQL_CONFIG = dict(
     host="raspberrypi.local",
@@ -9,6 +20,9 @@ MYSQL_CONFIG = dict(
     user="yuchi",
     password="raspberrypi",
 )
+
+if os.environ.get("CI"):
+    MYSQL_CONFIG = CI_MYSQL_CONFIG
 
 
 def point_id(point: list):
