@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS `point` (
   `ry` FLOAT,
   `rz` FLOAT,
   `img_path` varchar(255),
-  `check` TINYINT(1) NOT NULL DEFAULT '0',
+  `is_checked` TINYINT(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `point_id` (`point_id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
