@@ -8,6 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 numpy-stl = "^3.0.1"
+mysql-connector-python = "^8.1.0"
 
 
 [tool.poetry.group.dev.dependencies]

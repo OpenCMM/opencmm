@@ -1,5 +1,32 @@
 from stl import mesh
 import numpy as np
+import mysql.connector
+from mysql.connector.errors import IntegrityError
+import os
+
+
+# For github actions
+CI_MYSQL_CONFIG = dict(
+    host="localhost",
+    port=3306,
+    user="root",
+    password="root",
+)
+
+
+MYSQL_CONFIG = dict(
+    host="raspberrypi.local",
+    port=3306,
+    user="yuchi",
+    password="raspberrypi",
+)
+
+if os.environ.get("CI"):
+    MYSQL_CONFIG = CI_MYSQL_CONFIG
+
+
+def point_id(point: list):
+    return f"{point[0]},{point[1]},{point[2]}"
 
 
 def get_lines(stl_file_path: str, z: float):
@@ -41,8 +68,23 @@ def get_lines(stl_file_path: str, z: float):
     return ground_parallel_lines
 
 
-def get_unique_points(stl_file_path: str, z: float):
-    lines = get_lines(stl_file_path, z)
+def import_lines(lines: list):
+    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+    cursor = cnx.cursor()
+    line_list = [[point_id(p) for p in ab] for ab in lines]
+
+    insert_query = "INSERT INTO line (a, b) VALUES (%s, %s)"
+
+    try:
+        cursor.executemany(insert_query, line_list)
+    except IntegrityError:
+        print("Error: unable to import lines")
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+
+
+def get_unique_points(lines: list):
     points = []
     for line in lines:
         for point in line:
@@ -50,3 +92,21 @@ def get_unique_points(stl_file_path: str, z: float):
     points = np.array(points)
     unique_points = np.unique(points, axis=0)
     return unique_points
+
+
+def import_points(unique_points: list):
+    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+    cursor = cnx.cursor()
+    unique_point_list = unique_points.tolist()
+    for i in range(len(unique_point_list)):
+        unique_point_list[i].append(",".join(map(str, unique_point_list[i])))
+
+    insert_query = "INSERT INTO point (x, y, z, point_id) VALUES (%s, %s, %s, %s)"
+
+    try:
+        cursor.executemany(insert_query, unique_point_list)
+    except IntegrityError:
+        print("Error: unable to import points")
+    cnx.commit()
+    cursor.close()
+    cnx.close()

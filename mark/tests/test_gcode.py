@@ -1,5 +1,5 @@
 from mark.gcode import get_gcode
-from mark.point import get_unique_points
+from mark.point import get_unique_points, get_lines
 
 
 def test_get_gcode():
@@ -11,6 +11,7 @@ def test_get_gcode():
     assert gcode[2] == "G1 X0 Y0 Z2"
 
     z = 10.0
-    unique_points = get_unique_points("tests/fixtures/stl/sample.stl", z)
+    lines = get_lines("tests/fixtures/stl/sample.stl", z)
+    unique_points = get_unique_points(lines)
     gcode = get_gcode(unique_points)
     assert len(gcode) == 12
