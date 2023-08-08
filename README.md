@@ -1,4 +1,6 @@
 # opencmm
+![Test](https://github.com/OpenCMM/opencmm/actions/workflows/ci.yml/badge.svg)
+
 An image-based CMM (Coordinate Measuring Machine) system for CNC machine tools
 
 ## Introduction
