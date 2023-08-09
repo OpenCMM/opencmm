@@ -1,0 +1,13 @@
+__pycache__
+cache-directory
+env
+.pytest_cache
+tests
+
+Dockerfile
+README.md
+*.pyc
+*.pyo
+*.pyd
+
+data
