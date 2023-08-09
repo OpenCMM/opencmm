@@ -3,8 +3,8 @@ import os
 from fastapi import FastAPI, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-from server.prepare import process_stl 
-from server.connect import connect_lines 
+from server.prepare import process_stl
+from server.connect import connect_lines
 
 app = FastAPI()
 
@@ -44,9 +44,11 @@ async def upload_3dmodel(file: UploadFile):
 
     return {"status": "ok"}
 
+
 @app.get("/download/gcode")
 async def download_gcode():
     return FileResponse("data/gcode/opencmm.gcode")
+
 
 @app.get("/load/image")
 async def load_image():

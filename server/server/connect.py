@@ -8,6 +8,7 @@ distance = camera_height - object_height
 sensor_width = 36.0  # mm
 camera = Camera(focal_length, sensor_width)
 
+
 def connect_lines():
     all_images = AllImages(camera)
     all_images.add_lines()
