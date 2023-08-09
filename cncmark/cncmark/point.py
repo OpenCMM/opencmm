@@ -1,28 +1,8 @@
+from cncmark.config import MYSQL_CONFIG
 from stl import mesh
 import numpy as np
 import mysql.connector
 from mysql.connector.errors import IntegrityError
-import os
-
-
-# For github actions
-CI_MYSQL_CONFIG = dict(
-    host="localhost",
-    port=3306,
-    user="root",
-    password="root",
-)
-
-
-MYSQL_CONFIG = dict(
-    host="raspberrypi.local",
-    port=3306,
-    user="yuchi",
-    password="raspberrypi",
-)
-
-if os.environ.get("CI"):
-    MYSQL_CONFIG = CI_MYSQL_CONFIG
 
 
 def point_id(point: list):
@@ -92,6 +72,12 @@ def get_unique_points(lines: list):
     points = np.array(points)
     unique_points = np.unique(points, axis=0)
     return unique_points
+
+
+def save_unique_points(unique_points: list, file_path: str):
+    with open(file_path, "w") as f:
+        for point in unique_points:
+            f.write(f"{point[0]},{point[1]},{point[2]}\n")
 
 
 def import_points(unique_points: list):
