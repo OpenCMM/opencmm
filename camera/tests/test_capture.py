@@ -1,6 +1,7 @@
 from camera.capture import add_img_path
 import pytest
 
+
 @pytest.mark.skip(reason="need to mock mysql")
 def test_add_img_path():
     index = 0

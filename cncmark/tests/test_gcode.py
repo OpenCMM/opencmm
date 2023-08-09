@@ -1,5 +1,5 @@
-from mark.gcode import get_gcode
-from mark.point import get_unique_points, get_lines
+from cncmark.gcode import get_gcode
+from cncmark.point import get_unique_points, get_lines
 
 
 def test_get_gcode():

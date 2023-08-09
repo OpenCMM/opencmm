@@ -1,4 +1,4 @@
-from mark.config import MYSQL_CONFIG
+from cncmark.config import MYSQL_CONFIG
 from stl import mesh
 import numpy as np
 import mysql.connector

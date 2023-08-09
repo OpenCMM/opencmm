@@ -1,4 +1,4 @@
-from mark.point import get_lines, get_unique_points, import_points, import_lines
+from cncmark.point import get_lines, get_unique_points, import_points, import_lines
 
 
 def test_get_lines():

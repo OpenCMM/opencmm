@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "mark"
+name = "cncmark"
 version = "0.1.0"
 description = ""
 authors = ["yuichiroaoki <45054071+yuichiroaoki@users.noreply.github.com>"]
