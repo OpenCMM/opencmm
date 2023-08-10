@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "cncmark"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["yuichiroaoki <45054071+yuichiroaoki@users.noreply.github.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.9"
 numpy-stl = "^3.0.1"
 mysql-connector-python = "^8.1.0"
 
