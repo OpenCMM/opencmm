@@ -10,7 +10,6 @@ python = "^3.9"
 fastapi = {extras = ["all"], version = "^0.101.0"}
 uvicorn = {extras = ["standard"], version = "^0.23.2"}
 cncmark = "^0.2.0"
-cnceye = "^0.2.0"
 
 
 [tool.poetry.group.dev.dependencies]

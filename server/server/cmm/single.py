@@ -63,7 +63,12 @@ class SingleImage:
             WHERE point_id = %s
         """
         try:
-            data = (real_coordinate.x, real_coordinate.y, real_coordinate.z, point_id)
+            data = (
+                float(real_coordinate.x),
+                float(real_coordinate.y),
+                float(real_coordinate.z),
+                point_id,
+            )
             cursor.execute(update_query, data)
         except IntegrityError:
             print("Error: unable to update points")

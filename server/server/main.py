@@ -16,12 +16,13 @@ class JobInfo(BaseModel):
     camera_height: float
     feed_rate: float
 
+
 class CameraInfo(BaseModel):
     focal_length: float
     sensor_width: float
-    camera_height: float
-    object_height: float
+    distance: float
     is_full: bool = False
+
 
 model_path = "data/3dmodel/3dmodel.stl"
 
@@ -66,6 +67,7 @@ async def upload_3dmodel(file: UploadFile):
 
     return {"status": "ok"}
 
+
 @app.post("/setup/data")
 async def setup_data(job_info: JobInfo):
     """Find verticies, generate gcode"""
@@ -77,10 +79,11 @@ async def setup_data(job_info: JobInfo):
 
     return {"status": "ok"}
 
+
 @app.post("/process/start")
 async def process_start(camera_info: CameraInfo):
     camera = Camera(camera_info.focal_length, camera_info.sensor_width)
-    capture_images(camera, camera_info.is_full)
+    capture_images(camera, camera_info.distance, camera_info.is_full)
 
     return {"status": "ok"}
 

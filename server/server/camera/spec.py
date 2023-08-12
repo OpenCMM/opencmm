@@ -20,5 +20,9 @@ class Camera:
     def get_camera_wait(self):
         with open("data/gcode/camera_wait.txt", "r") as f:
             camera_wait = f.readlines()
-        camera_wait = [float(x.strip()) for x in camera_wait]
+        camera_wait = [format_row(x.strip()) for x in camera_wait]
         return camera_wait
+
+
+def format_row(row: str) -> list:
+    return [float(x) for x in row.split()]

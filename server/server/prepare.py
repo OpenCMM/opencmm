@@ -1,6 +1,7 @@
 from cncmark.point import get_lines, import_lines, get_unique_points, import_points
 from cncmark.gcode import GCode
 
+
 def process_stl(stl_file_path: str, z: float, camera_height: float, feed_rate: float):
     z = 10.0
     lines = get_lines(stl_file_path, z)
