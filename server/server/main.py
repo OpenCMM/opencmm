@@ -1,10 +1,21 @@
 import uvicorn
 import os
-from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from server.prepare import process_stl
 from server.connect import connect_lines
+from pydantic import BaseModel
+import os
+
+
+class JobInfo(BaseModel):
+    z: float
+    camera_height: float
+    feed_rate: float
+
+
+model_path = "data/3dmodel/3dmodel.stl"
 
 app = FastAPI()
 
@@ -36,23 +47,42 @@ def health_check():
 
 @app.post("/upload/3dmodel")
 async def upload_3dmodel(file: UploadFile):
+    """Upload 3d model file"""
     # save image
-    img_path = f"data/3dmodel/{file.filename}"
-    with open(img_path, "wb") as buffer:
+    file_extension = file.filename.split(".")[-1]
+    if file_extension not in ["stl", "STL"]:
+        raise HTTPException(status_code=400, detail="File extension not supported")
+
+    with open(model_path, "wb") as buffer:
         buffer.write(await file.read())
-    process_stl(img_path, 10.0)
+
+    return {"status": "ok"}
+
+@app.post("/setup/data")
+async def setup_data(job_info: JobInfo):
+    """Find verticies, generate gcode"""
+
+    # check if model exists
+    if not os.path.exists(model_path):
+        raise HTTPException(status_code=400, detail="No model uploaded")
+    process_stl(model_path, job_info.z, job_info.camera_height, job_info.feed_rate)
 
     return {"status": "ok"}
 
 
 @app.get("/download/gcode")
 async def download_gcode():
+    """Download gcode file"""
+    if not os.path.exists("data/gcode/opencmm.gcode"):
+        raise HTTPException(status_code=400, detail="No gcode file generated")
     return FileResponse("data/gcode/opencmm.gcode")
 
 
 @app.get("/load/image")
 async def load_image():
     connect_lines()
+    if not os.path.exists("data/images/result.png"):
+        raise HTTPException(status_code=400, detail="No image file generated")
     return FileResponse("data/images/result.png")
 
 

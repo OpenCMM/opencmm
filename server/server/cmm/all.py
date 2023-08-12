@@ -1,4 +1,4 @@
-from coordinate import Coordinate
+from server.coordinate import Coordinate
 from server.camera import Camera
 from server.line import Line
 from .single import SingleImage
