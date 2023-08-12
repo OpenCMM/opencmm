@@ -15,7 +15,7 @@ def test_gcode():
     assert gcode.gcode[4] == "G4 P1"
     assert gcode.gcode[5] == "G1 X0 Y30 Z300 F600"
 
-    for wait in gcode.pic_wait:
+    for wait in gcode.camera_wait:
         assert wait == 2.0
 
     z = 10.0
@@ -26,11 +26,11 @@ def test_gcode():
     assert len(gcode.gcode) == 24
 
 
-def test_pic_wait():
+def test_camera_wait():
     points = np.array([[0, 10, 0], [30, 10, 0], [30, 30, 0]])
     gcode = GCode(points, 600, 300)
     gcode.generate_gcode()
     assert len(gcode.gcode) == 6
-    assert gcode.pic_wait[0] == 2.0
-    assert gcode.pic_wait[1] == 4.0
-    assert gcode.pic_wait[2] == 3.0
+    assert gcode.camera_wait[0] == 2.0
+    assert gcode.camera_wait[1] == 4.0
+    assert gcode.camera_wait[2] == 3.0

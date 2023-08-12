@@ -7,6 +7,7 @@ from server.prepare import process_stl
 from server.connect import connect_lines
 from pydantic import BaseModel
 import os
+from camera import Camera
 
 
 class JobInfo(BaseModel):
@@ -14,6 +15,12 @@ class JobInfo(BaseModel):
     camera_height: float
     feed_rate: float
 
+class CameraInfo(BaseModel):
+    focal_length: float
+    sensor_width: float
+    camera_height: float
+    object_height: float
+    is_full: bool = False
 
 model_path = "data/3dmodel/3dmodel.stl"
 
@@ -66,6 +73,13 @@ async def setup_data(job_info: JobInfo):
     if not os.path.exists(model_path):
         raise HTTPException(status_code=400, detail="No model uploaded")
     process_stl(model_path, job_info.z, job_info.camera_height, job_info.feed_rate)
+
+    return {"status": "ok"}
+
+@app.post("/process/start")
+async def process_start(camera_info: CameraInfo):
+    camera = Camera(camera_info.focal_length, camera_info.sensor_width)
+    camera.capture_images(camera_info.is_full)
 
     return {"status": "ok"}
 

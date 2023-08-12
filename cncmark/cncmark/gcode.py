@@ -13,7 +13,7 @@ class GCode:
         self.feed_rate = feed_rate
         self.camera_height = camera_height
         self.gcode = []
-        self.pic_wait = []
+        self.camera_wait = []
 
     def generate_gcode(self):
         start = np.array([0, 0, 0])
@@ -23,7 +23,7 @@ class GCode:
             self.gcode.append("G4 P1")
 
             time_to_move = self.distance(start, point) / f_per_sec
-            self.pic_wait.append(1 + time_to_move)
+            self.camera_wait.append(1 + time_to_move)
             z = point[2] + self.camera_height
             one_line = f"G1 X{point[0]} Y{point[1]} Z{z} F{self.feed_rate}"
             self.gcode.append(one_line)

@@ -12,9 +12,11 @@ def process_stl(stl_file_path: str, z: float, camera_height: float, feed_rate: f
     gcode = GCode(unique_points, feed_rate, camera_height)
     gcode.generate_gcode()
     gcode.save_gcode("data/gcode/opencmm.gcode")
-    pic_wait = gcode.pic_wait
-    # save pic_wait list to file
-    with open("data/gcode/pic_wait.txt", "w") as f:
-        for wait in pic_wait:
-            f.write(str(wait) + "\n")
-
+    camera_wait = gcode.camera_wait
+    # save camera_wait list to file
+    with open("data/gcode/camera_wait.txt", "w") as f:
+        for i, wait in enumerate(camera_wait):
+            x = unique_points[i][0]
+            y = unique_points[i][1]
+            z = unique_points[i][2]
+            f.write(f"{x} {y} {z} {str(wait)}\n")
