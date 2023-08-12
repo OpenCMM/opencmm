@@ -7,7 +7,8 @@ from server.prepare import process_stl
 from server.connect import connect_lines
 from pydantic import BaseModel
 import os
-from camera import Camera
+from server.camera import Camera
+from server.capture import capture_images
 
 
 class JobInfo(BaseModel):
@@ -79,7 +80,7 @@ async def setup_data(job_info: JobInfo):
 @app.post("/process/start")
 async def process_start(camera_info: CameraInfo):
     camera = Camera(camera_info.focal_length, camera_info.sensor_width)
-    camera.capture_images(camera_info.is_full)
+    capture_images(camera, camera_info.is_full)
 
     return {"status": "ok"}
 
