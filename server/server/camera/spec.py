@@ -22,7 +22,9 @@ class Camera:
             camera_wait = f.readlines()
         camera_wait = [format_row(x.strip()) for x in camera_wait]
         return camera_wait
-
+    
+    def stop(self):
+        self.picam2.stop()
 
 def format_row(row: str) -> list:
     return [float(x) for x in row.split()]

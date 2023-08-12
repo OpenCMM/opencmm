@@ -98,7 +98,6 @@ async def download_gcode():
 
 @app.get("/load/image")
 async def load_image():
-    connect_lines()
     if not os.path.exists("data/images/result.png"):
         raise HTTPException(status_code=400, detail="No image file generated")
     return FileResponse("data/images/result.png")

@@ -68,7 +68,7 @@ class AllImages:
 
         real_coordinates = {}
         query = """
-            SELECT point_id, x, y, z
+            SELECT point_id, rx, ry, rz
             FROM point
         """
         cursor.execute(query)
