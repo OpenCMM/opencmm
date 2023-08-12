@@ -1,2 +1,2 @@
-from cmm.single import SingleImage  # noqa: F401
-from cmm.all import AllImages  # noqa: F401
+from .single import SingleImage  # noqa: F401
+from .all import AllImages  # noqa: F401

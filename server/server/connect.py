@@ -1,5 +1,5 @@
-from cnceye.cmm import AllImages
-from cnceye.camera import Camera
+from server.cmm import AllImages
+from server.camera import Camera
 
 focal_length = 50.0  # mm
 camera_height = 60.0  # mm

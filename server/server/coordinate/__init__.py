@@ -1,1 +1,1 @@
-from coordinate.coord import Coordinate  # noqa: F401
+from .coord import Coordinate  # noqa: F401

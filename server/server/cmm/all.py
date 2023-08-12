@@ -1,11 +1,11 @@
 from coordinate import Coordinate
-from camera import Camera
-from line import Line
-from cmm.single import SingleImage
+from server.camera import Camera
+from server.line import Line
+from .single import SingleImage
 import cv2
 import numpy as np
 import mysql.connector
-from config import MYSQL_CONFIG
+from server.config import MYSQL_CONFIG
 
 
 class AllImages:

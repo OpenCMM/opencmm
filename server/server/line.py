@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from coordinate import Coordinate
+from server.coordinate import Coordinate
 
 
 class Line:

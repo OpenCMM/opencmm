@@ -1,11 +1,11 @@
-from coordinate import Coordinate
-from camera import Camera
+from server.coordinate import Coordinate
+from server.camera import Camera
 from .pixel import get_field_of_view, get_pixel_per_mm
 import numpy as np
-from vertex import get_vertices
+from server.vertex import get_vertices
 import mysql.connector
 from mysql.connector.errors import IntegrityError
-from config import MYSQL_CONFIG
+from server.config import MYSQL_CONFIG
 
 
 class SingleImage:
