@@ -4,21 +4,25 @@
 	import DownloadGCode from './DownloadGCode.svelte';
 	import CaptureStart from './CaptureStart.svelte';
 	import Result from './Result.svelte';
+import "carbon-components-svelte/css/g80.css";
 
 	let uploaded: boolean = false;
 	let settingDone: boolean = false;
 	let captureDone: boolean = false;
 </script>
 
+<main>
 <h1>OpenCMM</h1>
 
+{#if !uploaded}
 <Upload3dModel bind:uploaded={uploaded} />
+{/if}
 
 {#if uploaded && !settingDone}
 	<Setup bind:settingDone={settingDone} />
 {/if}
 
-{#if settingDone}
+{#if settingDone && !captureDone}
 	<DownloadGCode />
 	<CaptureStart bind:captureDone={captureDone} />
 {/if}
@@ -26,3 +30,16 @@
 {#if captureDone}
 	<Result />
 {/if}
+</main>
+
+<style>
+main {
+  padding: 1rem;
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+</style>

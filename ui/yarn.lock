@@ -592,6 +592,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"carbon-components-svelte@npm:^0.79.0":
+  version: 0.79.0
+  resolution: "carbon-components-svelte@npm:0.79.0"
+  dependencies:
+    flatpickr: 4.6.9
+  checksum: 5afce573df48cbe8a4df7e116dcd670e3ab81ee0eaeb58a6bae4aec21f0e16a974da2e3383ed1417505e945454dde9e8340e7e231d1adcd30e021cc03e6c3388
+  languageName: node
+  linkType: hard
+
 "chokidar@npm:^3.4.1":
   version: 3.5.3
   resolution: "chokidar@npm:3.5.3"
@@ -947,6 +956,13 @@ __metadata:
   dependencies:
     to-regex-range: ^5.0.1
   checksum: cc283f4e65b504259e64fd969bcf4def4eb08d85565e906b7d36516e87819db52029a76b6363d0f02d0d532f0033c9603b9e2d943d56ee3b0d4f7ad3328ff917
+  languageName: node
+  linkType: hard
+
+"flatpickr@npm:4.6.9":
+  version: 4.6.9
+  resolution: "flatpickr@npm:4.6.9"
+  checksum: 4702ad182531af0524b2fc74a70e06d276ff91918449092b3a11c464cb5a5e010df6c7cc9ff92e8b8373f81b238ea85d911ce9b3b883ee8df5085180cc3aea13
   languageName: node
   linkType: hard
 
@@ -2227,6 +2243,7 @@ __metadata:
     "@sveltejs/adapter-auto": ^2.0.0
     "@sveltejs/kit": ^1.20.4
     axios: ^1.4.0
+    carbon-components-svelte: ^0.79.0
     prettier: ^2.8.0
     prettier-plugin-svelte: ^2.10.1
     svelte: ^4.0.5

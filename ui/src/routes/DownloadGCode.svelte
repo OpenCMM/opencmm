@@ -4,6 +4,9 @@
 	import { BACKEND_URL_LOCAL
 	 } from '$lib/constants/backend';
 	import axios from 'axios';
+  import {
+	Button,
+  } from "carbon-components-svelte";
 
 	 const downloadGCode = async () => {
 		 try {
@@ -27,5 +30,13 @@
 </script>
 
 
+<div class="bx--form-item">
 <p>GCodeをダウンロードしてください</p>
-<button on:click={downloadGCode} >ダウンロード</button>
+<Button on:click={downloadGCode} >ダウンロード</Button>
+</div>
+
+<style>
+	.bx--form-item {
+		margin: 1rem;
+	}
+</style>
