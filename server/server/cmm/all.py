@@ -1,6 +1,7 @@
 from server.coordinate import Coordinate
 from server.camera import Camera
 from server.line import Line
+from server.arc import Arc, get_arc_info
 from .single import SingleImage
 import cv2
 import numpy as np
@@ -13,6 +14,7 @@ class AllImages:
         self.camera = camera
         self.previous_lines = []
         self.lines = []
+        self.arcs = []
 
     def add_image(self, image, distance: float, center: Coordinate) -> None:
         single = SingleImage(image, center, self.camera)
@@ -54,6 +56,26 @@ class AllImages:
                 (
                     int((start.x + end.x + 200) * 5 / 2),
                     int((-start.y - end.y + 200) * 5 / 2),
+                ),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.4,
+                (105, 145, 209),
+                1,
+            )
+        for arc in self.arcs:
+            cv2.circle(
+                entire_image,
+                (int((arc.center.x + 100) * 5), int((-arc.center.y + 100) * 5)),
+                int(arc.radius * 5),
+                (255, 255, 255),
+                1,
+            )
+            cv2.putText(
+                entire_image,
+                f"({arc.center.x:.4f}, {arc.center.y:.4f}) | r: {arc.radius:.4f}",
+                (
+                    int((arc.center.x + 100) * 5),
+                    int((-arc.center.y + 100) * 5),
                 ),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.4,
@@ -105,3 +127,30 @@ class AllImages:
             start = real_coordinates[line[0]]
             end = real_coordinates[line[1]]
             self.lines.append(Line(start, end))
+
+    def fetch_arcs(self):
+        cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+        cursor = cnx.cursor()
+
+        arcs = []
+        query = """
+            SELECT a, b, c, d
+            FROM arc
+        """
+        cursor.execute(query)
+        for arc in cursor:
+            arcs.append((arc[0], arc[1], arc[2], arc[3]))
+
+        cursor.close()
+        cnx.close()
+
+        return arcs
+
+    def add_arcs(self):
+        real_coordinates = self.fetch_real_coordinates()
+        arcs = self.fetch_arcs()
+        for arc in arcs:
+            arc_points = np.array([real_coordinates[point_id] for point_id in arc])
+            radius, center = get_arc_info(arc_points)
+            center = Coordinate(center[0], center[1], center[2])
+            self.arcs.append(Arc(radius, center))

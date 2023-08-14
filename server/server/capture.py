@@ -46,6 +46,7 @@ def capture_images(camera: Camera, distance: float, is_full: bool):
 
     all_images = AllImages(camera)
     all_images.add_lines()
+    all_images.add_arcs()
     all_images.save_image("data/images/result.png")
 
 
