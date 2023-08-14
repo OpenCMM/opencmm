@@ -105,13 +105,13 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "cncmark"
-version = "0.2.2"
+version = "0.2.5"
 description = ""
 optional = false
-python-versions = ">=3.9,<4.0"
+python-versions = ">=3.9.2,<3.10"
 files = [
-    {file = "cncmark-0.2.2-py3-none-any.whl", hash = "sha256:f59ad95ccc9fdeb879f194408b2b13ed48e20347a4bc02defcd97e9706143c8d"},
-    {file = "cncmark-0.2.2.tar.gz", hash = "sha256:1b9cf1ad7a0fbd43980ecb76b959529ba84cbe9b233fd07856d5cc9e4d38c6f9"},
+    {file = "cncmark-0.2.5-py3-none-any.whl", hash = "sha256:77f7b5928feea45f37cd9fa6be1a086e386b3ae72a239a728d26301783d4d899"},
+    {file = "cncmark-0.2.5.tar.gz", hash = "sha256:c3d28b8a473df68311f39e8acfb1024dd15e0e1fde9b503f4ff85e21603de101"},
 ]
 
 [package.dependencies]
@@ -131,13 +131,13 @@ files = [
 
 [[package]]
 name = "dnspython"
-version = "2.4.1"
+version = "2.4.2"
 description = "DNS toolkit"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "dnspython-2.4.1-py3-none-any.whl", hash = "sha256:5b7488477388b8c0b70a8ce93b227c5603bc7b77f1565afe8e729c36c51447d7"},
-    {file = "dnspython-2.4.1.tar.gz", hash = "sha256:c33971c79af5be968bb897e95c2448e11a645ee84d93b265ce0b7aabe5dfdca8"},
+    {file = "dnspython-2.4.2-py3-none-any.whl", hash = "sha256:57c6fbaaeaaf39c891292012060beb141791735dbb4004798328fc2c467402d8"},
+    {file = "dnspython-2.4.2.tar.gz", hash = "sha256:8dcfae8c7460a2f84b4072e26f1c9f4101ca20c071649cb7c34e8b6a93d58984"},
 ]
 
 [package.extras]
@@ -1308,4 +1308,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9.2, <3.10"
-content-hash = "2e0abcfb6e847bc027c9029cfd344b0f163dd836bc093f421d31b23fe916c2dd"
+content-hash = "71a197740e2a8ca53d852d4757e5596fd2b302c1999c02cd07075959954397d4"

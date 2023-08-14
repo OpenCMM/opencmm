@@ -9,7 +9,7 @@ readme = "README.md"
 python = ">=3.9.2, <3.10"
 fastapi = {extras = ["all"], version = "^0.101.0"}
 uvicorn = {extras = ["standard"], version = "^0.23.2"}
-cncmark = "^0.2.0"
+cncmark = "^0.2.5"
 scipy = "^1.11.1"
 
 
