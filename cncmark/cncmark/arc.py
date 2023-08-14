@@ -3,7 +3,7 @@ from cncmark.config import MYSQL_CONFIG
 from scipy.optimize import least_squares
 import mysql.connector
 from mysql.connector.errors import IntegrityError
-from cncmark.point import point_id
+from .point import point_id
 
 
 def get_arc_info(arc_points: list):
@@ -67,7 +67,7 @@ def import_arcs(arcs: list):
     cnx.close()
 
 
-def to_arc_list(arc_points: list):
+def pick_arc_points(arc_points: list):
     """
     Pick 4 points that define the arc
     """
@@ -81,6 +81,12 @@ def to_arc_list(arc_points: list):
     one_third = count // 3
     b = arc_points[one_third - 1]
     c = arc_points[one_third * 2 - 1]
+
+    return a, b, c, d
+
+
+def to_arc_list(arc_points: list):
+    a, b, c, d = pick_arc_points(arc_points)
     radius, center = get_arc_info(arc_points)
     return [
         point_id(a),
