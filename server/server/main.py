@@ -9,6 +9,7 @@ from server.camera import Camera
 from server.capture import capture_images
 from server.reset import reset_tables
 from typing import Optional
+from server.result import fetch_points
 
 
 class JobInfo(BaseModel):
@@ -116,6 +117,11 @@ async def load_image():
 async def reset_data():
     reset_tables()
     return {"status": "ok"}
+
+@app.get("/result/points")
+async def get_result_points():
+    points = fetch_points()
+    return {"points": points}
 
 
 def start():
