@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cncmark"
-version = "0.2.4"
+version = "0.2.5"
 description = ""
 authors = ["yuichiroaoki <45054071+yuichiroaoki@users.noreply.github.com>"]
 readme = "README.md"

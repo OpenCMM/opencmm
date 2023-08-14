@@ -4,6 +4,7 @@ from scipy.optimize import least_squares
 import mysql.connector
 from mysql.connector.errors import IntegrityError
 
+
 def point_id(point: list):
     return f"{point[0]},{point[1]},{point[2]}"
 
@@ -95,8 +96,8 @@ def to_arc_list(arc_points: list):
         point_id(b),
         point_id(c),
         point_id(d),
-        radius,
-        center[0],
-        center[1],
-        center[2],
+        float(radius),
+        float(center[0]),
+        float(center[1]),
+        float(center[2]),
     ]
