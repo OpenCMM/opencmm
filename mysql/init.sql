@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS `line` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `a` varchar(255) NOT NULL,
   `b` varchar(255) NOT NULL,
+  `length` FLOAT NOT NULL,
+  `rlength` FLOAT,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
 
@@ -27,6 +29,13 @@ CREATE TABLE IF NOT EXISTS `arc` (
   `b` varchar(255) NOT NULL,
   `c` varchar(255) NOT NULL,
   `d` varchar(255) NOT NULL,
-  `e` varchar(255) NOT NULL,
+  `radius` FLOAT NOT NULL,
+  `cx` FLOAT NOT NULL,
+  `cy` FLOAT NOT NULL,
+  `cz` FLOAT NOT NULL,
+  `rradius` FLOAT,
+  `rcx` FLOAT,
+  `rcy` FLOAT,
+  `rcz` FLOAT,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;

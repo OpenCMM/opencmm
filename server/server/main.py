@@ -4,9 +4,7 @@ from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from server.prepare import process_stl
-from server.connect import connect_lines
 from pydantic import BaseModel
-import os
 from server.camera import Camera
 from server.capture import capture_images
 

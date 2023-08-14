@@ -1,5 +1,5 @@
 from cncmark.gcode import GCode
-from cncmark.point import get_unique_points, get_lines
+from cncmark.point import get_unique_points, get_shapes
 import numpy as np
 
 
@@ -19,11 +19,11 @@ def test_gcode():
         assert wait == 2.0
 
     z = 10.0
-    lines = get_lines("tests/fixtures/stl/sample.stl", z)
-    unique_points = get_unique_points(lines)
+    lines, arcs = get_shapes("tests/fixtures/stl/sample.stl", z)
+    unique_points = get_unique_points(lines, arcs)
     gcode = GCode(unique_points, 600, 300)
     gcode.generate_gcode()
-    assert len(gcode.gcode) == 24
+    assert len(gcode.gcode) == 46
 
 
 def test_camera_wait():
