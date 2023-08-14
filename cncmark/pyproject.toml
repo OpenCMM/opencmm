@@ -6,9 +6,10 @@ authors = ["yuichiroaoki <45054071+yuichiroaoki@users.noreply.github.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "3.9.17"
 numpy-stl = "^3.0.1"
 mysql-connector-python = "^8.1.0"
+scipy = "^1.11.1"
 
 
 [tool.poetry.group.dev.dependencies]

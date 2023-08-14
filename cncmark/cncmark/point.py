@@ -82,9 +82,9 @@ def get_shapes(stl_file_path: str, z: float):
 def import_lines(lines: list):
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
     cursor = cnx.cursor()
-    line_list = [[point_id(p) for p in ab] for ab in lines]
+    line_list = [to_line_list(ab) for ab in lines]
 
-    insert_query = "INSERT INTO line (a, b) VALUES (%s, %s)"
+    insert_query = "INSERT INTO line (a, b, length) VALUES (%s, %s, %s)"
 
     try:
         cursor.executemany(insert_query, line_list)
@@ -94,6 +94,11 @@ def import_lines(lines: list):
     cursor.close()
     cnx.close()
 
+def to_line_list(ab: list):
+    a = ab[0]
+    b = ab[1]
+    length = np.linalg.norm(a - b)
+    return [point_id(a), point_id(b), float(length)]
 
 def get_unique_points(lines: list):
     points = []
