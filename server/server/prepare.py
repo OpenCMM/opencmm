@@ -5,7 +5,13 @@ from cncmark.gcode import GCode
 from typing import Optional
 
 
-def process_stl(stl_file_path: str, camera_height: float, feed_rate: float, offset, z: Optional[float]):
+def process_stl(
+    stl_file_path: str,
+    camera_height: float,
+    feed_rate: float,
+    offset,
+    z: Optional[float],
+):
     z = 10.0
     lines, arcs = get_shapes(stl_file_path, z)
     import_lines(lines)

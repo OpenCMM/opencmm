@@ -9,7 +9,7 @@ from server.coordinate import Coordinate
 from picamera2 import Picamera2
 
 
-def capture_images(camera: Camera, distance: float, is_full: bool):
+def capture_images(camera: Camera, distance: float, is_full: bool, save_as_file: bool):
     start = time.time()
     process_time = 0
     camera.start(is_full)
@@ -30,16 +30,27 @@ def capture_images(camera: Camera, distance: float, is_full: bool):
                 time.sleep(wait - process_time)
 
         capture_start = time.time()
-        data = io.BytesIO()
-        camera.picam2.capture_file(data, format="jpeg")
-        print(data.getbuffer().nbytes)
-        print("capture time :", time.time() - capture_start)
+        if save_as_file:
+            camera.picam2.capture_file(f"data/images/{i}.jpg", format="jpeg")
+            print("capture time :", time.time() - capture_start)
+            center = Coordinate(float(x), float(y), float(z))
+            image = cv2.imread(f"data/images/{i}.jpg")
+            single = SingleImage(image, center, camera)
+            single.add_real_coordinate(distance)
+        else:
+            data = io.BytesIO()
+            camera.picam2.capture_file(f"data/images/{i}.jpg", format="jpeg")
 
-        pil_image = Image.open(data)
-        center = Coordinate(float(x), float(y), float(z))
-        image_np = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
-        single = SingleImage(image_np, center, camera)
-        single.add_real_coordinate(distance)
+            camera.picam2.capture_file(data, format="jpeg")
+            print(data.getbuffer().nbytes)
+            print("capture time :", time.time() - capture_start)
+
+            pil_image = Image.open(data)
+            center = Coordinate(float(x), float(y), float(z))
+            image_np = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
+            single = SingleImage(image_np, center, camera)
+            single.add_real_coordinate(distance)
+
         process_time = time.time() - capture_start
 
     camera.stop()

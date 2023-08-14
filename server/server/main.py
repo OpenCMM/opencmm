@@ -17,7 +17,7 @@ class JobInfo(BaseModel):
     x_offset: Optional[float]
     y_offset: Optional[float]
     z_offset: Optional[float]
-    z: Optional[float]=None
+    z: Optional[float] = None
 
 
 class CameraInfo(BaseModel):
@@ -25,6 +25,7 @@ class CameraInfo(BaseModel):
     sensor_width: float
     distance: float
     is_full: bool = False
+    save_as_file: bool = False
 
 
 model_path = "data/3dmodel/3dmodel.stl"
@@ -79,7 +80,9 @@ async def setup_data(job_info: JobInfo):
     if not os.path.exists(model_path):
         raise HTTPException(status_code=400, detail="No model uploaded")
     offset = (job_info.x_offset, job_info.y_offset, job_info.z_offset)
-    process_stl(model_path, job_info.camera_height, job_info.feed_rate, offset, job_info.z)
+    process_stl(
+        model_path, job_info.camera_height, job_info.feed_rate, offset, job_info.z
+    )
 
     return {"status": "ok"}
 
@@ -87,7 +90,9 @@ async def setup_data(job_info: JobInfo):
 @app.post("/process/start")
 async def process_start(camera_info: CameraInfo):
     camera = Camera(camera_info.focal_length, camera_info.sensor_width)
-    capture_images(camera, camera_info.distance, camera_info.is_full)
+    capture_images(
+        camera, camera_info.distance, camera_info.is_full, camera_info.save_as_file
+    )
 
     return {"status": "ok"}
 
@@ -105,6 +110,7 @@ async def load_image():
     if not os.path.exists("data/images/result.png"):
         raise HTTPException(status_code=400, detail="No image file generated")
     return FileResponse("data/images/result.png")
+
 
 @app.get("/reset/data")
 async def reset_data():
