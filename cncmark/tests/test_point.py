@@ -1,4 +1,9 @@
-from cncmark.point import get_shapes, get_unique_points, import_points, get_highest_point
+from cncmark.point import (
+    get_shapes,
+    get_unique_points,
+    import_points,
+    get_highest_point,
+)
 
 
 def test_get_unique_points():
@@ -16,6 +21,7 @@ def test_import_points():
     lines, arcs = get_shapes("tests/fixtures/stl/sample.stl", z)
     unique_points = get_unique_points(lines, arcs)
     import_points(unique_points)
+
 
 def test_get_highest_point():
     highest_point = get_highest_point("tests/fixtures/stl/sample.stl")

@@ -2,7 +2,7 @@ import numpy as np
 
 
 class GCode:
-    def __init__(self, points, feed_rate, offset = (0, 0, 0), camera_height = 300.0):
+    def __init__(self, points, feed_rate, offset=(0, 0, 0), camera_height=300.0):
         """
         :param points: numpy array of points
         :param feed_rate: feed rate in mm/min

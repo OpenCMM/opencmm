@@ -17,7 +17,7 @@ class JobInfo(BaseModel):
     x_offset: Optional[float]
     y_offset: Optional[float]
     z_offset: Optional[float]
-    z: Optional[float]
+    z: Optional[float]=None
 
 
 class CameraInfo(BaseModel):

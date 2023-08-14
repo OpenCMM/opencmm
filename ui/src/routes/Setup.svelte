@@ -45,9 +45,12 @@
 	<p id="form-title">設定</p>
 	<Form on:submit={handleSubmit}>
 		<FormGroup>
-			<TextInput labelText="カメラの高さ" id="cameraHeight" bind:value={cameraHeight}
+			<TextInput
+				labelText="カメラの高さ"
+				id="cameraHeight"
+				bind:value={cameraHeight}
 				helperText="測定箇所から機械原点までのz軸の距離（カメラの高さ＋焦点の長さ）"
-			 />
+			/>
 		</FormGroup>
 		<FormGroup>
 			<TextInput labelText="送り速度" id="feedRate" bind:value={feedRate} />

@@ -9,10 +9,12 @@ from typing import Optional
 def point_id(point: list):
     return f"{point[0]},{point[1]},{point[2]}"
 
+
 def get_highest_z(vertices):
     # get highest point
     highest_point = np.max(vertices, axis=0)
     return highest_point[2][2]
+
 
 def get_shapes(stl_file_path: str, z: Optional[float]):
     """

@@ -11,7 +11,7 @@
 
 	let sensorWidth: number = 6.287;
 
-	let distance: number = 0;
+	let distance: number = 50.0;
 	let processing: boolean = false;
 
 	const startCapturing = async (e: Event) => {
@@ -51,7 +51,12 @@
 			<TextInput labelText="sensor width" id="sensorWidth" bind:value={sensorWidth} />
 		</FormGroup>
 		<FormGroup>
-			<TextInput labelText="カメラとの距離" id="distance" bind:value={distance} />
+			<TextInput
+				labelText="カメラとの距離"
+				id="distance"
+				bind:value={distance}
+				helperText="カメラと測定箇所のz軸の距離"
+			/>
 		</FormGroup>
 		{#if processing && !error}
 			<InlineLoading status="active" description="測定中" />
@@ -73,5 +78,4 @@
 		font-weight: bold;
 		margin: 1rem;
 	}
-
 </style>
