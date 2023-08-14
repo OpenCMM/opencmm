@@ -1,0 +1,30 @@
+name: UI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "ui/**"
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  ui:
+    strategy:
+      matrix:
+        node-version: [18.x]
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: ui
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: yarn install
+      - run: yarn lint
+      - run: yarn build

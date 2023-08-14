@@ -1,5 +1,5 @@
 from cncmark.point import get_shapes
-from cncmark.arc import get_arc_info, import_arcs
+from server.arc import get_arc_info, import_arcs
 
 import numpy as np
 

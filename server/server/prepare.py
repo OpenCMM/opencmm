@@ -1,12 +1,15 @@
-from cncmark.point import get_lines, import_lines, get_unique_points, import_points
+from cncmark.point import get_shapes, get_unique_points, import_points
+from cncmark.line import import_lines
+from .arc import import_arcs
 from cncmark.gcode import GCode
 
 
 def process_stl(stl_file_path: str, z: float, camera_height: float, feed_rate: float):
     z = 10.0
-    lines = get_lines(stl_file_path, z)
+    lines, arcs = get_shapes(stl_file_path, z)
     import_lines(lines)
-    unique_points = get_unique_points(lines)
+    import_arcs(arcs)
+    unique_points = get_unique_points(lines, arcs)
     import_points(unique_points)
 
     # save gcode
