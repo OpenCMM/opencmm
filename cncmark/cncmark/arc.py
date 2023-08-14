@@ -1,5 +1,3 @@
-
-
 def pick_arc_points(arc_points: list):
     """
     Pick 4 points that define the arc
