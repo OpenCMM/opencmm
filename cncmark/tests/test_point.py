@@ -2,7 +2,7 @@ from cncmark.point import (
     get_shapes,
     get_unique_points,
     import_points,
-    get_highest_point,
+    get_highest_z,
 )
 
 
@@ -24,5 +24,5 @@ def test_import_points():
 
 
 def test_get_highest_point():
-    highest_point = get_highest_point("tests/fixtures/stl/sample.stl")
-    assert highest_point[2][2] == 10.0
+    highest_z = get_highest_z("tests/fixtures/stl/sample.stl")
+    assert highest_z == 10.0
