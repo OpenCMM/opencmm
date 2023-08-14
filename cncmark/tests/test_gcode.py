@@ -9,11 +9,11 @@ def test_gcode():
     gcode.generate_gcode()
     assert len(gcode.gcode) == 6
     assert gcode.gcode[0] == "G4 P1"
-    assert gcode.gcode[1] == "G1 X0 Y10 Z300 F600"
+    assert gcode.gcode[1] == "G1 X0 Y10 Z300.0 F600"
     assert gcode.gcode[2] == "G4 P1"
-    assert gcode.gcode[3] == "G1 X0 Y20 Z300 F600"
+    assert gcode.gcode[3] == "G1 X0 Y20 Z300.0 F600"
     assert gcode.gcode[4] == "G4 P1"
-    assert gcode.gcode[5] == "G1 X0 Y30 Z300 F600"
+    assert gcode.gcode[5] == "G1 X0 Y30 Z300.0 F600"
 
     for wait in gcode.camera_wait:
         assert wait == 2.0
