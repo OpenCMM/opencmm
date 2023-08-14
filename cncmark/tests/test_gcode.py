@@ -5,7 +5,7 @@ import numpy as np
 
 def test_gcode():
     points = np.array([[0, 10, 0], [0, 20, 0], [0, 30, 0]])
-    gcode = GCode(points, 600, 300)
+    gcode = GCode(points, 600)
     gcode.generate_gcode()
     assert len(gcode.gcode) == 6
     assert gcode.gcode[0] == "G4 P1"
@@ -21,14 +21,14 @@ def test_gcode():
     z = 10.0
     lines, arcs = get_shapes("tests/fixtures/stl/sample.stl", z)
     unique_points = get_unique_points(lines, arcs)
-    gcode = GCode(unique_points, 600, 300)
+    gcode = GCode(unique_points, 600)
     gcode.generate_gcode()
     assert len(gcode.gcode) == 46
 
 
 def test_camera_wait():
     points = np.array([[0, 10, 0], [30, 10, 0], [30, 30, 0]])
-    gcode = GCode(points, 600, 300)
+    gcode = GCode(points, 600)
     gcode.generate_gcode()
     assert len(gcode.gcode) == 6
     assert gcode.camera_wait[0] == 2.0

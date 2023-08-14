@@ -7,9 +7,9 @@
 
 	export let captureDone: boolean = false;
 	let error: string | null = null;
-	let focalLength: number = 0;
+	let focalLength: number = 25;
 
-	let sensorWidth: number = 0;
+	let sensorWidth: number = 6.287;
 
 	let distance: number = 0;
 	let processing: boolean = false;
@@ -41,7 +41,7 @@
 </script>
 
 <div class="bx--form-item">
-	<p>測定を開始します</p>
+	<p id="form-title">測定を開始します</p>
 
 	<Form on:submit={startCapturing}>
 		<FormGroup>
@@ -67,4 +67,11 @@
 	.bx--form-item {
 		margin: 1rem;
 	}
+
+	#form-title {
+		font-size: 1.2rem;
+		font-weight: bold;
+		margin: 1rem;
+	}
+
 </style>

@@ -8,12 +8,16 @@ from pydantic import BaseModel
 from server.camera import Camera
 from server.capture import capture_images
 from server.reset import reset_tables
+from typing import Optional
 
 
 class JobInfo(BaseModel):
-    z: float
     camera_height: float
     feed_rate: float
+    x_offset: Optional[float]
+    y_offset: Optional[float]
+    z_offset: Optional[float]
+    z: Optional[float]
 
 
 class CameraInfo(BaseModel):
@@ -74,7 +78,8 @@ async def setup_data(job_info: JobInfo):
     # check if model exists
     if not os.path.exists(model_path):
         raise HTTPException(status_code=400, detail="No model uploaded")
-    process_stl(model_path, job_info.z, job_info.camera_height, job_info.feed_rate)
+    offset = (job_info.x_offset, job_info.y_offset, job_info.z_offset)
+    process_stl(model_path, job_info.camera_height, job_info.feed_rate, offset, job_info.z)
 
     return {"status": "ok"}
 

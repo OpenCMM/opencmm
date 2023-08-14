@@ -3,13 +3,18 @@ from stl import mesh
 import numpy as np
 import mysql.connector
 from mysql.connector.errors import IntegrityError
+from typing import Optional
 
 
 def point_id(point: list):
     return f"{point[0]},{point[1]},{point[2]}"
 
+def get_highest_z(vertices):
+    # get highest point
+    highest_point = np.max(vertices, axis=0)
+    return highest_point[2][2]
 
-def get_shapes(stl_file_path: str, z: float):
+def get_shapes(stl_file_path: str, z: Optional[float]):
     """
     Extract lines parallel to the ground from an STL file \n
     If the line length is less than 1, it is considered an arc. \n
@@ -34,6 +39,8 @@ def get_shapes(stl_file_path: str, z: float):
     cuboid = mesh.Mesh.from_file(stl_file_path)
     # get vertices
     vertices = cuboid.vectors
+    if z is None:
+        z = get_highest_z(vertices)
 
     # Extract lines and arcs parallel to the ground
     ground_parallel_shapes = []
