@@ -29,7 +29,6 @@ CREATE TABLE IF NOT EXISTS `arc` (
   `b` varchar(255) NOT NULL,
   `c` varchar(255) NOT NULL,
   `d` varchar(255) NOT NULL,
-  `e` varchar(255) NOT NULL,
   `radius` FLOAT NOT NULL,
   `cx` FLOAT NOT NULL,
   `cy` FLOAT NOT NULL,

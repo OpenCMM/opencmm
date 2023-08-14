@@ -13,7 +13,7 @@ def get_shapes(stl_file_path: str, z: float):
     """
     Extract lines parallel to the ground from an STL file \n
     If the line length is less than 1, it is considered an arc. \n
-    if the line length for an arc is close to the previous arc length, 
+    if the line length for an arc is close to the previous arc length,
     it is considered part of the previous arc. \n
     Note: This is not a robust algorithm.
 
@@ -23,7 +23,7 @@ def get_shapes(stl_file_path: str, z: float):
         Path to STL file
     z : float
         z-coordinate of the plane parallel to the ground
-    
+
     Returns
     -------
     ground_parallel_lines : list
@@ -73,7 +73,7 @@ def get_shapes(stl_file_path: str, z: float):
                 )
             else:
                 ground_parallel_arcs.append(ground_parallel_shapes[i])
-        
+
         previous_length = line_length
 
     return ground_parallel_lines, ground_parallel_arcs
@@ -94,11 +94,13 @@ def import_lines(lines: list):
     cursor.close()
     cnx.close()
 
+
 def to_line_list(ab: list):
     a = ab[0]
     b = ab[1]
     length = np.linalg.norm(a - b)
     return [point_id(a), point_id(b), float(length)]
+
 
 def get_unique_points(lines: list):
     points = []
