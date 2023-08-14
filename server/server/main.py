@@ -7,6 +7,7 @@ from server.prepare import process_stl
 from pydantic import BaseModel
 from server.camera import Camera
 from server.capture import capture_images
+from server.reset import reset_tables
 
 
 class JobInfo(BaseModel):
@@ -99,6 +100,11 @@ async def load_image():
     if not os.path.exists("data/images/result.png"):
         raise HTTPException(status_code=400, detail="No image file generated")
     return FileResponse("data/images/result.png")
+
+@app.get("/reset/data")
+async def reset_data():
+    reset_tables()
+    return {"status": "ok"}
 
 
 def start():
