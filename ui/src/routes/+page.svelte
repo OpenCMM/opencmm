@@ -3,8 +3,10 @@
 	import Setup from './Setup.svelte';
 	import DownloadGCode from './DownloadGCode.svelte';
 	import CaptureStart from './CaptureStart.svelte';
-	import Result from './Result.svelte';
 	import 'carbon-components-svelte/css/g80.css';
+	import Point from './Result/Point.svelte';
+	import Line from './Result/Line.svelte';
+	import Arc from './Result/Arc.svelte';
 
 	let uploaded: boolean = false;
 	let settingDone: boolean = false;
@@ -27,14 +29,17 @@
 		<CaptureStart bind:captureDone />
 	{/if}
 
-	{#if captureDone}
-		<Result />
-	{/if}
+	<!-- {#if captureDone} -->
+	<Point />
+	<Line />
+	<Arc />
+	<!-- {/if} -->
 </main>
 
 <style>
 	main {
 		padding: 1rem;
+		margin: 2rem;
 	}
 
 	h1 {

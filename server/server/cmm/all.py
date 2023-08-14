@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 import mysql.connector
 from server.config import MYSQL_CONFIG
+from mysql.connector.errors import IntegrityError
 
 
 class AllImages:
@@ -123,10 +124,32 @@ class AllImages:
     def add_lines(self):
         real_coordinates = self.fetch_real_coordinates()
         lines = self.fetch_lines()
-        for line in lines:
-            start = real_coordinates[line[0]]
-            end = real_coordinates[line[1]]
-            self.lines.append(Line(start, end))
+        for ab in lines:
+            start = real_coordinates[ab[0]]
+            end = real_coordinates[ab[1]]
+            line = Line(start, end)
+            self.lines.append(line)
+            rlength = line.get_length()
+            self.update_line_lengths(ab[0], ab[1], rlength)
+
+    def update_line_lengths(self, a, b, rlength):
+        cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+        cursor = cnx.cursor()
+
+        update_query = """
+            UPDATE line
+            SET rlength = %s
+            WHERE a = %s AND b = %s
+        """
+        try:
+            data = (rlength, a, b)
+            cursor.execute(update_query, data)
+        except IntegrityError:
+            print("Error: unable to update line rlength")
+
+        cnx.commit()
+        cursor.close()
+        cnx.close()
 
     def fetch_arcs(self):
         cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
@@ -154,3 +177,23 @@ class AllImages:
             radius, center = get_arc_info(arc_points)
             center = Coordinate(center[0], center[1], center[2])
             self.arcs.append(Arc(radius, center))
+            self.update_arc_info(arc[1], arc[2], radius, center.x, center.y, center.z)
+
+    def update_arc_info(self, b, c, rradius, rcx, rcy, rcz):
+        cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+        cursor = cnx.cursor()
+
+        update_query = """
+            UPDATE arc
+            SET rradius = %s, rcx = %s, rcy = %s, rcz = %s
+            WHERE b = %s AND c = %s
+        """
+        try:
+            data = (rradius, rcx, rcy, rcz, b, c)
+            cursor.execute(update_query, data)
+        except IntegrityError:
+            print("Error: unable to update arc info")
+
+        cnx.commit()
+        cursor.close()
+        cnx.close()
