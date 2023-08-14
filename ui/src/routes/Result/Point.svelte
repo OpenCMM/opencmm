@@ -41,14 +41,20 @@
 
 <p>結果</p>
 <img id="result" src={`${BACKEND_URL_LOCAL}/load/image`} alt="result" />
-{#if !loaded}
-	<p>loading...</p>
-{:else}
-	<DataTable size="short" title="各頂点の座標" {headers} rows={row} />
-{/if}
+<div id="data-table">
+	{#if !loaded}
+		<p>loading...</p>
+	{:else}
+		<DataTable size="short" title="各頂点の座標" {headers} rows={row} />
+	{/if}
+</div>
 
 <style>
 	#result {
 		max-width: 1000px;
+	}
+
+	#data-table {
+		margin-top: 40px;
 	}
 </style>

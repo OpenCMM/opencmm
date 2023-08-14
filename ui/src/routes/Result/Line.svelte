@@ -7,8 +7,8 @@
 
 	const headers = [
 		{ key: 'id', value: 'ID' },
-		{ key: 'a', value: 'a' },
-		{ key: 'b', value: 'b' },
+		{ key: 'a', value: '始点' },
+		{ key: 'b', value: '終点' },
 		{ key: 'length', value: '長さ' },
 		{ key: 'rlength', value: '実際の長さ' }
 	];
@@ -33,8 +33,16 @@
 	});
 </script>
 
-{#if !loaded}
-	<p>loading...</p>
-{:else}
-	<DataTable size="short" title="線" {headers} rows={row} />
-{/if}
+<div id="data-table">
+	{#if !loaded}
+		<p>loading...</p>
+	{:else}
+		<DataTable size="short" title="線" {headers} rows={row} />
+	{/if}
+</div>
+
+<style>
+	#data-table {
+		margin-top: 40px;
+	}
+</style>

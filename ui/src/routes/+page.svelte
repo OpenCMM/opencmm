@@ -29,11 +29,11 @@
 		<CaptureStart bind:captureDone />
 	{/if}
 
-	<!-- {#if captureDone} -->
-	<Point />
-	<Line />
-	<Arc />
-	<!-- {/if} -->
+	{#if captureDone}
+		<Point />
+		<Line />
+		<Arc />
+	{/if}
 </main>
 
 <style>

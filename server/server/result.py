@@ -32,7 +32,7 @@ def fetch_lines():
 	"""
     cursor.execute(query)
     for line in cursor:
-        lines.append((line[0], line[1], line[2], line[3]))
+        lines.append((line[0], line[1], line[2], line[3], line[4]))
 
     cursor.close()
     cnx.close()

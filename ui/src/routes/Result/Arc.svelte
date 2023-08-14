@@ -30,7 +30,7 @@
 	const load_table_data = async () => {
 		const res = await fetch(`${BACKEND_URL_LOCAL}/result/arcs`);
 		const data = await res.json();
-		for (const d of data['arc']) {
+		for (const d of data['arcs']) {
 			row.push({
 				id: d[0],
 				radius: d[1],
@@ -51,8 +51,16 @@
 	});
 </script>
 
-{#if !loaded}
-	<p>loading...</p>
-{:else}
-	<DataTable size="short" title="孤" {headers} rows={row} />
-{/if}
+<div id="data-table">
+	{#if !loaded}
+		<p>loading...</p>
+	{:else}
+		<DataTable size="short" title="孤" {headers} rows={row} />
+	{/if}
+</div>
+
+<style>
+	#data-table {
+		margin-top: 40px;
+	}
+</style>
