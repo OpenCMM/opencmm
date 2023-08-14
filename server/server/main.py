@@ -7,12 +7,18 @@ from server.prepare import process_stl
 from pydantic import BaseModel
 from server.camera import Camera
 from server.capture import capture_images
+from server.reset import reset_tables
+from typing import Optional
+from server.result import fetch_points, fetch_arcs, fetch_lines
 
 
 class JobInfo(BaseModel):
-    z: float
     camera_height: float
     feed_rate: float
+    x_offset: Optional[float]
+    y_offset: Optional[float]
+    z_offset: Optional[float]
+    z: Optional[float] = None
 
 
 class CameraInfo(BaseModel):
@@ -20,6 +26,7 @@ class CameraInfo(BaseModel):
     sensor_width: float
     distance: float
     is_full: bool = False
+    save_as_file: bool = False
 
 
 model_path = "data/3dmodel/3dmodel.stl"
@@ -73,7 +80,10 @@ async def setup_data(job_info: JobInfo):
     # check if model exists
     if not os.path.exists(model_path):
         raise HTTPException(status_code=400, detail="No model uploaded")
-    process_stl(model_path, job_info.z, job_info.camera_height, job_info.feed_rate)
+    offset = (job_info.x_offset, job_info.y_offset, job_info.z_offset)
+    process_stl(
+        model_path, job_info.camera_height, job_info.feed_rate, offset, job_info.z
+    )
 
     return {"status": "ok"}
 
@@ -81,7 +91,9 @@ async def setup_data(job_info: JobInfo):
 @app.post("/process/start")
 async def process_start(camera_info: CameraInfo):
     camera = Camera(camera_info.focal_length, camera_info.sensor_width)
-    capture_images(camera, camera_info.distance, camera_info.is_full)
+    capture_images(
+        camera, camera_info.distance, camera_info.is_full, camera_info.save_as_file
+    )
 
     return {"status": "ok"}
 
@@ -99,6 +111,30 @@ async def load_image():
     if not os.path.exists("data/images/result.png"):
         raise HTTPException(status_code=400, detail="No image file generated")
     return FileResponse("data/images/result.png")
+
+
+@app.get("/reset/data")
+async def reset_data():
+    reset_tables()
+    return {"status": "ok"}
+
+
+@app.get("/result/points")
+async def get_result_points():
+    points = fetch_points()
+    return {"points": points}
+
+
+@app.get("/result/lines")
+async def get_result_lines():
+    lines = fetch_lines()
+    return {"lines": lines}
+
+
+@app.get("/result/arcs")
+async def get_result_arcs():
+    arcs = fetch_arcs()
+    return {"arcs": arcs}
 
 
 def start():

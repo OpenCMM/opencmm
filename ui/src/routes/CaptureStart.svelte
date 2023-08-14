@@ -7,11 +7,11 @@
 
 	export let captureDone: boolean = false;
 	let error: string | null = null;
-	let focalLength: number = 0;
+	let focalLength: number = 25;
 
-	let sensorWidth: number = 0;
+	let sensorWidth: number = 6.287;
 
-	let distance: number = 0;
+	let distance: number = 50.0;
 	let processing: boolean = false;
 
 	const startCapturing = async (e: Event) => {
@@ -41,7 +41,7 @@
 </script>
 
 <div class="bx--form-item">
-	<p>測定を開始します</p>
+	<p id="form-title">測定を開始します</p>
 
 	<Form on:submit={startCapturing}>
 		<FormGroup>
@@ -51,7 +51,12 @@
 			<TextInput labelText="sensor width" id="sensorWidth" bind:value={sensorWidth} />
 		</FormGroup>
 		<FormGroup>
-			<TextInput labelText="カメラとの距離" id="distance" bind:value={distance} />
+			<TextInput
+				labelText="カメラとの距離"
+				id="distance"
+				bind:value={distance}
+				helperText="カメラと測定箇所のz軸の距離"
+			/>
 		</FormGroup>
 		{#if processing && !error}
 			<InlineLoading status="active" description="測定中" />
@@ -65,6 +70,12 @@
 
 <style>
 	.bx--form-item {
+		margin: 1rem;
+	}
+
+	#form-title {
+		font-size: 1.2rem;
+		font-weight: bold;
 		margin: 1rem;
 	}
 </style>
