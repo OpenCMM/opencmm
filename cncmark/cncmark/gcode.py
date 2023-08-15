@@ -14,7 +14,7 @@ class GCode:
         self.feed_rate = feed_rate
         self.offset = offset
         self.camera_height = camera_height
-        self.gcode = []
+        self.gcode = ["O0001"]
         self.camera_wait = []
 
     def generate_gcode(self):

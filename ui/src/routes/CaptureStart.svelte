@@ -21,7 +21,8 @@
 			focal_length: Number(focalLength),
 			sensor_width: Number(sensorWidth),
 			distance: Number(distance),
-			is_full: false
+			is_full: false,
+			save_as_file: true
 		};
 		try {
 			processing = true;
