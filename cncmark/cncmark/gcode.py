@@ -21,6 +21,7 @@ class GCode:
         start = np.array([0, 0, 0])
         f_per_sec = self.feed_rate / 60
         for point in self.points:
+            print(point)
             # wait 1 second
             self.gcode.append("G4 P1000")
 
@@ -29,6 +30,11 @@ class GCode:
             x = point[0] + self.offset[0]
             y = point[1] + self.offset[1]
             z = point[2] + self.offset[2] + self.camera_height
+
+            # round to 3 decimal places
+            x = round(x, 3)
+            y = round(y, 3)
+            z = round(z, 3)
             one_line = f"G1 X{x} Y{y} Z{z} F{self.feed_rate}"
             self.gcode.append(one_line)
             start = point
