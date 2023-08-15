@@ -22,7 +22,7 @@ class GCode:
         f_per_sec = self.feed_rate / 60
         for point in self.points:
             # wait 1 second
-            self.gcode.append("G4 P1")
+            self.gcode.append("G4 P1000")
 
             time_to_move = self.distance(start, point) / f_per_sec
             self.camera_wait.append(1 + time_to_move)
