@@ -103,8 +103,6 @@ def get_unique_points(lines: list, arcs: list):
 
     points = np.array(points)
     unique_points = np.unique(points, axis=0)
-    # round to 3 decimal places
-    unique_points = np.round(unique_points, 3)
     return unique_points
 
 

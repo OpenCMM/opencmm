@@ -21,7 +21,6 @@ class GCode:
         start = np.array([0, 0, 0])
         f_per_sec = self.feed_rate / 60
         for point in self.points:
-            print(point)
             # wait 1 second
             self.gcode.append("G4 P1000")
 
@@ -38,6 +37,8 @@ class GCode:
             one_line = f"G1 X{x} Y{y} Z{z} F{self.feed_rate}"
             self.gcode.append(one_line)
             start = point
+        
+        self.gcode.append("M30")
 
     def save_gcode(self, file_path: str):
         with open(file_path, "w") as f:
