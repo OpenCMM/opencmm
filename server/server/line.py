@@ -40,9 +40,10 @@ class Line:
         return self.get_slope() * x + self.get_intercept()
 
     def get_length(self) -> float:
-        return np.sqrt(
+        length = np.sqrt(
             (self.end.x - self.start.x) ** 2 + (self.end.y - self.start.y) ** 2
         )
+        return float(length)
 
     def get_intersection(self, other) -> tuple:
         x = (other.get_intercept() - self.get_intercept()) / (

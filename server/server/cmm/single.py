@@ -23,6 +23,7 @@ class SingleImage:
         return self.center + diff_in_mm
 
     def pixel_per_mm(self, distance: float) -> float:
+        # field_of_view = 10.67
         field_of_view = get_field_of_view(
             self.camera.focal_length, self.camera.sensor_width, distance
         )
@@ -43,11 +44,22 @@ class SingleImage:
         return pixel_length / pixel_per_mm
 
     def vertex(self, distance: float) -> Coordinate:
-        vertices = get_vertices(self.image)
+        vertices = get_vertices(self.image, 3, 0.1, 2000)
         if vertices is None:
             return None
 
-        x, y = vertices[0][0]
+        center_point_in_pixel = (self.image.shape[1] / 2, self.image.shape[0] / 2)
+
+        # find the vertex closest to the center point
+        min_length_to_center_point = np.inf
+        for vertext in vertices:
+            length_to_center_point = np.linalg.norm(
+                np.array(vertext[0]) - np.array(center_point_in_pixel)
+            )
+            if length_to_center_point < min_length_to_center_point:
+                min_length_to_center_point = length_to_center_point
+                x, y = vertext[0]
+
         return self.from_opencv_coord(distance, (x, y))
 
     def add_real_coordinate(self, distance):
