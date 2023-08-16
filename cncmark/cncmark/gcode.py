@@ -37,7 +37,7 @@ class GCode:
             one_line = f"G1 X{x} Y{y} Z{z} F{self.feed_rate}"
             self.gcode.append(one_line)
             start = point
-        
+
         self.gcode.append("M30")
 
     def save_gcode(self, file_path: str):

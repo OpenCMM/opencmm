@@ -6,8 +6,8 @@ from mysql.connector.errors import IntegrityError
 from typing import Optional
 
 
-def point_id(point: list):
-    return f"{point[0]},{point[1]},{point[2]}"
+def point_id(point: np.ndarray):
+    return ",".join(point.astype(str))
 
 
 def get_highest_z(vertices):
@@ -16,7 +16,7 @@ def get_highest_z(vertices):
     return highest_point[2][2]
 
 
-def get_shapes(stl_file_path: str, z: Optional[float]):
+def get_shapes(stl_file_path: str, z: Optional[float], decimal_places: int = 3):
     """
     Extract lines parallel to the ground from an STL file \n
     If the line length is less than 1, it is considered an arc. \n
@@ -85,7 +85,18 @@ def get_shapes(stl_file_path: str, z: Optional[float]):
 
         previous_length = line_length
 
+    # round to decimal places
+    ground_parallel_lines = round_shape_values(ground_parallel_lines, decimal_places)
+    ground_parallel_arcs = round_shape_values(ground_parallel_arcs, decimal_places)
+
     return ground_parallel_lines, ground_parallel_arcs
+
+
+def round_shape_values(shapes: list, decimal_places: int = 3):
+    for i in range(len(shapes)):
+        shapes[i] = np.round(shapes[i], decimals=decimal_places)
+
+    return shapes
 
 
 def get_unique_points(lines: list, arcs: list):
@@ -112,12 +123,14 @@ def save_unique_points(unique_points: list, file_path: str):
             f.write(f"{point[0]},{point[1]},{point[2]}\n")
 
 
-def import_points(unique_points: list):
+def import_points(unique_points: np.ndarray):
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
     cursor = cnx.cursor()
-    unique_point_list = unique_points.tolist()
-    for i in range(len(unique_point_list)):
-        unique_point_list[i].append(",".join(map(str, unique_point_list[i])))
+    unique_point_list = []
+    for points in unique_points:
+        unique_point_list.append(
+            [float(points[0]), float(points[1]), float(points[2]), point_id(points)]
+        )
 
     insert_query = "INSERT INTO point (x, y, z, point_id) VALUES (%s, %s, %s, %s)"
 

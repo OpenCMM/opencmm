@@ -15,8 +15,8 @@ class Arc:
         return f"Arc(radius={self.radius}, center={self.center})"
 
 
-def point_id(point: list):
-    return f"{point[0]},{point[1]},{point[2]}"
+def point_id(point: np.ndarray):
+    return ",".join(point.astype(str))
 
 
 def get_arc_info(arc_points: list):
@@ -98,7 +98,7 @@ def pick_arc_points(arc_points: list):
     return a, b, c, d
 
 
-def to_arc_list(arc_points: list):
+def to_arc_list(arc_points: np.ndarray):
     a, b, c, d = pick_arc_points(arc_points)
     radius, center = get_arc_info(arc_points)
     return [
