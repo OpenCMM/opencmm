@@ -9,16 +9,19 @@
 		locale.set(lang);
 	};
 
-	const languages: { [lang: string] : string} = {
+	const languages: { [lang: string]: string } = {
 		en: 'English',
 		ja: '日本語'
 	};
 </script>
 
-<Select labelText={$_('settings.language.label')} id="language" 
-	selected={selected}
-on:change={changeLanguage}>
-  {#each $locales as locale}
-    <SelectItem value={locale} text={languages[locale]} />
-  {/each}
+<Select
+	labelText={$_('settings.language.label')}
+	id="language"
+	{selected}
+	on:change={changeLanguage}
+>
+	{#each $locales as locale}
+		<SelectItem value={locale} text={languages[locale]} />
+	{/each}
 </Select>

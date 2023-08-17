@@ -8,14 +8,13 @@
 	<Grid>
 		<Row>
 			<Column>
-				<ClickableTile href="/settings/language"
-				light={$page.url.pathname === '/settings/language'}
+				<ClickableTile
+					href="/settings/language"
+					light={$page.url.pathname === '/settings/language'}
 				>
 					{$_('settings.language.label')}
 				</ClickableTile>
-				<ClickableTile href="/settings/theme"
-				light={$page.url.pathname === '/settings/theme'}
-				>
+				<ClickableTile href="/settings/theme" light={$page.url.pathname === '/settings/theme'}>
 					{$_('settings.theme.label')}
 				</ClickableTile>
 			</Column>

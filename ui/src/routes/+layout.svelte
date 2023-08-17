@@ -8,7 +8,7 @@
 		HeaderPanelLinks,
 		HeaderPanelLink
 	} from 'carbon-components-svelte';
-	import "carbon-components-svelte/css/all.css";
+	import 'carbon-components-svelte/css/all.css';
 	import { _ } from 'svelte-i18n';
 	let isOpen = false;
 </script>
