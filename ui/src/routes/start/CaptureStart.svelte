@@ -6,7 +6,6 @@
 	import { Form, FormGroup, TextInput, Button, InlineLoading } from 'carbon-components-svelte';
 	import { _ } from 'svelte-i18n';
 
-	export let captureDone: boolean = false;
 	let error: string | null = null;
 	let focalLength: number = 25;
 
@@ -33,7 +32,6 @@
 				}
 			});
 			console.log(res);
-			captureDone = true;
 		} catch (err) {
 			console.error(err);
 			error = $_('home.start.error');

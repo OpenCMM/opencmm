@@ -7,7 +7,6 @@
 	import { _ } from 'svelte-i18n';
 
 	let error: string | null = null;
-	export let uploaded: boolean = false;
 	const handleFileChange = async (event: CustomEvent) => {
 		console.log(event);
 		const fileInput = event.detail;
@@ -26,7 +25,12 @@
 				}
 			});
 			console.log(res);
-			uploaded = true;
+
+			if (res.status === 200 && res.data["status"] === 'ok') {
+				window.location.href = '/setup';
+			} else {
+				error = res.data["message"];
+			}
 		} catch (err) {
 			console.error(err);
 		}
@@ -37,19 +41,23 @@
 	<p class="error">{error}</p>
 {/if}
 
-{#if !uploaded}
-	<FileUploader
-		labelTitle={$_('home.upload3dmodel.title')}
-		buttonLabel={$_('home.upload3dmodel.buttonLabel')}
-		labelDescription={$_('home.upload3dmodel.labelDescription')}
-		accept={['.stl', '.STL']}
-		status="complete"
-		on:change={handleFileChange}
-	/>
-{/if}
+<div id="file-uploader">
+<FileUploader
+	labelTitle={$_('home.upload3dmodel.title')}
+	buttonLabel={$_('home.upload3dmodel.buttonLabel')}
+	labelDescription={$_('home.upload3dmodel.labelDescription')}
+	accept={['.stl', '.STL']}
+	status="complete"
+	on:change={handleFileChange}
+/>
+</div>
 
 <style>
 	.error {
 		color: red;
+	}
+
+	#file-uploader {
+		margin: 1rem;
 	}
 </style>
