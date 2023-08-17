@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Grid, Row, Column, ClickableTile } from 'carbon-components-svelte';
+	import { page } from '$app/stores';
 	import { _ } from 'svelte-i18n';
 </script>
 
@@ -7,10 +8,14 @@
 	<Grid>
 		<Row>
 			<Column>
-				<ClickableTile href="/settings/language">
+				<ClickableTile href="/settings/language"
+				light={$page.url.pathname === '/settings/language'}
+				>
 					{$_('settings.language.label')}
 				</ClickableTile>
-				<ClickableTile href="/settings/theme">
+				<ClickableTile href="/settings/theme"
+				light={$page.url.pathname === '/settings/theme'}
+				>
 					{$_('settings.theme.label')}
 				</ClickableTile>
 			</Column>
