@@ -4,6 +4,7 @@
 	import axios from 'axios';
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
 	import { FileUploader } from 'carbon-components-svelte';
+	import { _ } from 'svelte-i18n';
 
 	let error: string | null = null;
 	export let uploaded: boolean = false;
@@ -38,9 +39,9 @@
 
 {#if !uploaded}
 	<FileUploader
-		labelTitle="3Dモデルをアップロードしてください"
-		buttonLabel="ファイルを選択"
-		labelDescription="STLファイルのみ対応しています"
+		labelTitle={$_('home.upload3dmodel.title')}
+		buttonLabel={$_('home.upload3dmodel.buttonLabel')}
+		labelDescription={$_('home.upload3dmodel.labelDescription')}
 		accept={['.stl', '.STL']}
 		status="complete"
 		on:change={handleFileChange}

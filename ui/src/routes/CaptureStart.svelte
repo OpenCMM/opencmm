@@ -4,6 +4,7 @@
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
 	import axios from 'axios';
 	import { Form, FormGroup, TextInput, Button, InlineLoading } from 'carbon-components-svelte';
+	import { _ } from 'svelte-i18n';
 
 	export let captureDone: boolean = false;
 	let error: string | null = null;
@@ -35,14 +36,14 @@
 			captureDone = true;
 		} catch (err) {
 			console.error(err);
-			error = '測定に失敗しました';
+			error = $_('home.start.error');
 			processing = false;
 		}
 	};
 </script>
 
 <div class="bx--form-item">
-	<p id="form-title">測定を開始します</p>
+	<p id="form-title">{$_('home.start.title')}</p>
 
 	<Form on:submit={startCapturing}>
 		<FormGroup>
@@ -53,18 +54,18 @@
 		</FormGroup>
 		<FormGroup>
 			<TextInput
-				labelText="カメラとの距離"
+				labelText={$_('home.start.distance.label')}
 				id="distance"
 				bind:value={distance}
-				helperText="カメラと測定箇所のz軸の距離"
+				helperText={$_('home.start.distance.helperText')}
 			/>
 		</FormGroup>
 		{#if processing && !error}
-			<InlineLoading status="active" description="測定中" />
+			<InlineLoading status="active" description={$_('home.start.status.active')} />
 		{:else if error}
 			<InlineLoading status="error" description={error} />
 		{:else}
-			<Button type="submit">測定開始</Button>
+			<Button type="submit">{$_('home.start.start')}</Button>
 		{/if}
 	</Form>
 </div>
