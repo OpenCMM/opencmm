@@ -26,10 +26,10 @@
 			});
 			console.log(res);
 
-			if (res.status === 200 && res.data["status"] === 'ok') {
+			if (res.status === 200 && res.data['status'] === 'ok') {
 				window.location.href = '/setup';
 			} else {
-				error = res.data["message"];
+				error = res.data['message'];
 			}
 		} catch (err) {
 			console.error(err);
@@ -42,14 +42,14 @@
 {/if}
 
 <div id="file-uploader">
-<FileUploader
-	labelTitle={$_('home.upload3dmodel.title')}
-	buttonLabel={$_('home.upload3dmodel.buttonLabel')}
-	labelDescription={$_('home.upload3dmodel.labelDescription')}
-	accept={['.stl', '.STL']}
-	status="complete"
-	on:change={handleFileChange}
-/>
+	<FileUploader
+		labelTitle={$_('home.upload3dmodel.title')}
+		buttonLabel={$_('home.upload3dmodel.buttonLabel')}
+		labelDescription={$_('home.upload3dmodel.labelDescription')}
+		accept={['.stl', '.STL']}
+		status="complete"
+		on:change={handleFileChange}
+	/>
 </div>
 
 <style>

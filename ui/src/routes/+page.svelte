@@ -4,7 +4,7 @@
 	import Line from './Result/Line.svelte';
 	import Arc from './Result/Arc.svelte';
 
-	let uploaded: boolean = false;
+	let uploaded = false;
 </script>
 
 <svelte:head>

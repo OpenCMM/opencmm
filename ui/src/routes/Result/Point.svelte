@@ -7,6 +7,16 @@
 
 	let loaded = false;
 
+	interface Point {
+		id: number;
+		x: number;
+		y: number;
+		z: number;
+		rx: number;
+		ry: number;
+		rz: number;
+	}
+
 	const headers = [
 		{ key: 'id', value: 'ID' },
 		{ key: 'x', value: 'x' },
@@ -16,7 +26,7 @@
 		{ key: 'ry', value: '実際のy' },
 		{ key: 'rz', value: '実際のz' }
 	];
-	let row: { id: any; x: any; y: any; z: any; rx: any; ry: any; rz: any }[] = [];
+	let row: Point[] = [];
 	const load_table_data = async () => {
 		const res = await fetch(`${BACKEND_URL_LOCAL}/result/points`);
 		const data = await res.json();

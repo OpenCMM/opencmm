@@ -12,7 +12,7 @@
 	let cameraHeight = 300.0;
 	let feedRate = 3000.0;
 	let error: string | null = null;
-	let settingDone: boolean = false;
+	let settingDone = false;
 	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
 
@@ -31,11 +31,11 @@
 				}
 			});
 			console.log(res);
-			if (res.status === 200 && res.data["status"] === 'ok') {
+			if (res.status === 200 && res.data['status'] === 'ok') {
 				settingDone = true;
 				window.location.href = '/start';
 			} else {
-				error = res.data["message"];
+				error = res.data['message'];
 			}
 		} catch (err) {
 			console.error(err);

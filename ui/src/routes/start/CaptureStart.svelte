@@ -7,12 +7,12 @@
 	import { _ } from 'svelte-i18n';
 
 	let error: string | null = null;
-	let focalLength: number = 25;
+	let focalLength = 25;
 
-	let sensorWidth: number = 6.287;
+	let sensorWidth = 6.287;
 
-	let distance: number = 50.0;
-	let processing: boolean = false;
+	let distance = 50.0;
+	let processing = false;
 
 	const startCapturing = async (e: Event) => {
 		e.preventDefault();

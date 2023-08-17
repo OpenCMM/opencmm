@@ -5,6 +5,14 @@
 
 	let loaded = false;
 
+	interface Line {
+		id: number;
+		a: number;
+		b: number;
+		length: number;
+		rlength: number;
+	}
+
 	const headers = [
 		{ key: 'id', value: 'ID' },
 		{ key: 'a', value: '始点' },
@@ -12,7 +20,7 @@
 		{ key: 'length', value: '長さ' },
 		{ key: 'rlength', value: '実際の長さ' }
 	];
-	let row: { id: any; a: any; b: any; length: any; rlength: any }[] = [];
+	let row: Line[] = [];
 	const load_table_data = async () => {
 		const res = await fetch(`${BACKEND_URL_LOCAL}/result/lines`);
 		const data = await res.json();

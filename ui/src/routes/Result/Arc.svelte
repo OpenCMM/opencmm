@@ -5,6 +5,18 @@
 
 	let loaded = false;
 
+	interface Arc {
+		id: number;
+		radius: number;
+		cx: number;
+		cy: number;
+		cz: number;
+		rradius: number;
+		rcx: number;
+		rcy: number;
+		rcz: number;
+	}
+
 	const headers = [
 		{ key: 'id', value: 'ID' },
 		{ key: 'radius', value: '半径' },
@@ -16,20 +28,11 @@
 		{ key: 'rcy', value: '実際の中心のy' },
 		{ key: 'rcz', value: '実際の中心のz' }
 	];
-	let row: {
-		id: any;
-		radius: any;
-		cx: any;
-		cy: any;
-		cz: any;
-		rradius: any;
-		rcx: any;
-		rcy: any;
-		rcz: any;
-	}[] = [];
+	let row: Arc[] = [];
 	const load_table_data = async () => {
 		const res = await fetch(`${BACKEND_URL_LOCAL}/result/arcs`);
 		const data = await res.json();
+		console.log(data);
 		for (const d of data['arcs']) {
 			row.push({
 				id: d[0],
