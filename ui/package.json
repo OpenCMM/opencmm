@@ -18,6 +18,7 @@
 		"@typescript-eslint/parser": "^5.45.0",
 		"axios": "^1.4.0",
 		"carbon-components-svelte": "^0.79.0",
+		"carbon-icons-svelte": "^12.1.0",
 		"eslint": "^8.28.0",
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-svelte": "^2.30.0",

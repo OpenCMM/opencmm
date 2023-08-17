@@ -1,13 +1,30 @@
 <script>
-	import { Content, Header, SkipToContent } from 'carbon-components-svelte';
+	import {
+		Content,
+		Header,
+		SkipToContent,
+		HeaderUtilities,
+		HeaderAction,
+		HeaderPanelLinks,
+		HeaderPanelLink
+	} from 'carbon-components-svelte';
 	import 'carbon-components-svelte/css/g80.css';
+	import { _ } from 'svelte-i18n';
+	let isOpen = false;
 </script>
 
 <div class="app">
-	<Header company="OpenCMM">
+	<Header company="OpenCMM" href="/">
 		<svelte:fragment slot="skip-to-content">
 			<SkipToContent />
 		</svelte:fragment>
+		<HeaderUtilities>
+			<HeaderAction bind:isOpen>
+				<HeaderPanelLinks>
+					<HeaderPanelLink href="/settings/language">{$_('menu.settings')}</HeaderPanelLink>
+				</HeaderPanelLinks>
+			</HeaderAction>
+		</HeaderUtilities>
 	</Header>
 	<main>
 		<Content>

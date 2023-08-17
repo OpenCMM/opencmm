@@ -32,7 +32,6 @@
 	const load_table_data = async () => {
 		const res = await fetch(`${BACKEND_URL_LOCAL}/result/arcs`);
 		const data = await res.json();
-		console.log(data);
 		for (const d of data['arcs']) {
 			row.push({
 				id: d[0],

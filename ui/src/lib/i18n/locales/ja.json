@@ -35,5 +35,16 @@
 			"start": "測定開始",
 			"error": "測定に失敗しました。"
 		}
+	},
+	"menu": {
+		"settings": "設定"
+	},
+	"settings": {
+		"language": {
+			"label": "言語"
+		},
+		"theme": {
+			"label": "テーマ"
+		}
 	}
 }

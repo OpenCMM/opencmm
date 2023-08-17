@@ -35,5 +35,16 @@
 			"start": "Start",
 			"error": "Failed to start measurement"
 		}
+	},
+	"menu": {
+		"settings": "Settings"
+	},
+	"settings": {
+		"language": {
+			"label": "Language"
+		},
+		"theme": {
+			"label": "Theme"
+		}
 	}
 }
