@@ -2,6 +2,7 @@
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
 	import { DataTable } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
+	import { _ } from 'svelte-i18n';
 
 	let loaded = false;
 
@@ -15,10 +16,10 @@
 
 	const headers = [
 		{ key: 'id', value: 'ID' },
-		{ key: 'a', value: '始点' },
-		{ key: 'b', value: '終点' },
-		{ key: 'length', value: '長さ' },
-		{ key: 'rlength', value: '実際の長さ' }
+		{ key: 'a', value: $_('home.result.line.start') },
+		{ key: 'b', value: $_('home.result.line.end') },
+		{ key: 'length', value: $_('home.result.line.length') },
+		{ key: 'rlength', value: $_('home.result.line.rlength') }
 	];
 	let row: Line[] = [];
 	const load_table_data = async () => {
@@ -45,7 +46,7 @@
 	{#if !loaded}
 		<p>loading...</p>
 	{:else}
-		<DataTable size="short" title="線" {headers} rows={row} />
+		<DataTable size="short" title={$_('home.result.line.title')} {headers} rows={row} />
 	{/if}
 </div>
 

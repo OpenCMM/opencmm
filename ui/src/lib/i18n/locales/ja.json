@@ -34,6 +34,27 @@
 			},
 			"start": "測定開始",
 			"error": "測定に失敗しました。"
+		},
+		"result": {
+			"point": {
+				"title": "点",
+				"coordinate": "座標",
+				"rcoordinate": "推定座標"
+			},
+			"line": {
+				"title": "線",
+				"start": "始点",
+				"end": "終点",
+				"length": "長さ",
+				"rlength": "推定長さ"
+			},
+			"arc": {
+				"title": "円弧",
+				"radius": "半径",
+				"center": "中心",
+				"rradius": "推定半径",
+				"rcenter": "推定中心"
+			}
 		}
 	},
 	"menu": {
