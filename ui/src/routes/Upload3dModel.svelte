@@ -4,9 +4,9 @@
 	import axios from 'axios';
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
 	import { FileUploader } from 'carbon-components-svelte';
+	import { _ } from 'svelte-i18n';
 
 	let error: string | null = null;
-	export let uploaded: boolean = false;
 	const handleFileChange = async (event: CustomEvent) => {
 		console.log(event);
 		const fileInput = event.detail;
@@ -25,7 +25,12 @@
 				}
 			});
 			console.log(res);
-			uploaded = true;
+
+			if (res.status === 200 && res.data['status'] === 'ok') {
+				window.location.href = '/setup';
+			} else {
+				error = res.data['message'];
+			}
 		} catch (err) {
 			console.error(err);
 		}
@@ -36,19 +41,23 @@
 	<p class="error">{error}</p>
 {/if}
 
-{#if !uploaded}
+<div id="file-uploader">
 	<FileUploader
-		labelTitle="3Dモデルをアップロードしてください"
-		buttonLabel="ファイルを選択"
-		labelDescription="STLファイルのみ対応しています"
+		labelTitle={$_('home.upload3dmodel.title')}
+		buttonLabel={$_('home.upload3dmodel.buttonLabel')}
+		labelDescription={$_('home.upload3dmodel.labelDescription')}
 		accept={['.stl', '.STL']}
 		status="complete"
 		on:change={handleFileChange}
 	/>
-{/if}
+</div>
 
 <style>
 	.error {
 		color: red;
+	}
+
+	#file-uploader {
+		margin: 1rem;
 	}
 </style>

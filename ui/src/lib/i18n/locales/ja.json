@@ -1,0 +1,73 @@
+{
+	"home": {
+		"upload3dmodel": {
+			"title": "3Dモデルをアップロードしてください",
+			"buttonLabel": "ファイルを選択",
+			"labelDescription": "STLファイルのみ対応しています"
+		},
+		"setup": {
+			"title": "設定",
+			"cameraHeight": {
+				"label": "カメラの高さ",
+				"helperText": "測定箇所から機械原点までのz軸の距離（カメラの高さ＋焦点の長さ）"
+			},
+			"feedRate": {
+				"label": "送り速度",
+				"helperText": "測定時の送り速度"
+			},
+			"offset": "オフセット",
+			"submit": "設定",
+			"done": "設定が完了しました。"
+		},
+		"gcode": {
+			"title": "GCodeをダウンロードしてください。",
+			"download": "ダウンロード"
+		},
+		"start": {
+			"title": "測定を開始します",
+			"distance": {
+				"label": "カメラとの距離",
+				"helperText": "カメラと測定箇所のz軸の距離"
+			},
+			"status": {
+				"active": "測定中"
+			},
+			"start": "測定開始",
+			"error": "測定に失敗しました。"
+		},
+		"result": {
+			"point": {
+				"title": "点",
+				"coordinate": "座標",
+				"rcoordinate": "推定座標"
+			},
+			"line": {
+				"title": "線",
+				"start": "始点",
+				"end": "終点",
+				"length": "長さ",
+				"rlength": "推定長さ",
+				"lengthDiff": "誤差(μm)"
+			},
+			"arc": {
+				"title": "円弧",
+				"radius": "半径",
+				"center": "中心",
+				"rradius": "推定半径",
+				"radiusDiff": "誤差",
+				"rcenter": "推定中心"
+			}
+		}
+	},
+	"menu": {
+		"settings": "設定"
+	},
+	"settings": {
+		"language": {
+			"label": "言語"
+		},
+		"theme": {
+			"label": "テーマ"
+		}
+	}
+}

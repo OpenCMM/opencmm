@@ -1,0 +1,73 @@
+{
+	"home": {
+		"upload3dmodel": {
+			"title": "Upload a 3D model",
+			"buttonLabel": "Select a file",
+			"labelDescription": "Only .stl files are supported."
+		},
+		"setup": {
+			"cameraHeight": {
+				"label": "camera height",
+				"helperText": "distance from the machine origin to the surface of the product"
+			},
+			"feedRate": {
+				"label": "feed rate"
+			},
+			"offset": "offset",
+			"submit": "ok",
+			"done": "done"
+		},
+		"gcode": {
+			"download": {
+				"label": "Download GCode",
+				"helperText": "Download"
+			}
+		},
+		"start": {
+			"title": "Start measurement",
+			"distance": {
+				"label": "distance",
+				"helperText": "distance from camera to the surface of the product"
+			},
+			"status": {
+				"active": "Measuring..."
+			},
+			"start": "Start",
+			"error": "Failed to start measurement"
+		},
+		"result": {
+			"point": {
+				"title": "Point",
+				"coordinate": "Coordinate",
+				"rcoordinate": "Estimated coordinate"
+			},
+			"line": {
+				"title": "Line",
+				"start": "Start",
+				"end": "End",
+				"length": "Length",
+				"rlength": "Estimated length",
+				"lengthDiff": "Difference(μm)"
+			},
+			"arc": {
+				"title": "Arc",
+				"radius": "Radius",
+				"center": "Center",
+				"rradius": "Estimated radius",
+				"radiusDiff": "Difference(μm)",
+				"rcenter": "Estimated center"
+			}
+		}
+	},
+	"menu": {
+		"settings": "Settings"
+	},
+	"settings": {
+		"language": {
+			"label": "Language"
+		},
+		"theme": {
+			"label": "Theme"
+		}
+	}
+}

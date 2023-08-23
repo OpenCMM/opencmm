@@ -4,6 +4,7 @@
 	import axios from 'axios';
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
 	import { Form, FormGroup, TextInput, Button } from 'carbon-components-svelte';
+	import { _ } from 'svelte-i18n';
 
 	let xOffset = 0;
 	let yOffset = 0;
@@ -11,7 +12,7 @@
 	let cameraHeight = 300.0;
 	let feedRate = 3000.0;
 	let error: string | null = null;
-	export let settingDone: boolean = false;
+	let settingDone = false;
 	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
 
@@ -30,7 +31,12 @@
 				}
 			});
 			console.log(res);
-			settingDone = true;
+			if (res.status === 200 && res.data['status'] === 'ok') {
+				settingDone = true;
+				window.location.href = '/start';
+			} else {
+				error = res.data['message'];
+			}
 		} catch (err) {
 			console.error(err);
 		}
@@ -42,34 +48,35 @@
 {/if}
 
 <div class="bx--form-item">
-	<p id="form-title">設定</p>
+	<p id="form-title">{$_('home.setup.title')}</p>
 	<Form on:submit={handleSubmit}>
 		<FormGroup>
 			<TextInput
-				labelText="カメラの高さ"
+				labelText={$_('home.setup.cameraHeight.label')}
 				id="cameraHeight"
 				bind:value={cameraHeight}
-				helperText="測定箇所から機械原点までのz軸の距離（カメラの高さ＋焦点の長さ）"
+				helperText=""
 			/>
 		</FormGroup>
 		<FormGroup>
-			<TextInput labelText="送り速度" id="feedRate" bind:value={feedRate} />
+			<TextInput labelText={$_('home.setup.feedRate.label')} id="feedRate" bind:value={feedRate} />
+		</FormGroup>
+		<p>{$_('home.setup.offset')}</p>
+		<FormGroup>
+			<TextInput labelText="x" id="xOffset" bind:value={xOffset} />
 		</FormGroup>
 		<FormGroup>
-			<TextInput labelText="xオフセット" id="xOffset" bind:value={xOffset} />
+			<TextInput labelText="y" id="yOffset" bind:value={yOffset} />
 		</FormGroup>
 		<FormGroup>
-			<TextInput labelText="yオフセット" id="yOffset" bind:value={yOffset} />
+			<TextInput labelText="z" id="zOffset" bind:value={zOffset} />
 		</FormGroup>
-		<FormGroup>
-			<TextInput labelText="zオフセット" id="zOffset" bind:value={zOffset} />
-		</FormGroup>
-		<Button type="submit">設定</Button>
+		<Button type="submit">{$_('home.setup.submit')}</Button>
 	</Form>
 </div>
 
 {#if settingDone}
-	<p>設定が完了しました</p>
+	<p>{$_('home.setup.done')}</p>
 {/if}
 
 <style>
