@@ -28,7 +28,7 @@
 	const load_table_data = async () => {
 		const res = await fetch(`${BACKEND_URL_LOCAL}/result/lines`);
 		const data = await res.json();
-		console.log(data)
+		console.log(data);
 		for (const d of data['lines']) {
 			row.push({
 				id: d[0],
