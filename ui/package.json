@@ -12,6 +12,8 @@
 		"format": "prettier --plugin-search-dir . --write ."
 	},
 	"devDependencies": {
+		"@carbon/charts-svelte": "^1.11.21",
+		"@carbon/styles": "^1.36.0",
 		"@sveltejs/adapter-auto": "^2.0.0",
 		"@sveltejs/kit": "^1.20.4",
 		"@typescript-eslint/eslint-plugin": "^5.45.0",
@@ -19,6 +21,7 @@
 		"axios": "^1.4.0",
 		"carbon-components-svelte": "^0.79.0",
 		"carbon-icons-svelte": "^12.1.0",
+		"d3": "^7.8.5",
 		"eslint": "^8.28.0",
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-svelte": "^2.30.0",

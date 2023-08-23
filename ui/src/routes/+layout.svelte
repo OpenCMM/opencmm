@@ -6,8 +6,10 @@
 		HeaderUtilities,
 		HeaderAction,
 		HeaderPanelLinks,
-		HeaderPanelLink
+		HeaderPanelLink,
+		HeaderActionLink
 	} from 'carbon-components-svelte';
+	import Debug from 'carbon-icons-svelte/lib/Debug.svelte';
 	import 'carbon-components-svelte/css/all.css';
 	import { _ } from 'svelte-i18n';
 	let isOpen = false;
@@ -19,6 +21,7 @@
 			<SkipToContent />
 		</svelte:fragment>
 		<HeaderUtilities>
+			<HeaderActionLink href="/debug" aria-label="Debug" icon={Debug}>Debug</HeaderActionLink>
 			<HeaderAction bind:isOpen>
 				<HeaderPanelLinks>
 					<HeaderPanelLink href="/settings/language">{$_('menu.settings')}</HeaderPanelLink>
