@@ -1,37 +1,21 @@
 import uvicorn
 import os
-from fastapi import FastAPI, UploadFile, HTTPException
+from fastapi import FastAPI, UploadFile, HTTPException, WebSocket
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from server.prepare import process_stl
-from pydantic import BaseModel
 from server.camera import Camera
 from server.capture import capture_images
 from server.reset import reset_tables
-from typing import Optional
 from server.result import fetch_points, fetch_arcs, fetch_lines
-
-
-class JobInfo(BaseModel):
-    camera_height: float
-    feed_rate: float
-    x_offset: Optional[float]
-    y_offset: Optional[float]
-    z_offset: Optional[float]
-    z: Optional[float] = None
-
-
-class CameraInfo(BaseModel):
-    focal_length: float
-    sensor_width: float
-    distance: float
-    is_full: bool = False
-    save_as_file: bool = False
-
+import board
+import busio
+import adafruit_vl53l0x
+import time
+import asyncio
+from server.type import JobInfo, CameraInfo
 
 model_path = "data/3dmodel/3dmodel.stl"
-
-app = FastAPI()
 
 origins = [
     "http://localhost",
@@ -40,6 +24,7 @@ origins = [
 ]
 
 
+app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -47,6 +32,39 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+i2c = busio.I2C(board.SCL, board.SDA)
+vl53 = adafruit_vl53l0x.VL53L0X(i2c)
+vl53.measurement_timing_budget = 200000
+
+connected_websockets = set()
+
+async def measure_distance():
+    with vl53.continuous_mode():
+        while True:
+            distance = vl53.range
+            timestamp = time.time()
+            data = {"distance": distance, "timestamp": timestamp}
+            
+            for websocket in connected_websockets:
+                await websocket.send_json(data)
+            
+            await asyncio.sleep(0.1)
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    connected_websockets.add(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except Exception as e:
+        print(e)
+        connected_websockets.remove(websocket)
+
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(measure_distance())
 
 
 @app.get("/")
