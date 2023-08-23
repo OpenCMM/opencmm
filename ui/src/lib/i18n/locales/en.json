@@ -43,16 +43,18 @@
 			},
 			"line": {
 				"title": "Line",
-				"start": "start",
-				"end": "end",
-				"length": "length",
-				"rlength": "Estimated length"
+				"start": "Start",
+				"end": "End",
+				"length": "Length",
+				"rlength": "Estimated length",
+				"lengthDiff": "Difference(μm)"
 			},
 			"arc": {
 				"title": "Arc",
 				"radius": "Radius",
 				"center": "Center",
 				"rradius": "Estimated radius",
+				"radiusDiff": "Difference(μm)",
 				"rcenter": "Estimated center"
 			}
 		}

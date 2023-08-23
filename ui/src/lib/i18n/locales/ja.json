@@ -46,13 +46,15 @@
 				"start": "始点",
 				"end": "終点",
 				"length": "長さ",
-				"rlength": "推定長さ"
+				"rlength": "推定長さ",
+				"lengthDiff": "誤差(μm)"
 			},
 			"arc": {
 				"title": "円弧",
 				"radius": "半径",
 				"center": "中心",
 				"rradius": "推定半径",
+				"radiusDiff": "誤差",
 				"rcenter": "推定中心"
 			}
 		}
