@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "listener"
+version = "0.1.0"
+description = ""
+authors = ["yuichiroaoki <45054071+yuichiroaoki@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+websockets = "^11.0.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
