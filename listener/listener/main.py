@@ -2,7 +2,14 @@ import websockets
 import asyncio
 import time
 
-server_url = "ws://192.168.10.132:81"
+# home
+# server_url = "ws://192.168.10.132:81"
+# mobile
+server_url = "ws://192.168.228.54:81"
+# usb
+# th = 3950
+# 3.7 battery
+th = 3600
 
 async def listen():
     async with websockets.connect(server_url) as websocket:
@@ -18,6 +25,8 @@ async def listen():
 
             with open("data.csv", "a") as f:
                 distance = await websocket.recv()
+                if distance > th:
+                    data = None
                 data = (*get_coordinate(), distance)
                 f.write(",".join(map(str, data)) + "\n")
                 idx += 1
