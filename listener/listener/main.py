@@ -1,5 +1,7 @@
 import websockets
 import asyncio
+import time
+import sqlite3
 import requests
 from listener import mt
 import xml.etree.ElementTree as ET
@@ -42,15 +44,22 @@ def listen():
 
 def combine_data():
     global xyz, distance
+    conn = sqlite3.connect('listener.db')
+    cur = conn.cursor()
     while True:
         if distance is not None and xyz is not None:
             # Combine sensor_data and coordinate_data
-            combined_data = (*xyz, distance)
+            combined_data = (*xyz, float(distance))
+            (x, y, z) = xyz
             print(combined_data)
+            cur.execute("INSERT INTO coord(x, y, z, distance) "
+                        f"VALUES ({x}, {y}, {z}, {float(distance)})")
             # Reset the variables to wait for new data
             distance = None
             xyz = None
 
+            conn.commit()
+    # conn.close()
 
 def mtconnect_streaming_reader():
     global xyz
