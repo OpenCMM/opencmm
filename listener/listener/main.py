@@ -9,11 +9,13 @@ import threading
 
 # home
 # server_url = "ws://192.168.10.132:81"
+server_url = "ws://192.168.10.114:81"
 # mobile
 # server_url = "ws://192.168.228.54:81"
 
 # mock
-server_url = "ws://localhost:8081"
+# server_url = "ws://localhost:8081"
+
 # usb
 # th = 3950
 # 3.7 battery
@@ -24,29 +26,60 @@ chunk_size = 1024
 position_path = './/{urn:mtconnect.org:MTConnectStreams:1.3}Position'
 xyz = None
 distance = None
+initial_coordinate = (109.074, -15.028, -561.215)
+final_coordinate = (105.042, -11.028, -568.215)
+streaming = False
+done = False
 
 async def receive_sensor_data():
     global distance
     async with websockets.connect(server_url) as websocket:
-        print("connected")
-        await websocket.send("startStreaming")
+        print("receive_sensor_data(): connected")
 
-        while True:
+        while not done:
             distance = await websocket.recv()
-        # await websocket.send("stopStreaming")
 
 # ref. https://stackoverflow.com/questions/67734115/how-to-use-multithreading-with-websockets
-def listen():
+def listen_sensor():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(receive_sensor_data())
     loop.close()
 
+def contorl_streaming_status():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(control_sensor())
+    loop.close()
+
+async def control_sensor():
+    global streaming, xyz, done
+    async with websockets.connect(server_url) as websocket:
+        print("control_sensor(): connected")
+
+        while not done:
+            if not streaming and xyz is not None and initial_coordinate == xyz:
+                print("ready to start streaming")
+                await websocket.send("startStreaming")
+                print("start streaming")
+                streaming = True
+
+            elif streaming and xyz is not None and final_coordinate == xyz:
+                print("ready to stop streaming")
+                await websocket.send("stopStreaming")
+                # await websocket.send("deepSleep")
+                print("stop streaming")
+                streaming = False
+                done = True
+            
+            await asyncio.sleep(0.5)
+
+
 def combine_data():
     global xyz, distance
     conn = sqlite3.connect('listener.db')
     cur = conn.cursor()
-    while True:
+    while not done:
         if distance is not None and xyz is not None:
             # Combine sensor_data and coordinate_data
             combined_data = (*xyz, float(distance))
@@ -59,7 +92,7 @@ def combine_data():
             xyz = None
 
             conn.commit()
-    # conn.close()
+    conn.close()
 
 def mtconnect_streaming_reader():
     global xyz
@@ -74,6 +107,8 @@ def mtconnect_streaming_reader():
             for chunk in response.iter_content(chunk_size=chunk_size):
                 if not chunk:
                     continue
+                if done:
+                    break
 
                 raw_data = chunk.decode('utf-8')
                 # print(raw_data)
@@ -97,7 +132,6 @@ def mtconnect_streaming_reader():
                         xyz = mt.get_coordinates(xml_buffer, position_path)[:3]
 
                     except ET.ParseError:
-                        breakpoint()
                         print("ParseError")
 
         else:
@@ -109,16 +143,19 @@ def mtconnect_streaming_reader():
         print("Streaming stopped by user.")
 
 if __name__ == "__main__":
-    thread1 = threading.Thread(target=listen)
+    thread1 = threading.Thread(target=listen_sensor)
     thread2 = threading.Thread(target=mtconnect_streaming_reader)
     thread3 = threading.Thread(target=combine_data)
+    thread4 = threading.Thread(target=contorl_streaming_status)
 
     # Start the threads
     thread1.start()
     thread2.start()
     thread3.start()
+    thread4.start()
 
     # Join the threads (optional, to wait for them to finish)
     thread1.join()
     thread2.join()
     thread3.join()
+    thread4.join()
