@@ -1,6 +1,5 @@
 import websockets
 import asyncio
-import time
 import sqlite3
 import requests
 from listener import mt
@@ -23,13 +22,14 @@ th = 3600
 
 chunk_size = 1024
 # position_path = './/{urn:mtconnect.org:MTConnectStreams:2.0}Position'
-position_path = './/{urn:mtconnect.org:MTConnectStreams:1.3}Position'
+position_path = ".//{urn:mtconnect.org:MTConnectStreams:1.3}Position"
 xyz = None
 distance = None
 initial_coordinate = (109.074, -15.028, -561.215)
 final_coordinate = (105.042, -11.028, -568.215)
 streaming = False
 done = False
+
 
 async def receive_sensor_data():
     global distance
@@ -39,6 +39,7 @@ async def receive_sensor_data():
         while not done:
             distance = await websocket.recv()
 
+
 # ref. https://stackoverflow.com/questions/67734115/how-to-use-multithreading-with-websockets
 def listen_sensor():
     loop = asyncio.new_event_loop()
@@ -46,11 +47,13 @@ def listen_sensor():
     loop.run_until_complete(receive_sensor_data())
     loop.close()
 
+
 def contorl_streaming_status():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(control_sensor())
     loop.close()
+
 
 async def control_sensor():
     global streaming, xyz, done
@@ -71,13 +74,13 @@ async def control_sensor():
                 print("stop streaming")
                 streaming = False
                 done = True
-            
+
             await asyncio.sleep(0.5)
 
 
 def combine_data():
     global xyz, distance
-    conn = sqlite3.connect('listener.db')
+    conn = sqlite3.connect("listener.db")
     cur = conn.cursor()
     while not done:
         if distance is not None and xyz is not None:
@@ -85,8 +88,10 @@ def combine_data():
             combined_data = (*xyz, float(distance))
             (x, y, z) = xyz
             print(combined_data)
-            cur.execute("INSERT INTO coord(x, y, z, distance) "
-                        f"VALUES ({x}, {y}, {z}, {float(distance)})")
+            cur.execute(
+                "INSERT INTO coord(x, y, z, distance) "
+                f"VALUES ({x}, {y}, {z}, {float(distance)})"
+            )
             # Reset the variables to wait for new data
             distance = None
             xyz = None
@@ -94,15 +99,16 @@ def combine_data():
             conn.commit()
     conn.close()
 
+
 def mtconnect_streaming_reader():
     global xyz
     # demo
     # endpoint = "https://demo.metalogi.io/sample?path=//Axes/Components/Linear/DataItems/DataItem&interval=1000"
 
-    endpoint = 'http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems&interval=1000'
+    endpoint = "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems&interval=1000"
     try:
         response = requests.get(endpoint, stream=True)
-        xml_buffer = ''
+        xml_buffer = ""
         if response.status_code == 200:
             for chunk in response.iter_content(chunk_size=chunk_size):
                 if not chunk:
@@ -110,10 +116,10 @@ def mtconnect_streaming_reader():
                 if done:
                     break
 
-                raw_data = chunk.decode('utf-8')
+                raw_data = chunk.decode("utf-8")
                 # print(raw_data)
                 if mt.is_first_chunk(raw_data):
-                    # beginning of xml 
+                    # beginning of xml
                     xml_string = mt.remove_http_response_header(raw_data)
                     xml_buffer = xml_string
 
@@ -141,6 +147,7 @@ def mtconnect_streaming_reader():
         print("Connection to the MTConnect agent was lost.")
     except KeyboardInterrupt:
         print("Streaming stopped by user.")
+
 
 if __name__ == "__main__":
     thread1 = threading.Thread(target=listen_sensor)
