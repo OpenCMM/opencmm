@@ -82,21 +82,25 @@ def combine_data():
     global xyz, distance
     conn = sqlite3.connect("listener.db")
     cur = conn.cursor()
+
+    data_to_insert = []
     while not done:
         if distance is not None and xyz is not None:
             # Combine sensor_data and coordinate_data
             combined_data = (*xyz, float(distance))
             (x, y, z) = xyz
             print(combined_data)
-            cur.execute(
-                "INSERT INTO coord(x, y, z, distance) "
-                f"VALUES ({x}, {y}, {z}, {float(distance)})"
-            )
+            data_to_insert.append((x, y, z, float(distance)))
             # Reset the variables to wait for new data
             distance = None
             xyz = None
 
-            conn.commit()
+    # Perform a bulk insert
+    cur.executemany(
+        "INSERT INTO coord(x, y, z, distance) VALUES (?, ?, ?, ?)",
+        data_to_insert
+    )
+    conn.commit()
     conn.close()
 
 
