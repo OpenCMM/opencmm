@@ -1,0 +1,8 @@
+CREATE TABLE coord(
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	x float NOT NULL,
+	y float NOT NULL,
+	z float NOT NULL,
+	distance float NOT NULL,
+	timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

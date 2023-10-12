@@ -11,6 +11,11 @@ websockets = "^11.0.3"
 requests = "^2.31.0"
 
 
+[tool.poetry.group.dev.dependencies]
+black = "^23.9.1"
+pytest = "^7.4.2"
+ruff = "^0.0.292"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
