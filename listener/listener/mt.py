@@ -1,13 +1,5 @@
-import requests
 import xml.etree.ElementTree as ET
 
-# endpoint = "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems&interval=2000"
-# endpoint = "https://demo.metalogi.io/sample?path=//Axes/Components/Linear/DataItems/DataItem[@id=%22Xpos%22]&interval=1000"
-endpoint = "https://demo.metalogi.io/sample?path=//Axes/Components/Linear/DataItems/DataItem&interval=1000"
-# endpoint = "https://demo.metalogi.io/sample?path=//Axes/Components/Linear[@id=%22x%22]&interval=0"
-# endpoint = "https://demo.metalogi.io/current?path=//DataItems/DataItem[@id=%22avail%22]&interval=2000"
-
-response = requests.get(endpoint, stream=True)
 xml_start = '<?xml version="1.0" encoding="UTF-8"?>'
 
 
