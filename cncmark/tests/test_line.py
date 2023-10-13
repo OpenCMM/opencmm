@@ -18,6 +18,7 @@ def test_import_lines():
     lines, arcs = get_shapes("tests/fixtures/stl/sample.stl", z)
     import_lines(lines)
 
+
 def test_get_parallel_lines():
     z = 10.0
     lines, arcs = get_shapes("tests/fixtures/stl/sample.stl", z)

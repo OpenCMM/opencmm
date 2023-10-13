@@ -97,8 +97,7 @@ def combine_data():
 
     # Perform a bulk insert
     cur.executemany(
-        "INSERT INTO coord(x, y, z, distance) VALUES (?, ?, ?, ?)",
-        data_to_insert
+        "INSERT INTO coord(x, y, z, distance) VALUES (?, ?, ?, ?)", data_to_insert
     )
     conn.commit()
     conn.close()

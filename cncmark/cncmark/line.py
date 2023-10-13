@@ -27,6 +27,7 @@ def to_line_list(ab: list):
     length = np.linalg.norm(a - b)
     return [point_id(a), point_id(b), float(length)]
 
+
 def get_parallel_lines(lines: list):
     x_parallel_lines = []
     y_parallel_lines = []
