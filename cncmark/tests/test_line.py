@@ -1,5 +1,5 @@
 from cncmark.point import get_shapes
-from cncmark.line import import_lines
+from cncmark.line import import_lines, get_parallel_lines
 
 
 def test_get_lines():
@@ -17,3 +17,11 @@ def test_import_lines():
     z = 10.0
     lines, arcs = get_shapes("tests/fixtures/stl/sample.stl", z)
     import_lines(lines)
+
+def test_get_parallel_lines():
+    z = 10.0
+    lines, arcs = get_shapes("tests/fixtures/stl/sample.stl", z)
+    x, y, other = get_parallel_lines(lines)
+    print(x)
+    print(y)
+    print(other)

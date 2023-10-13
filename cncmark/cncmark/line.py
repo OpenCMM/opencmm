@@ -26,3 +26,23 @@ def to_line_list(ab: list):
     b = ab[1]
     length = np.linalg.norm(a - b)
     return [point_id(a), point_id(b), float(length)]
+
+def get_parallel_lines(lines: list):
+    x_parallel_lines = []
+    y_parallel_lines = []
+    other_lines = []
+    for line in lines:
+        # check if line is parallel to x or y axis
+        x1, y1, _ = line[0]
+        x2, y2, _ = line[1]
+
+        if x1 == x2:
+            # line is parallel to y axis
+            y_parallel_lines.append(line)
+        elif y1 == y2:
+            # line is parallel to x axis
+            x_parallel_lines.append(line)
+        else:
+            other_lines.append(line)
+
+    return x_parallel_lines, y_parallel_lines, other_lines

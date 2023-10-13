@@ -33,8 +33,8 @@ def get_shapes(stl_file_path: str, z: Optional[float], decimal_places: int = 3):
 
     Returns
     -------
-    ground_parallel_lines : list
-        List of lines parallel to the ground
+    ground_parallel_lines : np.ndarray
+        numpy array of lines parallel to the ground
     ground_parallel_arcs : list
         List of arcs parallel to the ground
     """
@@ -89,10 +89,10 @@ def get_shapes(stl_file_path: str, z: Optional[float], decimal_places: int = 3):
     ground_parallel_lines = round_shape_values(ground_parallel_lines, decimal_places)
     ground_parallel_arcs = round_shape_values(ground_parallel_arcs, decimal_places)
 
-    return ground_parallel_lines, ground_parallel_arcs
+    return np.array(ground_parallel_lines), ground_parallel_arcs
 
 
-def round_shape_values(shapes: list, decimal_places: int = 3):
+def round_shape_values(shapes: np.ndarray, decimal_places: int = 3):
     for i in range(len(shapes)):
         shapes[i] = np.round(shapes[i], decimals=decimal_places)
 
