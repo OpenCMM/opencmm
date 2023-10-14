@@ -3,9 +3,10 @@ import numpy as np
 import mysql.connector
 from mysql.connector.errors import IntegrityError
 from .point import point_id
+from itertools import combinations
 
 
-def import_lines(lines: list):
+def import_lines(lines: np.ndarray):
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
     cursor = cnx.cursor()
     line_list = [to_line_list(ab) for ab in lines]
@@ -28,7 +29,7 @@ def to_line_list(ab: list):
     return [point_id(a), point_id(b), float(length)]
 
 
-def get_parallel_lines(lines: list):
+def get_parallel_lines(lines: np.ndarray):
     x_parallel_lines = []
     y_parallel_lines = []
     other_lines = []
@@ -46,4 +47,24 @@ def get_parallel_lines(lines: list):
         else:
             other_lines.append(line)
 
-    return x_parallel_lines, y_parallel_lines, other_lines
+    return np.array(x_parallel_lines), np.array(y_parallel_lines), np.array(other_lines)
+
+
+def get_pairs(parallel_lines: np.ndarray, direction: int):
+    pairs = []
+
+    # Loop through unique pairs of indices
+    for i, j in combinations(range(len(parallel_lines)), 2):
+        line0 = parallel_lines[i]
+        line1 = parallel_lines[j]
+
+        if (
+            line0[0][direction] == line1[0][direction]
+            and line0[1][direction] == line1[1][direction]
+        ) or (
+            line0[0][direction] == line1[1][direction]
+            and line0[1][direction] == line1[0][direction]
+        ):
+            pairs.append([line0, line1])
+
+    return pairs
