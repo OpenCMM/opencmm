@@ -1,3 +1,3 @@
-# Mark
+# CncMark
 
-Mark is a tool for indentifying the vertices and their coordinates of a 3D model. It is used to move the camera to the right position for taking pictures.
+CncMark generates G-code to measure workpiece dimensions using a laser triangulation sensor from a stl file.
