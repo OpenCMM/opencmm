@@ -1,5 +1,10 @@
 from cncmark.point import get_shapes
-from cncmark.line import import_lines, get_parallel_lines, get_pairs
+from cncmark.line import (
+    import_lines,
+    get_parallel_lines,
+    get_pairs,
+    import_sides,
+)
 
 
 def test_get_lines():
@@ -28,6 +33,8 @@ def test_get_parallel_lines():
 
     pairs = get_pairs(x, 0)
     assert len(pairs) == 2
+    import_sides(pairs)
 
     pairs = get_pairs(y, 1)
     assert len(pairs) == 2
+    import_sides(pairs)

@@ -68,3 +68,32 @@ def get_pairs(parallel_lines: np.ndarray, direction: int):
             pairs.append([line0, line1])
 
     return pairs
+
+
+def to_side_list(pairs: np.ndarray, pair_id: int):
+    side_list = []
+    for pair in pairs:
+        result = pair.flatten().tolist()
+        result.append(pair_id)
+        side_list.append(result)
+    return side_list
+
+
+def import_sides(pairs: np.ndarray):
+    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+    cursor = cnx.cursor()
+    pair_id = 0
+    for pair in pairs:
+        side_list = to_side_list(pair, pair_id)
+        insert_query = (
+            "INSERT INTO side (x0, y0, z0, x1, y1, z1, pair_id)"
+            " VALUES (%s, %s, %s, %s, %s, %s, %s)"
+        )
+        try:
+            cursor.executemany(insert_query, side_list)
+            pair_id += 1
+        except IntegrityError:
+            print("Error: unable to import lines")
+        cnx.commit()
+    cursor.close()
+    cnx.close()
