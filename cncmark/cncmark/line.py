@@ -97,3 +97,14 @@ def import_sides(pairs: np.ndarray):
         cnx.commit()
     cursor.close()
     cnx.close()
+
+
+def get_sides():
+    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+    cursor = cnx.cursor()
+    query = "SELECT * FROM side"
+    cursor.execute(query)
+    sides = cursor.fetchall()
+    cursor.close()
+    cnx.close()
+    return sides

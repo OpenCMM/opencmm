@@ -4,6 +4,7 @@ from cncmark.line import (
     get_parallel_lines,
     get_pairs,
     import_sides,
+    get_sides,
 )
 
 
@@ -38,3 +39,8 @@ def test_get_parallel_lines():
     pairs = get_pairs(y, 1)
     assert len(pairs) == 2
     import_sides(pairs)
+
+
+def test_get_sides():
+    sides = get_sides()
+    assert len(sides) == 8
