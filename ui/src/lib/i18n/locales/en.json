@@ -6,12 +6,15 @@
 			"labelDescription": "Only .stl files are supported."
 		},
 		"setup": {
-			"cameraHeight": {
-				"label": "camera height",
-				"helperText": "distance from the machine origin to the surface of the product"
+			"title": "GCode Setup",
+			"measureLength": {
+				"label": "measure length"
 			},
-			"feedRate": {
-				"label": "feed rate"
+			"measureFeedRate": {
+				"label": "feed rate when measuring"
+			},
+			"moveFeedRate": {
+				"label": "feed rate when moving"
 			},
 			"offset": "offset",
 			"submit": "ok",

@@ -73,7 +73,12 @@ async def setup_data(job_info: JobInfo):
         raise HTTPException(status_code=400, detail="No model uploaded")
     offset = (job_info.x_offset, job_info.y_offset, job_info.z_offset)
     process_stl(
-        model_path, job_info.measure_length, job_info.measure_feedrate, job_info.move_feedrate, offset, job_info.z
+        model_path,
+        job_info.measure_length,
+        job_info.measure_feedrate,
+        job_info.move_feedrate,
+        offset,
+        job_info.z,
     )
 
     return {"status": "ok"}

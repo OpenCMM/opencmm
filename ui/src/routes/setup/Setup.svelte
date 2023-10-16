@@ -9,16 +9,18 @@
 	let xOffset = 0;
 	let yOffset = 0;
 	let zOffset = 0;
-	let cameraHeight = 300.0;
-	let feedRate = 3000.0;
+	let measureLength = 2.5;
+	let measureFeedRate = 300.0;
+	let moveFeedRate = 600.0;
 	let error: string | null = null;
 	let settingDone = false;
 	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
 
 		const data = {
-			camera_height: Number(cameraHeight),
-			feed_rate: Number(feedRate),
+			measure_length: Number(measureLength),
+			measure_feedrate: Number(measureFeedRate),
+			move_feedrate: Number(moveFeedRate),
 			x_offset: Number(xOffset),
 			y_offset: Number(yOffset),
 			z_offset: Number(zOffset)
@@ -52,14 +54,20 @@
 	<Form on:submit={handleSubmit}>
 		<FormGroup>
 			<TextInput
-				labelText={$_('home.setup.cameraHeight.label')}
-				id="cameraHeight"
-				bind:value={cameraHeight}
-				helperText=""
+				labelText={$_('home.setup.measureLength.label')}
+				id="measureLength"
+				bind:value={measureLength}
 			/>
-		</FormGroup>
-		<FormGroup>
-			<TextInput labelText={$_('home.setup.feedRate.label')} id="feedRate" bind:value={feedRate} />
+			<TextInput
+				labelText={$_('home.setup.measureFeedRate.label')}
+				id="measureFeedRate"
+				bind:value={measureFeedRate}
+			/>
+			<TextInput
+				labelText={$_('home.setup.moveFeedRate.label')}
+				id="moveFeedRate"
+				bind:value={moveFeedRate}
+			/>
 		</FormGroup>
 		<p>{$_('home.setup.offset')}</p>
 		<FormGroup>

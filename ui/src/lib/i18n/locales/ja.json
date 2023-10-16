@@ -6,14 +6,15 @@
 			"labelDescription": "STLファイルのみ対応しています"
 		},
 		"setup": {
-			"title": "設定",
-			"cameraHeight": {
-				"label": "カメラの高さ",
-				"helperText": "測定箇所から機械原点までのz軸の距離（カメラの高さ＋焦点の長さ）"
+			"title": "GCodeの設定",
+			"measureLength": {
+				"label": "測定箇所の長さ"
 			},
-			"feedRate": {
-				"label": "送り速度",
-				"helperText": "測定時の送り速度"
+			"measureFeedRate": {
+				"label": "測定時の送り速度"
+			},
+			"moveFeedRate": {
+				"label": "移動時の送り速度"
 			},
 			"offset": "オフセット",
 			"submit": "設定",
