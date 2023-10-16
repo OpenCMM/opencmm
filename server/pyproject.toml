@@ -9,8 +9,8 @@ readme = "README.md"
 python = ">=3.11,<3.13"
 fastapi = {extras = ["all"], version = "^0.101.0"}
 uvicorn = {extras = ["standard"], version = "^0.23.2"}
-cncmark = "^0.3.0"
 scipy = "^1.11.1"
+cncmark = "^0.3.0"
 
 
 [tool.poetry.group.dev.dependencies]

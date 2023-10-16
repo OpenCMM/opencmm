@@ -1,1 +1,1 @@
-export const BACKEND_URL_LOCAL = 'http://raspberrypi.local:8000';
+export const BACKEND_URL_LOCAL = 'http://localhost:8000';
