@@ -108,3 +108,10 @@ def get_sides():
     cursor.close()
     cnx.close()
     return sides
+
+def import_parallel_lines(lines: np.ndarray):
+    x, y, other = get_parallel_lines(lines)
+    pairs = get_pairs(x, 0)
+    import_sides(pairs)
+    pairs = get_pairs(y, 1)
+    import_sides(pairs)
