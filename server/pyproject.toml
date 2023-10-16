@@ -6,10 +6,10 @@ authors = ["yuichiroaoki <45054071+yuichiroaoki@users.noreply.github.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.9.2, <3.10"
+python = ">=3.11,<3.13"
 fastapi = {extras = ["all"], version = "^0.101.0"}
 uvicorn = {extras = ["standard"], version = "^0.23.2"}
-cncmark = "^0.2.5"
+cncmark = "^0.3.0"
 scipy = "^1.11.1"
 
 
