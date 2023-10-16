@@ -1,4 +1,4 @@
-from cncmark.config import MYSQL_CONFIG, MEARURE_FEEDRATE, MOVE_FEEDRATE
+from cncmark.config import MYSQL_CONFIG
 import mysql.connector
 from mysql.connector.errors import IntegrityError
 
@@ -37,6 +37,11 @@ def import_edges(edge_list: list):
     cnx.close()
 
 
+def import_edges_from_sides(sides: list):
+    edge_list = to_edge_list(sides)
+    import_edges(edge_list)
+
+
 def get_direction(x0, y0, x1, y1):
     if y0 == y1:
         return 0
@@ -46,7 +51,12 @@ def get_direction(x0, y0, x1, y1):
         return -1
 
 
-def get_edge_path(sides, length: float = 2.5):
+def get_edge_path(
+    sides,
+    length: float = 2.5,
+    measure_feedrate: float = 300,
+    move_feedrate: float = 600,
+):
     path = []
     for side in sides:
         # path is the diagonal line of the side that crosses the center of the side
@@ -61,8 +71,8 @@ def get_edge_path(sides, length: float = 2.5):
             py1 = y + length
             path.append(
                 [
-                    f"G1 X{x} Y{py0} Z{z} {MOVE_FEEDRATE}",
-                    f"G1 X{x} Y{py1} Z{z} {MEARURE_FEEDRATE}",
+                    f"G1 X{x} Y{py0} Z{z} F{move_feedrate}",
+                    f"G1 X{x} Y{py1} Z{z} F{measure_feedrate}",
                     x,
                     y,
                 ]
@@ -73,8 +83,8 @@ def get_edge_path(sides, length: float = 2.5):
             px1 = x + length
             path.append(
                 [
-                    f"G1 X{px0} Y{y} Z{z} {MOVE_FEEDRATE}",
-                    f"G1 X{px1} Y{y} Z{z} {MEARURE_FEEDRATE}",
+                    f"G1 X{px0} Y{y} Z{z} F{move_feedrate}",
+                    f"G1 X{px1} Y{y} Z{z} F{measure_feedrate}",
                     x,
                     y,
                 ]

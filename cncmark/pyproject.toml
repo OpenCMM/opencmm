@@ -1,12 +1,15 @@
 [tool.poetry]
 name = "cncmark"
-version = "0.3.0"
-description = ""
+version = "0.3.1"
+description = "CncMark generates G-code to measure workpiece dimensions using a laser triangulation sensor from a stl file."
+license = "MIT"
 authors = ["yuichiroaoki <45054071+yuichiroaoki@users.noreply.github.com>"]
 readme = "README.md"
+repository = "https://github.com/OpenCMM/opencmm"
+keywords = ["cnc", "cmm", "milling", "gcode"]
 
 [tool.poetry.dependencies]
-python = ">=3.9.2, <3.10"
+python = ">=3.11,<3.13"
 numpy-stl = "^3.0.1"
 mysql-connector-python = "^8.1.0"
 

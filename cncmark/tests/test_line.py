@@ -7,8 +7,7 @@ from cncmark.line import (
     get_sides,
 )
 from cncmark.edge import (
-    import_edges,
-    to_edge_list,
+    import_edges_from_sides,
     get_edge_path,
     generate_gcode,
     save_gcode,
@@ -55,8 +54,7 @@ def test_get_sides():
 
 def test_import_edges():
     sides = get_sides()
-    edge_list = to_edge_list(sides)
-    import_edges(edge_list)
+    import_edges_from_sides(sides)
     path = get_edge_path(sides)
     assert len(path) == 8
 

@@ -5,28 +5,19 @@ from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from server.prepare import process_stl
 from pydantic import BaseModel
-from server.camera import Camera
-from server.capture import capture_images
 from server.reset import reset_tables
 from typing import Optional
 from server.result import fetch_points, fetch_arcs, fetch_lines
 
 
 class JobInfo(BaseModel):
-    camera_height: float
-    feed_rate: float
+    measure_length: float
+    measure_feedrate: float
+    move_feedrate: float
     x_offset: Optional[float]
     y_offset: Optional[float]
     z_offset: Optional[float]
     z: Optional[float] = None
-
-
-class CameraInfo(BaseModel):
-    focal_length: float
-    sensor_width: float
-    distance: float
-    is_full: bool = False
-    save_as_file: bool = False
 
 
 model_path = "data/3dmodel/3dmodel.stl"
@@ -82,17 +73,7 @@ async def setup_data(job_info: JobInfo):
         raise HTTPException(status_code=400, detail="No model uploaded")
     offset = (job_info.x_offset, job_info.y_offset, job_info.z_offset)
     process_stl(
-        model_path, job_info.camera_height, job_info.feed_rate, offset, job_info.z
-    )
-
-    return {"status": "ok"}
-
-
-@app.post("/process/start")
-async def process_start(camera_info: CameraInfo):
-    camera = Camera(camera_info.focal_length, camera_info.sensor_width)
-    capture_images(
-        camera, camera_info.distance, camera_info.is_full, camera_info.save_as_file
+        model_path, job_info.measure_length, job_info.measure_feedrate, job_info.move_feedrate, offset, job_info.z
     )
 
     return {"status": "ok"}

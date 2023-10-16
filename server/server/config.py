@@ -10,10 +10,10 @@ CI_MYSQL_CONFIG = dict(
 
 
 MYSQL_CONFIG = dict(
-    host="raspberrypi.local",
+    host="192.168.122.76",
     port=3306,
-    user="yuchi",
-    password="raspberrypi",
+    user="root",
+    password="root",
 )
 
 if os.environ.get("CI"):

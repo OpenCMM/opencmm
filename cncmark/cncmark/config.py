@@ -18,7 +18,3 @@ MYSQL_CONFIG = dict(
 
 if os.environ.get("CI"):
     MYSQL_CONFIG = CI_MYSQL_CONFIG
-
-
-MEARURE_FEEDRATE = 300
-MOVE_FEEDRATE = 600
