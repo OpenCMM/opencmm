@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9"]
+        python-version: ["3.11"]
         poetry-version: ["1.5.1"]
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
@@ -22,7 +22,7 @@ jobs:
         working-directory: cncmark
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v4
         with:
@@ -79,7 +79,7 @@ jobs:
         working-directory: server
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v4
         with:
@@ -136,7 +136,7 @@ jobs:
         working-directory: listener
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v4
         with:
