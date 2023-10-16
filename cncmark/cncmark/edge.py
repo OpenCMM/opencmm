@@ -36,9 +36,11 @@ def import_edges(edge_list: list):
     cursor.close()
     cnx.close()
 
+
 def import_edges_from_sides(sides: list):
     edge_list = to_edge_list(sides)
     import_edges(edge_list)
+
 
 def get_direction(x0, y0, x1, y1):
     if y0 == y1:
