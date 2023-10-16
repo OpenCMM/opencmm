@@ -61,8 +61,8 @@ def get_edge_path(sides, length: float = 2.5):
             py1 = y + length
             path.append(
                 [
-                    f"G1 X{x} Y{py0} Z{z} {MOVE_FEEDRATE}",
-                    f"G1 X{x} Y{py1} Z{z} {MEARURE_FEEDRATE}",
+                    f"G1 X{x} Y{py0} Z{z} F{MOVE_FEEDRATE}",
+                    f"G1 X{x} Y{py1} Z{z} F{MEARURE_FEEDRATE}",
                     x,
                     y,
                 ]
@@ -73,8 +73,8 @@ def get_edge_path(sides, length: float = 2.5):
             px1 = x + length
             path.append(
                 [
-                    f"G1 X{px0} Y{y} Z{z} {MOVE_FEEDRATE}",
-                    f"G1 X{px1} Y{y} Z{z} {MEARURE_FEEDRATE}",
+                    f"G1 X{px0} Y{y} Z{z} F{MOVE_FEEDRATE}",
+                    f"G1 X{px1} Y{y} Z{z} F{MEARURE_FEEDRATE}",
                     x,
                     y,
                 ]
