@@ -1,6 +1,7 @@
 from cncmark.config import MYSQL_CONFIG
 import mysql.connector
 from mysql.connector.errors import IntegrityError
+import random
 
 
 def get_center_of_side(side: tuple):
@@ -94,11 +95,13 @@ def get_edge_path(
 
 
 def generate_gcode(path):
-    gcode = ["O0001"]
+    # avoid duplicate gcode
+    random_4_digit = str(random.randint(1000, 9999))
+    gcode = ["%", f"O{random_4_digit}"]
     for row in path:
         gcode.append(row[0])
         gcode.append(row[1])
-    return gcode + ["M30"]
+    return gcode + ["M30", "%"]
 
 
 def save_gcode(gcode, file_path: str):
