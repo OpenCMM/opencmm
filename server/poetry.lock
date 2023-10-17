@@ -201,18 +201,20 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "cncmark"
-version = "0.3.1"
+version = "0.3.2"
 description = "CncMark generates G-code to measure workpiece dimensions using a laser triangulation sensor from a stl file."
 optional = false
 python-versions = ">=3.11,<3.13"
-files = [
-    {file = "cncmark-0.3.1-py3-none-any.whl", hash = "sha256:1b756f33d8a074adfe2208eb85c2078acdc2df908cc1c3647689a23524b25ac0"},
-    {file = "cncmark-0.3.1.tar.gz", hash = "sha256:f6fa0d160d888cb1ebcaf2904f3dfc6fe4d2caac795743949606504f834b4f3f"},
-]
+files = []
+develop = true
 
 [package.dependencies]
-mysql-connector-python = ">=8.1.0,<9.0.0"
-numpy-stl = ">=3.0.1,<4.0.0"
+mysql-connector-python = "^8.1.0"
+numpy-stl = "^3.0.1"
+
+[package.source]
+type = "directory"
+url = "../cncmark"
 
 [[package]]
 name = "colorama"
@@ -1501,4 +1503,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.13"
-content-hash = "85a6a6d80b29b0e56bf91945734944f478104b70630b2331622284f719abb562"
+content-hash = "a9ee5d8ed7b4ee834261094a25321b45778ebbf934088fe13555e92e9be9b38b"

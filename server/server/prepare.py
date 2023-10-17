@@ -17,7 +17,7 @@ def process_stl(
     measure_length: float,
     measure_feedrate: float,
     move_feedrate: float,
-    offset,
+    offset: tuple,
     z: Optional[float],
 ):
     z = 10.0
@@ -28,7 +28,7 @@ def process_stl(
     import_parallel_lines(lines)
     sides = get_sides()
     import_edges_from_sides(sides)
-    path = get_edge_path(sides, measure_length, measure_feedrate, move_feedrate)
+    path = get_edge_path(sides, measure_length, measure_feedrate, move_feedrate, offset)
 
     # save gcode
     gcode = generate_gcode(path)
