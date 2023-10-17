@@ -9,6 +9,7 @@ from server.reset import reset_tables
 from typing import Optional
 from server.result import fetch_points, fetch_arcs, fetch_lines
 from listener.main import listener_start
+from listener.status import get_process_status, start_measuring
 
 
 class JobInfo(BaseModel):
@@ -101,7 +102,9 @@ async def download_gcode():
 
 @app.post("/start/measurement/{mtconnect_interval}")
 async def start_measurement(mtconnect_interval:int, background_tasks: BackgroundTasks):
-    background_tasks.add_task(listener_start, mysql_config, mtconnect_interval)
+    sensor_ws_url = "ws://192.168.10.114:81"
+    process_id = start_measuring(mysql_config, "running")
+    background_tasks.add_task(listener_start, sensor_ws_url, mysql_config, mtconnect_interval, process_id)
     return {"status": "ok"}
 
 
@@ -135,6 +138,9 @@ async def get_result_arcs():
     arcs = fetch_arcs()
     return {"arcs": arcs}
 
+@app.get("/get_measurement_status/{process_id}")
+async def get_measurement_status(process_id: int):
+    return get_process_status(mysql_config, process_id)
 
 def start():
     """Launched with `poetry run start` at root level"""

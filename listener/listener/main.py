@@ -5,6 +5,7 @@ from listener import mt
 import xml.etree.ElementTree as ET
 import mysql.connector
 import threading
+from listener import status
 
 # home
 # server_url = "ws://192.168.10.132:81"
@@ -16,8 +17,8 @@ server_url = "ws://192.168.10.114:81"
 # server_url = "ws://localhost:8081"
 
 chunk_size = 1024
-# position_path = './/{urn:mtconnect.org:MTConnectStreams:2.0}Position'
-position_path = ".//{urn:mtconnect.org:MTConnectStreams:1.3}Position"
+position_path = './/{urn:mtconnect.org:MTConnectStreams:2.0}Position'
+# position_path = ".//{urn:mtconnect.org:MTConnectStreams:1.3}Position"
 xyz = None
 initial_coordinate = (109.074, -15.028, -561.215)
 final_coordinate = (105.042, -11.028, -568.215)
@@ -25,9 +26,9 @@ done = False
 data_to_insert = []
 
 
-async def receive_sensor_data():
+async def receive_sensor_data(sensor_ws_url: str):
     global data_to_insert
-    async with websockets.connect(server_url) as websocket:
+    async with websockets.connect(sensor_ws_url) as websocket:
         print("receive_sensor_data(): connected")
 
         while not done:
@@ -37,24 +38,24 @@ async def receive_sensor_data():
 
 
 # ref. https://stackoverflow.com/questions/67734115/how-to-use-multithreading-with-websockets
-def listen_sensor():
+def listen_sensor(sensor_ws_url: str):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(receive_sensor_data())
+    loop.run_until_complete(receive_sensor_data(sensor_ws_url))
     loop.close()
 
 
-def contorl_streaming_status(mysql_config: dict):
+def contorl_streaming_status(sensor_ws_url: str, mysql_config: dict, process_id: int):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(control_sensor(mysql_config))
+    loop.run_until_complete(control_sensor(sensor_ws_url, mysql_config, process_id))
     loop.close()
 
 
-async def control_sensor(mysql_config: dict):
+async def control_sensor(sensor_ws_url: str, mysql_config: dict, process_id: int):
     streaming = False
     global done
-    async with websockets.connect(server_url) as websocket:
+    async with websockets.connect(sensor_ws_url) as websocket:
         print("control_sensor(): connected")
 
         idx = 0
@@ -76,6 +77,7 @@ async def control_sensor(mysql_config: dict):
                 streaming = False
                 done = True
                 combine_data(mysql_config)
+                status.update_process_status(mysql_config, process_id, "done")
 
             await asyncio.sleep(0.5)
 
@@ -96,9 +98,9 @@ def combine_data(mysql_config: dict):
 def mtconnect_streaming_reader(interval: int):
     global xyz
     # demo
-    # endpoint = f"https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem&interval={interval}"
+    endpoint = f"https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem&interval={interval}"
 
-    endpoint = f"http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems&interval={interval}"
+    # endpoint = f"http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems&interval={interval}"
     try:
         response = requests.get(endpoint, stream=True)
         xml_buffer = ""
@@ -141,10 +143,10 @@ def mtconnect_streaming_reader(interval: int):
         print("Streaming stopped by user.")
 
 
-def listener_start(mysql_config: dict, mtconnect_interval: int):
-    thread1 = threading.Thread(target=listen_sensor)
+def listener_start(sensor_ws_url: str, mysql_config: dict, mtconnect_interval: int, process_id: int):
+    thread1 = threading.Thread(target=listen_sensor, args=((sensor_ws_url, )))
     thread2 = threading.Thread(target=mtconnect_streaming_reader, args=((mtconnect_interval, )))
-    thread3 = threading.Thread(target=contorl_streaming_status, args=((mysql_config, )))
+    thread3 = threading.Thread(target=contorl_streaming_status, args=((sensor_ws_url, mysql_config, process_id, )))
 
     # Start the threads
     thread1.start()
