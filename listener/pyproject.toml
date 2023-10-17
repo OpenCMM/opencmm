@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.11"
 websockets = "^11.0.3"
 requests = "^2.31.0"
+mysql-connector-python = "^8.1.0"
 
 
 [tool.poetry.group.dev.dependencies]

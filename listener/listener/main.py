@@ -1,9 +1,9 @@
 import websockets
 import asyncio
-import sqlite3
 import requests
 from listener import mt
 import xml.etree.ElementTree as ET
+import mysql.connector
 import threading
 
 # home
@@ -14,11 +14,6 @@ server_url = "ws://192.168.10.114:81"
 
 # mock
 # server_url = "ws://localhost:8081"
-
-# usb
-# th = 3950
-# 3.7 battery
-th = 3600
 
 chunk_size = 1024
 # position_path = './/{urn:mtconnect.org:MTConnectStreams:2.0}Position'
@@ -80,8 +75,8 @@ async def control_sensor():
 
 def combine_data():
     global xyz, distance
-    conn = sqlite3.connect("listener.db")
-    cur = conn.cursor()
+    mysql_conn = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+    mysql_cur = mysql_conn.cursor()
 
     data_to_insert = []
     while not done:
@@ -96,11 +91,12 @@ def combine_data():
             xyz = None
 
     # Perform a bulk insert
-    cur.executemany(
-        "INSERT INTO coord(x, y, z, distance) VALUES (?, ?, ?, ?)", data_to_insert
+    mysql_cur.executemany(
+        "INSERT INTO sensor(x, y, z, distance) VALUES (%s, %s, %s, %s)", data_to_insert
     )
-    conn.commit()
-    conn.close()
+    mysql_conn.commit()
+    mysql_cur.close()
+    mysql_conn.close()
 
 
 def mtconnect_streaming_reader():
@@ -152,7 +148,7 @@ def mtconnect_streaming_reader():
         print("Streaming stopped by user.")
 
 
-if __name__ == "__main__":
+def listener_start():
     thread1 = threading.Thread(target=listen_sensor)
     thread2 = threading.Thread(target=mtconnect_streaming_reader)
     thread3 = threading.Thread(target=combine_data)

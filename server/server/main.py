@@ -1,6 +1,6 @@
 import uvicorn
 import os
-from fastapi import FastAPI, UploadFile, HTTPException
+from fastapi import FastAPI, UploadFile, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from server.prepare import process_stl
@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from server.reset import reset_tables
 from typing import Optional
 from server.result import fetch_points, fetch_arcs, fetch_lines
+from listener.main import listener_start
 
 
 class JobInfo(BaseModel):
@@ -91,6 +92,11 @@ async def download_gcode():
         raise HTTPException(status_code=400, detail="No gcode file generated")
     return FileResponse("data/gcode/opencmm.gcode")
 
+
+@app.post("/start/measurement")
+async def start_measurement(background_tasks: BackgroundTasks):
+    background_tasks.add_task(listener_start)
+    return {"status": "ok"}
 
 @app.get("/load/image")
 async def load_image():

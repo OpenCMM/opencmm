@@ -63,3 +63,24 @@ CREATE TABLE IF NOT EXISTS `side` (
   `pair_id` int(11) unsigned,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
+
+
+CREATE TABLE IF NOT EXISTS `sensor` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `x` FLOAT NOT NULL,
+  `y` FLOAT NOT NULL,
+  `z` FLOAT NOT NULL,
+  `distance` FLOAT NOT NULL,
+  `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
+
+
+CREATE TABLE IF NOT EXISTS `process` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `status` varchar(255) NOT NULL,
+  `error` varchar(255),
+  `start` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `end` TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
