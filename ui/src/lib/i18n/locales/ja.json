@@ -26,10 +26,6 @@
 		},
 		"start": {
 			"title": "測定を開始します",
-			"distance": {
-				"label": "カメラとの距離",
-				"helperText": "カメラと測定箇所のz軸の距離"
-			},
 			"status": {
 				"active": "測定中"
 			},

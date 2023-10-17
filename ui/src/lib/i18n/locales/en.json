@@ -28,10 +28,6 @@
 		},
 		"start": {
 			"title": "Start measurement",
-			"distance": {
-				"label": "distance",
-				"helperText": "distance from camera to the surface of the product"
-			},
 			"status": {
 				"active": "Measuring..."
 			},
