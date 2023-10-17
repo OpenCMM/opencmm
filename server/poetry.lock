@@ -448,9 +448,10 @@ description = ""
 optional = false
 python-versions = "^3.11"
 files = []
-develop = false
+develop = true
 
 [package.dependencies]
+mysql-connector-python = "^8.1.0"
 requests = "^2.31.0"
 websockets = "^11.0.3"
 
@@ -1500,4 +1501,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.13"
-content-hash = "b80706fdf826674469835d725b086b1d710c7b544188bf5a14b98b4ee9602529"
+content-hash = "85a6a6d80b29b0e56bf91945734944f478104b70630b2331622284f719abb562"

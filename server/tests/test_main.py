@@ -10,15 +10,15 @@ def test_read_root():
     assert response.status_code == 200
     assert response.json() == {"Hello": "World"}
 
+
 def test_upload_3dmodel():
     path = "tests/fixtures/stl/sample.stl"
 
     with open(path, "rb") as f:
-        response = client.post(
-            "/upload/3dmodel",
-            files={"file": f})
+        response = client.post("/upload/3dmodel", files={"file": f})
         assert response.status_code == 200
         assert response.json() == {"status": "ok"}
+
 
 def test_setup_data():
     job_info = {

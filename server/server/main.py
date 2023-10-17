@@ -98,6 +98,7 @@ async def start_measurement(background_tasks: BackgroundTasks):
     background_tasks.add_task(listener_start)
     return {"status": "ok"}
 
+
 @app.get("/load/image")
 async def load_image():
     if not os.path.exists("data/images/result.png"):
