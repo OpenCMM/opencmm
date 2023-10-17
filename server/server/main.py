@@ -20,6 +20,12 @@ class JobInfo(BaseModel):
     z_offset: Optional[float]
     z: Optional[float] = None
 
+mysql_config = dict(
+    host="192.168.122.76",
+    port=3306,
+    user="root",
+    password="root",
+)
 
 model_path = "data/3dmodel/3dmodel.stl"
 
@@ -93,9 +99,9 @@ async def download_gcode():
     return FileResponse("data/gcode/opencmm.gcode")
 
 
-@app.post("/start/measurement")
-async def start_measurement(background_tasks: BackgroundTasks):
-    background_tasks.add_task(listener_start)
+@app.post("/start/measurement/{mtconnect_interval}")
+async def start_measurement(mtconnect_interval:int, background_tasks: BackgroundTasks):
+    background_tasks.add_task(listener_start, mysql_config, mtconnect_interval)
     return {"status": "ok"}
 
 

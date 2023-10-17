@@ -44,14 +44,14 @@ def listen_sensor():
     loop.close()
 
 
-def contorl_streaming_status():
+def contorl_streaming_status(mysql_config: dict):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(control_sensor())
+    loop.run_until_complete(control_sensor(mysql_config))
     loop.close()
 
 
-async def control_sensor():
+async def control_sensor(mysql_config: dict):
     streaming = False
     global done
     async with websockets.connect(server_url) as websocket:
@@ -75,19 +75,13 @@ async def control_sensor():
                 print("stop streaming")
                 streaming = False
                 done = True
-                combine_data()
+                combine_data(mysql_config)
 
             await asyncio.sleep(0.5)
 
 
-def combine_data():
+def combine_data(mysql_config: dict):
     # Perform a bulk insert
-    mysql_config = dict(
-        host="192.168.122.76",
-        port=3306,
-        user="root",
-        password="root",
-    )
     mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
     mysql_cur = mysql_conn.cursor()
 
@@ -99,12 +93,12 @@ def combine_data():
     mysql_conn.close()
 
 
-def mtconnect_streaming_reader():
+def mtconnect_streaming_reader(interval: int):
     global xyz
     # demo
-    # endpoint = "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem&interval=1000"
+    # endpoint = f"https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem&interval={interval}"
 
-    endpoint = "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems&interval=1000"
+    endpoint = f"http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems&interval={interval}"
     try:
         response = requests.get(endpoint, stream=True)
         xml_buffer = ""
@@ -147,10 +141,10 @@ def mtconnect_streaming_reader():
         print("Streaming stopped by user.")
 
 
-def listener_start():
+def listener_start(mysql_config: dict, mtconnect_interval: int):
     thread1 = threading.Thread(target=listen_sensor)
-    thread2 = threading.Thread(target=mtconnect_streaming_reader)
-    thread3 = threading.Thread(target=contorl_streaming_status)
+    thread2 = threading.Thread(target=mtconnect_streaming_reader, args=((mtconnect_interval, )))
+    thread3 = threading.Thread(target=contorl_streaming_status, args=((mysql_config, )))
 
     # Start the threads
     thread1.start()
