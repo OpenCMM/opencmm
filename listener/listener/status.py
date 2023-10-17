@@ -12,13 +12,16 @@ def start_measuring(mysql_config: dict, status: str):
     return processs_id
 
 
-def update_process_status(mysql_config: dict, process_id: int, status: str):
+def update_process_status(
+    mysql_config: dict, process_id: int, status: str, error: str = None
+):
     mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
     mysql_cur = mysql_conn.cursor()
     mysql_cur.execute(
-        "UPDATE process SET status = %s WHERE id = %s",
+        "UPDATE process SET status = %s, error = %s WHERE id = %s",
         (
             status,
+            error,
             process_id,
         ),
     )

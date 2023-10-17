@@ -6,6 +6,7 @@ import xml.etree.ElementTree as ET
 import mysql.connector
 import threading
 from listener import status
+from cnceye.edge import find
 
 # home
 # server_url = "ws://192.168.10.132:81"
@@ -61,6 +62,7 @@ async def control_sensor(sensor_ws_url: str, mysql_config: dict, process_id: int
         idx = 0
         while not done:
             idx += 1
+            await asyncio.sleep(0.5)
             if not streaming and xyz is not None:
                 # if not streaming and xyz is not None and initial_coordinate == xyz:
                 print("ready to start streaming")
@@ -76,10 +78,43 @@ async def control_sensor(sensor_ws_url: str, mysql_config: dict, process_id: int
                 print("stop streaming")
                 streaming = False
                 done = True
-                combine_data(mysql_config)
-                status.update_process_status(mysql_config, process_id, "done")
 
-            await asyncio.sleep(0.5)
+                try:
+                    combine_data(mysql_config)
+                    print("data combined")
+                    status.update_process_status(
+                        mysql_config, process_id, "data combined"
+                    )
+                except Exception as e:
+                    print(e)
+                    status.update_process_status(
+                        mysql_config, process_id, "Error at combine_data()", str(e)
+                    )
+
+                try:
+                    measured_edges = find.find_edges(mysql_config=mysql_config)
+                    edge_data = find.get_edge_data(mysql_config)
+                    # distance_threshold should be passed as an argument
+                    update_list = find.identify_close_edge(edge_data, measured_edges)
+                    edge_count = len(update_list)
+                    if edge_count == 0:
+                        status.update_process_status(
+                            mysql_config,
+                            process_id,
+                            "Error at find_edges()",
+                            "No edge found",
+                        )
+                        break
+                    find.add_measured_edge_coord(update_list, mysql_config)
+                    print(f"{edge_count} edges found")
+                except Exception as e:
+                    print(e)
+                    status.update_process_status(
+                        mysql_config, process_id, "Error at find_edges()", str(e)
+                    )
+
+                status.update_process_status(mysql_config, process_id, "done")
+                print("done")
 
 
 def combine_data(mysql_config: dict):

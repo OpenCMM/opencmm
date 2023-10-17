@@ -200,6 +200,21 @@ files = [
 colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
+name = "cnceye"
+version = "0.4.0"
+description = "CMM python library"
+optional = false
+python-versions = ">=3.11,<3.13"
+files = [
+    {file = "cnceye-0.4.0-py3-none-any.whl", hash = "sha256:397c8b534e743a63c23f022c8b28e1cde13746c619ba2f0aa297166aeebf4e8e"},
+    {file = "cnceye-0.4.0.tar.gz", hash = "sha256:1667e2c28cca61ac42107a7f180b77356c1a60ed38cf10941b8610949509c975"},
+]
+
+[package.dependencies]
+mysql-connector-python = ">=8.1.0,<9.0.0"
+scipy = ">=1.11.1,<2.0.0"
+
+[[package]]
 name = "cncmark"
 version = "0.3.2"
 description = "CncMark generates G-code to measure workpiece dimensions using a laser triangulation sensor from a stl file."
@@ -448,11 +463,12 @@ name = "listener"
 version = "0.1.0"
 description = ""
 optional = false
-python-versions = "^3.11"
+python-versions = ">=3.11,<3.13"
 files = []
 develop = true
 
 [package.dependencies]
+cnceye = "^0.4.0"
 mysql-connector-python = "^8.1.0"
 requests = "^2.31.0"
 websockets = "^11.0.3"
