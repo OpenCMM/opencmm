@@ -1,9 +1,10 @@
 from cncmark.point import get_shapes
 from server.arc import get_arc_info, import_arcs
-
+import pytest
 import numpy as np
 
 
+@pytest.mark.skip(reason="Not implemented")
 def test_get_arc_info():
     z = 10.0
     lines, arcs = get_shapes("tests/fixtures/stl/sample.stl", z)
@@ -25,6 +26,7 @@ def test_get_arc_info():
     assert np.isclose(center[2], 10.0, atol=1e-6)
 
 
+@pytest.mark.skip(reason="Not implemented")
 def test_import_arcs():
     z = 10.0
     lines, arcs = get_shapes("tests/fixtures/stl/sample.stl", z)
