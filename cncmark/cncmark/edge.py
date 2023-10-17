@@ -57,6 +57,7 @@ def get_edge_path(
     length: float = 2.5,
     measure_feedrate: float = 300,
     move_feedrate: float = 600,
+    xyz_offset: tuple = (0, 0, 0),
 ):
     path = []
     for side in sides:
@@ -66,6 +67,7 @@ def get_edge_path(
 
         # get center of side
         (x, y, z) = get_center_of_side(side)
+        (x, y, z) = (x + xyz_offset[0], y + xyz_offset[1], z + xyz_offset[2])
 
         if direction == 0:
             py0 = y - length
