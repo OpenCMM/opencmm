@@ -1,18 +1,8 @@
 import numpy as np
 from .config import MYSQL_CONFIG
 from scipy.optimize import least_squares
-from .coordinate import Coordinate
 import mysql.connector
 from mysql.connector.errors import IntegrityError
-
-
-class Arc:
-    def __init__(self, radius: float, center: Coordinate) -> None:
-        self.radius = radius
-        self.center = center
-
-    def __repr__(self) -> str:
-        return f"Arc(radius={self.radius}, center={self.center})"
 
 
 def point_id(point: np.ndarray):
