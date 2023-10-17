@@ -21,6 +21,7 @@ class JobInfo(BaseModel):
     z_offset: Optional[float]
     z: Optional[float] = None
 
+
 mysql_config = dict(
     host="192.168.122.76",
     port=3306,
@@ -101,10 +102,12 @@ async def download_gcode():
 
 
 @app.post("/start/measurement/{mtconnect_interval}")
-async def start_measurement(mtconnect_interval:int, background_tasks: BackgroundTasks):
+async def start_measurement(mtconnect_interval: int, background_tasks: BackgroundTasks):
     sensor_ws_url = "ws://192.168.10.114:81"
     process_id = start_measuring(mysql_config, "running")
-    background_tasks.add_task(listener_start, sensor_ws_url, mysql_config, mtconnect_interval, process_id)
+    background_tasks.add_task(
+        listener_start, sensor_ws_url, mysql_config, mtconnect_interval, process_id
+    )
     return {"status": "ok"}
 
 
@@ -138,9 +141,11 @@ async def get_result_arcs():
     arcs = fetch_arcs()
     return {"arcs": arcs}
 
+
 @app.get("/get_measurement_status/{process_id}")
 async def get_measurement_status(process_id: int):
     return get_process_status(mysql_config, process_id)
+
 
 def start():
     """Launched with `poetry run start` at root level"""

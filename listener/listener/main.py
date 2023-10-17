@@ -17,7 +17,7 @@ server_url = "ws://192.168.10.114:81"
 # server_url = "ws://localhost:8081"
 
 chunk_size = 1024
-position_path = './/{urn:mtconnect.org:MTConnectStreams:2.0}Position'
+position_path = ".//{urn:mtconnect.org:MTConnectStreams:2.0}Position"
 # position_path = ".//{urn:mtconnect.org:MTConnectStreams:1.3}Position"
 xyz = None
 initial_coordinate = (109.074, -15.028, -561.215)
@@ -143,10 +143,23 @@ def mtconnect_streaming_reader(interval: int):
         print("Streaming stopped by user.")
 
 
-def listener_start(sensor_ws_url: str, mysql_config: dict, mtconnect_interval: int, process_id: int):
-    thread1 = threading.Thread(target=listen_sensor, args=((sensor_ws_url, )))
-    thread2 = threading.Thread(target=mtconnect_streaming_reader, args=((mtconnect_interval, )))
-    thread3 = threading.Thread(target=contorl_streaming_status, args=((sensor_ws_url, mysql_config, process_id, )))
+def listener_start(
+    sensor_ws_url: str, mysql_config: dict, mtconnect_interval: int, process_id: int
+):
+    thread1 = threading.Thread(target=listen_sensor, args=((sensor_ws_url,)))
+    thread2 = threading.Thread(
+        target=mtconnect_streaming_reader, args=((mtconnect_interval,))
+    )
+    thread3 = threading.Thread(
+        target=contorl_streaming_status,
+        args=(
+            (
+                sensor_ws_url,
+                mysql_config,
+                process_id,
+            )
+        ),
+    )
 
     # Start the threads
     thread1.start()
