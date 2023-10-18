@@ -7,30 +7,15 @@
 	import { _ } from 'svelte-i18n';
 
 	let error: string | null = null;
-	let focalLength = 25;
-
-	let sensorWidth = 6.287;
-
-	let distance = 50.0;
+	let mtInterval = 500;
 	let processing = false;
 
 	const startCapturing = async (e: Event) => {
 		e.preventDefault();
 
-		const data = {
-			focal_length: Number(focalLength),
-			sensor_width: Number(sensorWidth),
-			distance: Number(distance),
-			is_full: false,
-			save_as_file: true
-		};
 		try {
 			processing = true;
-			const res = await axios.post(`${BACKEND_URL_LOCAL}/process/start`, data, {
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			});
+			const res = await axios.post(`${BACKEND_URL_LOCAL}/start/measurement/${mtInterval}`);
 			console.log(res);
 		} catch (err) {
 			console.error(err);
@@ -45,17 +30,10 @@
 
 	<Form on:submit={startCapturing}>
 		<FormGroup>
-			<TextInput labelText="focal length" id="focalLength" bind:value={focalLength} />
-		</FormGroup>
-		<FormGroup>
-			<TextInput labelText="sensor width" id="sensorWidth" bind:value={sensorWidth} />
-		</FormGroup>
-		<FormGroup>
 			<TextInput
-				labelText={$_('home.start.distance.label')}
-				id="distance"
-				bind:value={distance}
-				helperText={$_('home.start.distance.helperText')}
+				labelText="MTConnect data fetch interval"
+				id="mtInterval"
+				bind:value={mtInterval}
 			/>
 		</FormGroup>
 		{#if processing && !error}

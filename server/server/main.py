@@ -1,24 +1,33 @@
 import uvicorn
 import os
-from fastapi import FastAPI, UploadFile, HTTPException
+from fastapi import FastAPI, UploadFile, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from server.prepare import process_stl
 from pydantic import BaseModel
 from server.reset import reset_tables
 from typing import Optional
-from server.result import fetch_points, fetch_arcs, fetch_lines
+from server import result
+from listener.main import listener_start
+from listener.status import get_process_status, start_measuring
 
 
 class JobInfo(BaseModel):
     measure_length: float
     measure_feedrate: float
     move_feedrate: float
-    x_offset: Optional[float]
-    y_offset: Optional[float]
-    z_offset: Optional[float]
+    x_offset: Optional[float] = 0.0
+    y_offset: Optional[float] = 0.0
+    z_offset: Optional[float] = 0.0
     z: Optional[float] = None
 
+
+mysql_config = dict(
+    host="192.168.122.76",
+    port=3306,
+    user="root",
+    password="root",
+)
 
 model_path = "data/3dmodel/3dmodel.stl"
 
@@ -64,6 +73,16 @@ async def upload_3dmodel(file: UploadFile):
     return {"status": "ok"}
 
 
+@app.get("/load/model/{model_id}")
+async def load_model(model_id: str):
+    return FileResponse(f"data/3dmodel/{model_id}.stl")
+
+
+@app.get("/load/gcode/{filename}")
+async def load_gcode(filename: str):
+    return FileResponse(f"data/gcode/{filename}.gcode")
+
+
 @app.post("/setup/data")
 async def setup_data(job_info: JobInfo):
     """Find verticies, generate gcode"""
@@ -73,7 +92,12 @@ async def setup_data(job_info: JobInfo):
         raise HTTPException(status_code=400, detail="No model uploaded")
     offset = (job_info.x_offset, job_info.y_offset, job_info.z_offset)
     process_stl(
-        model_path, job_info.measure_length, job_info.measure_feedrate, job_info.move_feedrate, offset, job_info.z
+        model_path,
+        job_info.measure_length,
+        job_info.measure_feedrate,
+        job_info.move_feedrate,
+        offset,
+        job_info.z,
     )
 
     return {"status": "ok"}
@@ -85,6 +109,16 @@ async def download_gcode():
     if not os.path.exists("data/gcode/opencmm.gcode"):
         raise HTTPException(status_code=400, detail="No gcode file generated")
     return FileResponse("data/gcode/opencmm.gcode")
+
+
+@app.post("/start/measurement/{mtconnect_interval}")
+async def start_measurement(mtconnect_interval: int, background_tasks: BackgroundTasks):
+    sensor_ws_url = "ws://192.168.10.114:81"
+    process_id = start_measuring(mysql_config, "running")
+    background_tasks.add_task(
+        listener_start, sensor_ws_url, mysql_config, mtconnect_interval, process_id
+    )
+    return {"status": "ok"}
 
 
 @app.get("/load/image")
@@ -100,22 +134,27 @@ async def reset_data():
     return {"status": "ok"}
 
 
-@app.get("/result/points")
-async def get_result_points():
-    points = fetch_points()
-    return {"points": points}
+@app.get("/result/edges")
+async def get_result_edges():
+    edges = result.fetch_edges()
+    return {"edges": edges}
 
 
 @app.get("/result/lines")
 async def get_result_lines():
-    lines = fetch_lines()
+    lines = result.fetch_lines()
     return {"lines": lines}
 
 
 @app.get("/result/arcs")
 async def get_result_arcs():
-    arcs = fetch_arcs()
+    arcs = result.fetch_arcs()
     return {"arcs": arcs}
+
+
+@app.get("/get_measurement_status/{process_id}")
+async def get_measurement_status(process_id: int):
+    return get_process_status(mysql_config, process_id)
 
 
 def start():

@@ -1,8 +1,9 @@
 <script lang="ts">
 	import Upload3dModel from './Upload3dModel.svelte';
-	import Point from './Result/Point.svelte';
+	import Point from './Result/Edge.svelte';
 	import Line from './Result/Line.svelte';
 	import Arc from './Result/Arc.svelte';
+	import GridLine from './Result/GridLine.svelte';
 
 	let uploaded = false;
 </script>
@@ -17,6 +18,7 @@
 		<Upload3dModel />
 	{/if}
 
+	<GridLine />
 	<Point />
 	<Line />
 	<Arc />

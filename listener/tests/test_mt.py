@@ -11,7 +11,7 @@ position_path = ".//{urn:mtconnect.org:MTConnectStreams:2.0}Position"
 
 
 def test_remove_http_respose_header():
-    endpoint = "https://demo.metalogi.io/sample?path=//Axes/Components/Linear/DataItems/DataItem&interval=1000"
+    endpoint = "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem&interval=1000"
     idx = 0
 
     try:

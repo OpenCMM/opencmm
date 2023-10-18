@@ -1,10 +1,12 @@
 import websockets
 import asyncio
-import sqlite3
 import requests
 from listener import mt
 import xml.etree.ElementTree as ET
+import mysql.connector
 import threading
+from listener import status
+from cnceye.edge import find
 
 # home
 # server_url = "ws://192.168.10.132:81"
@@ -15,59 +17,61 @@ server_url = "ws://192.168.10.114:81"
 # mock
 # server_url = "ws://localhost:8081"
 
-# usb
-# th = 3950
-# 3.7 battery
-th = 3600
-
 chunk_size = 1024
-# position_path = './/{urn:mtconnect.org:MTConnectStreams:2.0}Position'
-position_path = ".//{urn:mtconnect.org:MTConnectStreams:1.3}Position"
+position_path = ".//{urn:mtconnect.org:MTConnectStreams:2.0}Position"
+# position_path = ".//{urn:mtconnect.org:MTConnectStreams:1.3}Position"
 xyz = None
-distance = None
 initial_coordinate = (109.074, -15.028, -561.215)
 final_coordinate = (105.042, -11.028, -568.215)
-streaming = False
 done = False
+data_to_insert = []
 
 
-async def receive_sensor_data():
-    global distance
-    async with websockets.connect(server_url) as websocket:
+async def receive_sensor_data(sensor_ws_url: str):
+    global data_to_insert
+    async with websockets.connect(sensor_ws_url) as websocket:
         print("receive_sensor_data(): connected")
 
         while not done:
             distance = await websocket.recv()
+            (x, y, z) = xyz
+            data_to_insert.append((x, y, z, float(distance)))
 
 
 # ref. https://stackoverflow.com/questions/67734115/how-to-use-multithreading-with-websockets
-def listen_sensor():
+def listen_sensor(sensor_ws_url: str):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(receive_sensor_data())
+    loop.run_until_complete(receive_sensor_data(sensor_ws_url))
     loop.close()
 
 
-def contorl_streaming_status():
+def contorl_streaming_status(sensor_ws_url: str, mysql_config: dict, process_id: int):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(control_sensor())
+    loop.run_until_complete(control_sensor(sensor_ws_url, mysql_config, process_id))
     loop.close()
 
 
-async def control_sensor():
-    global streaming, xyz, done
-    async with websockets.connect(server_url) as websocket:
+async def control_sensor(sensor_ws_url: str, mysql_config: dict, process_id: int):
+    streaming = False
+    global done
+    async with websockets.connect(sensor_ws_url) as websocket:
         print("control_sensor(): connected")
 
+        idx = 0
         while not done:
-            if not streaming and xyz is not None and initial_coordinate == xyz:
+            idx += 1
+            await asyncio.sleep(0.5)
+            if not streaming and xyz is not None:
+                # if not streaming and xyz is not None and initial_coordinate == xyz:
                 print("ready to start streaming")
                 await websocket.send("startStreaming")
                 print("start streaming")
                 streaming = True
 
-            elif streaming and xyz is not None and final_coordinate == xyz:
+            elif streaming and xyz is not None and idx == 40:
+                # elif streaming and xyz is not None and final_coordinate == xyz:
                 print("ready to stop streaming")
                 await websocket.send("stopStreaming")
                 # await websocket.send("deepSleep")
@@ -75,40 +79,63 @@ async def control_sensor():
                 streaming = False
                 done = True
 
-            await asyncio.sleep(0.5)
+                try:
+                    combine_data(mysql_config)
+                    print("data combined")
+                    status.update_process_status(
+                        mysql_config, process_id, "data combined"
+                    )
+                except Exception as e:
+                    print(e)
+                    status.update_process_status(
+                        mysql_config, process_id, "Error at combine_data()", str(e)
+                    )
+
+                try:
+                    measured_edges = find.find_edges(mysql_config=mysql_config)
+                    edge_data = find.get_edge_data(mysql_config)
+                    # distance_threshold should be passed as an argument
+                    update_list = find.identify_close_edge(edge_data, measured_edges)
+                    edge_count = len(update_list)
+                    if edge_count == 0:
+                        status.update_process_status(
+                            mysql_config,
+                            process_id,
+                            "Error at find_edges()",
+                            "No edge found",
+                        )
+                        break
+                    find.add_measured_edge_coord(update_list, mysql_config)
+                    print(f"{edge_count} edges found")
+                except Exception as e:
+                    print(e)
+                    status.update_process_status(
+                        mysql_config, process_id, "Error at find_edges()", str(e)
+                    )
+
+                status.update_process_status(mysql_config, process_id, "done")
+                print("done")
 
 
-def combine_data():
-    global xyz, distance
-    conn = sqlite3.connect("listener.db")
-    cur = conn.cursor()
-
-    data_to_insert = []
-    while not done:
-        if distance is not None and xyz is not None:
-            # Combine sensor_data and coordinate_data
-            combined_data = (*xyz, float(distance))
-            (x, y, z) = xyz
-            print(combined_data)
-            data_to_insert.append((x, y, z, float(distance)))
-            # Reset the variables to wait for new data
-            distance = None
-            xyz = None
-
+def combine_data(mysql_config: dict):
     # Perform a bulk insert
-    cur.executemany(
-        "INSERT INTO coord(x, y, z, distance) VALUES (?, ?, ?, ?)", data_to_insert
+    mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
+    mysql_cur = mysql_conn.cursor()
+
+    mysql_cur.executemany(
+        "INSERT INTO sensor(x, y, z, distance) VALUES (%s, %s, %s, %s)", data_to_insert
     )
-    conn.commit()
-    conn.close()
+    mysql_conn.commit()
+    mysql_cur.close()
+    mysql_conn.close()
 
 
-def mtconnect_streaming_reader():
+def mtconnect_streaming_reader(interval: int):
     global xyz
     # demo
-    # endpoint = "https://demo.metalogi.io/sample?path=//Axes/Components/Linear/DataItems/DataItem&interval=1000"
+    endpoint = f"https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem&interval={interval}"
 
-    endpoint = "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems&interval=1000"
+    # endpoint = f"http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems&interval={interval}"
     try:
         response = requests.get(endpoint, stream=True)
         xml_buffer = ""
@@ -139,7 +166,6 @@ def mtconnect_streaming_reader():
                     # full xml data received
                     try:
                         xyz = mt.get_coordinates(xml_buffer, position_path)[:3]
-
                     except ET.ParseError:
                         print("ParseError")
 
@@ -152,20 +178,30 @@ def mtconnect_streaming_reader():
         print("Streaming stopped by user.")
 
 
-if __name__ == "__main__":
-    thread1 = threading.Thread(target=listen_sensor)
-    thread2 = threading.Thread(target=mtconnect_streaming_reader)
-    thread3 = threading.Thread(target=combine_data)
-    thread4 = threading.Thread(target=contorl_streaming_status)
+def listener_start(
+    sensor_ws_url: str, mysql_config: dict, mtconnect_interval: int, process_id: int
+):
+    thread1 = threading.Thread(target=listen_sensor, args=((sensor_ws_url,)))
+    thread2 = threading.Thread(
+        target=mtconnect_streaming_reader, args=((mtconnect_interval,))
+    )
+    thread3 = threading.Thread(
+        target=contorl_streaming_status,
+        args=(
+            (
+                sensor_ws_url,
+                mysql_config,
+                process_id,
+            )
+        ),
+    )
 
     # Start the threads
     thread1.start()
     thread2.start()
     thread3.start()
-    thread4.start()
 
     # Join the threads (optional, to wait for them to finish)
     thread1.join()
     thread2.join()
     thread3.join()
-    thread4.join()

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import CaptureStart from './CaptureStart.svelte';
 	import DownloadGCode from './DownloadGCode.svelte';
+	import StartSensor from './StartSensor.svelte';
 </script>
 
 <DownloadGCode />
-<CaptureStart />
+<StartSensor />
