@@ -9,19 +9,17 @@
 	onMount(() => {
 		// Scene
 		const scene = new THREE.Scene();
-		scene.background = new THREE.Color(0x999999);
+		scene.background = new THREE.Color(0x3b3939);
 
 		// Camera
 		const camera = new THREE.PerspectiveCamera(50, 1000 / 1000, 1, 500);
 
-		camera.position.set(20, 20, 20);
+		camera.position.set(0, -15, 10);
 
 		const loader = new STLLoader();
 		loader.load('http://127.0.0.1:8000/load/model/3dmodel', function (geometry: any) {
 			let material = new THREE.MeshPhongMaterial({
-				color: 0xff9c7c,
-				specular: 0x494949,
-				shininess: 200
+				color: 0xf0f0f0,
 			});
 			// Colored binary STL
 			if (geometry.hasColors) {
@@ -30,25 +28,21 @@
 			const mesh = new THREE.Mesh(geometry, material);
 			const scaleFactor = 0.1; // Adjust this value as needed
 			mesh.scale.set(scaleFactor, scaleFactor, scaleFactor);
-			mesh.castShadow = true;
-			mesh.receiveShadow = true;
-
 			scene.add(mesh);
 		});
 
-		// Grid
+		// Grid on xy plane
 		const size = 50;
 		const divisions = 50;
-		const gridHelper = new THREE.GridHelper(size, divisions, 0xffffff, 0x555555);
+		const gridHelper = new THREE.GridHelper(size, divisions, 0xb3b3b3, 0x555555);
 		gridHelper.position.y = -0.5;
+		gridHelper.geometry.rotateX( Math.PI / 2 );
 
 		scene.add(gridHelper);
-		gridHelper.receiveShadow = true;
 
 		// Renderer
 		const renderer = new THREE.WebGLRenderer({ antialias: true });
 		renderer.setSize(1000, 1000);
-		renderer.useLegacyLights = false;
 
 		container.appendChild(renderer.domElement);
 
