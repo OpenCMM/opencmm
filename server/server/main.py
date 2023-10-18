@@ -72,13 +72,16 @@ async def upload_3dmodel(file: UploadFile):
 
     return {"status": "ok"}
 
+
 @app.get("/load/model/{model_id}")
 async def load_model(model_id: str):
     return FileResponse(f"data/3dmodel/{model_id}.stl")
 
+
 @app.get("/load/gcode/{filename}")
 async def load_gcode(filename: str):
     return FileResponse(f"data/gcode/{filename}.gcode")
+
 
 @app.post("/setup/data")
 async def setup_data(job_info: JobInfo):

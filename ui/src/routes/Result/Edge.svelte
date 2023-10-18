@@ -48,10 +48,6 @@
 </div>
 
 <style>
-	#result {
-		max-width: 1000px;
-	}
-
 	#data-table {
 		margin-top: 40px;
 	}
