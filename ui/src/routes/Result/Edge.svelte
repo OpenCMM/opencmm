@@ -9,7 +9,7 @@
 
 	let loaded = false;
 
-	interface Point {
+	interface Edge {
 		id: number;
 		coordinate: string;
 		rcoordinate: string;
@@ -17,14 +17,14 @@
 
 	const headers = [
 		{ key: 'id', value: 'ID' },
-		{ key: 'coordinate', value: $_('home.result.point.coordinate') },
-		{ key: 'rcoordinate', value: $_('home.result.point.rcoordinate') }
+		{ key: 'coordinate', value: $_('home.result.edge.coordinate') },
+		{ key: 'rcoordinate', value: $_('home.result.edge.rcoordinate') }
 	];
-	let row: Point[] = [];
+	let row: Edge[] = [];
 	const load_table_data = async () => {
-		const res = await fetch(`${BACKEND_URL_LOCAL}/result/points`);
+		const res = await fetch(`${BACKEND_URL_LOCAL}/result/edges`);
 		const data = await res.json();
-		for (const d of data['points']) {
+		for (const d of data['edges']) {
 			row.push({
 				id: d[0],
 				coordinate: displayCoordinates(d[1], d[2], d[3]),
@@ -39,12 +39,11 @@
 	});
 </script>
 
-<img id="result" src={`${BACKEND_URL_LOCAL}/load/image`} alt="result" />
 <div id="data-table">
 	{#if !loaded}
 		<p>loading...</p>
 	{:else}
-		<DataTable size="short" title={$_('home.result.point.title')} {headers} rows={row} />
+		<DataTable size="short" title={$_('home.result.edge.title')} {headers} rows={row} />
 	{/if}
 </div>
 

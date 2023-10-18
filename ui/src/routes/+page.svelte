@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Upload3dModel from './Upload3dModel.svelte';
-	import Point from './Result/Point.svelte';
+	import Point from './Result/Edge.svelte';
 	import Line from './Result/Line.svelte';
 	import Arc from './Result/Arc.svelte';
 

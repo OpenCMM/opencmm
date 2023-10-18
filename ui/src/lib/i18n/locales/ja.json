@@ -33,7 +33,7 @@
 			"error": "測定に失敗しました。"
 		},
 		"result": {
-			"point": {
+			"edge": {
 				"title": "点",
 				"coordinate": "座標",
 				"rcoordinate": "推定座標"

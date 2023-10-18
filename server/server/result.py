@@ -2,19 +2,16 @@ import mysql.connector
 from server.config import MYSQL_CONFIG
 
 
-def fetch_points():
+def fetch_edges():
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
     cursor = cnx.cursor()
 
-    points = []
     query = """
-		SELECT id, x, y, z, rx, ry, rz
-		FROM point
+		SELECT id, side_id, x, y, z, rx, ry, rz
+		FROM edge
 	"""
     cursor.execute(query)
-    for res in cursor:
-        points.append(res)
-
+    points = cursor.fetchall()
     cursor.close()
     cnx.close()
 

@@ -7,7 +7,7 @@ from server.prepare import process_stl
 from pydantic import BaseModel
 from server.reset import reset_tables
 from typing import Optional
-from server.result import fetch_points, fetch_arcs, fetch_lines
+from server import result
 from listener.main import listener_start
 from listener.status import get_process_status, start_measuring
 
@@ -124,21 +124,21 @@ async def reset_data():
     return {"status": "ok"}
 
 
-@app.get("/result/points")
-async def get_result_points():
-    points = fetch_points()
-    return {"points": points}
+@app.get("/result/edges")
+async def get_result_edges():
+    edges = result.fetch_edges()
+    return {"edges": edges}
 
 
 @app.get("/result/lines")
 async def get_result_lines():
-    lines = fetch_lines()
+    lines = result.fetch_lines()
     return {"lines": lines}
 
 
 @app.get("/result/arcs")
 async def get_result_arcs():
-    arcs = fetch_arcs()
+    arcs = result.fetch_arcs()
     return {"arcs": arcs}
 
 

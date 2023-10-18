@@ -35,8 +35,8 @@
 			"error": "Failed to start measurement"
 		},
 		"result": {
-			"point": {
-				"title": "Point",
+			"edge": {
+				"title": "Edge",
 				"coordinate": "Coordinate",
 				"rcoordinate": "Estimated coordinate"
 			},
