@@ -19,7 +19,7 @@
 		const loader = new STLLoader();
 		loader.load('http://127.0.0.1:8000/load/model/3dmodel', function (geometry: any) {
 			let material = new THREE.MeshPhongMaterial({
-				color: 0xf0f0f0,
+				color: 0xf0f0f0
 			});
 			// Colored binary STL
 			if (geometry.hasColors) {
@@ -33,7 +33,7 @@
 		const size = 500;
 		const divisions = 50;
 		const gridHelper = new THREE.GridHelper(size, divisions, 0xb3b3b3, 0x555555);
-		gridHelper.geometry.rotateX( Math.PI / 2 );
+		gridHelper.geometry.rotateX(Math.PI / 2);
 
 		scene.add(gridHelper);
 
