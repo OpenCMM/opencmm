@@ -30,7 +30,11 @@
 
 	<Form on:submit={startCapturing}>
 		<FormGroup>
-			<TextInput labelText="MTConnect data fetch interval" id="mtInterval" bind:value={mtInterval} />
+			<TextInput
+				labelText="MTConnect data fetch interval"
+				id="mtInterval"
+				bind:value={mtInterval}
+			/>
 		</FormGroup>
 		{#if processing && !error}
 			<InlineLoading status="active" description={$_('home.start.status.active')} />

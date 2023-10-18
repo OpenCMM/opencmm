@@ -507,6 +507,32 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/stats.js@npm:*":
+  version: 0.17.1
+  resolution: "@types/stats.js@npm:0.17.1"
+  checksum: 9b05d22f4d3be1aaa2ac3104273fd80457ad6ed9c816f4cd73873aec76c823b8f2f4a437c803dc5a1df8a9d5e6bf33af6c7baf9cb8269ddf7ef4b7d2c1e3ed72
+  languageName: node
+  linkType: hard
+
+"@types/three@npm:^0.157.0":
+  version: 0.157.0
+  resolution: "@types/three@npm:0.157.0"
+  dependencies:
+    "@types/stats.js": "*"
+    "@types/webxr": "*"
+    fflate: ~0.6.10
+    meshoptimizer: ~0.18.1
+  checksum: 9eb4225b26a7789b5154862763cd16b6f5470631b196649d3d31ade1604a78140b7d64c55f1778c222e274e8bbb1778e8a05512c6b9edcf20f19abde36bb7eee
+  languageName: node
+  linkType: hard
+
+"@types/webxr@npm:*":
+  version: 0.5.5
+  resolution: "@types/webxr@npm:0.5.5"
+  checksum: 326754e9077b28ef04b0a2ffa407bbd0b52f75755e35fe04b5bd6ad19d33f23e38e98a22499ad9847bc67be9705dfaafab47a37523066180bda92cf29f05969d
+  languageName: node
+  linkType: hard
+
 "@typescript-eslint/eslint-plugin@npm:^5.45.0":
   version: 5.62.0
   resolution: "@typescript-eslint/eslint-plugin@npm:5.62.0"
@@ -1575,6 +1601,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fflate@npm:~0.6.10":
+  version: 0.6.10
+  resolution: "fflate@npm:0.6.10"
+  checksum: 96384bc4090987fe565c0de8204e3830f538144ec950576fea50aee1b42adbe9fc3ed5e7905dfa7979faaa20979def330dbebce548f3dcafc3e118cc9838526d
+  languageName: node
+  linkType: hard
+
 "file-entry-cache@npm:^6.0.1":
   version: 6.0.1
   resolution: "file-entry-cache@npm:6.0.1"
@@ -2218,6 +2251,13 @@ __metadata:
   version: 1.4.1
   resolution: "merge2@npm:1.4.1"
   checksum: 7268db63ed5169466540b6fb947aec313200bcf6d40c5ab722c22e242f651994619bcd85601602972d3c85bd2cc45a358a4c61937e9f11a061919a1da569b0c2
+  languageName: node
+  linkType: hard
+
+"meshoptimizer@npm:~0.18.1":
+  version: 0.18.1
+  resolution: "meshoptimizer@npm:0.18.1"
+  checksum: 101dbed8abd4cf167cdb7a0bc13db90dd0743332c689e43b18cc5254d238f0766750752432401fa63dc7e9e32399ef68daacf48f0d89db1484042c1761c7362d
   languageName: node
   linkType: hard
 
@@ -3241,6 +3281,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"three@npm:^0.157.0":
+  version: 0.157.0
+  resolution: "three@npm:0.157.0"
+  checksum: 444797461c9db09d8a4cad886e494c2e6dd5754f09ac7ac4af75a3bf1143ae79641388db31999edcc76c5dba9677639f09da2df8d0128396a1dd59e41226c85c
+  languageName: node
+  linkType: hard
+
 "timers-ext@npm:^0.1.7":
   version: 0.1.7
   resolution: "timers-ext@npm:0.1.7"
@@ -3358,6 +3405,7 @@ __metadata:
   dependencies:
     "@sveltejs/adapter-auto": ^2.0.0
     "@sveltejs/kit": ^1.20.4
+    "@types/three": ^0.157.0
     "@typescript-eslint/eslint-plugin": ^5.45.0
     "@typescript-eslint/parser": ^5.45.0
     axios: ^1.4.0
@@ -3371,6 +3419,7 @@ __metadata:
     svelte: ^4.0.5
     svelte-check: ^3.4.3
     svelte-i18n: ^3.7.0
+    three: ^0.157.0
     tslib: ^2.4.1
     typescript: ^5.0.0
     vite: ^4.4.2
