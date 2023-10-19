@@ -1,9 +1,12 @@
 <script lang="ts">
+	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
 	import { onMount } from 'svelte';
 	import * as THREE from 'three';
 	import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 	import { GCodeLoader } from 'three/addons/loaders/GCodeLoader.js';
 	import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+	import axios from 'axios';
+	import { getSphereMesh } from './utils';
 
 	let container: HTMLDivElement;
 
@@ -37,6 +40,24 @@
 			scene.add(mesh);
 		});
 
+		axios.get(`${BACKEND_URL_LOCAL}/result/edges`).then((res) => {
+			if (res.status === 200) {
+				const edges = res.data['edges'];
+
+				for (const edge of edges) {
+					const [, , x, y, z, rx, ry, rz] = edge;
+					const point = new THREE.Vector3(x, y, z);
+					const measuredEdge = new THREE.Vector3(rx, ry, rz);
+					const pointMesh = getSphereMesh(0.2, 0xfcba03);
+					const edgeMesh = getSphereMesh(0.2, 0x00f719);
+					pointMesh.position.copy(point);
+					edgeMesh.position.copy(measuredEdge);
+					scene.add(pointMesh);
+					scene.add(edgeMesh);
+				}
+			}
+		});
+
 		// Grid on xy plane
 		const size = 500;
 		const divisions = 50;
@@ -51,7 +72,7 @@
 		container.appendChild(renderer.domElement);
 
 		// Lights
-		scene.add(new THREE.HemisphereLight(0x8d7c7c, 0x494966, 3));
+		scene.add(new THREE.HemisphereLight(0x8d7c7c, 0x494966, 5));
 
 		const controls = new OrbitControls(camera, renderer.domElement);
 		controls.mouseButtons = {

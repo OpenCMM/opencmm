@@ -3,7 +3,7 @@
 	import Point from './Result/Edge.svelte';
 	import Line from './Result/Line.svelte';
 	import Arc from './Result/Arc.svelte';
-	import GridLine from './Result/GridLine.svelte';
+	import { Link, Grid, Row, Column } from 'carbon-components-svelte';
 
 	let uploaded = false;
 </script>
@@ -17,8 +17,16 @@
 	{#if !uploaded}
 		<Upload3dModel />
 	{/if}
-
-	<GridLine />
+	<Grid>
+		<Row>
+			<Column>
+				<Link href="/gcode">Gcode</Link>
+			</Column>
+			<Column>Column</Column>
+			<Column>Column</Column>
+			<Column>Column</Column>
+		</Row>
+	</Grid>
 	<Point />
 	<Line />
 	<Arc />
