@@ -40,11 +40,11 @@ def test_get_parallel_lines():
 
     pairs = get_pairs(x, 0)
     assert len(pairs) == 2
-    import_sides(pairs)
+    import_sides(pairs, "line")
 
     pairs = get_pairs(y, 1)
     assert len(pairs) == 2
-    import_sides(pairs)
+    import_sides(pairs, "line")
 
 
 def test_get_sides():
@@ -54,9 +54,9 @@ def test_get_sides():
 
 def test_import_edges():
     sides = get_sides()
-    import_edges_from_sides(sides)
+    import_edges_from_sides(sides, 2)
     path = get_edge_path(sides)
-    assert len(path) == 8
+    assert len(path) == 16
 
 
 def test_generate_gcode():

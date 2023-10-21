@@ -4,18 +4,32 @@ from mysql.connector.errors import IntegrityError
 import random
 
 
-def get_center_of_side(side: tuple):
+def get_edges_for_side(side: tuple, number_of_edges_per_side: int) -> list:
+    """
+    Returns a list of edges for a side
+    Edges need to be distributed evenly along the side
+    """
+    assert (
+        number_of_edges_per_side > 1
+    ), "number_of_edges_per_side must be greater than 1"
     side_id, x0, y0, z0, x1, y1, z1, pair_id = side
-    x = (x0 + x1) / 2
-    y = (y0 + y1) / 2
-    z = (z0 + z1) / 2
-    return (x, y, z)
+
+    edges = []
+    for i in range(1, number_of_edges_per_side + 1):
+        x = x0 + (x1 - x0) * i / (number_of_edges_per_side + 1)
+        y = y0 + (y1 - y0) * i / (number_of_edges_per_side + 1)
+        z = z0 + (z1 - z0) * i / (number_of_edges_per_side + 1)
+        # x, y, z need to be rounded to 3 decimal places
+        x, y, z = round(x, 3), round(y, 3), round(z, 3)
+        edges.append((side_id, x, y, z))
+
+    return edges
 
 
-def to_edge_list(sides: list):
+def to_edge_list(sides: list, number_of_edges_per_side: int):
     edge_list = []
     for side in sides:
-        edge_list.append([side[0]] + list(get_center_of_side(side)))
+        edge_list += get_edges_for_side(side, number_of_edges_per_side)
 
     return order_by_xy(edge_list)
 
@@ -38,8 +52,8 @@ def import_edges(edge_list: list):
     cnx.close()
 
 
-def import_edges_from_sides(sides: list):
-    edge_list = to_edge_list(sides)
+def import_edges_from_sides(sides: list, number_of_edges_per_side: int = 2):
+    edge_list = to_edge_list(sides, number_of_edges_per_side)
     import_edges(edge_list)
 
 
@@ -66,32 +80,32 @@ def get_edge_path(
         direction = get_direction(x0, y0, x1, y1)
 
         # get center of side
-        (x, y, z) = get_center_of_side(side)
-        (x, y, z) = (x + xyz_offset[0], y + xyz_offset[1], z + xyz_offset[2])
+        for _, x, y, z in get_edges_for_side(side, 2):
+            (x, y, z) = (x + xyz_offset[0], y + xyz_offset[1], z + xyz_offset[2])
 
-        if direction == 0:
-            py0 = y - length
-            py1 = y + length
-            path.append(
-                [
-                    f"G1 X{x} Y{py0} Z{z} F{move_feedrate}",
-                    f"G1 X{x} Y{py1} Z{z} F{measure_feedrate}",
-                    x,
-                    y,
-                ]
-            )
+            if direction == 0:
+                py0 = y - length
+                py1 = y + length
+                path.append(
+                    [
+                        f"G1 X{x} Y{py0} Z{z} F{move_feedrate}",
+                        f"G1 X{x} Y{py1} Z{z} F{measure_feedrate}",
+                        x,
+                        y,
+                    ]
+                )
 
-        elif direction == 1:
-            px0 = x - length
-            px1 = x + length
-            path.append(
-                [
-                    f"G1 X{px0} Y{y} Z{z} F{move_feedrate}",
-                    f"G1 X{px1} Y{y} Z{z} F{measure_feedrate}",
-                    x,
-                    y,
-                ]
-            )
+            elif direction == 1:
+                px0 = x - length
+                px1 = x + length
+                path.append(
+                    [
+                        f"G1 X{px0} Y{y} Z{z} F{move_feedrate}",
+                        f"G1 X{px1} Y{y} Z{z} F{measure_feedrate}",
+                        x,
+                        y,
+                    ]
+                )
 
     return sorted(path, key=lambda point: (point[2], point[3]))
 
