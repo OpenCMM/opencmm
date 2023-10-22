@@ -67,7 +67,7 @@
 
 		// Renderer
 		const renderer = new THREE.WebGLRenderer({ antialias: true });
-		renderer.setSize(1000, 1000);
+		renderer.setSize(800, 800);
 
 		container.appendChild(renderer.domElement);
 

@@ -3,14 +3,12 @@
 	import { DataTable } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import { displayLengthDifference } from './utils';
+	import { displayLengthDifference } from '../Result/utils';
 
 	let loaded = false;
 
 	interface Line {
 		id: number;
-		a: number;
-		b: number;
 		length: number;
 		rlength: number;
 		lengthDiff: string;
@@ -18,8 +16,6 @@
 
 	const headers = [
 		{ key: 'id', value: 'ID' },
-		{ key: 'a', value: $_('home.result.line.start') },
-		{ key: 'b', value: $_('home.result.line.end') },
 		{ key: 'length', value: $_('home.result.line.length') },
 		{ key: 'rlength', value: $_('home.result.line.rlength') },
 		{ key: 'lengthDiff', value: $_('home.result.line.lengthDiff') }
@@ -32,11 +28,9 @@
 		for (const d of data['lines']) {
 			row.push({
 				id: d[0],
-				a: d[1],
-				b: d[2],
-				length: d[3],
-				rlength: d[4],
-				lengthDiff: displayLengthDifference(d[3], d[4])
+				length: d[1],
+				rlength: d[2],
+				lengthDiff: displayLengthDifference(d[1], d[2])
 			});
 		}
 		loaded = true;

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Upload3dModel from './Upload3dModel.svelte';
-	import Line from './Result/Line.svelte';
 	import { Link, Grid, Row, Column } from 'carbon-components-svelte';
 
 	let uploaded = false;
@@ -24,10 +23,11 @@
 				<Link href="/edge">Edge</Link>
 			</Column>
 			<Column>
+				<Link href="/line">Line</Link>
+			</Column>
+			<Column>
 				<Link href="/arc">Arc</Link>
 			</Column>
-			<Column>Column</Column>
 		</Row>
 	</Grid>
-	<Line />
 </section>

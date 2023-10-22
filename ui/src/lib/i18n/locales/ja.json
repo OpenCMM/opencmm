@@ -40,8 +40,6 @@
 			},
 			"line": {
 				"title": "線",
-				"start": "始点",
-				"end": "終点",
 				"length": "長さ",
 				"rlength": "推定長さ",
 				"lengthDiff": "誤差(μm)"
