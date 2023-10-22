@@ -10,5 +10,5 @@ def test_fit_circle():
         center_x, center_y, radius = fit_circle(points)
 
 
-def test_comb():
+def test_add_measured_arc_info():
     add_measured_arc_info()
