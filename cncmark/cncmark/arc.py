@@ -4,6 +4,7 @@ from scipy.optimize import least_squares
 import mysql.connector
 from mysql.connector.errors import IntegrityError
 
+
 def get_edges_for_arc(arc_id: int, arc_points: np.ndarray, number_of_edges: int):
     """
     Returns a list of edges for an arc/circle
@@ -12,18 +13,19 @@ def get_edges_for_arc(arc_id: int, arc_points: np.ndarray, number_of_edges: int)
     count = len(arc_points)
     if count < 4:
         raise ValueError("Not enough points to define arc")
-    
+
     if number_of_edges < 3:
         raise ValueError("Not enough edges to define arc")
 
     interval = count // number_of_edges
-    
+
     edges = []
     for i in range(number_of_edges):
         x, y, z = arc_points[i * interval].tolist()
-        edges.append((arc_id, round(x,3), round(y,3), round(z,3)))
+        edges.append((arc_id, round(x, 3), round(y, 3), round(z, 3)))
 
     return edges
+
 
 def import_arcs(arcs: list):
     for arc_points in arcs:
@@ -31,6 +33,7 @@ def import_arcs(arcs: list):
         arc_id = import_arc(arc_info)
         edges = get_edges_for_arc(arc_id, arc_points, 3)
         import_edges(edges)
+
 
 def import_edges(edge_list: list):
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
@@ -66,6 +69,7 @@ def to_arc_info(arc_points: np.ndarray):
     ]
     return [round(x, 3) for x in arc_info]
 
+
 def get_arc_info(arc_points: list):
     """
     Get information about arc
@@ -86,6 +90,7 @@ def get_arc_info(arc_points: list):
     center = np.array([center_x, center_y, arc_points[0, 2]])
     return radius, center
 
+
 def fit_circle(points):
     x = points[:, 0]
     y = points[:, 1]
@@ -100,6 +105,7 @@ def fit_circle(points):
     cx, cy, r = result.x
 
     return cx, cy, r
+
 
 def circle_residuals(params, x, y):
     cx, cy, r = params
