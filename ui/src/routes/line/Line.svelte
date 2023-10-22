@@ -1,34 +1,35 @@
-<!-- show the result image -->
-
 <script lang="ts">
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
 	import { DataTable } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import { displayCoordinates } from './utils';
+	import { displayLengthDifference } from '../Result/utils';
 
 	let loaded = false;
 
-	interface Edge {
+	interface Line {
 		id: number;
-		coordinate: string;
-		rcoordinate: string;
+		length: number;
+		rlength: number;
+		lengthDiff: string;
 	}
 
 	const headers = [
 		{ key: 'id', value: 'ID' },
-		{ key: 'coordinate', value: $_('home.result.edge.coordinate') },
-		{ key: 'rcoordinate', value: $_('home.result.edge.rcoordinate') }
+		{ key: 'length', value: $_('home.result.line.length') },
+		{ key: 'rlength', value: $_('home.result.line.rlength') },
+		{ key: 'lengthDiff', value: $_('home.result.line.lengthDiff') }
 	];
-	let row: Edge[] = [];
+	let row: Line[] = [];
 	const load_table_data = async () => {
-		const res = await fetch(`${BACKEND_URL_LOCAL}/result/edges`);
+		const res = await fetch(`${BACKEND_URL_LOCAL}/result/lines`);
 		const data = await res.json();
-		for (const d of data['edges']) {
+		for (const d of data['lines']) {
 			row.push({
 				id: d[0],
-				coordinate: displayCoordinates(d[2], d[3], d[4]),
-				rcoordinate: displayCoordinates(d[5], d[6], d[7])
+				length: d[1],
+				rlength: d[2],
+				lengthDiff: displayLengthDifference(d[1], d[2])
 			});
 		}
 		loaded = true;
@@ -43,7 +44,7 @@
 	{#if !loaded}
 		<p>loading...</p>
 	{:else}
-		<DataTable size="short" title={$_('home.result.edge.title')} {headers} rows={row} />
+		<DataTable size="short" title={$_('home.result.line.title')} {headers} rows={row} />
 	{/if}
 </div>
 

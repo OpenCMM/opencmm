@@ -5,7 +5,6 @@ from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from server.prepare import process_stl
 from pydantic import BaseModel
-from server.reset import reset_tables
 from typing import Optional
 from server import result
 from listener.main import listener_start
@@ -126,12 +125,6 @@ async def load_image():
     if not os.path.exists("data/images/result.png"):
         raise HTTPException(status_code=400, detail="No image file generated")
     return FileResponse("data/images/result.png")
-
-
-@app.get("/reset/data")
-async def reset_data():
-    reset_tables()
-    return {"status": "ok"}
 
 
 @app.get("/result/edges")

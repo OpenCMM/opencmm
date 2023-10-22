@@ -42,8 +42,6 @@
 			},
 			"line": {
 				"title": "Line",
-				"start": "Start",
-				"end": "End",
 				"length": "Length",
 				"rlength": "Estimated length",
 				"lengthDiff": "Difference(μm)"

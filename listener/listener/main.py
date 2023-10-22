@@ -7,6 +7,7 @@ import mysql.connector
 import threading
 from listener import status
 from cnceye.edge import find
+from cncmark import arc
 
 # home
 # server_url = "ws://192.168.10.132:81"
@@ -107,6 +108,7 @@ async def control_sensor(sensor_ws_url: str, mysql_config: dict, process_id: int
                         break
                     find.add_measured_edge_coord(update_list, mysql_config)
                     print(f"{edge_count} edges found")
+                    arc.add_measured_arc_info()
                 except Exception as e:
                     print(e)
                     status.update_process_status(

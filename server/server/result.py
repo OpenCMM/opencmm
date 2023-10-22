@@ -24,12 +24,12 @@ def fetch_lines():
 
     lines = []
     query = """
-		SELECT id, a, b, length, rlength
-		FROM line
+		SELECT id, length, rlength
+		FROM pair
 	"""
     cursor.execute(query)
     for line in cursor:
-        lines.append((line[0], line[1], line[2], line[3], line[4]))
+        lines.append((line[0], line[1], line[2]))
 
     cursor.close()
     cnx.close()

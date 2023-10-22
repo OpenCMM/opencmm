@@ -184,6 +184,24 @@ mysql-connector-python = ">=8.1.0,<9.0.0"
 scipy = ">=1.11.1,<2.0.0"
 
 [[package]]
+name = "cncmark"
+version = "0.3.2"
+description = "CncMark generates G-code to measure workpiece dimensions using a laser triangulation sensor from a stl file."
+optional = false
+python-versions = ">=3.11,<3.13"
+files = []
+develop = false
+
+[package.dependencies]
+mysql-connector-python = "^8.1.0"
+numpy-stl = "^3.0.1"
+scipy = "^1.11.3"
+
+[package.source]
+type = "directory"
+url = "../cncmark"
+
+[[package]]
 name = "colorama"
 version = "0.4.6"
 description = "Cross-platform colored terminal text."
@@ -308,6 +326,21 @@ files = [
 ]
 
 [[package]]
+name = "numpy-stl"
+version = "3.0.1"
+description = "Library to make reading, writing and modifying both binary and ascii STL files easy."
+optional = false
+python-versions = ">3.6.0"
+files = [
+    {file = "numpy-stl-3.0.1.tar.gz", hash = "sha256:dd4da1a379d2632f168518be8dcd9cddd7edc6c3238094fd8d21476b3586a0bc"},
+    {file = "numpy_stl-3.0.1-py3-none-any.whl", hash = "sha256:cd2c4b0032756bb1488559d507825b0dd8d5c2ac4a68638c2145387b2f804691"},
+]
+
+[package.dependencies]
+numpy = "*"
+python-utils = ">=3.4.5"
+
+[[package]]
 name = "packaging"
 version = "23.2"
 description = "Core utilities for Python packages"
@@ -403,6 +436,25 @@ pluggy = ">=0.12,<2.0"
 testing = ["argcomplete", "attrs (>=19.2.0)", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.7.2)", "requests", "setuptools", "xmlschema"]
 
 [[package]]
+name = "python-utils"
+version = "3.8.1"
+description = "Python Utils is a module with some convenient utilities not included with the standard Python install"
+optional = false
+python-versions = ">3.8.0"
+files = [
+    {file = "python-utils-3.8.1.tar.gz", hash = "sha256:ec3a672465efb6c673845a43afcfafaa23d2594c24324a40ec18a0c59478dc0b"},
+    {file = "python_utils-3.8.1-py2.py3-none-any.whl", hash = "sha256:efdf31c8154667d7dc0317547c8e6d3b506c5d4b6e360e0c89662306262fc0ab"},
+]
+
+[package.dependencies]
+typing-extensions = ">3.10.0.2"
+
+[package.extras]
+docs = ["mock", "python-utils", "sphinx"]
+loguru = ["loguru"]
+tests = ["flake8", "loguru", "pytest", "pytest-asyncio", "pytest-cov", "pytest-mypy", "sphinx", "types-setuptools"]
+
+[[package]]
 name = "requests"
 version = "2.31.0"
 description = "Python HTTP for Humans."
@@ -490,6 +542,17 @@ numpy = ">=1.21.6,<1.28.0"
 dev = ["click", "cython-lint (>=0.12.2)", "doit (>=0.36.0)", "mypy", "pycodestyle", "pydevtool", "rich-click", "ruff", "types-psutil", "typing_extensions"]
 doc = ["jupytext", "matplotlib (>2)", "myst-nb", "numpydoc", "pooch", "pydata-sphinx-theme (==0.9.0)", "sphinx (!=4.1.0)", "sphinx-design (>=0.2.0)"]
 test = ["asv", "gmpy2", "mpmath", "pooch", "pytest", "pytest-cov", "pytest-timeout", "pytest-xdist", "scikit-umfpack", "threadpoolctl"]
+
+[[package]]
+name = "typing-extensions"
+version = "4.8.0"
+description = "Backported and Experimental Type Hints for Python 3.8+"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "typing_extensions-4.8.0-py3-none-any.whl", hash = "sha256:8f92fc8806f9a6b641eaa5318da32b44d401efaac0f6678c9bc448ba3605faa0"},
+    {file = "typing_extensions-4.8.0.tar.gz", hash = "sha256:df8e4339e9cb77357558cbdbceca33c303714cf861d1eef15e1070055ae8b7ef"},
+]
 
 [[package]]
 name = "urllib3"
@@ -590,4 +653,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.13"
-content-hash = "32580f92e413b22b226a226b14c44194aced9bebe0744be28a9bfb0c182a0c1e"
+content-hash = "9e815288fdda64327d6bd60d5039487c8623b52ac689ca9157ade6cf15580af7"

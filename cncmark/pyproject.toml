@@ -12,6 +12,7 @@ keywords = ["cnc", "cmm", "milling", "gcode"]
 python = ">=3.11,<3.13"
 numpy-stl = "^3.0.1"
 mysql-connector-python = "^8.1.0"
+scipy = "^1.11.3"
 
 
 [tool.poetry.group.dev.dependencies]
