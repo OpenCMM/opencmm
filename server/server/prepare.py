@@ -4,10 +4,9 @@ from cncmark.point import (
 from cncmark.edge import (
     get_edge_path,
     generate_gcode,
-    import_edges_from_sides,
     save_gcode,
 )
-from cncmark.line import import_parallel_lines, get_sides
+from cncmark.line import import_parallel_lines, get_sides, import_edges_from_sides
 from cncmark.arc import import_arcs
 from typing import Optional
 
@@ -27,7 +26,7 @@ def process_stl(
     sides = get_sides()
     import_edges_from_sides(sides)
     import_arcs(arcs)
-    path = get_edge_path(sides, measure_length, measure_feedrate, move_feedrate, offset)
+    path = get_edge_path(measure_length, measure_feedrate, move_feedrate, offset)
 
     # save gcode
     gcode = generate_gcode(path)

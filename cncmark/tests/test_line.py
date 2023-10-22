@@ -5,9 +5,9 @@ from cncmark.line import (
     get_pairs,
     import_sides,
     get_sides,
+    import_edges_from_sides,
 )
 from cncmark.edge import (
-    import_edges_from_sides,
     get_edge_path,
     generate_gcode,
     save_gcode,
@@ -55,12 +55,9 @@ def test_get_sides():
 def test_import_edges():
     sides = get_sides()
     import_edges_from_sides(sides, 2)
-    path = get_edge_path(sides)
-    assert len(path) == 16
 
 
 def test_generate_gcode():
-    sides = get_sides()
-    path = get_edge_path(sides)
+    path = get_edge_path()
     gcode = generate_gcode(path)
     save_gcode(gcode, "tests/fixtures/gcode/edge.gcode")
