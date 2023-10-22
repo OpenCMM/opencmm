@@ -7,8 +7,7 @@ from cncmark.edge import (
     import_edges_from_sides,
     save_gcode,
 )
-from cncmark.line import import_lines, import_parallel_lines, get_sides
-from .arc import import_arcs
+from cncmark.line import import_parallel_lines, get_sides
 from typing import Optional
 
 
@@ -22,8 +21,6 @@ def process_stl(
 ):
     z = 10.0
     lines, arcs = get_shapes(stl_file_path, z)
-    import_lines(lines)
-    import_arcs(arcs)
 
     import_parallel_lines(lines)
     sides = get_sides()
