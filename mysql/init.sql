@@ -25,10 +25,6 @@ CREATE TABLE IF NOT EXISTS `line` (
 
 CREATE TABLE IF NOT EXISTS `arc` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `a` varchar(255) NOT NULL,
-  `b` varchar(255) NOT NULL,
-  `c` varchar(255) NOT NULL,
-  `d` varchar(255) NOT NULL,
   `radius` FLOAT NOT NULL,
   `cx` FLOAT NOT NULL,
   `cy` FLOAT NOT NULL,
@@ -42,7 +38,8 @@ CREATE TABLE IF NOT EXISTS `arc` (
 
 CREATE TABLE IF NOT EXISTS `edge` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `side_id` int(11) unsigned NOT NULL,
+  `side_id` int(11) unsigned,
+  `arc_id` int(11) unsigned,
   `x` FLOAT NOT NULL,
   `y` FLOAT NOT NULL,
   `z` FLOAT NOT NULL,

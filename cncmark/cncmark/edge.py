@@ -46,7 +46,7 @@ def import_edges(edge_list: list):
     try:
         cursor.executemany(insert_query, edge_list)
     except IntegrityError:
-        print("Error: unable to import lines")
+        print("Error: unable to import edges")
     cnx.commit()
     cursor.close()
     cnx.close()
