@@ -70,7 +70,7 @@ def to_arc_info(arc_points: np.ndarray):
     return [round(x, 3) for x in arc_info]
 
 
-def get_arc_info(arc_points: list):
+def get_arc_info(arc_points: np.ndarray):
     """
     Get information about arc
 
@@ -121,3 +121,48 @@ def get_arc(arc_id: int):
     cursor.close()
     cnx.close()
     return arc
+
+
+def get_arcs():
+    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+    cursor = cnx.cursor()
+    query = "SELECT * FROM arc"
+    cursor.execute(query)
+    arcs = cursor.fetchall()
+    cursor.close()
+    cnx.close()
+    return arcs
+
+
+def get_arc_edge(arc_id: int):
+    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+    cursor = cnx.cursor()
+    query = "SELECT rx,ry,rz FROM edge WHERE arc_id = %s"
+    cursor.execute(query, (arc_id,))
+    edges = cursor.fetchall()
+    cursor.close()
+    cnx.close()
+    return edges
+
+
+def add_measured_arc_info():
+    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+    cursor = cnx.cursor()
+
+    arcs = get_arcs()
+    for arc in arcs:
+        (arc_id, radius, cx, cy, cz, rradius, rcx, rcy, rcz) = arc
+        edges = get_arc_edge(arc_id)
+        radius, center = get_arc_info(np.array(edges))
+
+        query = (
+            "UPDATE arc SET rradius = %s, rcx = %s, rcy = %s, rcz = %s WHERE id = %s"
+        )
+        data = [radius, center[0], center[1], center[2]]
+        data = [round(x, 3) for x in data]
+        data.append(arc_id)
+        cursor.execute(query, tuple(data))
+        cnx.commit()
+
+    cursor.close()
+    cnx.close()

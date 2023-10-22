@@ -12,6 +12,7 @@ from cncmark.edge import (
     generate_gcode,
     save_gcode,
 )
+from cncmark.arc import import_arcs
 
 
 def test_get_lines():
@@ -55,6 +56,12 @@ def test_get_sides():
 def test_import_edges():
     sides = get_sides()
     import_edges_from_sides(sides, 2)
+
+
+def test_import_arcs():
+    z = 10.0
+    lines, arcs = get_shapes("tests/fixtures/stl/sample.stl", z)
+    import_arcs(arcs)
 
 
 def test_generate_gcode():
