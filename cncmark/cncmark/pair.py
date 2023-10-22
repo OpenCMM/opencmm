@@ -33,7 +33,8 @@ def point_to_line_distance(edges_on_the_same_line: list, point: tuple):
     # Calculate the magnitude of the line_direction vector squared
     line_length_squared = sum(a * a for a in line_direction)
 
-    # Calculate the parameter t, which is the distance along the line to the closest point
+    # Calculate the parameter t, which is the distance
+    # along the line to the closest point
     t = dot_product / line_length_squared
 
     if t < 0:

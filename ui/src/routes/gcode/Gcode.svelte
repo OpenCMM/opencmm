@@ -58,6 +58,24 @@
 			}
 		});
 
+		axios.get(`${BACKEND_URL_LOCAL}/result/arcs`).then((res) => {
+			if (res.status === 200) {
+				const edges = res.data['arcs'];
+
+				for (const edge of edges) {
+					const [, radius, cx, cy, cz, rradius, rcx, rcy, rcz] = edge;
+					const center = new THREE.Vector3(cx, cy, cz);
+					const measuredCenter = new THREE.Vector3(rcx, rcy, rcz);
+					const centerMesh = getSphereMesh(0.2, 0xfcba03);
+					const measuredCenterMesh = getSphereMesh(0.2, 0x00f719);
+					centerMesh.position.copy(center);
+					measuredCenterMesh.position.copy(measuredCenter);
+					scene.add(centerMesh);
+					scene.add(measuredCenterMesh);
+				}
+			}
+		});
+
 		// Grid on xy plane
 		const size = 500;
 		const divisions = 50;
