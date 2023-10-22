@@ -1,8 +1,5 @@
-from cncmark.config import MYSQL_CONFIG
 from stl import mesh
 import numpy as np
-import mysql.connector
-from mysql.connector.errors import IntegrityError
 from typing import Optional
 
 
@@ -97,47 +94,3 @@ def round_shape_values(shapes: np.ndarray, decimal_places: int = 3):
         shapes[i] = np.round(shapes[i], decimals=decimal_places)
 
     return shapes
-
-
-def get_unique_points(lines: list, arcs: list):
-    from .arc import pick_arc_points
-
-    points = []
-    for line in lines:
-        for point in line:
-            points.append(point)
-
-    for arc in arcs:
-        arc_points = pick_arc_points(arc)
-        for point in arc_points:
-            points.append(point)
-
-    points = np.array(points)
-    unique_points = np.unique(points, axis=0)
-    return unique_points
-
-
-def save_unique_points(unique_points: list, file_path: str):
-    with open(file_path, "w") as f:
-        for point in unique_points:
-            f.write(f"{point[0]},{point[1]},{point[2]}\n")
-
-
-def import_points(unique_points: np.ndarray):
-    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
-    cursor = cnx.cursor()
-    unique_point_list = []
-    for points in unique_points:
-        unique_point_list.append(
-            [float(points[0]), float(points[1]), float(points[2]), point_id(points)]
-        )
-
-    insert_query = "INSERT INTO point (x, y, z, point_id) VALUES (%s, %s, %s, %s)"
-
-    try:
-        cursor.executemany(insert_query, unique_point_list)
-    except IntegrityError:
-        print("Error: unable to import points")
-    cnx.commit()
-    cursor.close()
-    cnx.close()
