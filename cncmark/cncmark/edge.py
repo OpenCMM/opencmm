@@ -61,6 +61,17 @@ def get_arc_path(center, xyz, distance):
     return point1, point2
 
 
+def get_edges_by_side_id(side_id: int):
+    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+    cursor = cnx.cursor()
+    query = "SELECT rx,ry,rz FROM edge WHERE side_id = %s"
+    cursor.execute(query, (side_id,))
+    edges = cursor.fetchall()
+    cursor.close()
+    cnx.close()
+    return edges
+
+
 def get_edge_path(
     length: float = 2.5,
     measure_feedrate: float = 300,
