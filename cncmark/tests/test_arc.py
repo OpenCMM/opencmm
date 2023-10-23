@@ -1,5 +1,6 @@
 from cncmark.point import get_shapes
 from cncmark.arc import add_measured_arc_info, fit_circle
+from .config import MYSQL_CONFIG
 
 
 def test_fit_circle():
@@ -11,4 +12,4 @@ def test_fit_circle():
 
 
 def test_add_measured_arc_info():
-    add_measured_arc_info()
+    add_measured_arc_info(MYSQL_CONFIG)

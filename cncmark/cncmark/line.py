@@ -1,4 +1,3 @@
-from cncmark.config import MYSQL_CONFIG
 import numpy as np
 import mysql.connector
 from mysql.connector.errors import IntegrityError
@@ -55,8 +54,8 @@ def to_side_list(pairs: np.ndarray, pair_id: int):
     return side_list
 
 
-def import_pair(pair_type: str) -> int:
-    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+def import_pair(pair_type: str, mysql_config: dict) -> int:
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     insert_query = "INSERT INTO pair (type) VALUES (%s)"
     cursor.execute(insert_query, (pair_type,))
@@ -66,11 +65,11 @@ def import_pair(pair_type: str) -> int:
     return cursor.lastrowid
 
 
-def import_sides(pairs: np.ndarray, pair_type: str):
-    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+def import_sides(pairs: np.ndarray, pair_type: str, mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     for pair in pairs:
-        pair_id = import_pair(pair_type)
+        pair_id = import_pair(pair_type, mysql_config)
         side_list = to_side_list(pair, pair_id)
         insert_query = (
             "INSERT INTO side (x0, y0, z0, x1, y1, z1, pair_id)"
@@ -85,8 +84,8 @@ def import_sides(pairs: np.ndarray, pair_type: str):
     cnx.close()
 
 
-def get_sides():
-    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+def get_sides(mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     query = "SELECT * FROM side"
     cursor.execute(query)
@@ -96,16 +95,16 @@ def get_sides():
     return sides
 
 
-def import_parallel_lines(lines: np.ndarray):
+def import_parallel_lines(lines: np.ndarray, mysql_config: dict):
     x, y, other = get_parallel_lines(lines)
     pairs = get_pairs(x, 0)
-    import_sides(pairs, "line")
+    import_sides(pairs, "line", mysql_config)
     pairs = get_pairs(y, 1)
-    import_sides(pairs, "line")
+    import_sides(pairs, "line", mysql_config)
 
 
-def import_edges(edge_list: list):
-    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+def import_edges(edge_list: list, mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     insert_query = "INSERT INTO edge (side_id, x, y, z) VALUES (%s, %s, %s, %s)"
     try:
@@ -117,9 +116,11 @@ def import_edges(edge_list: list):
     cnx.close()
 
 
-def import_edges_from_sides(sides: list, number_of_edges_per_side: int = 2):
+def import_edges_from_sides(
+    sides: list, mysql_config: dict, number_of_edges_per_side: int = 2
+):
     edge_list = to_edge_list(sides, number_of_edges_per_side)
-    import_edges(edge_list)
+    import_edges(edge_list, mysql_config)
 
 
 def to_edge_list(sides: list, number_of_edges_per_side: int):
@@ -157,8 +158,8 @@ def get_edges_for_side(side: tuple, number_of_edges_per_side: int) -> list:
     return edges
 
 
-def get_side(side_id: int):
-    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+def get_side(side_id: int, mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     query = "SELECT * FROM side WHERE id = %s"
     cursor.execute(query, (side_id,))
@@ -166,3 +167,9 @@ def get_side(side_id: int):
     cursor.close()
     cnx.close()
     return side
+
+
+def import_lines(lines: np.ndarray, mysql_config: dict):
+    import_parallel_lines(lines, mysql_config)
+    sides = get_sides(mysql_config)
+    import_edges_from_sides(sides, mysql_config)

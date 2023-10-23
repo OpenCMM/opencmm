@@ -1,5 +1,4 @@
 import random
-from cncmark.config import MYSQL_CONFIG
 import mysql.connector
 from .line import get_side
 from .arc import get_arc
@@ -15,8 +14,8 @@ def get_direction(x0, y0, x1, y1):
         return -1
 
 
-def get_edges():
-    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+def get_edges(mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     query = "SELECT * FROM edge"
     cursor.execute(query)
@@ -61,8 +60,8 @@ def get_arc_path(center, xyz, distance):
     return point1, point2
 
 
-def get_edges_by_side_id(side_id: int):
-    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+def get_edges_by_side_id(side_id: int, mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     query = "SELECT rx,ry,rz FROM edge WHERE side_id = %s"
     cursor.execute(query, (side_id,))
@@ -73,17 +72,18 @@ def get_edges_by_side_id(side_id: int):
 
 
 def get_edge_path(
+    mysql_config: dict,
     length: float = 2.5,
     measure_feedrate: float = 300,
     move_feedrate: float = 600,
     xyz_offset: tuple = (0, 0, 0),
 ):
     path = []
-    edges = get_edges()
+    edges = get_edges(mysql_config)
     for edge in edges:
         edge_id, side_id, arc_id, x, y, z, rx, ry, rz = edge
         if arc_id is None:
-            side_id, x0, y0, z0, x1, y1, z1, pair_id = get_side(side_id)
+            side_id, x0, y0, z0, x1, y1, z1, pair_id = get_side(side_id, mysql_config)
             direction = get_direction(x0, y0, x1, y1)
 
             (x, y, z) = (x + xyz_offset[0], y + xyz_offset[1], z + xyz_offset[2])
@@ -114,7 +114,9 @@ def get_edge_path(
 
         else:
             assert side_id is None
-            arc_id, radius, cx, cy, cz, rradius, rcx, rcy, rcz = get_arc(arc_id)
+            arc_id, radius, cx, cy, cz, rradius, rcx, rcy, rcz = get_arc(
+                arc_id, mysql_config
+            )
             point1, point2 = get_arc_path((cx, cy, cz), (x, y, z), length)
             point1 = [x + xyz_offset[i] for i, x in enumerate(point1)]
             point2 = [x + xyz_offset[i] for i, x in enumerate(point2)]

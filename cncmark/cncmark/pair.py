@@ -1,11 +1,10 @@
 import math
-from cncmark.config import MYSQL_CONFIG
 import mysql.connector
 from .edge import get_edges_by_side_id
 
 
-def get_pairs():
-    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+def get_pairs(mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     query = "SELECT id FROM pair"
     cursor.execute(query)
@@ -53,26 +52,26 @@ def point_to_line_distance(edges_on_the_same_line: list, point: tuple):
     return distance
 
 
-def add_line_length():
-    pairs = get_pairs()
+def add_line_length(mysql_config: dict):
+    pairs = get_pairs(mysql_config)
     for (pair_id,) in pairs:
-        sides = get_sides_by_pair_id(pair_id)
+        sides = get_sides_by_pair_id(pair_id, mysql_config)
         side1 = sides[0]
         side2 = sides[1]
         length = point_to_line_distance([side1[0:3], side1[3:6]], side2[0:3])
         total_measured_length = 0
-        edges1 = get_edges_by_side_id(side1[6])
-        edges2 = get_edges_by_side_id(side2[6])
+        edges1 = get_edges_by_side_id(side1[6], mysql_config)
+        edges2 = get_edges_by_side_id(side2[6], mysql_config)
         total_measured_length += point_to_line_distance(edges1, edges2[0])
         total_measured_length += point_to_line_distance(edges1, edges2[1])
         total_measured_length += point_to_line_distance(edges2, edges1[0])
         total_measured_length += point_to_line_distance(edges2, edges1[1])
         measured_length = round(total_measured_length / 4, 3)
-        add_measured_length(pair_id, length, measured_length)
+        add_measured_length(pair_id, length, measured_length, mysql_config)
 
 
-def get_sides_by_pair_id(pair_id: int):
-    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+def get_sides_by_pair_id(pair_id: int, mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     query = "SELECT x0, y0, z0, x1, y1, z1, id FROM side WHERE pair_id = %s"
     cursor.execute(query, (pair_id,))
@@ -82,8 +81,10 @@ def get_sides_by_pair_id(pair_id: int):
     return sides
 
 
-def add_measured_length(pair_id: int, length: float, measured_length: float):
-    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+def add_measured_length(
+    pair_id: int, length: float, measured_length: float, mysql_config: dict
+):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     query = "UPDATE pair SET length = %s, rlength = %s WHERE id = %s"
     cursor.execute(query, (length, measured_length, pair_id))
