@@ -1,4 +1,3 @@
-from cncmark.config import MYSQL_CONFIG
 import numpy as np
 from scipy.optimize import least_squares
 import mysql.connector
@@ -27,16 +26,16 @@ def get_edges_for_arc(arc_id: int, arc_points: np.ndarray, number_of_edges: int)
     return edges
 
 
-def import_arcs(arcs: list):
+def import_arcs(arcs: list, mysql_config: dict):
     for arc_points in arcs:
         arc_info = to_arc_info(arc_points)
-        arc_id = import_arc(arc_info)
+        arc_id = import_arc(arc_info, mysql_config)
         edges = get_edges_for_arc(arc_id, arc_points, 3)
-        import_edges(edges)
+        import_edges(edges, mysql_config)
 
 
-def import_edges(edge_list: list):
-    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+def import_edges(edge_list: list, mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     insert_query = "INSERT INTO edge (arc_id, x, y, z) VALUES (%s, %s, %s, %s)"
     try:
@@ -48,8 +47,8 @@ def import_edges(edge_list: list):
     cnx.close()
 
 
-def import_arc(arc_info: list):
-    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+def import_arc(arc_info: list, mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     insert_query = "INSERT INTO arc (radius, cx, cy, cz) VALUES (%s, %s, %s, %s)"
     cursor.execute(insert_query, tuple(arc_info))
@@ -112,8 +111,8 @@ def circle_residuals(params, x, y):
     return (x - cx) ** 2 + (y - cy) ** 2 - r**2
 
 
-def get_arc(arc_id: int):
-    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+def get_arc(arc_id: int, mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     query = "SELECT * FROM arc WHERE id = %s"
     cursor.execute(query, (arc_id,))
@@ -123,8 +122,8 @@ def get_arc(arc_id: int):
     return arc
 
 
-def get_arcs():
-    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+def get_arcs(mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     query = "SELECT * FROM arc"
     cursor.execute(query)
@@ -134,8 +133,8 @@ def get_arcs():
     return arcs
 
 
-def get_arc_edge(arc_id: int):
-    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+def get_arc_edge(arc_id: int, mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     query = "SELECT rx,ry,rz FROM edge WHERE arc_id = %s"
     cursor.execute(query, (arc_id,))
@@ -145,8 +144,8 @@ def get_arc_edge(arc_id: int):
     return edges
 
 
-def add_measured_arc_info():
-    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+def add_measured_arc_info(mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
 
     arcs = get_arcs()

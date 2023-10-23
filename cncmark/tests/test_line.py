@@ -12,6 +12,7 @@ from cncmark.edge import (
     save_gcode,
 )
 from cncmark.arc import import_arcs
+from .config import MYSQL_CONFIG
 
 
 def test_get_lines():
@@ -42,22 +43,22 @@ def test_get_parallel_lines():
 
 
 def test_get_sides():
-    sides = get_sides()
+    sides = get_sides(MYSQL_CONFIG)
     assert len(sides) == 8
 
 
 def test_import_edges():
-    sides = get_sides()
-    import_edges_from_sides(sides, 2)
+    sides = get_sides(MYSQL_CONFIG)
+    import_edges_from_sides(sides, 2, MYSQL_CONFIG)
 
 
 def test_import_arcs():
     z = 10.0
     lines, arcs = get_shapes("tests/fixtures/stl/sample.stl", z)
-    import_arcs(arcs)
+    import_arcs(arcs, MYSQL_CONFIG)
 
 
 def test_generate_gcode():
-    path = get_edge_path()
+    path = get_edge_path(MYSQL_CONFIG)
     gcode = generate_gcode(path)
     save_gcode(gcode, "tests/fixtures/gcode/edge.gcode")
