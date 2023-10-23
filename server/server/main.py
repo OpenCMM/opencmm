@@ -113,12 +113,20 @@ async def start_measurement(mtconnect_interval: int, background_tasks: Backgroun
 
     running_process = get_running_process(MYSQL_CONFIG)
     if running_process is not None:
-        raise HTTPException(status_code=400, detail="Measurement already running (process id: {running_process[0]}))")
+        raise HTTPException(
+            status_code=400,
+            detail="Measurement already running (process id: {running_process[0]}))",
+        )
 
     final_coordinates = get_final_coordinates("data/gcode/opencmm.gcode")
     process_id = start_measuring(MYSQL_CONFIG, "running")
     background_tasks.add_task(
-        listener_start, sensor_ws_url, MYSQL_CONFIG, mtconnect_interval, process_id, final_coordinates
+        listener_start,
+        sensor_ws_url,
+        MYSQL_CONFIG,
+        mtconnect_interval,
+        process_id,
+        final_coordinates,
     )
     return {"status": "ok"}
 

@@ -41,14 +41,20 @@ def listen_sensor(sensor_ws_url: str, process_id: int):
     loop.close()
 
 
-def contorl_streaming_status(sensor_ws_url: str, mysql_config: dict, process_id: int, final_coordinates: tuple):
+def contorl_streaming_status(
+    sensor_ws_url: str, mysql_config: dict, process_id: int, final_coordinates: tuple
+):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(control_sensor(sensor_ws_url, mysql_config, process_id, final_coordinates))
+    loop.run_until_complete(
+        control_sensor(sensor_ws_url, mysql_config, process_id, final_coordinates)
+    )
     loop.close()
 
 
-async def control_sensor(sensor_ws_url: str, mysql_config: dict, process_id: int, final_coordinates: tuple):
+async def control_sensor(
+    sensor_ws_url: str, mysql_config: dict, process_id: int, final_coordinates: tuple
+):
     streaming = False
     global done
     async with websockets.connect(sensor_ws_url) as websocket:
@@ -179,7 +185,11 @@ def mtconnect_streaming_reader(interval: int):
 
 
 def listener_start(
-    sensor_ws_url: str, mysql_config: dict, mtconnect_interval: int, process_id: int, final_coordinates: tuple
+    sensor_ws_url: str,
+    mysql_config: dict,
+    mtconnect_interval: int,
+    process_id: int,
+    final_coordinates: tuple,
 ):
     thread1 = threading.Thread(
         target=listen_sensor,
