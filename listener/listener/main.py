@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 chunk_size = 1024
 xyz = None
 initial_coordinate = (109.074, -15.028, -561.215)
-final_coordinate = (105.042, -11.028, -568.215)
 done = False
 data_to_insert = []
 
@@ -42,14 +41,14 @@ def listen_sensor(sensor_ws_url: str, process_id: int):
     loop.close()
 
 
-def contorl_streaming_status(sensor_ws_url: str, mysql_config: dict, process_id: int):
+def contorl_streaming_status(sensor_ws_url: str, mysql_config: dict, process_id: int, final_coordinates: tuple):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(control_sensor(sensor_ws_url, mysql_config, process_id))
+    loop.run_until_complete(control_sensor(sensor_ws_url, mysql_config, process_id, final_coordinates))
     loop.close()
 
 
-async def control_sensor(sensor_ws_url: str, mysql_config: dict, process_id: int):
+async def control_sensor(sensor_ws_url: str, mysql_config: dict, process_id: int, final_coordinates: tuple):
     streaming = False
     global done
     async with websockets.connect(sensor_ws_url) as websocket:
@@ -67,7 +66,7 @@ async def control_sensor(sensor_ws_url: str, mysql_config: dict, process_id: int
                 streaming = True
 
             elif streaming and xyz is not None and idx == 40:
-                # elif streaming and xyz is not None and final_coordinate == xyz:
+                # elif streaming and xyz is not None and final_coordinates == xyz:
                 logger.info("ready to stop streaming")
                 await websocket.send("stopStreaming")
                 # await websocket.send("deepSleep")
@@ -180,7 +179,7 @@ def mtconnect_streaming_reader(interval: int):
 
 
 def listener_start(
-    sensor_ws_url: str, mysql_config: dict, mtconnect_interval: int, process_id: int
+    sensor_ws_url: str, mysql_config: dict, mtconnect_interval: int, process_id: int, final_coordinates: tuple
 ):
     thread1 = threading.Thread(
         target=listen_sensor,
@@ -201,6 +200,7 @@ def listener_start(
                 sensor_ws_url,
                 mysql_config,
                 process_id,
+                final_coordinates,
             )
         ),
     )
