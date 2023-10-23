@@ -461,12 +461,12 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "listener"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 optional = false
 python-versions = ">=3.11,<3.13"
 files = []
-develop = false
+develop = true
 
 [package.dependencies]
 cnceye = "^0.4.2"

@@ -60,9 +60,7 @@ async def control_sensor(
     async with websockets.connect(sensor_ws_url) as websocket:
         logger.info("control_sensor(): connected")
 
-        idx = 0
         while not done:
-            idx += 1
             await asyncio.sleep(0.5)
             if not streaming and xyz is not None:
                 # if not streaming and xyz is not None and initial_coordinate == xyz:
@@ -71,8 +69,7 @@ async def control_sensor(
                 logger.info("start streaming")
                 streaming = True
 
-            elif streaming and xyz is not None and idx == 40:
-                # elif streaming and xyz is not None and final_coordinates == xyz:
+            elif streaming and xyz is not None and final_coordinates == xyz:
                 logger.info("ready to stop streaming")
                 await websocket.send("stopStreaming")
                 # await websocket.send("deepSleep")
@@ -136,12 +133,9 @@ def combine_data(mysql_config: dict):
     mysql_conn.close()
 
 
-def mtconnect_streaming_reader(interval: int):
+def mtconnect_streaming_reader(interval: int, url: str):
     global xyz
-    # demo
-    endpoint = f"https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem&interval={interval}"
-
-    # endpoint = f"http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems&interval={interval}"
+    endpoint = f"{url}&interval={interval}"
     try:
         response = requests.get(endpoint, stream=True)
         xml_buffer = ""
@@ -190,6 +184,7 @@ def listener_start(
     mtconnect_interval: int,
     process_id: int,
     final_coordinates: tuple,
+    mtconnect_url: str,
 ):
     thread1 = threading.Thread(
         target=listen_sensor,
@@ -201,7 +196,7 @@ def listener_start(
         ),
     )
     thread2 = threading.Thread(
-        target=mtconnect_streaming_reader, args=((mtconnect_interval,))
+        target=mtconnect_streaming_reader, args=((mtconnect_interval, mtconnect_url, ))
     )
     thread3 = threading.Thread(
         target=contorl_streaming_status,

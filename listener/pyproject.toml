@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "listener"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 authors = ["yuichiroaoki <45054071+yuichiroaoki@users.noreply.github.com>"]
 readme = "README.md"
