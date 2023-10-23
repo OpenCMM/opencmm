@@ -49,7 +49,7 @@ def test_get_sides():
 
 def test_import_edges():
     sides = get_sides(MYSQL_CONFIG)
-    import_edges_from_sides(sides, 2, MYSQL_CONFIG)
+    import_edges_from_sides(sides, MYSQL_CONFIG, 2)
 
 
 def test_import_arcs():
