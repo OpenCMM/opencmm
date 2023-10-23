@@ -8,7 +8,8 @@ from pydantic import BaseModel
 from typing import Optional
 from server import result
 from listener.main import listener_start
-from listener.status import get_process_status, start_measuring
+from listener.status import get_process_status, start_measuring, get_running_process
+from server.coord import get_final_coordinates
 from server.config import MYSQL_CONFIG
 
 
@@ -107,10 +108,25 @@ async def download_gcode():
 
 @app.post("/start/measurement/{mtconnect_interval}")
 async def start_measurement(mtconnect_interval: int, background_tasks: BackgroundTasks):
-    sensor_ws_url = "ws://192.168.10.114:81"
+    # sensor_ws_url = "ws://192.168.10.114:81"
+    sensor_ws_url = "ws://localhost:8081"
+
+    running_process = get_running_process(MYSQL_CONFIG)
+    if running_process is not None:
+        raise HTTPException(
+            status_code=400,
+            detail="Measurement already running (process id: {running_process[0]}))",
+        )
+
+    final_coordinates = get_final_coordinates("data/gcode/opencmm.gcode")
     process_id = start_measuring(MYSQL_CONFIG, "running")
     background_tasks.add_task(
-        listener_start, sensor_ws_url, MYSQL_CONFIG, mtconnect_interval, process_id
+        listener_start,
+        sensor_ws_url,
+        MYSQL_CONFIG,
+        mtconnect_interval,
+        process_id,
+        final_coordinates,
     )
     return {"status": "ok"}
 

@@ -10,8 +10,8 @@ python = ">=3.11,<3.13"
 websockets = "^11.0.3"
 requests = "^2.31.0"
 mysql-connector-python = "^8.1.0"
-cnceye = "^0.4.0"
 cncmark = {path = "../cncmark"}
+cnceye = "^0.4.2"
 
 
 [tool.poetry.group.dev.dependencies]

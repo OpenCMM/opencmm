@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS `sensor` (
   `x` FLOAT NOT NULL,
   `y` FLOAT NOT NULL,
   `z` FLOAT NOT NULL,
+  `process_id` int(11) unsigned NOT NULL,
   `distance` FLOAT NOT NULL,
   `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)

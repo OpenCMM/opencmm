@@ -8,57 +8,57 @@ import threading
 from listener import status
 from cnceye.edge import find
 from cncmark import arc, pair
+import logging
 
-# home
-# server_url = "ws://192.168.10.132:81"
-server_url = "ws://192.168.10.114:81"
-# mobile
-# server_url = "ws://192.168.228.54:81"
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
+logger = logging.getLogger(__name__)
 
-# mock
-# server_url = "ws://localhost:8081"
 
 chunk_size = 1024
-position_path = ".//{urn:mtconnect.org:MTConnectStreams:2.0}Position"
-# position_path = ".//{urn:mtconnect.org:MTConnectStreams:1.3}Position"
 xyz = None
 initial_coordinate = (109.074, -15.028, -561.215)
-final_coordinate = (105.042, -11.028, -568.215)
 done = False
 data_to_insert = []
 
 
-async def receive_sensor_data(sensor_ws_url: str):
+async def receive_sensor_data(sensor_ws_url: str, process_id: int):
     global data_to_insert
     async with websockets.connect(sensor_ws_url) as websocket:
-        print("receive_sensor_data(): connected")
+        logger.info("receive_sensor_data(): connected")
 
         while not done:
             distance = await websocket.recv()
-            (x, y, z) = xyz
-            data_to_insert.append((x, y, z, float(distance)))
+            if xyz is not None:
+                (x, y, z) = xyz
+                data_to_insert.append((x, y, z, process_id, float(distance)))
 
 
 # ref. https://stackoverflow.com/questions/67734115/how-to-use-multithreading-with-websockets
-def listen_sensor(sensor_ws_url: str):
+def listen_sensor(sensor_ws_url: str, process_id: int):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(receive_sensor_data(sensor_ws_url))
+    loop.run_until_complete(receive_sensor_data(sensor_ws_url, process_id))
     loop.close()
 
 
-def contorl_streaming_status(sensor_ws_url: str, mysql_config: dict, process_id: int):
+def contorl_streaming_status(
+    sensor_ws_url: str, mysql_config: dict, process_id: int, final_coordinates: tuple
+):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(control_sensor(sensor_ws_url, mysql_config, process_id))
+    loop.run_until_complete(
+        control_sensor(sensor_ws_url, mysql_config, process_id, final_coordinates)
+    )
     loop.close()
 
 
-async def control_sensor(sensor_ws_url: str, mysql_config: dict, process_id: int):
+async def control_sensor(
+    sensor_ws_url: str, mysql_config: dict, process_id: int, final_coordinates: tuple
+):
     streaming = False
     global done
     async with websockets.connect(sensor_ws_url) as websocket:
-        print("control_sensor(): connected")
+        logger.info("control_sensor(): connected")
 
         idx = 0
         while not done:
@@ -66,34 +66,36 @@ async def control_sensor(sensor_ws_url: str, mysql_config: dict, process_id: int
             await asyncio.sleep(0.5)
             if not streaming and xyz is not None:
                 # if not streaming and xyz is not None and initial_coordinate == xyz:
-                print("ready to start streaming")
+                logger.info("ready to start streaming")
                 await websocket.send("startStreaming")
-                print("start streaming")
+                logger.info("start streaming")
                 streaming = True
 
             elif streaming and xyz is not None and idx == 40:
-                # elif streaming and xyz is not None and final_coordinate == xyz:
-                print("ready to stop streaming")
+                # elif streaming and xyz is not None and final_coordinates == xyz:
+                logger.info("ready to stop streaming")
                 await websocket.send("stopStreaming")
                 # await websocket.send("deepSleep")
-                print("stop streaming")
+                logger.info("stop streaming")
                 streaming = False
                 done = True
 
                 try:
                     combine_data(mysql_config)
-                    print("data combined")
+                    logger.info("data combined")
                     status.update_process_status(
                         mysql_config, process_id, "data combined"
                     )
                 except Exception as e:
-                    print(e)
+                    logger.warning(e)
                     status.update_process_status(
                         mysql_config, process_id, "Error at combine_data()", str(e)
                     )
 
                 try:
-                    measured_edges = find.find_edges(mysql_config=mysql_config)
+                    measured_edges = find.find_edges(
+                        process_id, mysql_config=mysql_config
+                    )
                     edge_data = find.get_edge_data(mysql_config)
                     # distance_threshold should be passed as an argument
                     update_list = find.identify_close_edge(edge_data, measured_edges)
@@ -107,17 +109,17 @@ async def control_sensor(sensor_ws_url: str, mysql_config: dict, process_id: int
                         )
                         break
                     find.add_measured_edge_coord(update_list, mysql_config)
-                    print(f"{edge_count} edges found")
+                    logger.info(f"{edge_count} edges found")
                     pair.add_line_length(mysql_config)
                     arc.add_measured_arc_info(mysql_config)
                 except Exception as e:
-                    print(e)
+                    logger.warning(e)
                     status.update_process_status(
                         mysql_config, process_id, "Error at find_edges()", str(e)
                     )
 
                 status.update_process_status(mysql_config, process_id, "done")
-                print("done")
+                logger.info("done")
 
 
 def combine_data(mysql_config: dict):
@@ -126,7 +128,8 @@ def combine_data(mysql_config: dict):
     mysql_cur = mysql_conn.cursor()
 
     mysql_cur.executemany(
-        "INSERT INTO sensor(x, y, z, distance) VALUES (%s, %s, %s, %s)", data_to_insert
+        "INSERT INTO sensor(x, y, z, process_id, distance) VALUES (%s,%s,%s, %s, %s)",
+        data_to_insert,
     )
     mysql_conn.commit()
     mysql_cur.close()
@@ -158,7 +161,7 @@ def mtconnect_streaming_reader(interval: int):
 
                     if mt.is_last_chunk(raw_data):
                         try:
-                            xyz = mt.get_coordinates(xml_buffer, position_path)[:3]
+                            xyz = mt.get_coordinates(xml_buffer)[:3]
                         except ET.ParseError:
                             pass
                 else:
@@ -168,23 +171,35 @@ def mtconnect_streaming_reader(interval: int):
 
                     # full xml data received
                     try:
-                        xyz = mt.get_coordinates(xml_buffer, position_path)[:3]
+                        xyz = mt.get_coordinates(xml_buffer)[:3]
                     except ET.ParseError:
-                        print("ParseError")
+                        logger.warning("ParseError")
 
         else:
-            print("Error:", response.status_code)
+            logger.warning("Error:", response.status_code)
 
     except requests.ConnectionError:
-        print("Connection to the MTConnect agent was lost.")
+        logger.warning("Connection to the MTConnect agent was lost.")
     except KeyboardInterrupt:
-        print("Streaming stopped by user.")
+        logger.info("Streaming stopped by user.")
 
 
 def listener_start(
-    sensor_ws_url: str, mysql_config: dict, mtconnect_interval: int, process_id: int
+    sensor_ws_url: str,
+    mysql_config: dict,
+    mtconnect_interval: int,
+    process_id: int,
+    final_coordinates: tuple,
 ):
-    thread1 = threading.Thread(target=listen_sensor, args=((sensor_ws_url,)))
+    thread1 = threading.Thread(
+        target=listen_sensor,
+        args=(
+            (
+                sensor_ws_url,
+                process_id,
+            )
+        ),
+    )
     thread2 = threading.Thread(
         target=mtconnect_streaming_reader, args=((mtconnect_interval,))
     )
@@ -195,6 +210,7 @@ def listener_start(
                 sensor_ws_url,
                 mysql_config,
                 process_id,
+                final_coordinates,
             )
         ),
     )

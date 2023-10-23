@@ -170,13 +170,13 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "cnceye"
-version = "0.4.0"
+version = "0.4.2"
 description = "CMM python library"
 optional = false
 python-versions = ">=3.11,<3.13"
 files = [
-    {file = "cnceye-0.4.0-py3-none-any.whl", hash = "sha256:397c8b534e743a63c23f022c8b28e1cde13746c619ba2f0aa297166aeebf4e8e"},
-    {file = "cnceye-0.4.0.tar.gz", hash = "sha256:1667e2c28cca61ac42107a7f180b77356c1a60ed38cf10941b8610949509c975"},
+    {file = "cnceye-0.4.2-py3-none-any.whl", hash = "sha256:da0f43b59b64dbbe74437d3e5b41366e3f1d7ac34d7493ee0e891d84c073c4dc"},
+    {file = "cnceye-0.4.2.tar.gz", hash = "sha256:063123169277da9e3a2cd36d2c8ce455f5e51bd60b5fb5631299e7fae201f5d8"},
 ]
 
 [package.dependencies]
@@ -653,4 +653,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.13"
-content-hash = "9e815288fdda64327d6bd60d5039487c8623b52ac689ca9157ade6cf15580af7"
+content-hash = "abfb78603bbff271b92f1c660602dd66c91b90e27e5b4d4d03c8b14e2cc50b2c"
