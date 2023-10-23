@@ -216,7 +216,7 @@ scipy = ">=1.11.1,<2.0.0"
 
 [[package]]
 name = "cncmark"
-version = "0.3.3"
+version = "0.3.4"
 description = "CncMark generates G-code to measure workpiece dimensions using a laser triangulation sensor from a stl file."
 optional = false
 python-versions = ">=3.11,<3.13"

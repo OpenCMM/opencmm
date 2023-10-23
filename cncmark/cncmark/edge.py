@@ -70,6 +70,11 @@ def get_edges_by_side_id(side_id: int, mysql_config: dict):
     cnx.close()
     return edges
 
+def to_gcode_row(x, y, feedrate):
+    # round to 3 decimal places
+    x = round(x, 3)
+    y = round(y, 3)
+    return f"G1 X{x} Y{y} F{feedrate}"
 
 def get_edge_path(
     mysql_config: dict,
@@ -93,8 +98,8 @@ def get_edge_path(
                 py1 = y + length
                 path.append(
                     [
-                        f"G1 X{x} Y{py0} Z{z} F{move_feedrate}",
-                        f"G1 X{x} Y{py1} Z{z} F{measure_feedrate}",
+                        to_gcode_row(x, py0, move_feedrate),
+                        to_gcode_row(x, py1, measure_feedrate),
                         x,
                         y,
                     ]
@@ -105,8 +110,8 @@ def get_edge_path(
                 px1 = x + length
                 path.append(
                     [
-                        f"G1 X{px0} Y{y} Z{z} F{move_feedrate}",
-                        f"G1 X{px1} Y{y} Z{z} F{measure_feedrate}",
+                        to_gcode_row(px0, y, move_feedrate),
+                        to_gcode_row(px1, y, measure_feedrate),
                         x,
                         y,
                     ]
@@ -122,8 +127,8 @@ def get_edge_path(
             point2 = [x + xyz_offset[i] for i, x in enumerate(point2)]
             path.append(
                 [
-                    f"G1 X{point1[0]} Y{point1[1]} Z{point1[2]} F{move_feedrate}",
-                    f"G1 X{point2[0]} Y{point2[1]} Z{point2[2]} F{measure_feedrate}",
+                    to_gcode_row(point1[0], point1[1], move_feedrate),
+                    to_gcode_row(point2[0], point2[1], measure_feedrate),
                     x,
                     y,
                 ]
@@ -135,7 +140,7 @@ def get_edge_path(
 def generate_gcode(path):
     # avoid duplicate gcode
     random_4_digit = str(random.randint(1000, 9999))
-    gcode = ["%", f"O{random_4_digit}"]
+    gcode = ["%", f"O{random_4_digit}", "G90 G54"]
     for row in path:
         gcode.append(row[0])
         gcode.append(row[1])
