@@ -196,7 +196,13 @@ def listener_start(
         ),
     )
     thread2 = threading.Thread(
-        target=mtconnect_streaming_reader, args=((mtconnect_interval, mtconnect_url, ))
+        target=mtconnect_streaming_reader,
+        args=(
+            (
+                mtconnect_interval,
+                mtconnect_url,
+            )
+        ),
     )
     thread3 = threading.Thread(
         target=contorl_streaming_status,

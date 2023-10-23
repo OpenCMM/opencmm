@@ -70,11 +70,13 @@ def get_edges_by_side_id(side_id: int, mysql_config: dict):
     cnx.close()
     return edges
 
+
 def to_gcode_row(x, y, feedrate):
     # round to 3 decimal places
     x = round(x, 3)
     y = round(y, 3)
     return f"G1 X{x} Y{y} F{feedrate}"
+
 
 def get_edge_path(
     mysql_config: dict,

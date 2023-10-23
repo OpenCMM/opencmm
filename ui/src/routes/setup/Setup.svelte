@@ -25,7 +25,7 @@
 			z: Number(z),
 			x_offset: Number(xOffset),
 			y_offset: Number(yOffset),
-			z_offset: Number(zOffset),
+			z_offset: Number(zOffset)
 		};
 
 		try {
