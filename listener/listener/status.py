@@ -39,6 +39,7 @@ def get_process_status(mysql_config: dict, process_id: int):
     mysql_conn.close()
     return process_status
 
+
 def get_running_process(mysql_config: dict):
     mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
     mysql_cur = mysql_conn.cursor()

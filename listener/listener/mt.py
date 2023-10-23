@@ -31,22 +31,27 @@ def get_coordinates(xml_string: str):
 def is_last_chunk(raw_data):
     return raw_data.endswith("/MTConnectStreams>\n\r\n")
 
+
 def extract_version_number(string):
-  """Extracts the version number after `MTConnectStreams:` from a string.
+    """Extracts the version number after `MTConnectStreams:` from a string.
 
-  Args:
-    string: A string containing the version number.
+    Args:
+      string: A string containing the version number.
 
-  Returns:
-    A string containing the version number, or None if the version number could
-    not be extracted.
-  """
+    Returns:
+      A string containing the version number, or None if the version number could
+      not be extracted.
+    """
 
-  match = re.search(r'{urn:mtconnect.org:MTConnectStreams:(?P<version>\d+\.\d+)}MTConnectStreams', string)
-  if match:
-    return match.group('version')
-  else:
-    return None
+    match = re.search(
+        r"{urn:mtconnect.org:MTConnectStreams:(?P<version>\d+\.\d+)}MTConnectStreams",
+        string,
+    )
+    if match:
+        return match.group("version")
+    else:
+        return None
+
 
 def get_mtconnect_version(xml_string: str):
     root = ET.fromstring(xml_string)
