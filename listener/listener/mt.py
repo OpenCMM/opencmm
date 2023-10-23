@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+import re
 
 xml_start = '<?xml version="1.0" encoding="UTF-8"?>'
 
@@ -18,8 +19,10 @@ def is_first_chunk(raw_data: str) -> bool:
     return two == "--"
 
 
-def get_coordinates(xml_string: str, position_path: str):
+def get_coordinates(xml_string: str):
     root = ET.fromstring(xml_string)
+    version = get_mtconnect_version(xml_string)
+    position_path = ".//{urn:mtconnect.org:MTConnectStreams:" + version + "}Position"
     positions = root.findall(position_path)
     xyz = tuple([float(p.text) for p in positions])
     return xyz
@@ -27,3 +30,25 @@ def get_coordinates(xml_string: str, position_path: str):
 
 def is_last_chunk(raw_data):
     return raw_data.endswith("/MTConnectStreams>\n\r\n")
+
+def extract_version_number(string):
+  """Extracts the version number after `MTConnectStreams:` from a string.
+
+  Args:
+    string: A string containing the version number.
+
+  Returns:
+    A string containing the version number, or None if the version number could
+    not be extracted.
+  """
+
+  match = re.search(r'{urn:mtconnect.org:MTConnectStreams:(?P<version>\d+\.\d+)}MTConnectStreams', string)
+  if match:
+    return match.group('version')
+  else:
+    return None
+
+def get_mtconnect_version(xml_string: str):
+    root = ET.fromstring(xml_string)
+    tag = root.tag
+    return extract_version_number(tag)

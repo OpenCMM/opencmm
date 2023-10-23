@@ -7,8 +7,6 @@ import xml.etree.ElementTree as ET
 # endpoint = "https://demo.metalogi.io/sample?path=//Axes/Components/Linear[@id=%22x%22]&interval=0"
 # endpoint = "https://demo.metalogi.io/current?path=//DataItems/DataItem[@id=%22avail%22]&interval=2000"
 
-position_path = ".//{urn:mtconnect.org:MTConnectStreams:2.0}Position"
-
 
 def test_remove_http_respose_header():
     endpoint = "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem&interval=1000"
@@ -30,7 +28,7 @@ def test_remove_http_respose_header():
 
                     if mt.is_last_chunk(raw_data):
                         try:
-                            xyz = mt.get_coordinates(xml_buffer, position_path)[:3]
+                            xyz = mt.get_coordinates(xml_buffer)[:3]
                             for v in xyz:
                                 assert v is not None
                                 # check if the values are float
@@ -45,7 +43,7 @@ def test_remove_http_respose_header():
 
                     # full xml data received
                     try:
-                        xyz = mt.get_coordinates(xml_buffer, position_path)[:3]
+                        xyz = mt.get_coordinates(xml_buffer)[:3]
                         for v in xyz:
                             assert v is not None
                             # check if the values are float
