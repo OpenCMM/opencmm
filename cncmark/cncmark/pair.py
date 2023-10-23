@@ -53,9 +53,9 @@ def point_to_line_distance(edges_on_the_same_line: list, point: tuple):
 
 
 def add_line_length(mysql_config: dict):
-    pairs = get_pairs()
+    pairs = get_pairs(mysql_config)
     for (pair_id,) in pairs:
-        sides = get_sides_by_pair_id(pair_id)
+        sides = get_sides_by_pair_id(pair_id, mysql_config)
         side1 = sides[0]
         side2 = sides[1]
         length = point_to_line_distance([side1[0:3], side1[3:6]], side2[0:3])

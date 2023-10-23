@@ -9,6 +9,7 @@ from typing import Optional
 from server import result
 from listener.main import listener_start
 from listener.status import get_process_status, start_measuring
+from server.config import MYSQL_CONFIG
 
 
 class JobInfo(BaseModel):
@@ -20,13 +21,6 @@ class JobInfo(BaseModel):
     z_offset: Optional[float] = 0.0
     z: Optional[float] = None
 
-
-mysql_config = dict(
-    host="192.168.122.230",
-    port=3306,
-    user="root",
-    password="root",
-)
 
 model_path = "data/3dmodel/3dmodel.stl"
 
@@ -91,7 +85,7 @@ async def setup_data(job_info: JobInfo):
         raise HTTPException(status_code=400, detail="No model uploaded")
     offset = (job_info.x_offset, job_info.y_offset, job_info.z_offset)
     process_stl(
-        mysql_config,
+        MYSQL_CONFIG,
         model_path,
         job_info.measure_length,
         job_info.measure_feedrate,
@@ -114,9 +108,9 @@ async def download_gcode():
 @app.post("/start/measurement/{mtconnect_interval}")
 async def start_measurement(mtconnect_interval: int, background_tasks: BackgroundTasks):
     sensor_ws_url = "ws://192.168.10.114:81"
-    process_id = start_measuring(mysql_config, "running")
+    process_id = start_measuring(MYSQL_CONFIG, "running")
     background_tasks.add_task(
-        listener_start, sensor_ws_url, mysql_config, mtconnect_interval, process_id
+        listener_start, sensor_ws_url, MYSQL_CONFIG, mtconnect_interval, process_id
     )
     return {"status": "ok"}
 
@@ -148,7 +142,7 @@ async def get_result_arcs():
 
 @app.get("/get_measurement_status/{process_id}")
 async def get_measurement_status(process_id: int):
-    return get_process_status(mysql_config, process_id)
+    return get_process_status(MYSQL_CONFIG, process_id)
 
 
 def start():
