@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cncmark"
-version = "0.3.2"
+version = "0.3.3"
 description = "CncMark generates G-code to measure workpiece dimensions using a laser triangulation sensor from a stl file."
 license = "MIT"
 authors = ["yuichiroaoki <45054071+yuichiroaoki@users.noreply.github.com>"]

@@ -9,6 +9,7 @@
 	let xOffset = 0;
 	let yOffset = 0;
 	let zOffset = 0;
+	let z = 0;
 	let measureLength = 2.5;
 	let measureFeedRate = 300.0;
 	let moveFeedRate = 600.0;
@@ -21,9 +22,10 @@
 			measure_length: Number(measureLength),
 			measure_feedrate: Number(measureFeedRate),
 			move_feedrate: Number(moveFeedRate),
+			z: Number(z),
 			x_offset: Number(xOffset),
 			y_offset: Number(yOffset),
-			z_offset: Number(zOffset)
+			z_offset: Number(zOffset),
 		};
 
 		try {
@@ -78,6 +80,9 @@
 		</FormGroup>
 		<FormGroup>
 			<TextInput labelText="z" id="zOffset" bind:value={zOffset} />
+		</FormGroup>
+		<FormGroup>
+			<TextInput labelText="z" id="z" bind:value={z} />
 		</FormGroup>
 		<Button type="submit">{$_('home.setup.submit')}</Button>
 	</Form>
