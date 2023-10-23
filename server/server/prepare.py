@@ -6,12 +6,13 @@ from cncmark.edge import (
     generate_gcode,
     save_gcode,
 )
-from cncmark.line import import_parallel_lines, get_sides, import_edges_from_sides
+from cncmark.line import import_lines
 from cncmark.arc import import_arcs
 from typing import Optional
 
 
 def process_stl(
+    mysql_config: dict,
     stl_file_path: str,
     measure_length: float,
     measure_feedrate: float,
@@ -22,11 +23,11 @@ def process_stl(
     z = 10.0
     lines, arcs = get_shapes(stl_file_path, z)
 
-    import_parallel_lines(lines)
-    sides = get_sides()
-    import_edges_from_sides(sides)
-    import_arcs(arcs)
-    path = get_edge_path(measure_length, measure_feedrate, move_feedrate, offset)
+    import_lines(lines, mysql_config)
+    import_arcs(arcs, mysql_config)
+    path = get_edge_path(
+        mysql_config, measure_length, measure_feedrate, move_feedrate, offset
+    )
 
     # save gcode
     gcode = generate_gcode(path)

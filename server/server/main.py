@@ -22,7 +22,7 @@ class JobInfo(BaseModel):
 
 
 mysql_config = dict(
-    host="192.168.122.76",
+    host="192.168.122.230",
     port=3306,
     user="root",
     password="root",
@@ -91,6 +91,7 @@ async def setup_data(job_info: JobInfo):
         raise HTTPException(status_code=400, detail="No model uploaded")
     offset = (job_info.x_offset, job_info.y_offset, job_info.z_offset)
     process_stl(
+        mysql_config,
         model_path,
         job_info.measure_length,
         job_info.measure_feedrate,
