@@ -148,10 +148,10 @@ def add_measured_arc_info(mysql_config: dict):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
 
-    arcs = get_arcs()
+    arcs = get_arcs(mysql_config)
     for arc in arcs:
         (arc_id, radius, cx, cy, cz, rradius, rcx, rcy, rcz) = arc
-        edges = get_arc_edge(arc_id)
+        edges = get_arc_edge(arc_id, mysql_config)
         radius, center = get_arc_info(np.array(edges))
 
         query = (

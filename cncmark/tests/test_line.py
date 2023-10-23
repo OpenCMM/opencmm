@@ -35,11 +35,11 @@ def test_get_parallel_lines():
 
     pairs = get_pairs(x, 0)
     assert len(pairs) == 2
-    import_sides(pairs, "line")
+    import_sides(pairs, "line", MYSQL_CONFIG)
 
     pairs = get_pairs(y, 1)
     assert len(pairs) == 2
-    import_sides(pairs, "line")
+    import_sides(pairs, "line", MYSQL_CONFIG)
 
 
 def test_get_sides():
