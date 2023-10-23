@@ -17,10 +17,10 @@ class JobInfo(BaseModel):
     measure_length: float
     measure_feedrate: float
     move_feedrate: float
+    z: float
     x_offset: Optional[float] = 0.0
     y_offset: Optional[float] = 0.0
     z_offset: Optional[float] = 0.0
-    z: Optional[float] = None
 
 
 model_path = "data/3dmodel/3dmodel.stl"
@@ -108,8 +108,12 @@ async def download_gcode():
 
 @app.post("/start/measurement/{mtconnect_interval}")
 async def start_measurement(mtconnect_interval: int, background_tasks: BackgroundTasks):
-    # sensor_ws_url = "ws://192.168.10.114:81"
-    sensor_ws_url = "ws://localhost:8081"
+    sensor_ws_url = "ws://192.168.0.35:81"
+    mtconnect_url = (
+        "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
+    )
+    # mtconnect_url = "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
+    # sensor_ws_url = "ws://localhost:8081"
 
     running_process = get_running_process(MYSQL_CONFIG)
     if running_process is not None:
@@ -127,6 +131,7 @@ async def start_measurement(mtconnect_interval: int, background_tasks: Backgroun
         mtconnect_interval,
         process_id,
         final_coordinates,
+        mtconnect_url,
     )
     return {"status": "ok"}
 

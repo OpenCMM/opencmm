@@ -8,7 +8,6 @@ from cncmark.edge import (
 )
 from cncmark.line import import_lines
 from cncmark.arc import import_arcs
-from typing import Optional
 
 
 def process_stl(
@@ -18,9 +17,8 @@ def process_stl(
     measure_feedrate: float,
     move_feedrate: float,
     offset: tuple,
-    z: Optional[float],
+    z: float,
 ):
-    z = 10.0
     lines, arcs = get_shapes(stl_file_path, z)
 
     import_lines(lines, mysql_config)
