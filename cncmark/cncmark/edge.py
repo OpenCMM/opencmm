@@ -88,9 +88,11 @@ def get_edge_path(
     path = []
     edges = get_edges(mysql_config)
     for edge in edges:
-        edge_id, side_id, arc_id, x, y, z, rx, ry, rz = edge
+        edge_id, model_id, side_id, arc_id, x, y, z, rx, ry, rz = edge
         if arc_id is None:
-            side_id, x0, y0, z0, x1, y1, z1, pair_id = get_side(side_id, mysql_config)
+            side_id, model_id, x0, y0, z0, x1, y1, z1, pair_id = get_side(
+                side_id, mysql_config
+            )
             direction = get_direction(x0, y0, x1, y1)
 
             (x, y, z) = (x + xyz_offset[0], y + xyz_offset[1], z + xyz_offset[2])
@@ -121,7 +123,7 @@ def get_edge_path(
 
         else:
             assert side_id is None
-            arc_id, radius, cx, cy, cz, rradius, rcx, rcy, rcz = get_arc(
+            arc_id, model_id, radius, cx, cy, cz, rradius, rcx, rcy, rcz = get_arc(
                 arc_id, mysql_config
             )
             point1, point2 = get_arc_path((cx, cy, cz), (x, y, z), length)
@@ -153,3 +155,13 @@ def save_gcode(gcode, file_path: str):
     with open(file_path, "w") as f:
         for line in gcode:
             f.write(line + "\n")
+
+
+def delete_edges_with_model_id(model_id: int, mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
+    cursor = cnx.cursor()
+    query = "DELETE FROM edge WHERE model_id = %s"
+    cursor.execute(query, (model_id,))
+    cnx.commit()
+    cursor.close()
+    cnx.close()

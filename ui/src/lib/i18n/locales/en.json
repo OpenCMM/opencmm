@@ -6,7 +6,7 @@
 			"labelDescription": "Only .stl files are supported."
 		},
 		"setup": {
-			"title": "GCode Setup",
+			"title": "Create GCode",
 			"measureLength": {
 				"label": "measure length"
 			},
@@ -17,7 +17,7 @@
 				"label": "feed rate when moving"
 			},
 			"offset": "offset",
-			"submit": "ok",
+			"submit": "Create",
 			"done": "done"
 		},
 		"gcode": {
@@ -33,6 +33,19 @@
 			},
 			"start": "Start",
 			"error": "Failed to start measurement"
+		},
+		"file": {
+			"3dmodel": {
+				"title": "3D model files",
+				"name": "Name",
+				"size": "Size",
+				"lastModified": "Last modified",
+				"gcodeReady": "GCode",
+				"createGcode": "Create GCode",
+				"modelView": "3D model view",
+				"downloadGcode": "Download GCode",
+				"delete": "Delete"
+			}
 		},
 		"result": {
 			"edge": {
@@ -66,5 +79,8 @@
 		"theme": {
 			"label": "Theme"
 		}
+	},
+	"common": {
+		"cancel": "Go back"
 	}
 }

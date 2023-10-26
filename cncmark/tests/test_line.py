@@ -14,32 +14,30 @@ from cncmark.edge import (
 from cncmark.arc import import_arcs
 from .config import MYSQL_CONFIG
 
+model_id = 1
+
 
 def test_get_lines():
-    z = 10.0
-    lines, arcs = get_shapes("tests/fixtures/stl/sample.stl", z)
+    lines, arcs = get_shapes("tests/fixtures/stl/sample.stl")
     assert len(lines) == 8
     assert len(arcs) == 5
     for line in lines:
         assert line.shape == (2, 3)
-        assert line[0][2] == z
-        assert line[1][2] == z
 
 
 def test_get_parallel_lines():
-    z = 10.0
-    lines, arcs = get_shapes("tests/fixtures/stl/sample.stl", z)
+    lines, arcs = get_shapes("tests/fixtures/stl/sample.stl")
     x, y, other = get_parallel_lines(lines)
     assert len(x) == 4
     assert len(y) == 4
 
     pairs = get_pairs(x, 0)
     assert len(pairs) == 2
-    import_sides(pairs, "line", MYSQL_CONFIG)
+    import_sides(model_id, pairs, "line", MYSQL_CONFIG)
 
     pairs = get_pairs(y, 1)
     assert len(pairs) == 2
-    import_sides(pairs, "line", MYSQL_CONFIG)
+    import_sides(model_id, pairs, "line", MYSQL_CONFIG)
 
 
 def test_get_sides():
@@ -53,9 +51,8 @@ def test_import_edges():
 
 
 def test_import_arcs():
-    z = 10.0
-    lines, arcs = get_shapes("tests/fixtures/stl/sample.stl", z)
-    import_arcs(arcs, MYSQL_CONFIG)
+    lines, arcs = get_shapes("tests/fixtures/stl/sample.stl")
+    import_arcs(model_id, arcs, MYSQL_CONFIG)
 
 
 def test_generate_gcode():

@@ -3,26 +3,34 @@
 <script lang="ts">
 	import axios from 'axios';
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
-	import { Form, FormGroup, TextInput, Button } from 'carbon-components-svelte';
+	import { page } from '$app/stores';
+	import { Form, FormGroup, TextInput, Button, ButtonSet } from 'carbon-components-svelte';
 	import { _ } from 'svelte-i18n';
+	import { base } from '$app/paths';
+	import { goto, afterNavigate } from '$app/navigation';
+
+	let previousPage: string = base;
+	afterNavigate(({ from }) => {
+		previousPage = from?.url.pathname || previousPage;
+	});
 
 	let xOffset = 0;
 	let yOffset = 0;
 	let zOffset = 0;
-	let z = 0;
 	let measureLength = 2.5;
 	let measureFeedRate = 300.0;
 	let moveFeedRate = 600.0;
 	let error: string | null = null;
 	let settingDone = false;
+	const modelId = $page.url.searchParams.get('id');
 	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
 
 		const data = {
+			three_d_model_id: Number(modelId),
 			measure_length: Number(measureLength),
 			measure_feedrate: Number(measureFeedRate),
 			move_feedrate: Number(moveFeedRate),
-			z: Number(z),
 			x_offset: Number(xOffset),
 			y_offset: Number(yOffset),
 			z_offset: Number(zOffset)
@@ -81,10 +89,10 @@
 		<FormGroup>
 			<TextInput labelText="z" id="zOffset" bind:value={zOffset} />
 		</FormGroup>
-		<FormGroup>
-			<TextInput labelText="z" id="z" bind:value={z} />
-		</FormGroup>
-		<Button type="submit">{$_('home.setup.submit')}</Button>
+		<ButtonSet>
+			<Button kind="secondary" on:click={() => goto(previousPage)}>{$_('common.cancel')}</Button>
+			<Button type="submit">{$_('home.setup.submit')}</Button>
+		</ButtonSet>
 	</Form>
 </div>
 

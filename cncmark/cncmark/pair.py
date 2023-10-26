@@ -91,3 +91,13 @@ def add_measured_length(
     cnx.commit()
     cursor.close()
     cnx.close()
+
+
+def delete_row_with_model_id(model_id: int, mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
+    cursor = cnx.cursor()
+    query = "DELETE FROM pair WHERE model_id = %s"
+    cursor.execute(query, (model_id,))
+    cnx.commit()
+    cursor.close()
+    cnx.close()

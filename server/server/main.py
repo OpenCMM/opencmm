@@ -10,20 +10,30 @@ from server import result
 from listener.main import listener_start
 from listener.status import get_process_status, start_measuring, get_running_process
 from server.coord import get_final_coordinates
-from server.config import MYSQL_CONFIG
+from server.config import MYSQL_CONFIG, MODEL_PATH
+from server.model import (
+    get_3dmodel_data,
+    model_exists,
+    model_id_to_filename,
+    add_new_3dmodel,
+)
 
 
 class JobInfo(BaseModel):
+    three_d_model_id: int
     measure_length: float
     measure_feedrate: float
     move_feedrate: float
-    z: float
     x_offset: Optional[float] = 0.0
     y_offset: Optional[float] = 0.0
     z_offset: Optional[float] = 0.0
 
 
-model_path = "data/3dmodel/3dmodel.stl"
+class MeasurementConfig(BaseModel):
+    mtconnect_interval: int
+    interval: int
+    threshold: int
+
 
 app = FastAPI()
 
@@ -61,19 +71,30 @@ async def upload_3dmodel(file: UploadFile):
     if file_extension not in ["stl", "STL"]:
         raise HTTPException(status_code=400, detail="File extension not supported")
 
-    with open(model_path, "wb") as buffer:
+    _model_id = add_new_3dmodel(file.filename)
+    with open(f"{MODEL_PATH}/{file.filename}", "wb") as buffer:
         buffer.write(await file.read())
 
-    return {"status": "ok"}
+    return {"status": "ok", "model_id": _model_id}
+
+
+@app.get("/list/3dmodels")
+async def list_3dmodels():
+    """List uploaded 3d models"""
+    return {"models": get_3dmodel_data()}
 
 
 @app.get("/load/model/{model_id}")
 async def load_model(model_id: str):
-    return FileResponse(f"data/3dmodel/{model_id}.stl")
+    model_id = int(model_id)
+    filename = model_id_to_filename(model_id)
+    return FileResponse(f"data/3dmodel/{filename}")
 
 
-@app.get("/load/gcode/{filename}")
-async def load_gcode(filename: str):
+@app.get("/load/gcode/{model_id}")
+async def load_gcode(model_id: str):
+    model_id = int(model_id)
+    filename = model_id_to_filename(model_id)
     return FileResponse(f"data/gcode/{filename}.gcode")
 
 
@@ -81,18 +102,16 @@ async def load_gcode(filename: str):
 async def setup_data(job_info: JobInfo):
     """Find verticies, generate gcode"""
 
-    # check if model exists
-    if not os.path.exists(model_path):
+    filename = model_id_to_filename(job_info.three_d_model_id)
+    if not model_exists(filename):
         raise HTTPException(status_code=400, detail="No model uploaded")
     offset = (job_info.x_offset, job_info.y_offset, job_info.z_offset)
     process_stl(
         MYSQL_CONFIG,
-        model_path,
-        job_info.measure_length,
-        job_info.measure_feedrate,
-        job_info.move_feedrate,
+        job_info.three_d_model_id,
+        filename,
+        (job_info.measure_length, job_info.measure_feedrate, job_info.move_feedrate),
         offset,
-        job_info.z,
     )
 
     return {"status": "ok"}
@@ -106,8 +125,10 @@ async def download_gcode():
     return FileResponse("data/gcode/opencmm.gcode")
 
 
-@app.post("/start/measurement/{mtconnect_interval}")
-async def start_measurement(mtconnect_interval: int, background_tasks: BackgroundTasks):
+@app.post("/start/measurement")
+async def start_measurement(
+    _conf: MeasurementConfig, background_tasks: BackgroundTasks
+):
     sensor_ws_url = "ws://192.168.0.35:81"
     mtconnect_url = (
         "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
@@ -128,19 +149,12 @@ async def start_measurement(mtconnect_interval: int, background_tasks: Backgroun
         listener_start,
         sensor_ws_url,
         MYSQL_CONFIG,
-        mtconnect_interval,
+        (mtconnect_url, _conf.mtconnect_interval),
         process_id,
         final_coordinates,
-        mtconnect_url,
+        (_conf.interval, _conf.threshold),
     )
     return {"status": "ok"}
-
-
-@app.get("/load/image")
-async def load_image():
-    if not os.path.exists("data/images/result.png"):
-        raise HTTPException(status_code=400, detail="No image file generated")
-    return FileResponse("data/images/result.png")
 
 
 @app.get("/result/edges")

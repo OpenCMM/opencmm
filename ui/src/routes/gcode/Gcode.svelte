@@ -6,6 +6,7 @@
 	import { GCodeLoader } from 'three/addons/loaders/GCodeLoader.js';
 	import { STLLoader } from 'three/addons/loaders/STLLoader.js';
 	import axios from 'axios';
+	import { page } from '$app/stores';
 	import { getSphereMesh } from './utils';
 
 	let container: HTMLDivElement;
@@ -20,15 +21,16 @@
 
 		camera.position.set(0, -100, 100);
 
+		const modelId = $page.url.searchParams.get('id');
 		const loader = new GCodeLoader();
-		loader.load('http://127.0.0.1:8000/load/gcode/opencmm', function (obj: any) {
+		loader.load(`http://127.0.0.1:8000/load/gcode/${modelId}`, function (obj: any) {
 			// rotate the model
 			obj.rotateX(Math.PI / 2);
 			scene.add(obj);
 		});
 
 		const stlLoader = new STLLoader();
-		stlLoader.load('http://127.0.0.1:8000/load/model/3dmodel', function (geometry: any) {
+		stlLoader.load(`http://127.0.0.1:8000/load/model/${modelId}`, function (geometry: any) {
 			let material = new THREE.MeshPhongMaterial({
 				color: 0xf0f0f0
 			});

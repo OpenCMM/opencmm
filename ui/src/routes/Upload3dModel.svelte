@@ -5,6 +5,7 @@
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
 	import { FileUploader } from 'carbon-components-svelte';
 	import { _ } from 'svelte-i18n';
+	import { goto } from '$app/navigation';
 
 	let error: string | null = null;
 	const handleFileChange = async (event: CustomEvent) => {
@@ -27,7 +28,8 @@
 			console.log(res);
 
 			if (res.status === 200 && res.data['status'] === 'ok') {
-				window.location.href = '/setup';
+				const modelId = res.data['model_id'];
+				goto(`/setup?id=${modelId}`);
 			} else {
 				error = res.data['message'];
 			}

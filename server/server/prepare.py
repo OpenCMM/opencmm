@@ -1,32 +1,33 @@
 from cncmark.point import (
     get_shapes,
 )
-from cncmark.edge import (
-    get_edge_path,
-    generate_gcode,
-    save_gcode,
-)
-from cncmark.line import import_lines
-from cncmark.arc import import_arcs
+from cncmark import line, edge, arc
+from server.config import MODEL_PATH, GCODE_PATH
 
 
 def process_stl(
     mysql_config: dict,
-    stl_file_path: str,
-    measure_length: float,
-    measure_feedrate: float,
-    move_feedrate: float,
+    model_id: int,
+    stl_filename: str,
+    measure_config: tuple,
     offset: tuple,
-    z: float,
 ):
-    lines, arcs = get_shapes(stl_file_path, z)
+    (measure_length, measure_feedrate, move_feedrate) = measure_config
+    lines, arcs = get_shapes(f"{MODEL_PATH}/{stl_filename}")
 
-    import_lines(lines, mysql_config)
-    import_arcs(arcs, mysql_config)
-    path = get_edge_path(
+    remove_data_with_model_id(model_id, mysql_config)
+    line.import_lines(model_id, lines, mysql_config)
+    arc.import_arcs(model_id, arcs, mysql_config)
+    path = edge.get_edge_path(
         mysql_config, measure_length, measure_feedrate, move_feedrate, offset
     )
 
     # save gcode
-    gcode = generate_gcode(path)
-    save_gcode(gcode, "data/gcode/opencmm.gcode")
+    gcode = edge.generate_gcode(path)
+    edge.save_gcode(gcode, f"{GCODE_PATH}/{stl_filename}.gcode")
+
+
+def remove_data_with_model_id(model_id: int, mysql_config: dict):
+    line.delete_sides_with_model_id(model_id, mysql_config)
+    arc.delete_arcs_with_model_id(model_id, mysql_config)
+    edge.delete_edges_with_model_id(model_id, mysql_config)

@@ -6,7 +6,7 @@
 			"labelDescription": "STLファイルのみ対応しています"
 		},
 		"setup": {
-			"title": "GCodeの設定",
+			"title": "GCode作成",
 			"measureLength": {
 				"label": "測定箇所の長さ"
 			},
@@ -31,6 +31,19 @@
 			},
 			"start": "測定開始",
 			"error": "測定に失敗しました。"
+		},
+		"file": {
+			"3dmodel": {
+				"title": "CADデータ",
+				"name": "ファイル名",
+				"size": "サイズ",
+				"lastModified": "最終更新日時",
+				"gcodeReady": "GCode",
+				"createGcode": "GCode作成",
+				"modelView": "3Dモデル",
+				"downloadGcode": "GCodeダウンロード",
+				"delete": "削除"
+			}
 		},
 		"result": {
 			"edge": {
@@ -64,5 +77,8 @@
 		"theme": {
 			"label": "テーマ"
 		}
+	},
+	"common": {
+		"cancel": "戻る"
 	}
 }

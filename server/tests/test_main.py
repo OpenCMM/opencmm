@@ -17,18 +17,42 @@ def test_upload_3dmodel():
     with open(path, "rb") as f:
         response = client.post("/upload/3dmodel", files={"file": f})
         assert response.status_code == 200
-        assert response.json() == {"status": "ok"}
+        assert response.json() == {"status": "ok", "model_id": 1}
+
+
+def test_upload_duplicate_3dmodel():
+    path = "tests/fixtures/stl/sample.stl"
+
+    with open(path, "rb") as f:
+        response = client.post("/upload/3dmodel", files={"file": f})
+        assert response.status_code == 200
+        assert response.json() == {"status": "ok", "model_id": 1}
 
 
 def test_setup_data():
     job_info = {
+        "three_d_model_id": 1,
         "measure_length": 2.5,
         "measure_feedrate": 300.0,
         "move_feedrate": 600.0,
         "x_offset": 0.0,
         "y_offset": 0.0,
         "z_offset": 0.0,
-        "z": 10.0,
+    }
+    response = client.post("/setup/data", json=job_info)
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+
+def test_setup_data_with_duplicate_model_id():
+    job_info = {
+        "three_d_model_id": 1,
+        "measure_length": 2.5,
+        "measure_feedrate": 300.0,
+        "move_feedrate": 600.0,
+        "x_offset": 0.0,
+        "y_offset": 0.0,
+        "z_offset": 0.0,
     }
     response = client.post("/setup/data", json=job_info)
     assert response.status_code == 200

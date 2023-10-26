@@ -10,7 +10,7 @@ CI_MYSQL_CONFIG = dict(
 
 
 MYSQL_CONFIG = dict(
-    host="192.168.122.230",
+    host="192.168.122.76",
     port=3306,
     user="root",
     password="root",
@@ -18,3 +18,7 @@ MYSQL_CONFIG = dict(
 
 if os.environ.get("CI"):
     MYSQL_CONFIG = CI_MYSQL_CONFIG
+
+
+MODEL_PATH = "data/3dmodel"
+GCODE_PATH = "data/gcode"
