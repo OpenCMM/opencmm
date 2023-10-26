@@ -59,7 +59,7 @@ def import_sides(model_id: int, pairs: np.ndarray, pair_type: str, mysql_config:
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     for pair in pairs:
-        pair_id = import_pair(pair_type, mysql_config)
+        pair_id = import_pair(model_id, pair_type, mysql_config)
         side_list = to_side_list(model_id, pair, pair_id)
         insert_query = (
             "INSERT INTO side (x0, y0, z0, x1, y1, z1, model_id, pair_id)"
@@ -96,7 +96,9 @@ def import_parallel_lines(model_id, lines: np.ndarray, mysql_config: dict):
 def import_edges(edge_list: list, mysql_config: dict):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
-    insert_query = "INSERT INTO edge (side_id, x, y, z) VALUES (%s, %s, %s, %s)"
+    insert_query = (
+        "INSERT INTO edge (model_id, side_id, x, y, z) VALUES (%s, %s, %s, %s, %s)"
+    )
     try:
         cursor.executemany(insert_query, edge_list)
     except IntegrityError:
@@ -143,7 +145,7 @@ def get_edges_for_side(side: tuple, number_of_edges_per_side: int) -> list:
         z = z0 + (z1 - z0) * i / (number_of_edges_per_side + 1)
         # x, y, z need to be rounded to 3 decimal places
         x, y, z = round(x, 3), round(y, 3), round(z, 3)
-        edges.append((side_id, x, y, z))
+        edges.append((model_id, side_id, x, y, z))
 
     return edges
 
@@ -165,39 +167,21 @@ def import_lines(model_id: int, lines: np.ndarray, mysql_config: dict):
     import_edges_from_sides(sides, mysql_config)
 
 
-def import_pair(pair_type: str, mysql_config: dict) -> int:
+def import_pair(model_id: int, pair_type: str, mysql_config: dict) -> int:
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
-    insert_query = "INSERT INTO pair (type) VALUES (%s)"
+    insert_query = "INSERT INTO pair (model_id, type) VALUES (%s, %s)"
     cursor.execute(
         insert_query,
-        (pair_type,),
+        (
+            model_id,
+            pair_type,
+        ),
     )
     cnx.commit()
     cursor.close()
     cnx.close()
     return cursor.lastrowid
-
-
-def delete_edges_and_pair_with_model_id(model_id: int, mysql_config: dict):
-    cnx = mysql.connector.connect(**mysql_config, database="coord")
-    cursor = cnx.cursor()
-    query = "SELECT id, pair_id FROM side WHERE model_id = %s"
-    cursor.execute(query, (model_id,))
-    sides = cursor.fetchall()
-    if sides is not None:
-        for side in sides:
-            side_id = side[0]
-            pair_id = side[1]
-            query = "DELETE FROM edge WHERE side_id = %s"
-            cursor.execute(query, (side_id,))
-            cnx.commit()
-
-            query = "DELETE FROM pair WHERE id = %s"
-            cursor.execute(query, (pair_id,))
-            cnx.commit()
-    cursor.close()
-    cnx.close()
 
 
 def delete_sides_with_model_id(model_id: int, mysql_config: dict):
@@ -208,8 +192,3 @@ def delete_sides_with_model_id(model_id: int, mysql_config: dict):
     cnx.commit()
     cursor.close()
     cnx.close()
-
-
-def delete_row_with_model_id(model_id: int, mysql_config: dict):
-    delete_edges_and_pair_with_model_id(model_id, mysql_config)
-    delete_sides_with_model_id(model_id, mysql_config)

@@ -155,3 +155,13 @@ def save_gcode(gcode, file_path: str):
     with open(file_path, "w") as f:
         for line in gcode:
             f.write(line + "\n")
+
+
+def delete_edges_with_model_id(model_id: int, mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
+    cursor = cnx.cursor()
+    query = "DELETE FROM edge WHERE model_id = %s"
+    cursor.execute(query, (model_id,))
+    cnx.commit()
+    cursor.close()
+    cnx.close()

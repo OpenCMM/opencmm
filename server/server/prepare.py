@@ -1,15 +1,8 @@
 from cncmark.point import (
     get_shapes,
 )
-from cncmark.edge import (
-    get_edge_path,
-    generate_gcode,
-    save_gcode,
-)
-from cncmark import line
-from cncmark import arc
+from cncmark import line, edge, arc
 from server.config import MODEL_PATH, GCODE_PATH
-import mysql.connector
 
 
 def process_stl(
@@ -25,15 +18,16 @@ def process_stl(
     remove_data_with_model_id(model_id, mysql_config)
     line.import_lines(model_id, lines, mysql_config)
     arc.import_arcs(model_id, arcs, mysql_config)
-    path = get_edge_path(
+    path = edge.get_edge_path(
         mysql_config, measure_length, measure_feedrate, move_feedrate, offset
     )
 
     # save gcode
-    gcode = generate_gcode(path)
-    save_gcode(gcode, f"{GCODE_PATH}/{stl_filename}.gcode")
+    gcode = edge.generate_gcode(path)
+    edge.save_gcode(gcode, f"{GCODE_PATH}/{stl_filename}.gcode")
 
 
 def remove_data_with_model_id(model_id: int, mysql_config: dict):
-    line.delete_row_with_model_id(model_id, mysql_config)
-    arc.delete_row_with_model_id(model_id, mysql_config)
+    line.delete_sides_with_model_id(model_id, mysql_config)
+    arc.delete_arcs_with_model_id(model_id, mysql_config)
+    edge.delete_edges_with_model_id(model_id, mysql_config)

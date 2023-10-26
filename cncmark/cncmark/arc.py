@@ -4,7 +4,9 @@ import mysql.connector
 from mysql.connector.errors import IntegrityError
 
 
-def get_edges_for_arc(arc_id: int, arc_points: np.ndarray, number_of_edges: int):
+def get_edges_for_arc(
+    model_id: int, arc_id: int, arc_points: np.ndarray, number_of_edges: int
+):
     """
     Returns a list of edges for an arc/circle
     Edges need to be distributed evenly along the arc
@@ -21,7 +23,7 @@ def get_edges_for_arc(arc_id: int, arc_points: np.ndarray, number_of_edges: int)
     edges = []
     for i in range(number_of_edges):
         x, y, z = arc_points[i * interval].tolist()
-        edges.append((arc_id, round(x, 3), round(y, 3), round(z, 3)))
+        edges.append((model_id, arc_id, round(x, 3), round(y, 3), round(z, 3)))
 
     return edges
 
@@ -30,14 +32,16 @@ def import_arcs(model_id: int, arcs: list, mysql_config: dict):
     for arc_points in arcs:
         arc_info = to_arc_info(model_id, arc_points)
         arc_id = import_arc(arc_info, mysql_config)
-        edges = get_edges_for_arc(arc_id, arc_points, 3)
+        edges = get_edges_for_arc(model_id, arc_id, arc_points, 3)
         import_edges(edges, mysql_config)
 
 
 def import_edges(edge_list: list, mysql_config: dict):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
-    insert_query = "INSERT INTO edge (arc_id, x, y, z) VALUES (%s, %s, %s, %s)"
+    insert_query = (
+        "INSERT INTO edge (model_id, arc_id, x, y, z) VALUES (%s, %s, %s, %s, %s)"
+    )
     try:
         cursor.executemany(insert_query, edge_list)
     except IntegrityError:
@@ -170,22 +174,6 @@ def add_measured_arc_info(mysql_config: dict):
     cnx.close()
 
 
-def delete_edges_with_model_id(model_id: int, mysql_config: dict):
-    cnx = mysql.connector.connect(**mysql_config, database="coord")
-    cursor = cnx.cursor()
-    query = "SELECT id FROM arc WHERE model_id = %s"
-    cursor.execute(query, (model_id,))
-    arcs = cursor.fetchall()
-    if arcs is not None:
-        for arc in arcs:
-            arc_id = arc[0]
-            query = "DELETE FROM edge WHERE arc_id = %s"
-            cursor.execute(query, (arc_id,))
-            cnx.commit()
-    cursor.close()
-    cnx.close()
-
-
 def delete_arcs_with_model_id(model_id: int, mysql_config: dict):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
@@ -194,8 +182,3 @@ def delete_arcs_with_model_id(model_id: int, mysql_config: dict):
     cnx.commit()
     cursor.close()
     cnx.close()
-
-
-def delete_row_with_model_id(model_id: int, mysql_config: dict):
-    delete_edges_with_model_id(model_id, mysql_config)
-    delete_arcs_with_model_id(model_id, mysql_config)
