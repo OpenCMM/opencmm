@@ -11,11 +11,16 @@ from listener.main import listener_start
 from listener.status import get_process_status, start_measuring, get_running_process
 from server.coord import get_final_coordinates
 from server.config import MYSQL_CONFIG, MODEL_PATH
-from server.model import get_3dmodel_data
+from server.model import (
+    get_3dmodel_data,
+    model_exists,
+    file_id_to_filename,
+    filename_to_file_id,
+)
 
 
 class JobInfo(BaseModel):
-    filename: str
+    file_id: int
     measure_length: float
     measure_feedrate: float
     move_feedrate: float
@@ -69,12 +74,16 @@ async def upload_3dmodel(file: UploadFile):
     with open(f"{MODEL_PATH}/{file.filename}", "wb") as buffer:
         buffer.write(await file.read())
 
-    return {"status": "ok"}
+    _file_id = filename_to_file_id(file.filename)
+
+    return {"status": "ok", "file_id": _file_id}
+
 
 @app.get("/list/3dmodels")
 async def list_3dmodels():
     """List uploaded 3d models"""
     return {"models": get_3dmodel_data()}
+
 
 @app.get("/load/model/{model_id}")
 async def load_model(model_id: str):
@@ -90,13 +99,13 @@ async def load_gcode(filename: str):
 async def setup_data(job_info: JobInfo):
     """Find verticies, generate gcode"""
 
-    # check if model exists
-    if not os.path.exists(f"{MODEL_PATH}/{job_info.filename}"):
+    filename = file_id_to_filename(job_info.file_id)
+    if not model_exists(filename):
         raise HTTPException(status_code=400, detail="No model uploaded")
     offset = (job_info.x_offset, job_info.y_offset, job_info.z_offset)
     process_stl(
         MYSQL_CONFIG,
-        job_info.filename,
+        filename,
         job_info.measure_length,
         job_info.measure_feedrate,
         job_info.move_feedrate,

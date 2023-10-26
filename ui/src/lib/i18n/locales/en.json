@@ -6,7 +6,7 @@
 			"labelDescription": "Only .stl files are supported."
 		},
 		"setup": {
-			"title": "GCode Setup",
+			"title": "Create GCode",
 			"measureLength": {
 				"label": "measure length"
 			},

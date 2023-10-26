@@ -27,7 +27,8 @@
 			console.log(res);
 
 			if (res.status === 200 && res.data['status'] === 'ok') {
-				window.location.href = '/setup';
+				const fileId = res.data['file_id'];
+				window.location.href = `/setup?id=${fileId}`;
 			} else {
 				error = res.data['message'];
 			}

@@ -2,9 +2,9 @@
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
 	import { DataTable, Button } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
-	import Add from "carbon-icons-svelte/lib/Add.svelte";
-  import Download from "carbon-icons-svelte/lib/Download.svelte";
-  import TrashCan from "carbon-icons-svelte/lib/TrashCan.svelte";
+	import Add from 'carbon-icons-svelte/lib/Add.svelte';
+	import Download from 'carbon-icons-svelte/lib/Download.svelte';
+	import TrashCan from 'carbon-icons-svelte/lib/TrashCan.svelte';
 
 	import { _ } from 'svelte-i18n';
 
@@ -60,16 +60,31 @@
 		<DataTable size="short" title={$_('home.file.3dmodel.title')} {headers} rows={row}>
 			<svelte:fragment slot="cell" let:cell>
 				{#if cell.key === 'createGcode'}
-					<Button kind="primary" size="small" href={`/setup?id=${cell.value}`}
-						iconDescription={$_('home.file.3dmodel.createGcode')} icon={Add} />
+					<Button
+						kind="primary"
+						size="small"
+						href={`/setup?id=${cell.value}`}
+						iconDescription={$_('home.file.3dmodel.createGcode')}
+						icon={Add}
+					/>
 				{:else if cell.key === 'downloadGcode'}
-					<Button kind="primary" size="small" href={`/setup?id=${cell.value}`}
-						iconDescription={$_('home.file.3dmodel.downloadGcode')} icon={Download} />
+					<Button
+						kind="primary"
+						size="small"
+						href={`/setup?id=${cell.value}`}
+						iconDescription={$_('home.file.3dmodel.downloadGcode')}
+						icon={Download}
+					/>
 				{:else if cell.key === 'delete'}
-					<Button kind="secondary" size="small" href={`/setup?id=${cell.value}`}
-						iconDescription={$_('home.file.3dmodel.delete')} icon={TrashCan} />
+					<Button
+						kind="secondary"
+						size="small"
+						href={`/setup?id=${cell.value}`}
+						iconDescription={$_('home.file.3dmodel.delete')}
+						icon={TrashCan}
+					/>
 				{:else}
-				{cell.value}{/if}
+					{cell.value}{/if}
 			</svelte:fragment>
 		</DataTable>
 	{/if}

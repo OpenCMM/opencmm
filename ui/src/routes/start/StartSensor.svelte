@@ -17,11 +17,11 @@
 
 		try {
 			processing = true;
-			const data = { 
+			const data = {
 				mtconnect_interval: Number(mtInterval),
 				interval: Number(interval),
-				threshold: Number(threshold),
-			 };
+				threshold: Number(threshold)
+			};
 			const res = await axios.post(`${BACKEND_URL_LOCAL}/start/measurement`, data);
 			console.log(res);
 		} catch (err) {
@@ -44,11 +44,7 @@
 			/>
 		</FormGroup>
 		<FormGroup>
-			<TextInput
-				labelText="Sensor data fetch interval"
-				id="interval"
-				bind:value={interval}
-			/>
+			<TextInput labelText="Sensor data fetch interval" id="interval" bind:value={interval} />
 			<TextInput
 				labelText="Sensor data difference threshold"
 				id="threshold"

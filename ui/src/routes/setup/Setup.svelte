@@ -3,6 +3,7 @@
 <script lang="ts">
 	import axios from 'axios';
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
+	import { page } from '$app/stores';
 	import { Form, FormGroup, TextInput, Button } from 'carbon-components-svelte';
 	import { _ } from 'svelte-i18n';
 
@@ -14,10 +15,12 @@
 	let moveFeedRate = 600.0;
 	let error: string | null = null;
 	let settingDone = false;
+	const fileId = $page.url.searchParams.get('id');
 	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
 
 		const data = {
+			file_id: Number(fileId),
 			measure_length: Number(measureLength),
 			measure_feedrate: Number(measureFeedRate),
 			move_feedrate: Number(moveFeedRate),

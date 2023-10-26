@@ -6,7 +6,7 @@
 			"labelDescription": "STLファイルのみ対応しています"
 		},
 		"setup": {
-			"title": "GCodeの設定",
+			"title": "GCode作成",
 			"measureLength": {
 				"label": "測定箇所の長さ"
 			},

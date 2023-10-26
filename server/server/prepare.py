@@ -10,6 +10,7 @@ from cncmark.line import import_lines
 from cncmark.arc import import_arcs
 from server.config import MODEL_PATH, GCODE_PATH
 
+
 def process_stl(
     mysql_config: dict,
     stl_filename: str,
