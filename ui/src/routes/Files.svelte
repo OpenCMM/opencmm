@@ -23,7 +23,6 @@
 	}
 
 	const headers = [
-		{ key: 'id', value: 'ID' },
 		{ key: 'name', value: $_('home.file.3dmodel.name') },
 		{ key: 'size', value: $_('home.file.3dmodel.size') },
 		{ key: 'modifiedTime', value: $_('home.file.3dmodel.lastModified') },

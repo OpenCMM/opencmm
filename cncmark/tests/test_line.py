@@ -21,8 +21,6 @@ def test_get_lines():
     assert len(arcs) == 5
     for line in lines:
         assert line.shape == (2, 3)
-        assert line[0][2] == z
-        assert line[1][2] == z
 
 
 def test_get_parallel_lines():

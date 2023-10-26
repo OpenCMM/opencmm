@@ -155,13 +155,6 @@ async def start_measurement(
     return {"status": "ok"}
 
 
-@app.get("/load/image")
-async def load_image():
-    if not os.path.exists("data/images/result.png"):
-        raise HTTPException(status_code=400, detail="No image file generated")
-    return FileResponse("data/images/result.png")
-
-
 @app.get("/result/edges")
 async def get_result_edges():
     edges = result.fetch_edges()

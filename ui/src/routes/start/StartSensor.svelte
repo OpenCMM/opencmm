@@ -1,5 +1,3 @@
-<!-- Start capturing images -->
-
 <script lang="ts">
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
 	import axios from 'axios';
