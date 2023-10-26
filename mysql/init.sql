@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS `model` (
 
 CREATE TABLE IF NOT EXISTS `arc` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `model_id` int(11) unsigned NOT NULL,
   `radius` FLOAT NOT NULL,
   `cx` FLOAT NOT NULL,
   `cy` FLOAT NOT NULL,
@@ -50,6 +51,7 @@ CREATE TABLE IF NOT EXISTS `edge` (
 
 CREATE TABLE IF NOT EXISTS `side` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `model_id` int(11) unsigned NOT NULL,
   `x0` FLOAT NOT NULL,
   `y0` FLOAT NOT NULL,
   `z0` FLOAT NOT NULL,
@@ -62,6 +64,7 @@ CREATE TABLE IF NOT EXISTS `side` (
 
 CREATE TABLE IF NOT EXISTS `pair` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `model_id` int(11) unsigned NOT NULL,
   `type` varchar(255) NOT NULL,
   `length` FLOAT,
   `rlength` FLOAT,
@@ -83,6 +86,7 @@ CREATE TABLE IF NOT EXISTS `sensor` (
 
 CREATE TABLE IF NOT EXISTS `process` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `model_id` int(11) unsigned NOT NULL,
   `status` varchar(255) NOT NULL,
   `error` varchar(255),
   `start` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

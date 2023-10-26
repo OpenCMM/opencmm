@@ -26,9 +26,9 @@ def get_edges_for_arc(arc_id: int, arc_points: np.ndarray, number_of_edges: int)
     return edges
 
 
-def import_arcs(arcs: list, mysql_config: dict):
+def import_arcs(model_id: int, arcs: list, mysql_config: dict):
     for arc_points in arcs:
-        arc_info = to_arc_info(arc_points)
+        arc_info = to_arc_info(model_id, arc_points)
         arc_id = import_arc(arc_info, mysql_config)
         edges = get_edges_for_arc(arc_id, arc_points, 3)
         import_edges(edges, mysql_config)
@@ -58,9 +58,10 @@ def import_arc(arc_info: list, mysql_config: dict):
     return cursor.lastrowid
 
 
-def to_arc_info(arc_points: np.ndarray):
+def to_arc_info(model_id: int, arc_points: np.ndarray):
     radius, center = get_arc_info(arc_points)
     arc_info = [
+        model_id,
         float(radius),
         float(center[0]),
         float(center[1]),

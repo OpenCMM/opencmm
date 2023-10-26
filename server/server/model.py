@@ -2,6 +2,7 @@ from server.config import MODEL_PATH, MYSQL_CONFIG
 import os
 import mysql.connector
 
+
 def add_new_3dmodel(filename: str) -> int:
     if not model_exists(filename):
         cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
@@ -29,7 +30,7 @@ def get_3dmodel_data():
     cursor.execute(query)
     models_data = []
     for model in cursor:
-        idx = model[0] 
+        idx = model[0]
         filename = model[1]
         model_path = os.path.join(MODEL_PATH, filename)
         model_size = os.path.getsize(model_path)

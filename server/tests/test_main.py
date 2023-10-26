@@ -31,7 +31,7 @@ def test_upload_duplicate_3dmodel():
 
 def test_setup_data():
     job_info = {
-        "model_id": 1,
+        "three_d_model_id": 1,
         "measure_length": 2.5,
         "measure_feedrate": 300.0,
         "move_feedrate": 600.0,

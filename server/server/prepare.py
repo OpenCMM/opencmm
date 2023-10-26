@@ -13,16 +13,16 @@ from server.config import MODEL_PATH, GCODE_PATH
 
 def process_stl(
     mysql_config: dict,
+    model_id: int,
     stl_filename: str,
-    measure_length: float,
-    measure_feedrate: float,
-    move_feedrate: float,
+    measure_config: tuple,
     offset: tuple,
 ):
+    (measure_length, measure_feedrate, move_feedrate) = measure_config
     lines, arcs = get_shapes(f"{MODEL_PATH}/{stl_filename}")
 
-    import_lines(lines, mysql_config)
-    import_arcs(arcs, mysql_config)
+    import_lines(model_id, lines, mysql_config)
+    import_arcs(model_id, arcs, mysql_config)
     path = get_edge_path(
         mysql_config, measure_length, measure_feedrate, move_feedrate, offset
     )

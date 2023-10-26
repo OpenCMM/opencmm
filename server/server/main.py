@@ -20,7 +20,7 @@ from server.model import (
 
 
 class JobInfo(BaseModel):
-    model_id: int
+    three_d_model_id: int
     measure_length: float
     measure_feedrate: float
     move_feedrate: float
@@ -99,16 +99,15 @@ async def load_gcode(filename: str):
 async def setup_data(job_info: JobInfo):
     """Find verticies, generate gcode"""
 
-    filename = model_id_to_filename(job_info.model_id)
+    filename = model_id_to_filename(job_info.three_d_model_id)
     if not model_exists(filename):
         raise HTTPException(status_code=400, detail="No model uploaded")
     offset = (job_info.x_offset, job_info.y_offset, job_info.z_offset)
     process_stl(
         MYSQL_CONFIG,
+        job_info.three_d_model_id,
         filename,
-        job_info.measure_length,
-        job_info.measure_feedrate,
-        job_info.move_feedrate,
+        (job_info.measure_length, job_info.measure_feedrate, job_info.move_feedrate),
         offset,
     )
 

@@ -20,7 +20,7 @@
 		e.preventDefault();
 
 		const data = {
-			model_id: Number(modelId),
+			three_d_model_id: Number(modelId),
 			measure_length: Number(measureLength),
 			measure_feedrate: Number(measureFeedRate),
 			move_feedrate: Number(moveFeedRate),

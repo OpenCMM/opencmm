@@ -45,16 +45,17 @@ def get_pairs(parallel_lines: np.ndarray, direction: int):
     return pairs
 
 
-def to_side_list(pairs: np.ndarray, pair_id: int):
+def to_side_list(model_id: int, pairs: np.ndarray, pair_id: int):
     side_list = []
     for pair in pairs:
         result = pair.flatten().tolist()
+        result.append(model_id)
         result.append(pair_id)
         side_list.append(result)
     return side_list
 
 
-def import_pair(pair_type: str, mysql_config: dict) -> int:
+def import_pair(model_id: int, pair_type: str, mysql_config: dict) -> int:
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     insert_query = "INSERT INTO pair (type) VALUES (%s)"
@@ -65,15 +66,15 @@ def import_pair(pair_type: str, mysql_config: dict) -> int:
     return cursor.lastrowid
 
 
-def import_sides(pairs: np.ndarray, pair_type: str, mysql_config: dict):
+def import_sides(model_id: int, pairs: np.ndarray, pair_type: str, mysql_config: dict):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     for pair in pairs:
-        pair_id = import_pair(pair_type, mysql_config)
-        side_list = to_side_list(pair, pair_id)
+        pair_id = import_pair(model_id, pair_type, mysql_config)
+        side_list = to_side_list(model_id, pair, pair_id)
         insert_query = (
-            "INSERT INTO side (x0, y0, z0, x1, y1, z1, pair_id)"
-            " VALUES (%s, %s, %s, %s, %s, %s, %s)"
+            "INSERT INTO side (x0, y0, z0, x1, y1, z1, model_id, pair_id)"
+            " VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
         )
         try:
             cursor.executemany(insert_query, side_list)
@@ -95,12 +96,12 @@ def get_sides(mysql_config: dict):
     return sides
 
 
-def import_parallel_lines(lines: np.ndarray, mysql_config: dict):
+def import_parallel_lines(model_id, lines: np.ndarray, mysql_config: dict):
     x, y, other = get_parallel_lines(lines)
     pairs = get_pairs(x, 0)
-    import_sides(pairs, "line", mysql_config)
+    import_sides(model_id, pairs, "line", mysql_config)
     pairs = get_pairs(y, 1)
-    import_sides(pairs, "line", mysql_config)
+    import_sides(model_id, pairs, "line", mysql_config)
 
 
 def import_edges(edge_list: list, mysql_config: dict):
@@ -169,7 +170,7 @@ def get_side(side_id: int, mysql_config: dict):
     return side
 
 
-def import_lines(lines: np.ndarray, mysql_config: dict):
-    import_parallel_lines(lines, mysql_config)
+def import_lines(model_id: int, lines: np.ndarray, mysql_config: dict):
+    import_parallel_lines(model_id, lines, mysql_config)
     sides = get_sides(mysql_config)
     import_edges_from_sides(sides, mysql_config)
