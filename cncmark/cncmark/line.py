@@ -58,8 +58,14 @@ def to_side_list(model_id: int, pairs: np.ndarray, pair_id: int):
 def import_pair(model_id: int, pair_type: str, mysql_config: dict) -> int:
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
-    insert_query = "INSERT INTO pair (type) VALUES (%s)"
-    cursor.execute(insert_query, (pair_type,))
+    insert_query = "INSERT INTO pair (model_id, type) VALUES (%s, %s)"
+    cursor.execute(
+        insert_query,
+        (
+            model_id,
+            pair_type,
+        ),
+    )
     cnx.commit()
     cursor.close()
     cnx.close()

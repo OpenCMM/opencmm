@@ -71,10 +71,9 @@ async def upload_3dmodel(file: UploadFile):
     if file_extension not in ["stl", "STL"]:
         raise HTTPException(status_code=400, detail="File extension not supported")
 
+    _model_id = add_new_3dmodel(file.filename)
     with open(f"{MODEL_PATH}/{file.filename}", "wb") as buffer:
         buffer.write(await file.read())
-
-    _model_id = add_new_3dmodel(file.filename)
 
     return {"status": "ok", "model_id": _model_id}
 
