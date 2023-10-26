@@ -20,6 +20,15 @@ def test_upload_3dmodel():
         assert response.json() == {"status": "ok", "model_id": 1}
 
 
+def test_upload_duplicate_3dmodel():
+    path = "tests/fixtures/stl/sample.stl"
+
+    with open(path, "rb") as f:
+        response = client.post("/upload/3dmodel", files={"file": f})
+        assert response.status_code == 200
+        assert response.json() == {"status": "ok", "model_id": 1}
+
+
 def test_setup_data():
     job_info = {
         "model_id": 1,
