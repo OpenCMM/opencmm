@@ -4,8 +4,7 @@ from .config import MYSQL_CONFIG
 
 
 def test_fit_circle():
-    z = 10.0
-    lines, arcs = get_shapes("tests/fixtures/stl/sample.stl", z)
+    lines, arcs = get_shapes("tests/fixtures/stl/sample.stl")
     for arc_points in arcs:
         points = arc_points[:, :2]
         center_x, center_y, radius = fit_circle(points)

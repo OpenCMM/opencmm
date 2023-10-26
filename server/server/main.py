@@ -17,7 +17,6 @@ class JobInfo(BaseModel):
     measure_length: float
     measure_feedrate: float
     move_feedrate: float
-    z: float
     x_offset: Optional[float] = 0.0
     y_offset: Optional[float] = 0.0
     z_offset: Optional[float] = 0.0
@@ -98,7 +97,6 @@ async def setup_data(job_info: JobInfo):
         job_info.measure_feedrate,
         job_info.move_feedrate,
         offset,
-        job_info.z,
     )
 
     return {"status": "ok"}

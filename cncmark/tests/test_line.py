@@ -16,8 +16,7 @@ from .config import MYSQL_CONFIG
 
 
 def test_get_lines():
-    z = 10.0
-    lines, arcs = get_shapes("tests/fixtures/stl/sample.stl", z)
+    lines, arcs = get_shapes("tests/fixtures/stl/sample.stl")
     assert len(lines) == 8
     assert len(arcs) == 5
     for line in lines:
@@ -27,8 +26,7 @@ def test_get_lines():
 
 
 def test_get_parallel_lines():
-    z = 10.0
-    lines, arcs = get_shapes("tests/fixtures/stl/sample.stl", z)
+    lines, arcs = get_shapes("tests/fixtures/stl/sample.stl")
     x, y, other = get_parallel_lines(lines)
     assert len(x) == 4
     assert len(y) == 4
@@ -53,8 +51,7 @@ def test_import_edges():
 
 
 def test_import_arcs():
-    z = 10.0
-    lines, arcs = get_shapes("tests/fixtures/stl/sample.stl", z)
+    lines, arcs = get_shapes("tests/fixtures/stl/sample.stl")
     import_arcs(arcs, MYSQL_CONFIG)
 
 
