@@ -90,7 +90,9 @@ def get_edge_path(
     for edge in edges:
         edge_id, side_id, arc_id, x, y, z, rx, ry, rz = edge
         if arc_id is None:
-            side_id, x0, y0, z0, x1, y1, z1, pair_id = get_side(side_id, mysql_config)
+            side_id, model_id, x0, y0, z0, x1, y1, z1, pair_id = get_side(
+                side_id, mysql_config
+            )
             direction = get_direction(x0, y0, x1, y1)
 
             (x, y, z) = (x + xyz_offset[0], y + xyz_offset[1], z + xyz_offset[2])
@@ -121,7 +123,7 @@ def get_edge_path(
 
         else:
             assert side_id is None
-            arc_id, radius, cx, cy, cz, rradius, rcx, rcy, rcz = get_arc(
+            arc_id, model_id, radius, cx, cy, cz, rradius, rcx, rcy, rcz = get_arc(
                 arc_id, mysql_config
             )
             point1, point2 = get_arc_path((cx, cy, cz), (x, y, z), length)

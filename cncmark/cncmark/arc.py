@@ -168,3 +168,34 @@ def add_measured_arc_info(mysql_config: dict):
 
     cursor.close()
     cnx.close()
+
+
+def delete_edges_with_model_id(model_id: int, mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
+    cursor = cnx.cursor()
+    query = "SELECT id FROM arc WHERE model_id = %s"
+    cursor.execute(query, (model_id,))
+    arcs = cursor.fetchall()
+    if arcs is not None:
+        for arc in arcs:
+            arc_id = arc[0]
+            query = "DELETE FROM edge WHERE arc_id = %s"
+            cursor.execute(query, (arc_id,))
+            cnx.commit()
+    cursor.close()
+    cnx.close()
+
+
+def delete_arcs_with_model_id(model_id: int, mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
+    cursor = cnx.cursor()
+    query = "DELETE FROM arc WHERE model_id = %s"
+    cursor.execute(query, (model_id,))
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+
+
+def delete_row_with_model_id(model_id: int, mysql_config: dict):
+    delete_edges_with_model_id(model_id, mysql_config)
+    delete_arcs_with_model_id(model_id, mysql_config)
