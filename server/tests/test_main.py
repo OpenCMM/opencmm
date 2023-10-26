@@ -17,11 +17,12 @@ def test_upload_3dmodel():
     with open(path, "rb") as f:
         response = client.post("/upload/3dmodel", files={"file": f})
         assert response.status_code == 200
-        assert response.json() == {"status": "ok"}
+        assert response.json() == {"status": "ok", "file_id": 1}
 
 
 def test_setup_data():
     job_info = {
+        "file_id": 1,
         "measure_length": 2.5,
         "measure_feedrate": 300.0,
         "move_feedrate": 600.0,

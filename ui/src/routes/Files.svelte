@@ -5,6 +5,8 @@
 	import Add from 'carbon-icons-svelte/lib/Add.svelte';
 	import Download from 'carbon-icons-svelte/lib/Download.svelte';
 	import TrashCan from 'carbon-icons-svelte/lib/TrashCan.svelte';
+	import Close from 'carbon-icons-svelte/lib/Close.svelte';
+	import Checkmark from 'carbon-icons-svelte/lib/Checkmark.svelte';
 
 	import { _ } from 'svelte-i18n';
 
@@ -59,7 +61,13 @@
 	{:else}
 		<DataTable size="short" title={$_('home.file.3dmodel.title')} {headers} rows={row}>
 			<svelte:fragment slot="cell" let:cell>
-				{#if cell.key === 'createGcode'}
+				{#if cell.key === 'gcodeReady'}
+					{#if cell.value}
+						<Checkmark style="color: green" />
+					{:else}
+						<Close style="color: red" />
+					{/if}
+				{:else if cell.key === 'createGcode'}
 					<Button
 						kind="primary"
 						size="small"
