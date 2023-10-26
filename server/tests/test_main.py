@@ -28,7 +28,6 @@ def test_setup_data():
         "x_offset": 0.0,
         "y_offset": 0.0,
         "z_offset": 0.0,
-        "z": 10.0,
     }
     response = client.post("/setup/data", json=job_info)
     assert response.status_code == 200

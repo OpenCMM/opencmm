@@ -17,9 +17,8 @@ def process_stl(
     measure_feedrate: float,
     move_feedrate: float,
     offset: tuple,
-    z: float,
 ):
-    lines, arcs = get_shapes(stl_file_path, z)
+    lines, arcs = get_shapes(stl_file_path)
 
     import_lines(lines, mysql_config)
     import_arcs(arcs, mysql_config)
