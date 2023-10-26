@@ -25,8 +25,8 @@ class JobInfo(BaseModel):
 
 class MeasurementConfig(BaseModel):
     mtconnect_interval: int
-    sensor_data_fetch_interval: int
-    sensor_data_diff_threshold: int
+    interval: int
+    threshold: int
 
 
 model_path = "data/3dmodel/3dmodel.stl"
@@ -139,7 +139,7 @@ async def start_measurement(
         (mtconnect_url, _conf.mtconnect_interval),
         process_id,
         final_coordinates,
-        (_conf.sensor_data_fetch_interval, _conf.sensor_data_diff_threshold),
+        (_conf.interval, _conf.threshold),
     )
     return {"status": "ok"}
 

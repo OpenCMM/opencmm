@@ -10,7 +10,7 @@ CI_MYSQL_CONFIG = dict(
 
 
 MYSQL_CONFIG = dict(
-    host="192.168.122.230",
+    host="192.168.122.76",
     port=3306,
     user="root",
     password="root",

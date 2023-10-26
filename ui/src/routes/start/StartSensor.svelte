@@ -8,6 +8,8 @@
 
 	let error: string | null = null;
 	let mtInterval = 500;
+	let interval = 1000;
+	let threshold = 100;
 	let processing = false;
 
 	const startCapturing = async (e: Event) => {
@@ -15,7 +17,12 @@
 
 		try {
 			processing = true;
-			const res = await axios.post(`${BACKEND_URL_LOCAL}/start/measurement/${mtInterval}`);
+			const data = { 
+				mtconnect_interval: Number(mtInterval),
+				interval: Number(interval),
+				threshold: Number(threshold),
+			 };
+			const res = await axios.post(`${BACKEND_URL_LOCAL}/start/measurement`, data);
 			console.log(res);
 		} catch (err) {
 			console.error(err);
@@ -34,6 +41,18 @@
 				labelText="MTConnect data fetch interval"
 				id="mtInterval"
 				bind:value={mtInterval}
+			/>
+		</FormGroup>
+		<FormGroup>
+			<TextInput
+				labelText="Sensor data fetch interval"
+				id="interval"
+				bind:value={interval}
+			/>
+			<TextInput
+				labelText="Sensor data difference threshold"
+				id="threshold"
+				bind:value={threshold}
 			/>
 		</FormGroup>
 		{#if processing && !error}
