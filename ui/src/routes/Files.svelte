@@ -7,6 +7,7 @@
 	import TrashCan from 'carbon-icons-svelte/lib/TrashCan.svelte';
 	import Close from 'carbon-icons-svelte/lib/Close.svelte';
 	import Checkmark from 'carbon-icons-svelte/lib/Checkmark.svelte';
+	import WatsonHealth3DMprToggle from 'carbon-icons-svelte/lib/WatsonHealth3DMprToggle.svelte';
 
 	import { _ } from 'svelte-i18n';
 
@@ -19,7 +20,9 @@
 		modifiedTime: string;
 		gcodeReady: boolean;
 		createGcode: number;
-		downloadGcode: number;
+		modelView: number;
+		downloadGcode: number | undefined;
+		delete: number;
 	}
 
 	const headers = [
@@ -28,6 +31,7 @@
 		{ key: 'modifiedTime', value: $_('home.file.3dmodel.lastModified') },
 		{ key: 'gcodeReady', value: $_('home.file.3dmodel.gcodeReady') },
 		{ key: 'createGcode', empty: true },
+		{ key: 'modelView', empty: true },
 		{ key: 'downloadGcode', empty: true },
 		{ key: 'delete', empty: true }
 	];
@@ -43,7 +47,9 @@
 				modifiedTime: new Date(d['modified_time']).toLocaleString(),
 				gcodeReady: d['gcode_ready'],
 				createGcode: d['id'],
-				downloadGcode: d['id']
+				modelView: d['id'],
+				downloadGcode: d['gcode_ready'] ? d['id'] : undefined,
+				delete: d['id']
 			});
 		}
 		loaded = true;
@@ -74,10 +80,19 @@
 						iconDescription={$_('home.file.3dmodel.createGcode')}
 						icon={Add}
 					/>
+				{:else if cell.key === 'modelView'}
+					<Button
+						kind="primary"
+						size="small"
+						href={`/gcode?id=${cell.value}`}
+						iconDescription={$_('home.file.3dmodel.modelView')}
+						icon={WatsonHealth3DMprToggle}
+					/>
 				{:else if cell.key === 'downloadGcode'}
 					<Button
 						kind="primary"
 						size="small"
+						disabled={!cell.value}
 						href={`/setup?id=${cell.value}`}
 						iconDescription={$_('home.file.3dmodel.downloadGcode')}
 						icon={Download}

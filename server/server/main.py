@@ -86,11 +86,15 @@ async def list_3dmodels():
 
 @app.get("/load/model/{model_id}")
 async def load_model(model_id: str):
-    return FileResponse(f"data/3dmodel/{model_id}.stl")
+    model_id = int(model_id)
+    filename = model_id_to_filename(model_id)
+    return FileResponse(f"data/3dmodel/{filename}")
 
 
-@app.get("/load/gcode/{filename}")
-async def load_gcode(filename: str):
+@app.get("/load/gcode/{model_id}")
+async def load_gcode(model_id: str):
+    model_id = int(model_id)
+    filename = model_id_to_filename(model_id)
     return FileResponse(f"data/gcode/{filename}.gcode")
 
 

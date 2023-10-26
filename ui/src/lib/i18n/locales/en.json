@@ -42,6 +42,7 @@
 				"lastModified": "Last modified",
 				"gcodeReady": "GCode",
 				"createGcode": "Create GCode",
+				"modelView": "3D model view",
 				"downloadGcode": "Download GCode",
 				"delete": "Delete"
 			}

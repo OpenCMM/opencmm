@@ -88,7 +88,7 @@ def get_edge_path(
     path = []
     edges = get_edges(mysql_config)
     for edge in edges:
-        edge_id, side_id, arc_id, x, y, z, rx, ry, rz = edge
+        edge_id, model_id, side_id, arc_id, x, y, z, rx, ry, rz = edge
         if arc_id is None:
             side_id, model_id, x0, y0, z0, x1, y1, z1, pair_id = get_side(
                 side_id, mysql_config
