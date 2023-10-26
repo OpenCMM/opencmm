@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Upload3dModel from './Upload3dModel.svelte';
 	import { Link, Grid, Row, Column } from 'carbon-components-svelte';
+	import Files from './Files.svelte';
 
 	let uploaded = false;
 </script>
@@ -27,6 +28,11 @@
 			</Column>
 			<Column>
 				<Link href="/arc">Arc</Link>
+			</Column>
+		</Row>
+		<Row>
+			<Column>
+				<Files />
 			</Column>
 		</Row>
 	</Grid>

@@ -32,6 +32,18 @@
 			"start": "測定開始",
 			"error": "測定に失敗しました。"
 		},
+		"file": {
+			"3dmodel": {
+				"title": "CADデータ",
+				"name": "ファイル名",
+				"size": "サイズ",
+				"lastModified": "最終更新日時",
+				"gcodeReady": "GCode",
+				"createGcode": "GCode作成",
+				"downloadGcode": "GCodeダウンロード",
+				"delete": "削除"
+			}
+		},
 		"result": {
 			"edge": {
 				"title": "点",

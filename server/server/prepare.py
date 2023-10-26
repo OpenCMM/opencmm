@@ -8,17 +8,17 @@ from cncmark.edge import (
 )
 from cncmark.line import import_lines
 from cncmark.arc import import_arcs
-
+from server.config import MODEL_PATH, GCODE_PATH
 
 def process_stl(
     mysql_config: dict,
-    stl_file_path: str,
+    stl_filename: str,
     measure_length: float,
     measure_feedrate: float,
     move_feedrate: float,
     offset: tuple,
 ):
-    lines, arcs = get_shapes(stl_file_path)
+    lines, arcs = get_shapes(f"{MODEL_PATH}/{stl_filename}")
 
     import_lines(lines, mysql_config)
     import_arcs(arcs, mysql_config)
@@ -28,4 +28,4 @@ def process_stl(
 
     # save gcode
     gcode = generate_gcode(path)
-    save_gcode(gcode, "data/gcode/opencmm.gcode")
+    save_gcode(gcode, f"{GCODE_PATH}/{stl_filename}.gcode")

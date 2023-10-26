@@ -34,6 +34,18 @@
 			"start": "Start",
 			"error": "Failed to start measurement"
 		},
+		"file": {
+			"3dmodel": {
+				"title": "3D model files",
+				"name": "Name",
+				"size": "Size",
+				"lastModified": "Last modified",
+				"gcodeReady": "GCode",
+				"createGcode": "Create GCode",
+				"downloadGcode": "Download GCode",
+				"delete": "Delete"
+			}
+		},
 		"result": {
 			"edge": {
 				"title": "Edge",

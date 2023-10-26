@@ -18,3 +18,7 @@ MYSQL_CONFIG = dict(
 
 if os.environ.get("CI"):
     MYSQL_CONFIG = CI_MYSQL_CONFIG
+
+
+MODEL_PATH = "data/3dmodel"
+GCODE_PATH = "data/gcode"

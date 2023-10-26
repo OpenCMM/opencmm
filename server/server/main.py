@@ -10,10 +10,12 @@ from server import result
 from listener.main import listener_start
 from listener.status import get_process_status, start_measuring, get_running_process
 from server.coord import get_final_coordinates
-from server.config import MYSQL_CONFIG
+from server.config import MYSQL_CONFIG, MODEL_PATH
+from server.model import get_3dmodel_data
 
 
 class JobInfo(BaseModel):
+    filename: str
     measure_length: float
     measure_feedrate: float
     move_feedrate: float
@@ -27,8 +29,6 @@ class MeasurementConfig(BaseModel):
     interval: int
     threshold: int
 
-
-model_path = "data/3dmodel/3dmodel.stl"
 
 app = FastAPI()
 
@@ -66,11 +66,15 @@ async def upload_3dmodel(file: UploadFile):
     if file_extension not in ["stl", "STL"]:
         raise HTTPException(status_code=400, detail="File extension not supported")
 
-    with open(model_path, "wb") as buffer:
+    with open(f"{MODEL_PATH}/{file.filename}", "wb") as buffer:
         buffer.write(await file.read())
 
     return {"status": "ok"}
 
+@app.get("/list/3dmodels")
+async def list_3dmodels():
+    """List uploaded 3d models"""
+    return {"models": get_3dmodel_data()}
 
 @app.get("/load/model/{model_id}")
 async def load_model(model_id: str):
@@ -87,12 +91,12 @@ async def setup_data(job_info: JobInfo):
     """Find verticies, generate gcode"""
 
     # check if model exists
-    if not os.path.exists(model_path):
+    if not os.path.exists(f"{MODEL_PATH}/{job_info.filename}"):
         raise HTTPException(status_code=400, detail="No model uploaded")
     offset = (job_info.x_offset, job_info.y_offset, job_info.z_offset)
     process_stl(
         MYSQL_CONFIG,
-        model_path,
+        job_info.filename,
         job_info.measure_length,
         job_info.measure_feedrate,
         job_info.move_feedrate,
