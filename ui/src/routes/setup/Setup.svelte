@@ -15,12 +15,12 @@
 	let moveFeedRate = 600.0;
 	let error: string | null = null;
 	let settingDone = false;
-	const fileId = $page.url.searchParams.get('id');
+	const modelId = $page.url.searchParams.get('id');
 	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
 
 		const data = {
-			file_id: Number(fileId),
+			model_id: Number(modelId),
 			measure_length: Number(measureLength),
 			measure_feedrate: Number(measureFeedRate),
 			move_feedrate: Number(moveFeedRate),

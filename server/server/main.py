@@ -14,13 +14,13 @@ from server.config import MYSQL_CONFIG, MODEL_PATH
 from server.model import (
     get_3dmodel_data,
     model_exists,
-    file_id_to_filename,
-    filename_to_file_id,
+    model_id_to_filename,
+    add_new_3dmodel,
 )
 
 
 class JobInfo(BaseModel):
-    file_id: int
+    model_id: int
     measure_length: float
     measure_feedrate: float
     move_feedrate: float
@@ -74,9 +74,9 @@ async def upload_3dmodel(file: UploadFile):
     with open(f"{MODEL_PATH}/{file.filename}", "wb") as buffer:
         buffer.write(await file.read())
 
-    _file_id = filename_to_file_id(file.filename)
+    _model_id = add_new_3dmodel(file.filename)
 
-    return {"status": "ok", "file_id": _file_id}
+    return {"status": "ok", "model_id": _model_id}
 
 
 @app.get("/list/3dmodels")
@@ -99,7 +99,7 @@ async def load_gcode(filename: str):
 async def setup_data(job_info: JobInfo):
     """Find verticies, generate gcode"""
 
-    filename = file_id_to_filename(job_info.file_id)
+    filename = model_id_to_filename(job_info.model_id)
     if not model_exists(filename):
         raise HTTPException(status_code=400, detail="No model uploaded")
     offset = (job_info.x_offset, job_info.y_offset, job_info.z_offset)

@@ -14,6 +14,14 @@ CREATE TABLE IF NOT EXISTS `point` (
   UNIQUE KEY `point_id` (`point_id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
 
+CREATE TABLE IF NOT EXISTS `model` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `filename` varchar (255) NOT NULL,
+  `status` varchar(255) ,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `filename` (`filename`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
+
 CREATE TABLE IF NOT EXISTS `arc` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `radius` FLOAT NOT NULL,
