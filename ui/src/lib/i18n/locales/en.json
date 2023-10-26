@@ -17,7 +17,7 @@
 				"label": "feed rate when moving"
 			},
 			"offset": "offset",
-			"submit": "ok",
+			"submit": "Create",
 			"done": "done"
 		},
 		"gcode": {
@@ -79,5 +79,8 @@
 		"theme": {
 			"label": "Theme"
 		}
+	},
+	"common": {
+		"cancel": "Go back"
 	}
 }

@@ -77,5 +77,8 @@
 		"theme": {
 			"label": "テーマ"
 		}
+	},
+	"common": {
+		"cancel": "戻る"
 	}
 }
