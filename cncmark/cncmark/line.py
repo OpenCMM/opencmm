@@ -151,7 +151,7 @@ def get_edges_for_side(side: tuple, number_of_edges_per_side: int) -> list:
     assert (
         number_of_edges_per_side > 1
     ), "number_of_edges_per_side must be greater than 1"
-    side_id, x0, y0, z0, x1, y1, z1, pair_id = side
+    side_id, model_id, x0, y0, z0, x1, y1, z1, pair_id = side
 
     edges = []
     for i in range(1, number_of_edges_per_side + 1):

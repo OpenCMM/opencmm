@@ -50,7 +50,9 @@ def import_edges(edge_list: list, mysql_config: dict):
 def import_arc(arc_info: list, mysql_config: dict):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
-    insert_query = "INSERT INTO arc (radius, cx, cy, cz) VALUES (%s, %s, %s, %s)"
+    insert_query = (
+        "INSERT INTO arc (model_id, radius, cx, cy, cz) VALUES (%s, %s, %s, %s, %s)"
+    )
     cursor.execute(insert_query, tuple(arc_info))
     cnx.commit()
     cursor.close()
