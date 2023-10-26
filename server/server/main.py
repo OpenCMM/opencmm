@@ -23,6 +23,12 @@ class JobInfo(BaseModel):
     z_offset: Optional[float] = 0.0
 
 
+class MeasurementConfig(BaseModel):
+    mtconnect_interval: int
+    sensor_data_fetch_interval: int
+    sensor_data_diff_threshold: int
+
+
 model_path = "data/3dmodel/3dmodel.stl"
 
 app = FastAPI()
@@ -106,8 +112,10 @@ async def download_gcode():
     return FileResponse("data/gcode/opencmm.gcode")
 
 
-@app.post("/start/measurement/{mtconnect_interval}")
-async def start_measurement(mtconnect_interval: int, background_tasks: BackgroundTasks):
+@app.post("/start/measurement")
+async def start_measurement(
+    _conf: MeasurementConfig, background_tasks: BackgroundTasks
+):
     sensor_ws_url = "ws://192.168.0.35:81"
     mtconnect_url = (
         "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
@@ -128,10 +136,10 @@ async def start_measurement(mtconnect_interval: int, background_tasks: Backgroun
         listener_start,
         sensor_ws_url,
         MYSQL_CONFIG,
-        mtconnect_interval,
+        (mtconnect_url, _conf.mtconnect_interval),
         process_id,
         final_coordinates,
-        mtconnect_url,
+        (_conf.sensor_data_fetch_interval, _conf.sensor_data_diff_threshold),
     )
     return {"status": "ok"}
 

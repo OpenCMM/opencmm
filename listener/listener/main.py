@@ -9,6 +9,7 @@ from listener import status
 from cnceye.edge import find
 from cncmark import arc, pair
 import logging
+from listener import hakaru
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
 logger = logging.getLogger(__name__)
@@ -42,18 +43,28 @@ def listen_sensor(sensor_ws_url: str, process_id: int):
 
 
 def contorl_streaming_status(
-    sensor_ws_url: str, mysql_config: dict, process_id: int, final_coordinates: tuple
+    sensor_ws_url: str,
+    mysql_config: dict,
+    process_id: int,
+    final_coordinates: tuple,
+    streaming_config: tuple,
 ):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(
-        control_sensor(sensor_ws_url, mysql_config, process_id, final_coordinates)
+        control_sensor(
+            sensor_ws_url, mysql_config, process_id, final_coordinates, streaming_config
+        )
     )
     loop.close()
 
 
 async def control_sensor(
-    sensor_ws_url: str, mysql_config: dict, process_id: int, final_coordinates: tuple
+    sensor_ws_url: str,
+    mysql_config: dict,
+    process_id: int,
+    final_coordinates: tuple,
+    streaming_config: tuple,
 ):
     streaming = False
     global done
@@ -65,14 +76,15 @@ async def control_sensor(
             if not streaming and xyz is not None:
                 # if not streaming and xyz is not None and initial_coordinate == xyz:
                 logger.info("ready to start streaming")
-                await websocket.send("startStreaming")
+                (interval, threshold) = streaming_config
+                await websocket.send(hakaru.start_streaming(interval, threshold))
                 logger.info("start streaming")
                 streaming = True
 
             elif streaming and xyz is not None and final_coordinates == xyz:
                 logger.info("ready to stop streaming")
-                await websocket.send("stopStreaming")
-                # await websocket.send("deepSleep")
+                await websocket.send(hakaru.stop_streaming())
+                # await websocket.send(hakaru.deep_sleep())
                 logger.info("stop streaming")
                 streaming = False
                 done = True
@@ -133,8 +145,9 @@ def combine_data(mysql_config: dict):
     mysql_conn.close()
 
 
-def mtconnect_streaming_reader(interval: int, url: str):
+def mtconnect_streaming_reader(mtconnect_config: tuple):
     global xyz
+    (url, interval) = mtconnect_config
     endpoint = f"{url}&interval={interval}"
     try:
         response = requests.get(endpoint, stream=True)
@@ -181,10 +194,10 @@ def mtconnect_streaming_reader(interval: int, url: str):
 def listener_start(
     sensor_ws_url: str,
     mysql_config: dict,
-    mtconnect_interval: int,
+    mtconnect_config: tuple,
     process_id: int,
     final_coordinates: tuple,
-    mtconnect_url: str,
+    streaming_config: tuple,
 ):
     thread1 = threading.Thread(
         target=listen_sensor,
@@ -197,12 +210,7 @@ def listener_start(
     )
     thread2 = threading.Thread(
         target=mtconnect_streaming_reader,
-        args=(
-            (
-                mtconnect_interval,
-                mtconnect_url,
-            )
-        ),
+        args=((mtconnect_config,)),
     )
     thread3 = threading.Thread(
         target=contorl_streaming_status,
@@ -212,6 +220,7 @@ def listener_start(
                 mysql_config,
                 process_id,
                 final_coordinates,
+                streaming_config,
             )
         ),
     )
