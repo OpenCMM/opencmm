@@ -5,6 +5,7 @@ from cncmark.line import (
     import_sides,
     get_sides,
     import_edges_from_sides,
+    import_lines,
 )
 from cncmark.edge import (
     get_edge_path,
@@ -15,6 +16,7 @@ from cncmark.arc import import_arcs
 from .config import MYSQL_CONFIG
 
 model_id = 1
+model_id_test_part = 1
 
 
 def test_get_lines():
@@ -59,3 +61,13 @@ def test_generate_gcode():
     path = get_edge_path(MYSQL_CONFIG)
     gcode = generate_gcode(path)
     save_gcode(gcode, "tests/fixtures/gcode/edge.gcode")
+
+
+def test_import_lines():
+    lines, arcs = get_shapes("tests/fixtures/stl/test-Part.stl")
+    import_lines(model_id, lines, MYSQL_CONFIG)
+
+
+def test_import_arcs_with_test_part():
+    lines, arcs = get_shapes("tests/fixtures/stl/test-Part.stl")
+    import_arcs(model_id_test_part, arcs, MYSQL_CONFIG)
