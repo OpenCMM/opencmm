@@ -18,6 +18,7 @@ listener = {path = "../listener", develop = true}
 black = "^23.7.0"
 pytest = "^7.4.0"
 ruff = "^0.0.283"
+pytest-cov = "^4.1.0"
 
 [build-system]
 requires = ["poetry-core"]
