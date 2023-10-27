@@ -3,13 +3,15 @@
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
 	import { page } from '$app/stores';
 	import { _ } from 'svelte-i18n';
-	import { ClickableTile } from 'carbon-components-svelte';
-	import { ProgressIndicator, ProgressStep } from 'carbon-components-svelte';
+	import { ContentSwitcher, Switch } from 'carbon-components-svelte';
+	import Arc from './Arc.svelte';
+	import Line from './Line.svelte';
 
 	const modelId = $page.url.searchParams.get('id');
 
 	let loaded = false;
 
+	let selectedIndex = 0;
 	interface ModelInfo {
 		id: number;
 		name: string;
@@ -34,34 +36,20 @@
 	});
 </script>
 
-{#if !loaded}
+{#if !loaded || !modelId}
 	<p>Loading...</p>
 {:else}
 	<h1>
 		{modelInfo.name}
 	</h1>
+	<ContentSwitcher bind:selectedIndex>
+		<Switch>Arc</Switch>
+		<Switch>Line</Switch>
+	</ContentSwitcher>
 
-	<div id="progress-indicator">
-		<ProgressIndicator spaceEqually preventChangeOnClick currentIndex={8}>
-			<ProgressStep complete label={$_('home.file.progress.step1')} />
-			<ProgressStep complete={modelInfo.gcodeReady} label={$_('home.file.progress.step2')} />
-			<ProgressStep label={$_('home.file.progress.step3')} />
-		</ProgressIndicator>
-	</div>
-	<ClickableTile href={`/file/setup?id=${modelInfo.id}`}>
-		{$_('home.file.3dmodel.createGcode')}
-	</ClickableTile>
-
-	{#if modelInfo.gcodeReady}
-		<ClickableTile href={`/gcode?id=${modelInfo.id}`}>
-			{$_('home.file.3dmodel.downloadGcode')}
-		</ClickableTile>
+	{#if selectedIndex === 0}
+		<Arc {modelId} />
+	{:else if selectedIndex === 1}
+		<Line {modelId} />
 	{/if}
 {/if}
-
-<style>
-	#progress-indicator {
-		margin-top: 2rem;
-		margin-bottom: 2rem;
-	}
-</style>

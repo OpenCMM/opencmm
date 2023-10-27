@@ -7,6 +7,7 @@
 
 	let loaded = false;
 
+	export let modelId: string;
 	interface Line {
 		id: number;
 		length: number;
@@ -22,7 +23,7 @@
 	];
 	let row: Line[] = [];
 	const load_table_data = async () => {
-		const res = await fetch(`${BACKEND_URL_LOCAL}/result/lines`);
+		const res = await fetch(`${BACKEND_URL_LOCAL}/result/lines/${modelId}`);
 		const data = await res.json();
 		for (const d of data['lines']) {
 			row.push({
@@ -44,7 +45,19 @@
 	{#if !loaded}
 		<p>loading...</p>
 	{:else}
-		<DataTable size="short" title={$_('home.result.line.title')} {headers} rows={row} />
+		<DataTable size="short" title={$_('home.result.line.title')} {headers} rows={row}>
+			<svelte:fragment slot="cell" let:cell>
+				{#if cell.key === 'lengthDiff'}
+					{#if Math.abs(parseFloat(cell.value)) < 100.0}
+						<span style="color: green;">{cell.value}</span>
+					{:else}
+						<span style="color: red;">{cell.value}</span>
+					{/if}
+				{:else}
+					{cell.value}
+				{/if}
+			</svelte:fragment>
+		</DataTable>
 	{/if}
 </div>
 

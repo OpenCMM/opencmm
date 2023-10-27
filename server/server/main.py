@@ -169,6 +169,7 @@ async def start_measurement(
         MYSQL_CONFIG,
         (mtconnect_url, _conf.mtconnect_interval),
         process_id,
+        _conf.three_d_model_id,
         final_coordinates,
         (_conf.interval, _conf.threshold),
     )
@@ -203,21 +204,21 @@ async def websocket_endpoint(model_id: int, websocket: WebSocket):
         await asyncio.sleep(1)
 
 
-@app.get("/result/edges")
-async def get_result_edges():
-    edges = result.fetch_edges()
+@app.get("/result/edges/{model_id}")
+async def get_result_edges(model_id: int):
+    edges = result.fetch_edges(model_id)
     return {"edges": edges}
 
 
-@app.get("/result/lines")
-async def get_result_lines():
-    lines = result.fetch_lines()
+@app.get("/result/lines/{model_id}")
+async def get_result_lines(model_id: int):
+    lines = result.fetch_lines(model_id)
     return {"lines": lines}
 
 
-@app.get("/result/arcs")
-async def get_result_arcs():
-    arcs = result.fetch_arcs()
+@app.get("/result/arcs/{model_id}")
+async def get_result_arcs(model_id: int):
+    arcs = result.fetch_arcs(model_id)
     return {"arcs": arcs}
 
 

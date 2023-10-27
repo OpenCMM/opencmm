@@ -5,6 +5,7 @@
 	import { _ } from 'svelte-i18n';
 	import { displayCoordinates, displayLengthDifference } from '../Result/utils';
 
+	export let modelId: string;
 	let loaded = false;
 
 	interface Arc {
@@ -26,7 +27,7 @@
 	];
 	let row: Arc[] = [];
 	const load_table_data = async () => {
-		const res = await fetch(`${BACKEND_URL_LOCAL}/result/arcs`);
+		const res = await fetch(`${BACKEND_URL_LOCAL}/result/arcs/${modelId}`);
 		const data = await res.json();
 		for (const d of data['arcs']) {
 			row.push({
@@ -48,9 +49,21 @@
 
 <div id="data-table">
 	{#if !loaded}
-		<p>loading...</p>
+		<p>Loading...</p>
 	{:else}
-		<DataTable size="short" title={$_('home.result.arc.title')} {headers} rows={row} />
+		<DataTable size="short" title={$_('home.result.arc.title')} {headers} rows={row}>
+			<svelte:fragment slot="cell" let:cell>
+				{#if cell.key === 'radiusDiff'}
+					{#if Math.abs(parseFloat(cell.value)) < 100.0}
+						<span style="color: green;">{cell.value}</span>
+					{:else}
+						<span style="color: red;">{cell.value}</span>
+					{/if}
+				{:else}
+					{cell.value}
+				{/if}
+			</svelte:fragment>
+		</DataTable>
 	{/if}
 </div>
 

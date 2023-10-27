@@ -8,10 +8,8 @@ export function goToFilePage(model_id: number, status: number) {
 		case 1:
 			goto(`/file/start?id=${model_id}`);
 			break;
-		case 2:
-			goto(`/model?id=${model_id}`);
-			break;
 		default:
+			goto(`/model?id=${model_id}`);
 			break;
 	}
 }

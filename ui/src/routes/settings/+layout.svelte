@@ -2,6 +2,7 @@
 	import { Grid, Row, Column, ClickableTile } from 'carbon-components-svelte';
 	import { page } from '$app/stores';
 	import { _ } from 'svelte-i18n';
+	import { goto } from '$app/navigation';
 </script>
 
 <div id="settings">
@@ -9,12 +10,15 @@
 		<Row>
 			<Column>
 				<ClickableTile
-					href="/settings/language"
+					on:click={() => goto('/settings/language')}
 					light={$page.url.pathname === '/settings/language'}
 				>
 					{$_('settings.language.label')}
 				</ClickableTile>
-				<ClickableTile href="/settings/theme" light={$page.url.pathname === '/settings/theme'}>
+				<ClickableTile
+					on:click={() => goto('/settings/theme')}
+					light={$page.url.pathname === '/settings/theme'}
+				>
 					{$_('settings.theme.label')}
 				</ClickableTile>
 			</Column>

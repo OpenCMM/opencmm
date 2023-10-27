@@ -3,11 +3,11 @@ import mysql.connector
 from .edge import get_edges_by_side_id
 
 
-def get_pairs(mysql_config: dict):
+def get_pairs(model_id: int, mysql_config: dict):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
-    query = "SELECT id FROM pair"
-    cursor.execute(query)
+    query = "SELECT id FROM pair WHERE model_id = %s"
+    cursor.execute(query, (model_id,))
     pairs = cursor.fetchall()
     cursor.close()
     cnx.close()
@@ -52,8 +52,8 @@ def point_to_line_distance(edges_on_the_same_line: list, point: tuple):
     return distance
 
 
-def add_line_length(mysql_config: dict):
-    pairs = get_pairs(mysql_config)
+def add_line_length(model_id: int, mysql_config: dict):
+    pairs = get_pairs(model_id, mysql_config)
     for (pair_id,) in pairs:
         sides = get_sides_by_pair_id(pair_id, mysql_config)
         side1 = sides[0]

@@ -2,10 +2,12 @@ from cncmark.pair import add_line_length, get_pairs
 import pytest
 from .config import MYSQL_CONFIG
 
+model_id = 1
+
 
 @pytest.mark.skip(reason="not implemented")
 def test_add_line_length():
-    add_line_length(MYSQL_CONFIG)
+    add_line_length(model_id, MYSQL_CONFIG)
 
 
 @pytest.mark.skip(reason="not implemented")

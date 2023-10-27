@@ -46,6 +46,7 @@ def contorl_streaming_status(
     sensor_ws_url: str,
     mysql_config: dict,
     process_id: int,
+    model_id: int,
     final_coordinates: tuple,
     streaming_config: tuple,
 ):
@@ -53,7 +54,12 @@ def contorl_streaming_status(
     asyncio.set_event_loop(loop)
     loop.run_until_complete(
         control_sensor(
-            sensor_ws_url, mysql_config, process_id, final_coordinates, streaming_config
+            sensor_ws_url,
+            mysql_config,
+            process_id,
+            model_id,
+            final_coordinates,
+            streaming_config,
         )
     )
     loop.close()
@@ -63,6 +69,7 @@ async def control_sensor(
     sensor_ws_url: str,
     mysql_config: dict,
     process_id: int,
+    model_id: int,
     final_coordinates: tuple,
     streaming_config: tuple,
 ):
@@ -105,7 +112,7 @@ async def control_sensor(
                     measured_edges = find.find_edges(
                         process_id, mysql_config=mysql_config
                     )
-                    edge_data = find.get_edge_data(mysql_config)
+                    edge_data = find.get_edge_data(model_id, mysql_config)
                     # distance_threshold should be passed as an argument
                     update_list = find.identify_close_edge(edge_data, measured_edges)
                     edge_count = len(update_list)
@@ -120,7 +127,7 @@ async def control_sensor(
                     find.add_measured_edge_coord(update_list, mysql_config)
                     logger.info(f"{edge_count} edges found")
                     pair.add_line_length(mysql_config)
-                    arc.add_measured_arc_info(mysql_config)
+                    arc.add_measured_arc_info(model_id, mysql_config)
                 except Exception as e:
                     logger.warning(e)
                     status.update_process_status(
@@ -196,6 +203,7 @@ def listener_start(
     mysql_config: dict,
     mtconnect_config: tuple,
     process_id: int,
+    model_id: int,
     final_coordinates: tuple,
     streaming_config: tuple,
 ):
@@ -219,6 +227,7 @@ def listener_start(
                 sensor_ws_url,
                 mysql_config,
                 process_id,
+                model_id,
                 final_coordinates,
                 streaming_config,
             )
