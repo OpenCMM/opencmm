@@ -5,3 +5,4 @@ TRUNCATE `side`;
 TRUNCATE `pair`;
 TRUNCATE `sensor`;
 TRUNCATE `process`;
+TRUNCATE `model`;
