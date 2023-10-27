@@ -13,6 +13,8 @@ from server.coord import get_final_coordinates
 from server.config import MYSQL_CONFIG, MODEL_PATH
 from server.model import (
     get_3dmodel_data,
+    get_recent_3dmodel_data,
+    get_3dmodel_file_info,
     model_exists,
     model_id_to_filename,
     add_new_3dmodel,
@@ -84,6 +86,18 @@ async def list_3dmodels():
     return {"models": get_3dmodel_data()}
 
 
+@app.get("/list/recent/3dmodels")
+async def list_recent_3dmodels(limit: int = 5):
+    """List recently used 3d models"""
+    return {"models": get_recent_3dmodel_data(limit)}
+
+
+@app.get("/get/3dmodel/info/{model_id}")
+async def get_3dmodel_info(model_id: int):
+    """Get 3d model info"""
+    return get_3dmodel_file_info(model_id)
+
+
 @app.get("/load/model/{model_id}")
 async def load_model(model_id: str):
     model_id = int(model_id)
@@ -117,12 +131,13 @@ async def setup_data(job_info: JobInfo):
     return {"status": "ok"}
 
 
-@app.get("/download/gcode")
-async def download_gcode():
+@app.get("/download/gcode/{model_id}")
+async def download_gcode(model_id: int):
     """Download gcode file"""
-    if not os.path.exists("data/gcode/opencmm.gcode"):
+    filename = model_id_to_filename(model_id)
+    if not os.path.exists(f"data/gcode/{filename}.gcode"):
         raise HTTPException(status_code=400, detail="No gcode file generated")
-    return FileResponse("data/gcode/opencmm.gcode")
+    return FileResponse(f"data/gcode/{filename}.gcode")
 
 
 @app.post("/start/measurement")

@@ -29,7 +29,7 @@
 
 			if (res.status === 200 && res.data['status'] === 'ok') {
 				const modelId = res.data['model_id'];
-				goto(`/setup?id=${modelId}`);
+				goto(`/file/setup?id=${modelId}`);
 			} else {
 				error = res.data['message'];
 			}
