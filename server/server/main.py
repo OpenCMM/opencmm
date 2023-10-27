@@ -1,6 +1,6 @@
 import uvicorn
 import os
-from fastapi import FastAPI, UploadFile, HTTPException, BackgroundTasks
+from fastapi import FastAPI, UploadFile, HTTPException, BackgroundTasks, WebSocket
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from server.prepare import process_stl
@@ -19,6 +19,7 @@ from server.model import (
     model_id_to_filename,
     add_new_3dmodel,
 )
+import asyncio
 
 
 class JobInfo(BaseModel):
@@ -32,6 +33,7 @@ class JobInfo(BaseModel):
 
 
 class MeasurementConfig(BaseModel):
+    three_d_model_id: int
     mtconnect_interval: int
     interval: int
     threshold: int
@@ -151,15 +153,16 @@ async def start_measurement(
     # mtconnect_url = "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
     # sensor_ws_url = "ws://localhost:8081"
 
-    running_process = get_running_process(MYSQL_CONFIG)
+    running_process = get_running_process(_conf.three_d_model_id, MYSQL_CONFIG)
     if running_process is not None:
         raise HTTPException(
             status_code=400,
             detail="Measurement already running (process id: {running_process[0]}))",
         )
 
-    final_coordinates = get_final_coordinates("data/gcode/opencmm.gcode")
-    process_id = start_measuring(MYSQL_CONFIG, "running")
+    filename = model_id_to_filename(_conf.three_d_model_id)
+    final_coordinates = get_final_coordinates(f"data/gcode/{filename}.gcode")
+    process_id = start_measuring(_conf.three_d_model_id, MYSQL_CONFIG, "running")
     background_tasks.add_task(
         listener_start,
         sensor_ws_url,
@@ -170,6 +173,34 @@ async def start_measurement(
         (_conf.interval, _conf.threshold),
     )
     return {"status": "ok"}
+
+
+@app.get("/get_sensor_status/{model_id}")
+async def get_sensor_status(model_id: int):
+    running_process = get_running_process(model_id, MYSQL_CONFIG)
+    return {"status": running_process}
+
+
+@app.websocket("/ws/{model_id}")
+async def websocket_endpoint(model_id: int, websocket: WebSocket):
+    await websocket.accept()
+    while True:
+        _process_data = await get_sensor_status(model_id)
+        process_data = _process_data["status"]
+        if process_data is None:
+            status = {
+                "process_id": -1,
+                "status": "process not found",
+                "error": "",
+            }
+        else:
+            status = {
+                "process_id": process_data[0],
+                "status": process_data[2],
+                "error": process_data[3],
+            }
+        await websocket.send_json(status)
+        await asyncio.sleep(1)
 
 
 @app.get("/result/edges")

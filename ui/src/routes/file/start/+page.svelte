@@ -44,8 +44,8 @@
 	<div id="progress-indicator">
 		<ProgressIndicator spaceEqually preventChangeOnClick currentIndex={2}>
 			<ProgressStep complete label={$_('home.file.progress.step1')} />
-			<ProgressStep complete={modelInfo.status === 1} label={$_('home.file.progress.step2')} />
-			<ProgressStep complete={modelInfo.status === 2} label={$_('home.file.progress.step3')} />
+			<ProgressStep complete={modelInfo.status > 0} label={$_('home.file.progress.step2')} />
+			<ProgressStep complete={modelInfo.status > 1} label={$_('home.file.progress.step3')} />
 		</ProgressIndicator>
 	</div>
 	<StartSensor />

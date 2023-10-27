@@ -17,6 +17,7 @@
 			"measureLength": {
 				"label": "measure length"
 			},
+			"loading": "Creating GCode...",
 			"measureFeedRate": {
 				"label": "feed rate when measuring"
 			},
@@ -45,10 +46,15 @@
 			"title": "Start measurement",
 			"description": "Click this button to make the sensor state to active. Then the sensor will be ready to measure the work.",
 			"status": {
-				"active": "Measuring..."
+				"title": "Sensor status",
+				"active": "Measuring...",
+				"running": "Ready",
+				"notRunning": "Not Ready",
+				"other": "Loading",
+				"done": "Done"
 			},
 			"start": "Start",
-			"error": "Failed to start measurement"
+			"error": "Server error"
 		},
 		"file": {
 			"3dmodel": {

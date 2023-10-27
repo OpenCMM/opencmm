@@ -17,6 +17,7 @@
 			"measureLength": {
 				"label": "測定箇所の長さ"
 			},
+			"loading": "GCode作成中...",
 			"measureFeedRate": {
 				"label": "測定時の送り速度"
 			},
@@ -45,10 +46,15 @@
 			"title": "測定を開始します",
 			"description": "こちらのボタンをクリックしてセンサを測定可能な状態にしてください。",
 			"status": {
-				"active": "測定中"
+				"title": "センサの状態",
+				"active": "測定中",
+				"running": "準備完了",
+				"notRunning": "センサは測定可能な状態ではありません",
+				"other": "処理中",
+				"done": "測定完了"
 			},
 			"start": "測定開始",
-			"error": "測定に失敗しました。"
+			"error": "サーバーエラーが発生しました。"
 		},
 		"file": {
 			"3dmodel": {

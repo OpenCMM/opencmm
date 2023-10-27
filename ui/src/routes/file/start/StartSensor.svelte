@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
 	import axios from 'axios';
-	import { Form, FormGroup, TextInput, Button, InlineLoading } from 'carbon-components-svelte';
+	import { Form, FormGroup, TextInput, Button } from 'carbon-components-svelte';
 	import { _ } from 'svelte-i18n';
 	import { page } from '$app/stores';
 	import DownloadGCode from './DownloadGCode.svelte';
+	import { InlineNotification } from 'carbon-components-svelte';
+	import SensorStatus from './SensorStatus.svelte';
 
 	const modelId = $page.url.searchParams.get('id');
 	const advanced = $page.url.searchParams.get('advanced') === 'true';
@@ -21,6 +23,7 @@
 		try {
 			processing = true;
 			const data = {
+				three_d_model_id: Number(modelId),
 				mtconnect_interval: Number(mtInterval),
 				interval: Number(interval),
 				threshold: Number(threshold)
@@ -46,37 +49,42 @@
 {#if modelId}
 	<DownloadGCode {modelId} />
 {/if}
-<div class="bx--form-item">
-	<h3>{$_('home.start.title')}</h3>
-	<p class="start-description">{$_('home.start.description')}</p>
 
-	<Form on:submit={startCapturing}>
-		{#if advanced}
-			<FormGroup>
-				<TextInput
-					labelText="MTConnect data fetch interval"
-					id="mtInterval"
-					bind:value={mtInterval}
-				/>
-			</FormGroup>
-			<FormGroup>
-				<TextInput labelText="Sensor data fetch interval" id="interval" bind:value={interval} />
-				<TextInput
-					labelText="Sensor data difference threshold"
-					id="threshold"
-					bind:value={threshold}
-				/>
-			</FormGroup>
-		{/if}
-		{#if processing && !error}
-			<InlineLoading status="active" description={$_('home.start.status.active')} />
-		{:else if error}
-			<InlineLoading status="error" description={error} />
-		{:else}
-			<Button type="submit">{$_('home.start.start')}</Button>
-		{/if}
-	</Form>
-</div>
+{#if processing}
+	<div class="bx--form-item">
+		<h3>{$_('home.start.title')}</h3>
+		<p class="start-description">{$_('home.start.description')}</p>
+
+		<Form on:submit={startCapturing}>
+			{#if advanced}
+				<FormGroup>
+					<TextInput
+						labelText="MTConnect data fetch interval"
+						id="mtInterval"
+						bind:value={mtInterval}
+					/>
+				</FormGroup>
+				<FormGroup>
+					<TextInput labelText="Sensor data fetch interval" id="interval" bind:value={interval} />
+					<TextInput
+						labelText="Sensor data difference threshold"
+						id="threshold"
+						bind:value={threshold}
+					/>
+				</FormGroup>
+				<Button type="submit">{$_('home.start.start')}</Button>
+			{/if}
+		</Form>
+	</div>
+{/if}
+
+{#if modelId}
+	<SensorStatus {modelId} />
+{/if}
+
+{#if error}
+	<InlineNotification title="Error:" subtitle={$_('home.start.error')} />
+{/if}
 
 <style>
 	.bx--form-item {

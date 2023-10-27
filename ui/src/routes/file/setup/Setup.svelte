@@ -4,6 +4,7 @@
 	import axios from 'axios';
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
 	import { page } from '$app/stores';
+	import { InlineLoading } from 'carbon-components-svelte';
 	import { Form, FormGroup, TextInput, Button } from 'carbon-components-svelte';
 	import { _ } from 'svelte-i18n';
 
@@ -16,7 +17,9 @@
 	let moveFeedRate = 600.0;
 	let error: string | null = null;
 	let settingDone = false;
+	let loading = false;
 	const handleSubmit = async (e: Event) => {
+		loading = true;
 		e.preventDefault();
 
 		const data = {
@@ -45,6 +48,7 @@
 		} catch (err) {
 			console.error(err);
 		}
+		loading = false;
 	};
 </script>
 
@@ -85,7 +89,11 @@
 			<FormGroup>
 				<TextInput labelText="z" id="zOffset" bind:value={zOffset} />
 			</FormGroup>
-			<Button type="submit">{$_('home.setup.submit')}</Button>
+			{#if loading}
+				<InlineLoading description={$_('home.setup.loading')} />
+			{:else}
+				<Button type="submit">{$_('home.setup.submit')}</Button>
+			{/if}
 		</Form>
 	</div>
 {/if}
