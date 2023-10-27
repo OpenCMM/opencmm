@@ -4,7 +4,7 @@
 	import { InlineLoading } from 'carbon-components-svelte';
 
 	export let modelId: string;
-	let sensorStatus = 'process not found';
+	export let sensorStatus: string;
 
 	const ws = new WebSocket(`${BACKEND_WS_URL_LOCAL}/ws/${modelId}`);
 	ws.addEventListener('open', function (event) {
@@ -21,7 +21,7 @@
 	<h3>{$_('home.start.status.title')}</h3>
 	{#if sensorStatus === 'running' || sensorStatus === 'done'}
 		<InlineLoading description={$_('home.start.status.running')} status="finished" />
-	{:else if sensorStatus === 'process not running'}
+	{:else if sensorStatus === 'process not found'}
 		<InlineLoading description={$_('home.start.status.notRunning')} status="inactive" />
 	{:else}
 		<InlineLoading description={$_('home.start.status.running')} status="active" />

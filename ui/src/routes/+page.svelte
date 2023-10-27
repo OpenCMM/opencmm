@@ -5,9 +5,9 @@
 	import Document from 'carbon-icons-svelte/lib/Document.svelte';
 	import { _ } from 'svelte-i18n';
 	import Upload3dModel from './Upload3dModel.svelte';
-	import Files from './Files.svelte';
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
-	import { goto } from '$app/navigation';
+	import FileTiles from './FileTiles.svelte';
+	import { goToFilePage } from './utils/path';
 
 	let newFileOpen = false;
 	let openFileOpen = false;
@@ -15,6 +15,7 @@
 	interface RecentFile {
 		id: number;
 		name: string;
+		status: number;
 	}
 	let recentFiles: RecentFile[] = [];
 	const load_recent_files = async () => {
@@ -23,7 +24,8 @@
 		for (const d of data['models']) {
 			recentFiles.push({
 				id: d['id'],
-				name: d['name']
+				name: d['name'],
+				status: d['model_status']
 			});
 		}
 		loaded = true;
@@ -33,10 +35,6 @@
 		document.body.classList.add('start-menu-open');
 		load_recent_files();
 	});
-
-	function goToFilePage(model_id: number) {
-		goto(`/model?id=${model_id}`);
-	}
 </script>
 
 <div id="start-menu">
@@ -65,11 +63,13 @@
 				<Column>
 					<h2>{$_('home.welcome.recentFiles')}</h2>
 					{#if !loaded}
-						<p>loading...</p>
+						<p>Loading...</p>
 					{:else}
 						{#each recentFiles as file}
-							<Button class="menu-button" kind="secondary" on:click={() => goToFilePage(file.id)}
-								>{file.name}</Button
+							<Button
+								class="menu-button"
+								kind="secondary"
+								on:click={() => goToFilePage(file.id, file.status)}>{file.name}</Button
 							>
 						{/each}
 					{/if}
@@ -98,7 +98,7 @@
 	on:open
 	on:close
 >
-	<Files />
+	<FileTiles />
 </Modal>
 
 <style>

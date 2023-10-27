@@ -16,6 +16,7 @@
 	let interval = 10;
 	let threshold = 100;
 	let processing = false;
+	let sensorStatus = 'process not found';
 
 	const startCapturing = async (e: Event) => {
 		e.preventDefault();
@@ -50,7 +51,7 @@
 	<DownloadGCode {modelId} />
 {/if}
 
-{#if processing}
+{#if sensorStatus === 'process not found'}
 	<div class="bx--form-item">
 		<h3>{$_('home.start.title')}</h3>
 		<p class="start-description">{$_('home.start.description')}</p>
@@ -72,14 +73,14 @@
 						bind:value={threshold}
 					/>
 				</FormGroup>
-				<Button type="submit">{$_('home.start.start')}</Button>
 			{/if}
+			<Button type="submit">{$_('home.start.start')}</Button>
 		</Form>
 	</div>
 {/if}
 
 {#if modelId}
-	<SensorStatus {modelId} />
+	<SensorStatus {modelId} {sensorStatus} />
 {/if}
 
 {#if error}

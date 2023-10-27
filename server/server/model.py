@@ -36,6 +36,8 @@ def get_3dmodel_data():
         model_size = os.path.getsize(model_path)
         model_modified_time = int(os.path.getmtime(model_path) * 1000)
         gcode_ready = os.path.exists(f"data/gcode/{filename}.gcode")
+        sensor_status = get_sensor_status(idx)
+        model_status = get_model_status(gcode_ready, sensor_status)
         models_data.append(
             {
                 "id": idx,
@@ -43,6 +45,7 @@ def get_3dmodel_data():
                 "size": model_size,
                 "modified_time": model_modified_time,
                 "gcode_ready": gcode_ready,
+                "model_status": model_status,
             }
         )
     return models_data
