@@ -1,5 +1,12 @@
 {
 	"home": {
+		"welcome": {
+			"title": "Welcome to OpenCMM",
+			"description": "OpenCMM is an open source software for coordinate measuring machines (CMM).",
+			"newFile": "New file",
+			"openFile": "Open file",
+			"recentFiles": "Recent files"
+		},
 		"upload3dmodel": {
 			"title": "Upload a 3D model",
 			"buttonLabel": "Select a file",
@@ -10,6 +17,7 @@
 			"measureLength": {
 				"label": "measure length"
 			},
+			"loading": "Creating GCode...",
 			"measureFeedRate": {
 				"label": "feed rate when measuring"
 			},
@@ -23,16 +31,30 @@
 		"gcode": {
 			"download": {
 				"label": "Download GCode",
+				"description": "Download the GCode file and send it to the CNC machine.",
 				"helperText": "Download"
 			}
 		},
 		"start": {
+			"howto": {
+				"title": "How to measure",
+				"step1": "1. Download GCode",
+				"step2": "2. Send GCode to CNC machine",
+				"step3": "3. Make the sensor state to active",
+				"step4": "4. Start CNC machine"
+			},
 			"title": "Start measurement",
+			"description": "Click this button to make the sensor state to active. Then the sensor will be ready to measure the work.",
 			"status": {
-				"active": "Measuring..."
+				"title": "Sensor status",
+				"active": "Measuring...",
+				"running": "Ready",
+				"notRunning": "Not Ready",
+				"other": "Loading",
+				"done": "Done"
 			},
 			"start": "Start",
-			"error": "Failed to start measurement"
+			"error": "Server error"
 		},
 		"file": {
 			"3dmodel": {
@@ -45,6 +67,11 @@
 				"modelView": "3D model view",
 				"downloadGcode": "Download GCode",
 				"delete": "Delete"
+			},
+			"progress": {
+				"step1": "1. Upload 3D model",
+				"step2": "2. Create GCode",
+				"step3": "3. Start Sensor"
 			}
 		},
 		"result": {

@@ -36,6 +36,8 @@ def get_3dmodel_data():
         model_size = os.path.getsize(model_path)
         model_modified_time = int(os.path.getmtime(model_path) * 1000)
         gcode_ready = os.path.exists(f"data/gcode/{filename}.gcode")
+        sensor_status = get_sensor_status(idx)
+        model_status = get_model_status(gcode_ready, sensor_status)
         models_data.append(
             {
                 "id": idx,
@@ -43,9 +45,60 @@ def get_3dmodel_data():
                 "size": model_size,
                 "modified_time": model_modified_time,
                 "gcode_ready": gcode_ready,
+                "model_status": model_status,
             }
         )
     return models_data
+
+
+def get_recent_3dmodel_data(limit: int):
+    models = get_3dmodel_data()
+
+    recent_models = sorted(models, key=lambda x: x["modified_time"], reverse=True)
+    return recent_models[:limit]
+
+
+def get_3dmodel_file_info(model_id: int):
+    filename = model_id_to_filename(model_id)
+    gcode_ready = os.path.exists(f"data/gcode/{filename}.gcode")
+    sensor_status = get_sensor_status(model_id)
+    model_status = get_model_status(gcode_ready, sensor_status)
+    return {
+        "id": model_id,
+        "name": filename,
+        "size": os.path.getsize(os.path.join(MODEL_PATH, filename)),
+        "modified_time": int(
+            os.path.getmtime(os.path.join(MODEL_PATH, filename)) * 1000
+        ),
+        "gcode_ready": gcode_ready,
+        "model_status": model_status,
+    }
+
+
+def get_model_status(gcode_ready, sensor_status):
+    if gcode_ready and sensor_status == "done":
+        return 3
+    elif gcode_ready and sensor_status == "running":
+        return 2
+    elif gcode_ready:
+        return 1
+    return 0
+
+
+def get_sensor_status(model_id: int):
+    """
+    Get sensor status of a model
+    """
+    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+    cursor = cnx.cursor()
+    query = "SELECT status FROM process WHERE id = %s ORDER BY start DESC LIMIT 1"
+    cursor.execute(query, (model_id,))
+    sensor_status = cursor.fetchone()
+    cursor.close()
+    cnx.close()
+    if sensor_status is not None:
+        return sensor_status[0]
+    return sensor_status
 
 
 def model_id_to_filename(_model_id: int):

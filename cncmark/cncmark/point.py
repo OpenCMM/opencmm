@@ -69,7 +69,7 @@ def get_shapes(stl_file_path: str, decimal_places: int = 3):
         else:
             # arc
             # if close to previous length, add to previous arc
-            if np.isclose(line_length, previous_length, atol=1e-6):
+            if np.isclose(line_length, previous_length, atol=1e-3):
                 ground_parallel_arcs[-1] = np.vstack(
                     (ground_parallel_arcs[-1], ground_parallel_shapes[i][1])
                 )

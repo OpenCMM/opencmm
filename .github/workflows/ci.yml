@@ -64,7 +64,7 @@ jobs:
           poetry run ruff --format=github --target-version=py37 .
 
       - name: Run the automated tests
-        run: poetry run pytest -v
+        run: poetry run pytest -v --cov=cncmark 
 
   server:
     strategy:
@@ -121,7 +121,7 @@ jobs:
           poetry run ruff --format=github --target-version=py37 .
 
       - name: Run the automated tests
-        run: poetry run pytest -v tests/test_main.py
+        run: poetry run pytest -v --cov=server tests/test_main.py
 
   listener:
     strategy:
