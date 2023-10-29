@@ -22,3 +22,5 @@ if os.environ.get("CI"):
 
 MODEL_PATH = "data/3dmodel"
 GCODE_PATH = "data/gcode"
+
+SENSOR_HOSTNAME = "opencmm"

@@ -10,7 +10,7 @@ from server import result
 from listener.main import listener_start
 from listener.status import get_process_status, start_measuring, get_running_process
 from server.coord import get_final_coordinates
-from server.config import MYSQL_CONFIG, MODEL_PATH
+from server.config import MYSQL_CONFIG, MODEL_PATH, SENSOR_HOSTNAME
 from server.model import (
     get_3dmodel_data,
     get_recent_3dmodel_data,
@@ -146,7 +146,8 @@ async def download_gcode(model_id: int):
 async def start_measurement(
     _conf: MeasurementConfig, background_tasks: BackgroundTasks
 ):
-    sensor_ws_url = "ws://192.168.0.35:81"
+    sensor_ws_url = f"ws://{SENSOR_HOSTNAME}.local:81"
+    # sensor_ws_url = "ws://192.168.0.35:81"
     mtconnect_url = (
         "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
     )
