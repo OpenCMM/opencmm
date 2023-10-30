@@ -15,14 +15,12 @@
 	let mtInterval = 5;
 	let interval = 10;
 	let threshold = 100;
-	let processing = false;
 	let sensorStatus = 'process not found';
 
 	const startCapturing = async (e: Event) => {
 		e.preventDefault();
 
 		try {
-			processing = true;
 			const data = {
 				three_d_model_id: Number(modelId),
 				mtconnect_interval: Number(mtInterval),
@@ -34,7 +32,6 @@
 		} catch (err) {
 			console.error(err);
 			error = $_('home.start.error');
-			processing = false;
 		}
 	};
 </script>

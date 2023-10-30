@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "listener"
-version = "0.2.0"
+version = "0.2.2"
 description = ""
 authors = ["yuichiroaoki <45054071+yuichiroaoki@users.noreply.github.com>"]
 readme = "README.md"
@@ -12,6 +12,7 @@ requests = "^2.31.0"
 mysql-connector-python = "^8.1.0"
 cncmark = {path = "../cncmark"}
 cnceye = "^0.4.2"
+ping3 = "^4.0.4"
 
 
 [tool.poetry.group.dev.dependencies]

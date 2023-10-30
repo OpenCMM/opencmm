@@ -23,6 +23,8 @@
 		<InlineLoading description={$_('home.start.status.running')} status="finished" />
 	{:else if sensorStatus === 'process not found'}
 		<InlineLoading description={$_('home.start.status.notRunning')} status="inactive" />
+	{:else if sensorStatus === 'sensor not found or turned off'}
+		<InlineLoading description={$_('home.start.status.cannotPing')} status="error" />
 	{:else}
 		<InlineLoading description={$_('home.start.status.running')} status="active" />
 	{/if}

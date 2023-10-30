@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 
 chunk_size = 1024
 xyz = None
-initial_coordinate = (109.074, -15.028, -561.215)
 done = False
 data_to_insert = []
 
@@ -31,7 +30,7 @@ async def receive_sensor_data(sensor_ws_url: str, process_id: int):
             distance = await websocket.recv()
             if xyz is not None:
                 (x, y, z) = xyz
-                data_to_insert.append((x, y, z, process_id, float(distance)))
+                data_to_insert.append((x, y, z, process_id, distance))
 
 
 # ref. https://stackoverflow.com/questions/67734115/how-to-use-multithreading-with-websockets
@@ -46,6 +45,7 @@ def contorl_streaming_status(
     sensor_ws_url: str,
     mysql_config: dict,
     process_id: int,
+    model_id: int,
     final_coordinates: tuple,
     streaming_config: tuple,
 ):
@@ -53,7 +53,12 @@ def contorl_streaming_status(
     asyncio.set_event_loop(loop)
     loop.run_until_complete(
         control_sensor(
-            sensor_ws_url, mysql_config, process_id, final_coordinates, streaming_config
+            sensor_ws_url,
+            mysql_config,
+            process_id,
+            model_id,
+            final_coordinates,
+            streaming_config,
         )
     )
     loop.close()
@@ -63,6 +68,7 @@ async def control_sensor(
     sensor_ws_url: str,
     mysql_config: dict,
     process_id: int,
+    model_id: int,
     final_coordinates: tuple,
     streaming_config: tuple,
 ):
@@ -71,17 +77,28 @@ async def control_sensor(
     async with websockets.connect(sensor_ws_url) as websocket:
         logger.info("control_sensor(): connected")
 
+        def is_same_coord(target_coord, current_coord):
+            return (
+                target_coord[0] == current_coord[0]
+                and target_coord[1] == current_coord[1]
+            )
+
         while not done:
             await asyncio.sleep(0.5)
-            if not streaming and xyz is not None:
-                # if not streaming and xyz is not None and initial_coordinate == xyz:
+            if (
+                not streaming
+                and xyz is not None
+                and not is_same_coord(final_coordinates, xyz)
+            ):
                 logger.info("ready to start streaming")
                 (interval, threshold) = streaming_config
                 await websocket.send(hakaru.start_streaming(interval, threshold))
                 logger.info("start streaming")
                 streaming = True
 
-            elif streaming and xyz is not None and final_coordinates == xyz:
+            elif (
+                streaming and xyz is not None and is_same_coord(final_coordinates, xyz)
+            ):
                 logger.info("ready to stop streaming")
                 await websocket.send(hakaru.stop_streaming())
                 # await websocket.send(hakaru.deep_sleep())
@@ -105,7 +122,7 @@ async def control_sensor(
                     measured_edges = find.find_edges(
                         process_id, mysql_config=mysql_config
                     )
-                    edge_data = find.get_edge_data(mysql_config)
+                    edge_data = find.get_edge_data(model_id, mysql_config)
                     # distance_threshold should be passed as an argument
                     update_list = find.identify_close_edge(edge_data, measured_edges)
                     edge_count = len(update_list)
@@ -120,7 +137,7 @@ async def control_sensor(
                     find.add_measured_edge_coord(update_list, mysql_config)
                     logger.info(f"{edge_count} edges found")
                     pair.add_line_length(mysql_config)
-                    arc.add_measured_arc_info(mysql_config)
+                    arc.add_measured_arc_info(model_id, mysql_config)
                 except Exception as e:
                     logger.warning(e)
                     status.update_process_status(
@@ -145,7 +162,9 @@ def combine_data(mysql_config: dict):
     mysql_conn.close()
 
 
-def mtconnect_streaming_reader(mtconnect_config: tuple):
+def mtconnect_streaming_reader(
+    mtconnect_config: tuple, mysql_config: dict, process_id: int
+):
     global xyz
     (url, interval) = mtconnect_config
     endpoint = f"{url}&interval={interval}"
@@ -180,15 +199,25 @@ def mtconnect_streaming_reader(mtconnect_config: tuple):
                     try:
                         xyz = mt.get_coordinates(xml_buffer)[:3]
                     except ET.ParseError:
-                        logger.warning("ParseError")
+                        err_msg = "ParseError"
+                        logger.warning(err_msg)
+                        status.update_process_status(
+                            mysql_config, process_id, err_msg, err_msg
+                        )
 
         else:
-            logger.warning("Error:", response.status_code)
+            err_msg = f"Error: {response.status_code}"
+            logger.warning(err_msg)
+            status.update_process_status(mysql_config, process_id, err_msg, err_msg)
 
     except requests.ConnectionError:
-        logger.warning("Connection to the MTConnect agent was lost.")
+        err_msg = "Connection to the MTConnect agent was lost."
+        logger.warning(err_msg)
+        status.update_process_status(mysql_config, process_id, err_msg, err_msg)
     except KeyboardInterrupt:
-        logger.info("Streaming stopped by user.")
+        _msg = "Streaming stopped by user."
+        logger.info(_msg)
+        status.update_process_status(mysql_config, process_id, _msg)
 
 
 def listener_start(
@@ -196,6 +225,7 @@ def listener_start(
     mysql_config: dict,
     mtconnect_config: tuple,
     process_id: int,
+    model_id: int,
     final_coordinates: tuple,
     streaming_config: tuple,
 ):
@@ -210,7 +240,13 @@ def listener_start(
     )
     thread2 = threading.Thread(
         target=mtconnect_streaming_reader,
-        args=((mtconnect_config,)),
+        args=(
+            (
+                mtconnect_config,
+                mysql_config,
+                process_id,
+            )
+        ),
     )
     thread3 = threading.Thread(
         target=contorl_streaming_status,
@@ -219,6 +255,7 @@ def listener_start(
                 sensor_ws_url,
                 mysql_config,
                 process_id,
+                model_id,
                 final_coordinates,
                 streaming_config,
             )

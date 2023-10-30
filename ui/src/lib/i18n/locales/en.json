@@ -50,6 +50,7 @@
 				"active": "Measuring...",
 				"running": "Ready",
 				"notRunning": "Not Ready",
+				"cannotPing": "Cannot connect to the sensor. Please make sure sensor is turned on and connected to the network.",
 				"other": "Loading",
 				"done": "Done"
 			},

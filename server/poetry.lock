@@ -201,18 +201,17 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "cnceye"
-version = "0.4.2"
+version = "0.4.3"
 description = "CMM python library"
 optional = false
 python-versions = ">=3.11,<3.13"
 files = [
-    {file = "cnceye-0.4.2-py3-none-any.whl", hash = "sha256:da0f43b59b64dbbe74437d3e5b41366e3f1d7ac34d7493ee0e891d84c073c4dc"},
-    {file = "cnceye-0.4.2.tar.gz", hash = "sha256:063123169277da9e3a2cd36d2c8ce455f5e51bd60b5fb5631299e7fae201f5d8"},
+    {file = "cnceye-0.4.3-py3-none-any.whl", hash = "sha256:5c8ee4308edd6281d051e4281bee37d938996e49996b538086d004b818fdf53b"},
+    {file = "cnceye-0.4.3.tar.gz", hash = "sha256:586321d028e40e5c129b49f93d626d6bc973a7525ab328026167fcef866a1bc2"},
 ]
 
 [package.dependencies]
 mysql-connector-python = ">=8.1.0,<9.0.0"
-scipy = ">=1.11.1,<2.0.0"
 
 [[package]]
 name = "cncmark"
@@ -525,7 +524,7 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "listener"
-version = "0.2.0"
+version = "0.2.2"
 description = ""
 optional = false
 python-versions = ">=3.11,<3.13"
@@ -536,6 +535,7 @@ develop = true
 cnceye = "^0.4.2"
 cncmark = {path = "../cncmark"}
 mysql-connector-python = "^8.1.0"
+ping3 = "^4.0.4"
 requests = "^2.31.0"
 websockets = "^11.0.3"
 
@@ -788,6 +788,20 @@ files = [
     {file = "pathspec-0.11.2-py3-none-any.whl", hash = "sha256:1d6ed233af05e679efb96b1851550ea95bbb64b7c490b0f5aa52996c11e92a20"},
     {file = "pathspec-0.11.2.tar.gz", hash = "sha256:e0d8d0ac2f12da61956eb2306b69f9469b42f4deb0f3cb6ed47b9cce9996ced3"},
 ]
+
+[[package]]
+name = "ping3"
+version = "4.0.4"
+description = "A pure python3 version of ICMP ping implementation using raw socket."
+optional = false
+python-versions = ">=3"
+files = [
+    {file = "ping3-4.0.4-py3-none-any.whl", hash = "sha256:dd8439ced69d6fec5885c8d4faefb055aacffb5a20f5e38a78459a5b18cc5e5a"},
+    {file = "ping3-4.0.4.tar.gz", hash = "sha256:1ea12acf6752d4666616341fd7c6393c664cffc510c693ef06f736fb267a13ba"},
+]
+
+[package.extras]
+dev = ["build", "pycodestyle", "wheel"]
 
 [[package]]
 name = "platformdirs"

@@ -3,14 +3,16 @@ import os
 from fastapi import FastAPI, UploadFile, HTTPException, BackgroundTasks, WebSocket
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from websockets.exceptions import ConnectionClosedOK, ConnectionClosedError
 from server.prepare import process_stl
 from pydantic import BaseModel
 from typing import Optional
 from server import result
 from listener.main import listener_start
 from listener.status import get_process_status, start_measuring, get_running_process
+from listener.hakaru import ping_sensor
 from server.coord import get_final_coordinates
-from server.config import MYSQL_CONFIG, MODEL_PATH
+from server.config import MYSQL_CONFIG, MODEL_PATH, SENSOR_IP
 from server.model import (
     get_3dmodel_data,
     get_recent_3dmodel_data,
@@ -146,11 +148,12 @@ async def download_gcode(model_id: int):
 async def start_measurement(
     _conf: MeasurementConfig, background_tasks: BackgroundTasks
 ):
-    sensor_ws_url = "ws://192.168.0.35:81"
-    mtconnect_url = (
-        "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
-    )
-    # mtconnect_url = "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
+    sensor_ws_url = f"ws://{SENSOR_IP}:81"
+    # sensor_ws_url = "ws://192.168.0.35:81"
+    # mtconnect_url = (
+    #     "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
+    # )
+    mtconnect_url = "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
     # sensor_ws_url = "ws://localhost:8081"
 
     running_process = get_running_process(_conf.three_d_model_id, MYSQL_CONFIG)
@@ -169,6 +172,7 @@ async def start_measurement(
         MYSQL_CONFIG,
         (mtconnect_url, _conf.mtconnect_interval),
         process_id,
+        _conf.three_d_model_id,
         final_coordinates,
         (_conf.interval, _conf.threshold),
     )
@@ -177,47 +181,53 @@ async def start_measurement(
 
 @app.get("/get_sensor_status/{model_id}")
 async def get_sensor_status(model_id: int):
+    if not ping_sensor(SENSOR_IP):
+        return {"status": "sensor not found or turned off", "data": None}
     running_process = get_running_process(model_id, MYSQL_CONFIG)
-    return {"status": running_process}
+    if running_process is None:
+        return {"status": "process not found", "data": None}
+    return {"status": "ok", "data": running_process}
 
 
 @app.websocket("/ws/{model_id}")
 async def websocket_endpoint(model_id: int, websocket: WebSocket):
     await websocket.accept()
-    while True:
-        _process_data = await get_sensor_status(model_id)
-        process_data = _process_data["status"]
-        if process_data is None:
-            status = {
-                "process_id": -1,
-                "status": "process not found",
-                "error": "",
-            }
-        else:
-            status = {
-                "process_id": process_data[0],
-                "status": process_data[2],
-                "error": process_data[3],
-            }
-        await websocket.send_json(status)
-        await asyncio.sleep(1)
+    try:
+        while True:
+            _process_data = await get_sensor_status(model_id)
+            if _process_data["status"] == "ok":
+                status = {
+                    "process_id": _process_data["data"][0],
+                    "status": _process_data["data"][2],
+                    "error": _process_data["data"][3],
+                }
+            else:
+                status = {
+                    "process_id": -1,
+                    "status": _process_data["status"],
+                    "error": "",
+                }
+            await websocket.send_json(status)
+            await asyncio.sleep(1)
+    except ConnectionClosedOK or ConnectionClosedError:
+        await websocket.close()
 
 
-@app.get("/result/edges")
-async def get_result_edges():
-    edges = result.fetch_edges()
+@app.get("/result/edges/{model_id}")
+async def get_result_edges(model_id: int):
+    edges = result.fetch_edges(model_id)
     return {"edges": edges}
 
 
-@app.get("/result/lines")
-async def get_result_lines():
-    lines = result.fetch_lines()
+@app.get("/result/lines/{model_id}")
+async def get_result_lines(model_id: int):
+    lines = result.fetch_lines(model_id)
     return {"lines": lines}
 
 
-@app.get("/result/arcs")
-async def get_result_arcs():
-    arcs = result.fetch_arcs()
+@app.get("/result/arcs/{model_id}")
+async def get_result_arcs(model_id: int):
+    arcs = result.fetch_arcs(model_id)
     return {"arcs": arcs}
 
 
