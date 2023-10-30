@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte';
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
 	import { page } from '$app/stores';
-	import { _ } from 'svelte-i18n';
 	import { ContentSwitcher, Switch } from 'carbon-components-svelte';
 	import Arc from './Arc.svelte';
 	import Line from './Line.svelte';
