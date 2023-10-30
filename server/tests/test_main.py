@@ -57,3 +57,16 @@ def test_setup_data_with_duplicate_model_id():
     response = client.post("/setup/data", json=job_info)
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+def test_websocket():
+    client = TestClient(app)
+    model_id = 1
+    status = {
+        "process_id": -1,
+        "status": "process not found",
+        "error": "",
+    }
+    with client.websocket_connect(f"/ws/{model_id}") as websocket:
+        data = websocket.receive_json()
+        assert data == status

@@ -78,18 +78,27 @@ async def control_sensor(
         logger.info("control_sensor(): connected")
 
         def is_same_coord(target_coord, current_coord):
-            return target_coord[0] == current_coord[0] and target_coord[1] == current_coord[1]
+            return (
+                target_coord[0] == current_coord[0]
+                and target_coord[1] == current_coord[1]
+            )
 
         while not done:
             await asyncio.sleep(0.5)
-            if not streaming and xyz is not None and not is_same_coord(final_coordinates, xyz):
+            if (
+                not streaming
+                and xyz is not None
+                and not is_same_coord(final_coordinates, xyz)
+            ):
                 logger.info("ready to start streaming")
                 (interval, threshold) = streaming_config
                 await websocket.send(hakaru.start_streaming(interval, threshold))
                 logger.info("start streaming")
                 streaming = True
 
-            elif streaming and xyz is not None and is_same_coord(final_coordinates, xyz):
+            elif (
+                streaming and xyz is not None and is_same_coord(final_coordinates, xyz)
+            ):
                 logger.info("ready to stop streaming")
                 await websocket.send(hakaru.stop_streaming())
                 # await websocket.send(hakaru.deep_sleep())
@@ -153,7 +162,9 @@ def combine_data(mysql_config: dict):
     mysql_conn.close()
 
 
-def mtconnect_streaming_reader(mtconnect_config: tuple, mysql_config: dict, process_id: int):
+def mtconnect_streaming_reader(
+    mtconnect_config: tuple, mysql_config: dict, process_id: int
+):
     global xyz
     (url, interval) = mtconnect_config
     endpoint = f"{url}&interval={interval}"
@@ -197,22 +208,16 @@ def mtconnect_streaming_reader(mtconnect_config: tuple, mysql_config: dict, proc
         else:
             err_msg = f"Error: {response.status_code}"
             logger.warning(err_msg)
-            status.update_process_status(
-                mysql_config, process_id, err_msg, err_msg
-            )
+            status.update_process_status(mysql_config, process_id, err_msg, err_msg)
 
     except requests.ConnectionError:
         err_msg = "Connection to the MTConnect agent was lost."
         logger.warning(err_msg)
-        status.update_process_status(
-            mysql_config, process_id, err_msg, err_msg
-        )
+        status.update_process_status(mysql_config, process_id, err_msg, err_msg)
     except KeyboardInterrupt:
         _msg = "Streaming stopped by user."
         logger.info(_msg)
-        status.update_process_status(
-            mysql_config, process_id, _msg
-        )
+        status.update_process_status(mysql_config, process_id, _msg)
 
 
 def listener_start(
@@ -235,7 +240,13 @@ def listener_start(
     )
     thread2 = threading.Thread(
         target=mtconnect_streaming_reader,
-        args=((mtconnect_config,mysql_config, process_id, )),
+        args=(
+            (
+                mtconnect_config,
+                mysql_config,
+                process_id,
+            )
+        ),
     )
     thread3 = threading.Thread(
         target=contorl_streaming_status,
