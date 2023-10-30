@@ -10,8 +10,9 @@ from typing import Optional
 from server import result
 from listener.main import listener_start
 from listener.status import get_process_status, start_measuring, get_running_process
+from listener.hakaru import ping_sensor
 from server.coord import get_final_coordinates
-from server.config import MYSQL_CONFIG, MODEL_PATH, SENSOR_HOSTNAME
+from server.config import MYSQL_CONFIG, MODEL_PATH, SENSOR_IP
 from server.model import (
     get_3dmodel_data,
     get_recent_3dmodel_data,
@@ -147,7 +148,7 @@ async def download_gcode(model_id: int):
 async def start_measurement(
     _conf: MeasurementConfig, background_tasks: BackgroundTasks
 ):
-    sensor_ws_url = f"ws://{SENSOR_HOSTNAME}.local:81"
+    sensor_ws_url = f"ws://{SENSOR_IP}:81"
     # sensor_ws_url = "ws://192.168.0.35:81"
     # mtconnect_url = (
     #     "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
@@ -180,8 +181,12 @@ async def start_measurement(
 
 @app.get("/get_sensor_status/{model_id}")
 async def get_sensor_status(model_id: int):
+    if not ping_sensor(SENSOR_IP):
+        return {"status": "sensor not found or turned off", "data": None}
     running_process = get_running_process(model_id, MYSQL_CONFIG)
-    return {"status": running_process}
+    if running_process is None:
+        return {"status": "process not found", "data": None}
+    return {"status": "ok", "data": running_process}
 
 
 @app.websocket("/ws/{model_id}")
@@ -190,18 +195,17 @@ async def websocket_endpoint(model_id: int, websocket: WebSocket):
     try:
         while True:
             _process_data = await get_sensor_status(model_id)
-            process_data = _process_data["status"]
-            if process_data is None:
+            if _process_data["status"] == "ok":
                 status = {
-                    "process_id": -1,
-                    "status": "process not found",
-                    "error": "",
+                    "process_id": _process_data["data"][0],
+                    "status": _process_data["data"][2],
+                    "error": _process_data["data"][3],
                 }
             else:
                 status = {
-                    "process_id": process_data[0],
-                    "status": process_data[2],
-                    "error": process_data[3],
+                    "process_id": -1,
+                    "status": _process_data["status"],
+                    "error": "",
                 }
             await websocket.send_json(status)
             await asyncio.sleep(1)

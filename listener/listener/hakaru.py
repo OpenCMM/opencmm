@@ -1,4 +1,5 @@
 import json
+from ping3 import ping
 
 
 def start_streaming(interval: int, threshold: int):
@@ -21,3 +22,10 @@ def stop_streaming():
 
 def deep_sleep():
     return json.dumps({"command": "deepSleep", "interval": 1000, "threshold": 100})
+
+
+def ping_sensor(sensor_ip: str):
+    """
+    Pings the sensor
+    """
+    return ping(sensor_ip)
