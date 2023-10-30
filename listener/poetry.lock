@@ -170,18 +170,17 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "cnceye"
-version = "0.4.2"
+version = "0.4.3"
 description = "CMM python library"
 optional = false
 python-versions = ">=3.11,<3.13"
 files = [
-    {file = "cnceye-0.4.2-py3-none-any.whl", hash = "sha256:da0f43b59b64dbbe74437d3e5b41366e3f1d7ac34d7493ee0e891d84c073c4dc"},
-    {file = "cnceye-0.4.2.tar.gz", hash = "sha256:063123169277da9e3a2cd36d2c8ce455f5e51bd60b5fb5631299e7fae201f5d8"},
+    {file = "cnceye-0.4.3-py3-none-any.whl", hash = "sha256:5c8ee4308edd6281d051e4281bee37d938996e49996b538086d004b818fdf53b"},
+    {file = "cnceye-0.4.3.tar.gz", hash = "sha256:586321d028e40e5c129b49f93d626d6bc973a7525ab328026167fcef866a1bc2"},
 ]
 
 [package.dependencies]
 mysql-connector-python = ">=8.1.0,<9.0.0"
-scipy = ">=1.11.1,<2.0.0"
 
 [[package]]
 name = "cncmark"

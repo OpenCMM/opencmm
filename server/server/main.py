@@ -3,6 +3,7 @@ import os
 from fastapi import FastAPI, UploadFile, HTTPException, BackgroundTasks, WebSocket
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from websockets.exceptions import ConnectionClosedOK, ConnectionClosedError
 from server.prepare import process_stl
 from pydantic import BaseModel
 from typing import Optional
@@ -148,10 +149,10 @@ async def start_measurement(
 ):
     sensor_ws_url = f"ws://{SENSOR_HOSTNAME}.local:81"
     # sensor_ws_url = "ws://192.168.0.35:81"
-    mtconnect_url = (
-        "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
-    )
-    # mtconnect_url = "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
+    # mtconnect_url = (
+    #     "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
+    # )
+    mtconnect_url = "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
     # sensor_ws_url = "ws://localhost:8081"
 
     running_process = get_running_process(_conf.three_d_model_id, MYSQL_CONFIG)
@@ -186,23 +187,26 @@ async def get_sensor_status(model_id: int):
 @app.websocket("/ws/{model_id}")
 async def websocket_endpoint(model_id: int, websocket: WebSocket):
     await websocket.accept()
-    while True:
-        _process_data = await get_sensor_status(model_id)
-        process_data = _process_data["status"]
-        if process_data is None:
-            status = {
-                "process_id": -1,
-                "status": "process not found",
-                "error": "",
-            }
-        else:
-            status = {
-                "process_id": process_data[0],
-                "status": process_data[2],
-                "error": process_data[3],
-            }
-        await websocket.send_json(status)
-        await asyncio.sleep(1)
+    try:
+        while True:
+            _process_data = await get_sensor_status(model_id)
+            process_data = _process_data["status"]
+            if process_data is None:
+                status = {
+                    "process_id": -1,
+                    "status": "process not found",
+                    "error": "",
+                }
+            else:
+                status = {
+                    "process_id": process_data[0],
+                    "status": process_data[2],
+                    "error": process_data[3],
+                }
+            await websocket.send_json(status)
+            await asyncio.sleep(1)
+    except ConnectionClosedOK or ConnectionClosedError:
+        await websocket.close()
 
 
 @app.get("/result/edges/{model_id}")
