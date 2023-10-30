@@ -5,6 +5,7 @@
 	import { ContentSwitcher, Switch } from 'carbon-components-svelte';
 	import Arc from './Arc.svelte';
 	import Line from './Line.svelte';
+	import Edge from './Edge.svelte';
 
 	const modelId = $page.url.searchParams.get('id');
 
@@ -44,11 +45,14 @@
 	<ContentSwitcher bind:selectedIndex>
 		<Switch>Arc</Switch>
 		<Switch>Line</Switch>
+		<Switch>Edge</Switch>
 	</ContentSwitcher>
 
 	{#if selectedIndex === 0}
 		<Arc {modelId} />
 	{:else if selectedIndex === 1}
 		<Line {modelId} />
+	{:else if selectedIndex === 2}
+		<Edge {modelId} />
 	{/if}
 {/if}
