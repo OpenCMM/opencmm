@@ -59,3 +59,19 @@ def test_remove_http_respose_header():
 
     except requests.ConnectionError:
         print("Connection to the MTConnect agent was lost.")
+
+
+def test_get_namespace():
+    tree = ET.parse("tests/fixtures/xml/demo.xml")
+    root = tree.getroot()
+    ns = mt.get_namespace(root)
+    assert ns == "{urn:mtconnect.org:MTConnectStreams:2.0}"
+
+
+def test_devices():
+    tree = ET.parse("tests/fixtures/xml/demo.xml")
+    root = tree.getroot()
+    ns = mt.get_namespace(root)
+    device_stream_path = f".//{ns}DeviceStream"
+    devices = root.findall(device_stream_path)
+    assert len(devices) == 3

@@ -32,6 +32,11 @@ def is_last_chunk(raw_data):
     return raw_data.endswith("/MTConnectStreams>\n\r\n")
 
 
+def get_namespace(element):
+    m = re.match(r"\{.*\}", element.tag)
+    return m.group(0) if m else ""
+
+
 def extract_version_number(string):
     """Extracts the version number after `MTConnectStreams:` from a string.
 
