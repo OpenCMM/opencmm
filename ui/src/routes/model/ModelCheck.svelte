@@ -5,13 +5,10 @@
 	import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 	import { GCodeLoader } from 'three/addons/loaders/GCodeLoader.js';
 	import { STLLoader } from 'three/addons/loaders/STLLoader.js';
-	import axios from 'axios';
-	import { page } from '$app/stores';
-	import { getSphereMesh } from './utils';
 
 	let container: HTMLDivElement;
-	const modelId = $page.url.searchParams.get('id');
 
+	export let modelId: string;
 	onMount(() => {
 		// Scene
 		const scene = new THREE.Scene();
@@ -42,42 +39,6 @@
 			scene.add(mesh);
 		});
 
-		axios.get(`${BACKEND_URL_LOCAL}/result/edges/${modelId}`).then((res) => {
-			if (res.status === 200) {
-				const edges = res.data['edges'];
-
-				for (const edge of edges) {
-					const [, , x, y, z, rx, ry, rz] = edge;
-					const point = new THREE.Vector3(x, y, z);
-					const measuredEdge = new THREE.Vector3(rx, ry, rz);
-					const pointMesh = getSphereMesh(0.2, 0xfcba03);
-					const edgeMesh = getSphereMesh(0.2, 0x00f719);
-					pointMesh.position.copy(point);
-					edgeMesh.position.copy(measuredEdge);
-					scene.add(pointMesh);
-					scene.add(edgeMesh);
-				}
-			}
-		});
-
-		axios.get(`${BACKEND_URL_LOCAL}/result/arcs/${modelId}`).then((res) => {
-			if (res.status === 200) {
-				const edges = res.data['arcs'];
-
-				for (const edge of edges) {
-					const [, radius, cx, cy, cz, rradius, rcx, rcy, rcz] = edge;
-					const center = new THREE.Vector3(cx, cy, cz);
-					const measuredCenter = new THREE.Vector3(rcx, rcy, rcz);
-					const centerMesh = getSphereMesh(0.2, 0xfcba03);
-					const measuredCenterMesh = getSphereMesh(0.2, 0x00f719);
-					centerMesh.position.copy(center);
-					measuredCenterMesh.position.copy(measuredCenter);
-					scene.add(centerMesh);
-					scene.add(measuredCenterMesh);
-				}
-			}
-		});
-
 		// Grid on xy plane
 		const size = 500;
 		const divisions = 50;
@@ -96,9 +57,9 @@
 
 		const controls = new OrbitControls(camera, renderer.domElement);
 		controls.mouseButtons = {
-			LEFT: THREE.MOUSE.PAN,
+			LEFT: THREE.MOUSE.ROTATE,
 			MIDDLE: THREE.MOUSE.DOLLY,
-			RIGHT: THREE.MOUSE.ROTATE
+			RIGHT: THREE.MOUSE.PAN
 		};
 		controls.target.set(0, 0, 2);
 		controls.update();

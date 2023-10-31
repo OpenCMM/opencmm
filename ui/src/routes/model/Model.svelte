@@ -6,6 +6,7 @@
 	import Arc from './Arc.svelte';
 	import Line from './Line.svelte';
 	import Edge from './Edge.svelte';
+	import ModelCheck from './ModelCheck.svelte';
 
 	const modelId = $page.url.searchParams.get('id');
 
@@ -42,6 +43,7 @@
 	<h1>
 		{modelInfo.name}
 	</h1>
+	<ModelCheck {modelId} />
 	<ContentSwitcher bind:selectedIndex>
 		<Switch>Arc</Switch>
 		<Switch>Line</Switch>
