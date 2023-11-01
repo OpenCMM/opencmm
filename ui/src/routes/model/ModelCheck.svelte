@@ -3,7 +3,6 @@
 	import { onMount } from 'svelte';
 	import * as THREE from 'three';
 	import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-	import { GCodeLoader } from 'three/addons/loaders/GCodeLoader.js';
 	import { STLLoader } from 'three/addons/loaders/STLLoader.js';
 	import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 	import axios from 'axios';
@@ -14,6 +13,9 @@
 	export let modelId: string;
 	const canvasWidth = 600;
 	const canvasHeight = 600;
+	const arcColor = '70a0ff';
+	const pairColor = 'cae643';
+
 	onMount(() => {
 		// Scene
 		const scene = new THREE.Scene();
@@ -22,14 +24,7 @@
 		// Camera
 		const camera = new THREE.PerspectiveCamera(50, 1000 / 1000, 1, 500);
 
-		camera.position.set(0, -100, 100);
-
-		const loader = new GCodeLoader();
-		loader.load(`${BACKEND_URL_LOCAL}/load/gcode/${modelId}`, function (obj: any) {
-			// rotate the model
-			obj.rotateX(Math.PI / 2);
-			scene.add(obj);
-		});
+		camera.position.set(0, 0, 200);
 
 		const stlLoader = new STLLoader();
 		stlLoader.load(`${BACKEND_URL_LOCAL}/load/model/${modelId}`, function (geometry: any) {
@@ -75,10 +70,34 @@
 
 					const arcLabel = document.createElement('div');
 					arcLabel.textContent = arcId;
-					arcLabel.style.cssText = 'color:#ffffff;font-family:sans-serif;font-size: 17px;';
+					arcLabel.style.cssText = `color:#${arcColor};font-family:sans-serif;font-size: 17px;`;
 					const arcLabelObject = new CSS2DObject(arcLabel);
 					arcLabelObject.position.copy(center).add(new THREE.Vector3(-3.0, 3.0, 0));
 					scene.add(arcLabelObject);
+				}
+			}
+		});
+
+		axios.get(`${BACKEND_URL_LOCAL}/result/pairs/${modelId}`).then((res) => {
+			if (res.status === 200) {
+				const pairs = res.data['pairs'];
+
+				for (const pair of pairs) {
+					const [pairId, x0, y0, z0, x1, y1, z1] = pair;
+					const point0 = new THREE.Vector3(x0, y0, z0);
+					const point1 = new THREE.Vector3(x1, y1, z1);
+					const lineGeometry = new THREE.BufferGeometry().setFromPoints([point0, point1]);
+					const lineMaterial = new THREE.LineBasicMaterial({ color: parseInt(pairColor, 16) });
+					const line = new THREE.Line(lineGeometry, lineMaterial);
+					scene.add(line);
+
+					const lineLabel = document.createElement('div');
+					lineLabel.textContent = pairId;
+					lineLabel.style.cssText = `color:#${pairColor};font-family:sans-serif;font-size: 17px;`;
+					const lineLabelObject = new CSS2DObject(lineLabel);
+					const midpoint = new THREE.Vector3().lerpVectors(point0, point1, 0.5);
+					lineLabelObject.position.copy(midpoint).add(new THREE.Vector3(-3.0, 3.0, 0));
+					scene.add(lineLabelObject);
 				}
 			}
 		});
@@ -119,7 +138,6 @@
 		// Clean up the Three.js scene on component unmount
 		return () => {
 			renderer.dispose();
-			labelRenderer.dispose();
 			scene.remove(gridHelper);
 		};
 	});

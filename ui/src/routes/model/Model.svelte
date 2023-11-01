@@ -3,7 +3,7 @@
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
 	import { page } from '$app/stores';
 	import { ContentSwitcher, Switch } from 'carbon-components-svelte';
-  import { Grid, Row, Column } from "carbon-components-svelte";
+	import { Grid, Row, Column } from 'carbon-components-svelte';
 	import Arc from './Arc.svelte';
 	import Line from './Line.svelte';
 	import Edge from './Edge.svelte';
@@ -46,28 +46,28 @@
 	</h1>
 
 	<div id="model-page">
-<Grid>
-  <Row>
-    <Column>
-		<ModelCheck {modelId} />
-	</Column>
-    <Column>
-		<ContentSwitcher bind:selectedIndex>
-			<Switch>Arc</Switch>
-			<Switch>Line</Switch>
-			<Switch>Edge</Switch>
-		</ContentSwitcher>
-		
-		{#if selectedIndex === 0}
-			<Arc {modelId} />
-		{:else if selectedIndex === 1}
-			<Line {modelId} />
-		{:else if selectedIndex === 2}
-			<Edge {modelId} />
-		{/if}
-	</Column>
-  </Row>
-</Grid>
+		<Grid>
+			<Row>
+				<Column>
+					<ModelCheck {modelId} />
+				</Column>
+				<Column>
+					<ContentSwitcher bind:selectedIndex>
+						<Switch>Arc</Switch>
+						<Switch>Line</Switch>
+						<Switch>Edge</Switch>
+					</ContentSwitcher>
+
+					{#if selectedIndex === 0}
+						<Arc {modelId} />
+					{:else if selectedIndex === 1}
+						<Line {modelId} />
+					{:else if selectedIndex === 2}
+						<Edge {modelId} />
+					{/if}
+				</Column>
+			</Row>
+		</Grid>
 	</div>
 {/if}
 
