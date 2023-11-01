@@ -1,5 +1,5 @@
-import websockets
-import asyncio
+import paho.mqtt.client as mqtt
+import paho.mqtt.publish as publish
 import requests
 from listener import mt
 import xml.etree.ElementTree as ET
@@ -10,6 +10,7 @@ from cnceye.edge import find
 from cncmark import arc, pair
 import logging
 from listener import hakaru
+from time import sleep
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
 logger = logging.getLogger(__name__)
@@ -19,133 +20,110 @@ chunk_size = 1024
 xyz = None
 done = False
 data_to_insert = []
+USERNAME = "opencmm"
+PASSWORD = "opencmm"
 
 
-async def receive_sensor_data(sensor_ws_url: str, process_id: int):
+def listen_sensor(mqtt_url: str, process_id: int):
     global data_to_insert
-    async with websockets.connect(sensor_ws_url) as websocket:
-        logger.info("receive_sensor_data(): connected")
+    client = mqtt.Client()
+    client.username_pw_set(USERNAME, PASSWORD)
+    receive_data_topic = "sensor/data"
 
+    def on_connect(client, userdata, flags, rc):
+        logger.info("Connected with result code " + str(rc))
+        logger.info("receive_sensor_data(): connected")
+        client.subscribe(receive_data_topic)
+
+    client.on_connect = on_connect
+
+    def on_message(client, userdata, msg):
+        print(msg.topic + " " + str(msg.payload))
         while not done:
-            distance = await websocket.recv()
+            distance = float(msg.payload.decode("utf-8"))
             if xyz is not None:
                 (x, y, z) = xyz
                 data_to_insert.append((x, y, z, process_id, distance))
 
-
-# ref. https://stackoverflow.com/questions/67734115/how-to-use-multithreading-with-websockets
-def listen_sensor(sensor_ws_url: str, process_id: int):
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(receive_sensor_data(sensor_ws_url, process_id))
-    loop.close()
+    client.on_message = on_message
+    client.connect(mqtt_url, 1883, 60)
 
 
-def contorl_streaming_status(
-    sensor_ws_url: str,
+def control_sensor_status(
+    mqtt_url: str,
     mysql_config: dict,
     process_id: int,
     model_id: int,
     final_coordinates: tuple,
     streaming_config: tuple,
 ):
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(
-        control_sensor(
-            sensor_ws_url,
-            mysql_config,
-            process_id,
-            model_id,
-            final_coordinates,
-            streaming_config,
-        )
-    )
-    loop.close()
-
-
-async def control_sensor(
-    sensor_ws_url: str,
-    mysql_config: dict,
-    process_id: int,
-    model_id: int,
-    final_coordinates: tuple,
-    streaming_config: tuple,
-):
-    streaming = False
     global done
-    async with websockets.connect(sensor_ws_url) as websocket:
-        logger.info("control_sensor(): connected")
+    control_sensor_topic = "sensor/control"
 
-        def is_same_coord(target_coord, current_coord):
-            return (
-                target_coord[0] == current_coord[0]
-                and target_coord[1] == current_coord[1]
+    def is_same_coord(target_coord, current_coord):
+        return (
+            target_coord[0] == current_coord[0] and target_coord[1] == current_coord[1]
+        )
+
+    # send config to sensor
+    logger.info("send config to sensor")
+    (interval, threshold) = streaming_config
+    publish.single(
+        control_sensor_topic,
+        hakaru.send_config(interval, threshold),
+        hostname=mqtt_url,
+        auth={"username": USERNAME, "password": PASSWORD},
+    )
+
+    while not done:
+        sleep(1)
+        if xyz is not None and is_same_coord(final_coordinates, xyz):
+            logger.info("ready to stop streaming")
+            publish.single(
+                control_sensor_topic,
+                hakaru.deep_sleep(),
+                hostname=mqtt_url,
+                auth={"username": USERNAME, "password": PASSWORD},
             )
+            logger.info("stop streaming")
+            done = True
 
-        while not done:
-            await asyncio.sleep(0.5)
-            if (
-                not streaming
-                and xyz is not None
-                and not is_same_coord(final_coordinates, xyz)
-            ):
-                logger.info("ready to start streaming")
-                (interval, threshold) = streaming_config
-                await websocket.send(hakaru.start_streaming(interval, threshold))
-                logger.info("start streaming")
-                streaming = True
+            try:
+                combine_data(mysql_config)
+                logger.info("data combined")
+                status.update_process_status(mysql_config, process_id, "data combined")
+            except Exception as e:
+                logger.warning(e)
+                status.update_process_status(
+                    mysql_config, process_id, "Error at combine_data()", str(e)
+                )
 
-            elif (
-                streaming and xyz is not None and is_same_coord(final_coordinates, xyz)
-            ):
-                logger.info("ready to stop streaming")
-                await websocket.send(hakaru.stop_streaming())
-                # await websocket.send(hakaru.deep_sleep())
-                logger.info("stop streaming")
-                streaming = False
-                done = True
-
-                try:
-                    combine_data(mysql_config)
-                    logger.info("data combined")
+            try:
+                measured_edges = find.find_edges(process_id, mysql_config=mysql_config)
+                edge_data = find.get_edge_data(model_id, mysql_config)
+                # distance_threshold should be passed as an argument
+                update_list = find.identify_close_edge(edge_data, measured_edges)
+                edge_count = len(update_list)
+                if edge_count == 0:
                     status.update_process_status(
-                        mysql_config, process_id, "data combined"
+                        mysql_config,
+                        process_id,
+                        "Error at find_edges()",
+                        "No edge found",
                     )
-                except Exception as e:
-                    logger.warning(e)
-                    status.update_process_status(
-                        mysql_config, process_id, "Error at combine_data()", str(e)
-                    )
+                    break
+                find.add_measured_edge_coord(update_list, mysql_config)
+                logger.info(f"{edge_count} edges found")
+                pair.add_line_length(mysql_config)
+                arc.add_measured_arc_info(model_id, mysql_config)
+            except Exception as e:
+                logger.warning(e)
+                status.update_process_status(
+                    mysql_config, process_id, "Error at find_edges()", str(e)
+                )
 
-                try:
-                    measured_edges = find.find_edges(
-                        process_id, mysql_config=mysql_config
-                    )
-                    edge_data = find.get_edge_data(model_id, mysql_config)
-                    # distance_threshold should be passed as an argument
-                    update_list = find.identify_close_edge(edge_data, measured_edges)
-                    edge_count = len(update_list)
-                    if edge_count == 0:
-                        status.update_process_status(
-                            mysql_config,
-                            process_id,
-                            "Error at find_edges()",
-                            "No edge found",
-                        )
-                        break
-                    find.add_measured_edge_coord(update_list, mysql_config)
-                    logger.info(f"{edge_count} edges found")
-                    pair.add_line_length(mysql_config)
-                    arc.add_measured_arc_info(model_id, mysql_config)
-                except Exception as e:
-                    logger.warning(e)
-                    status.update_process_status(
-                        mysql_config, process_id, "Error at find_edges()", str(e)
-                    )
-
-                status.update_process_status(mysql_config, process_id, "done")
-                logger.info("done")
+            status.update_process_status(mysql_config, process_id, "done")
+            logger.info("done")
 
 
 def combine_data(mysql_config: dict):
@@ -221,7 +199,7 @@ def mtconnect_streaming_reader(
 
 
 def listener_start(
-    sensor_ws_url: str,
+    mqtt_url: str,
     mysql_config: dict,
     mtconnect_config: tuple,
     process_id: int,
@@ -233,7 +211,7 @@ def listener_start(
         target=listen_sensor,
         args=(
             (
-                sensor_ws_url,
+                mqtt_url,
                 process_id,
             )
         ),
@@ -249,10 +227,10 @@ def listener_start(
         ),
     )
     thread3 = threading.Thread(
-        target=contorl_streaming_status,
+        target=control_sensor_status,
         args=(
             (
-                sensor_ws_url,
+                mqtt_url,
                 mysql_config,
                 process_id,
                 model_id,

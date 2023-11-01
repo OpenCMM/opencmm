@@ -148,13 +148,12 @@ async def download_gcode(model_id: int):
 async def start_measurement(
     _conf: MeasurementConfig, background_tasks: BackgroundTasks
 ):
-    sensor_ws_url = f"ws://{SENSOR_IP}:81"
-    # sensor_ws_url = "ws://192.168.0.35:81"
+    mqtt_url = "192.168.10.111"
     # mtconnect_url = (
     #     "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
     # )
     mtconnect_url = "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
-    # sensor_ws_url = "ws://localhost:8081"
+    # mqtt_urll = "ws://localhost:8081"
 
     running_process = get_running_process(_conf.three_d_model_id, MYSQL_CONFIG)
     if running_process is not None:
@@ -168,7 +167,7 @@ async def start_measurement(
     process_id = start_measuring(_conf.three_d_model_id, MYSQL_CONFIG, "running")
     background_tasks.add_task(
         listener_start,
-        sensor_ws_url,
+        mqtt_url,
         MYSQL_CONFIG,
         (mtconnect_url, _conf.mtconnect_interval),
         process_id,
