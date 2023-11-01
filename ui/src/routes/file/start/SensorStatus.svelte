@@ -21,7 +21,9 @@
 
 		// close connection when leaving the page
 		return () => {
-			ws.close();
+			if (ws.readyState === WebSocket.OPEN) {
+				ws.close();
+			}
 		};
 	});
 </script>

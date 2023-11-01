@@ -30,17 +30,17 @@ def get_3dmodel_data():
     cursor.execute(query)
     models_data = []
     for model in cursor:
-        idx = model[0]
+        model_id = model[0]
         filename = model[1]
         model_path = os.path.join(MODEL_PATH, filename)
         model_size = os.path.getsize(model_path)
         model_modified_time = int(os.path.getmtime(model_path) * 1000)
         gcode_ready = os.path.exists(f"data/gcode/{filename}.gcode")
-        sensor_status = get_sensor_status(idx)
+        sensor_status = get_sensor_status(model_id)
         model_status = get_model_status(gcode_ready, sensor_status)
         models_data.append(
             {
-                "id": idx,
+                "id": model_id,
                 "name": filename,
                 "size": model_size,
                 "modified_time": model_modified_time,
@@ -91,7 +91,7 @@ def get_sensor_status(model_id: int):
     """
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
     cursor = cnx.cursor()
-    query = "SELECT status FROM process WHERE id = %s ORDER BY start DESC LIMIT 1"
+    query = "SELECT status FROM process WHERE model_id = %s ORDER BY start DESC LIMIT 1"
     cursor.execute(query, (model_id,))
     sensor_status = cursor.fetchone()
     cursor.close()
