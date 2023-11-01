@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import DocumentAdd from 'carbon-icons-svelte/lib/DocumentAdd.svelte';
 	import Document from 'carbon-icons-svelte/lib/Document.svelte';
+	import { InlineLoading } from 'carbon-components-svelte';
 	import { _ } from 'svelte-i18n';
 	import Upload3dModel from './Upload3dModel.svelte';
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
@@ -63,7 +64,7 @@
 				<Column>
 					<h2>{$_('home.welcome.recentFiles')}</h2>
 					{#if !loaded}
-						<p>Loading...</p>
+						<InlineLoading />
 					{:else}
 						{#each recentFiles as file}
 							<Button

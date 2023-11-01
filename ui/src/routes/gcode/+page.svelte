@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Gcode from './Gcode.svelte';
-	import { Grid, Row, Column } from 'carbon-components-svelte';
+	import { Grid, Row, Column, ProgressBar } from 'carbon-components-svelte';
 	import { page } from '$app/stores';
 	import Edge from '../model/Edge.svelte';
 
@@ -8,7 +8,7 @@
 </script>
 
 {#if !modelId}
-	<p>Loading...</p>
+	<ProgressBar helperText="Loading..." />
 {:else}
 	<Grid>
 		<Row>

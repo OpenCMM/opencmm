@@ -1,6 +1,8 @@
 <script lang="ts">
 	import Setup from './Setup.svelte';
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
+	import { Loading } from 'carbon-components-svelte';
+
 	import { ProgressIndicator, ProgressStep } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import 'carbon-components-svelte/css/all.css';
@@ -36,7 +38,7 @@
 </script>
 
 {#if !loaded}
-	<p>Loading...</p>
+	<Loading />
 {:else}
 	<h1>
 		{modelInfo.name}

@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { ClickableTile } from 'carbon-components-svelte';
 	import { goto } from '$app/navigation';
+	import { Loading } from 'carbon-components-svelte';
 
 	let loaded = false;
 
@@ -34,7 +35,7 @@
 
 <div id="data-table">
 	{#if !loaded}
-		<p>Loading...</p>
+		<Loading description="Loading..." />
 	{:else}
 		{#each files as file}
 			<ClickableTile on:click={() => goto(`/model?id=${file.modelId}`)}>
