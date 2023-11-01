@@ -143,7 +143,7 @@ def get_edge_path(
 
 def generate_gcode(path):
     # avoid duplicate gcode
-    program_number = str(random.randint(1000, 8999)) # random 4 digit number
+    program_number = str(random.randint(1000, 8999))  # random 4 digit number
     gcode = ["%", f"O{program_number}", "G90 G54"]
     for row in path:
         gcode.append(row[0])
