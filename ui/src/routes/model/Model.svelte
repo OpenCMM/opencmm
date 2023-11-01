@@ -7,6 +7,8 @@
 	import Arc from './Arc.svelte';
 	import Line from './Line.svelte';
 	import ModelCheck from './ModelCheck.svelte';
+	import { redirectToFilePage } from '$lib/access/path';
+	import { ProgressBar } from 'carbon-components-svelte';
 
 	const modelId = $page.url.searchParams.get('id');
 
@@ -29,6 +31,8 @@
 			gcodeReady: data['gcode_ready'],
 			status: data['model_status']
 		};
+		// access control
+		redirectToFilePage(data['id'], data['model_status']);
 		loaded = true;
 	};
 
@@ -38,7 +42,7 @@
 </script>
 
 {#if !loaded || !modelId}
-	<p>Loading...</p>
+	<ProgressBar helperText="Loading..." />
 {:else}
 	<h1>
 		{modelInfo.name}

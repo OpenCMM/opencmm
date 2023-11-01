@@ -2,12 +2,12 @@
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
 	import { onMount } from 'svelte';
 	import { ClickableTile } from 'carbon-components-svelte';
-	import { goToFilePage } from './utils/path';
+	import { goto } from '$app/navigation';
 
 	let loaded = false;
 
 	interface File {
-		id: number;
+		modelId: number;
 		name: string;
 		status: number;
 	}
@@ -18,7 +18,7 @@
 		const data = await res.json();
 		for (const d of data['models']) {
 			files.push({
-				id: d['id'],
+				modelId: d['id'],
 				name: d['name'],
 				status: d['model_status']
 			});
@@ -37,7 +37,7 @@
 		<p>Loading...</p>
 	{:else}
 		{#each files as file}
-			<ClickableTile on:click={() => goToFilePage(file.id, file.status)}>
+			<ClickableTile on:click={() => goto(`/model?id=${file.modelId}`)}>
 				{file.name}
 			</ClickableTile>
 		{/each}

@@ -18,6 +18,7 @@ from server.model import (
     get_recent_3dmodel_data,
     get_3dmodel_file_info,
     model_exists,
+    list_3dmodel,
     model_id_to_filename,
     add_new_3dmodel,
 )
@@ -88,6 +89,12 @@ async def upload_3dmodel(file: UploadFile):
 async def list_3dmodels():
     """List uploaded 3d models"""
     return {"models": get_3dmodel_data()}
+
+
+@app.get("/list/all/3dmodels")
+async def list_all_3dmodels():
+    """List all uploaded 3d models"""
+    return {"models": list_3dmodel()}
 
 
 @app.get("/list/recent/3dmodels")
@@ -247,4 +254,6 @@ def start():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+    app.run(
+        debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080), workers=4)
+    )

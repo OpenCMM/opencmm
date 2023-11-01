@@ -7,13 +7,13 @@
 	import Upload3dModel from './Upload3dModel.svelte';
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
 	import FileTiles from './FileTiles.svelte';
-	import { goToFilePage } from './utils/path';
+	import { goto } from '$app/navigation';
 
 	let newFileOpen = false;
 	let openFileOpen = false;
 	let loaded = false;
 	interface RecentFile {
-		id: number;
+		modelId: number;
 		name: string;
 		status: number;
 	}
@@ -23,7 +23,7 @@
 		const data = await res.json();
 		for (const d of data['models']) {
 			recentFiles.push({
-				id: d['id'],
+				modelId: d['model_id'],
 				name: d['name'],
 				status: d['model_status']
 			});
@@ -69,7 +69,7 @@
 							<Button
 								class="menu-button"
 								kind="secondary"
-								on:click={() => goToFilePage(file.id, file.status)}>{file.name}</Button
+								on:click={() => goto(`/model?id=${file.modelId}`)}>{file.name}</Button
 							>
 						{/each}
 					{/if}
