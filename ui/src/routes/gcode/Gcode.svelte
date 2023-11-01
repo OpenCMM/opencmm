@@ -7,7 +7,7 @@
 	import { STLLoader } from 'three/addons/loaders/STLLoader.js';
 	import axios from 'axios';
 	import { page } from '$app/stores';
-	import { getSphereMesh } from './utils';
+	import { getSphereMesh } from '$lib/utils/mesh';
 
 	let container: HTMLDivElement;
 	const modelId = $page.url.searchParams.get('id');
