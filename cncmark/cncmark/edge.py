@@ -14,11 +14,11 @@ def get_direction(x0, y0, x1, y1):
         return -1
 
 
-def get_edges(mysql_config: dict):
+def get_edges(mysql_config: dict, model_id: int):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
-    query = "SELECT * FROM edge"
-    cursor.execute(query)
+    query = "SELECT * FROM edge WHERE model_id = %s"
+    cursor.execute(query, (model_id,))
     edges = cursor.fetchall()
     cursor.close()
     cnx.close()
@@ -80,13 +80,14 @@ def to_gcode_row(x, y, feedrate):
 
 def get_edge_path(
     mysql_config: dict,
+    model_id: int,
     length: float = 2.5,
     measure_feedrate: float = 300,
     move_feedrate: float = 600,
     xyz_offset: tuple = (0, 0, 0),
 ):
     path = []
-    edges = get_edges(mysql_config)
+    edges = get_edges(mysql_config, model_id)
     for edge in edges:
         edge_id, model_id, side_id, arc_id, x, y, z, rx, ry, rz = edge
         if arc_id is None:

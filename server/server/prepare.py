@@ -19,7 +19,7 @@ def process_stl(
     line.import_lines(model_id, lines, mysql_config)
     arc.import_arcs(model_id, arcs, mysql_config)
     path = edge.get_edge_path(
-        mysql_config, measure_length, measure_feedrate, move_feedrate, offset
+        mysql_config, model_id, measure_length, measure_feedrate, move_feedrate, offset
     )
 
     # save gcode
