@@ -2,13 +2,12 @@
 	import { onMount } from 'svelte';
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
 	import { page } from '$app/stores';
-	import { ContentSwitcher, Switch } from 'carbon-components-svelte';
+	import { ContentSwitcher, Loading, Switch } from 'carbon-components-svelte';
 	import { Grid, Row, Column } from 'carbon-components-svelte';
 	import Arc from './Arc.svelte';
 	import Line from './Line.svelte';
 	import ModelCheck from './ModelCheck.svelte';
 	import { redirectToFilePage } from '$lib/access/path';
-	import { ProgressBar } from 'carbon-components-svelte';
 
 	const modelId = $page.url.searchParams.get('id');
 
@@ -42,7 +41,7 @@
 </script>
 
 {#if !loaded || !modelId}
-	<ProgressBar helperText="Loading..." />
+	<Loading />
 {:else}
 	<h1>
 		{modelInfo.name}

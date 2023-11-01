@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
-	import { DataTable } from 'carbon-components-svelte';
+	import { DataTable, InlineLoading } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { displayLengthDifference } from '$lib/utils/display';
@@ -43,7 +43,7 @@
 
 <div id="data-table">
 	{#if !loaded}
-		<p>loading...</p>
+		<InlineLoading />
 	{:else}
 		<DataTable size="short" title={$_('home.result.line.title')} {headers} rows={row}>
 			<svelte:fragment slot="cell" let:cell>

@@ -1,12 +1,19 @@
 <script lang="ts">
 	import { BACKEND_WS_URL_LOCAL } from '$lib/constants/backend';
 	import { _ } from 'svelte-i18n';
+	import { onDestroy } from 'svelte';
 	import { InlineLoading } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 
 	export let modelId: string;
 	export let sensorStatus: string;
 	let ws: WebSocket;
+
+	onDestroy(() => {
+		if (ws.readyState === WebSocket.OPEN) {
+			ws.close();
+		}
+	});
 
 	onMount(() => {
 		ws = new WebSocket(`${BACKEND_WS_URL_LOCAL}/ws/${modelId}`);
@@ -17,13 +24,6 @@
 		ws.onmessage = function (event) {
 			const data = JSON.parse(event.data);
 			sensorStatus = data['status'];
-		};
-
-		// close connection when leaving the page
-		return () => {
-			if (ws.readyState === WebSocket.OPEN) {
-				ws.close();
-			}
 		};
 	});
 </script>

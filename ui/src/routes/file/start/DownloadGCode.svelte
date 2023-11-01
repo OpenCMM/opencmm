@@ -2,7 +2,6 @@
 
 <script lang="ts">
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
-	import axios from 'axios';
 	import { Button, ButtonSet } from 'carbon-components-svelte';
 	import Download from 'carbon-icons-svelte/lib/Download.svelte';
 	import ChartStepper from 'carbon-icons-svelte/lib/ChartStepper.svelte';
@@ -11,32 +10,15 @@
 	import { goto } from '$app/navigation';
 
 	export let modelId: string;
-
-	const downloadGCode = async () => {
-		try {
-			const res = await axios.get(`${BACKEND_URL_LOCAL}/download/gcode/${modelId}`);
-			console.log(res);
-			const textContent = res.data;
-			const blob = new Blob([textContent], { type: 'text/plain' });
-			const url = URL.createObjectURL(blob);
-
-			const link = document.createElement('a');
-			link.href = url;
-			link.download = 'opencmm.gcode';
-			link.click();
-
-			URL.revokeObjectURL(url);
-		} catch (err) {
-			console.error(err);
-		}
-	};
 </script>
 
 <div class="bx--form-item">
 	<h3>{$_('home.gcode.download.label')}</h3>
 	<p class="download-description">{$_('home.gcode.download.description')}</p>
 	<ButtonSet>
-		<Button icon={Download} on:click={downloadGCode}>{$_('home.gcode.download.helperText')}</Button>
+		<Button icon={Download} href={`${BACKEND_URL_LOCAL}/download/gcode/${modelId}`}
+			>{$_('home.gcode.download.helperText')}</Button
+		>
 		<Button icon={ChartStepper} on:click={() => goto(`/gcode?id=${modelId}`)} kind="secondary"
 			>{$_('home.gcode.download.check')}</Button
 		>

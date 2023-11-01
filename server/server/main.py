@@ -148,7 +148,9 @@ async def download_gcode(model_id: int):
     filename = model_id_to_filename(model_id)
     if not os.path.exists(f"data/gcode/{filename}.gcode"):
         raise HTTPException(status_code=400, detail="No gcode file generated")
-    return FileResponse(f"data/gcode/{filename}.gcode")
+    return FileResponse(
+        f"data/gcode/{filename}.gcode", media_type="blob", filename=f"{filename}.gcode"
+    )
 
 
 @app.post("/start/measurement")
@@ -198,6 +200,7 @@ async def get_sensor_status(model_id: int):
 @app.websocket("/ws/{model_id}")
 async def websocket_endpoint(model_id: int, websocket: WebSocket):
     await websocket.accept()
+    current_status = ""
     try:
         while True:
             _process_data = await get_sensor_status(model_id)
@@ -213,9 +216,10 @@ async def websocket_endpoint(model_id: int, websocket: WebSocket):
                     "status": _process_data["status"],
                     "error": "",
                 }
-            await websocket.send_json(status)
+            if current_status != status["status"]:
+                await websocket.send_json(status)
             await asyncio.sleep(1)
-    except ConnectionClosedOK or ConnectionClosedError:
+    except ConnectionClosedOK or ConnectionClosedError or KeyboardInterrupt:
         await websocket.close()
 
 
