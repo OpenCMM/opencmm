@@ -5,7 +5,7 @@
 	import { DataTable } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import { displayCoordinates } from '../Result/utils';
+	import { displayCoordinates } from '$lib/utils/display';
 
 	export let modelId: string;
 	let loaded = false;

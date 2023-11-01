@@ -6,6 +6,7 @@
 	import 'carbon-components-svelte/css/all.css';
 	import { page } from '$app/stores';
 	import { _ } from 'svelte-i18n';
+	import { goto } from '$app/navigation';
 
 	const modelId = $page.url.searchParams.get('id');
 	let loaded = false;
@@ -42,9 +43,13 @@
 	</h1>
 
 	<div id="progress-indicator">
-		<ProgressIndicator spaceEqually preventChangeOnClick currentIndex={2}>
-			<ProgressStep complete label={$_('home.file.progress.step1')} />
-			<ProgressStep complete={modelInfo.status > 0} label={$_('home.file.progress.step2')} />
+		<ProgressIndicator spaceEqually currentIndex={2}>
+			<ProgressStep complete label={$_('home.file.progress.step1')} on:click={() => goto('/')} />
+			<ProgressStep
+				complete={modelInfo.status > 0}
+				label={$_('home.file.progress.step2')}
+				on:click={() => goto(`/file/setup?id=${modelId}`)}
+			/>
 			<ProgressStep complete={modelInfo.status > 1} label={$_('home.file.progress.step3')} />
 		</ProgressIndicator>
 	</div>
@@ -54,6 +59,5 @@
 <style>
 	#progress-indicator {
 		margin-top: 2rem;
-		margin-bottom: 2rem;
 	}
 </style>

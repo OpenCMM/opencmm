@@ -32,6 +32,7 @@
 			"download": {
 				"label": "Download GCode",
 				"description": "Download the GCode file and send it to the CNC machine.",
+				"check": "Check",
 				"helperText": "Download"
 			}
 		},

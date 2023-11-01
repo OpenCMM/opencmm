@@ -90,7 +90,6 @@
 	}
 
 	h2 {
-		margin-top: 2rem;
 		margin-bottom: 1rem;
 	}
 

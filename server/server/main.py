@@ -224,6 +224,7 @@ async def get_result_lines(model_id: int):
     lines = result.fetch_lines(model_id)
     return {"lines": lines}
 
+
 @app.get("/result/pairs/{model_id}")
 async def get_result_pair(model_id: int):
     pairs = result.fetch_pairs(model_id)

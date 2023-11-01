@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
+	import { displayCoordinates, displayLengthDifference } from '$lib/utils/display';
 	import { DataTable } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import { displayCoordinates, displayLengthDifference } from '../Result/utils';
 
 	export let modelId: string;
 	let loaded = false;

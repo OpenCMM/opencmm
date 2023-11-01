@@ -3,9 +3,12 @@
 <script lang="ts">
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
 	import axios from 'axios';
-	import { Button } from 'carbon-components-svelte';
+	import { Button, ButtonSet } from 'carbon-components-svelte';
 	import Download from 'carbon-icons-svelte/lib/Download.svelte';
+	import ChartStepper from 'carbon-icons-svelte/lib/ChartStepper.svelte';
+
 	import { _ } from 'svelte-i18n';
+	import { goto } from '$app/navigation';
 
 	export let modelId: string;
 
@@ -32,7 +35,12 @@
 <div class="bx--form-item">
 	<h3>{$_('home.gcode.download.label')}</h3>
 	<p class="download-description">{$_('home.gcode.download.description')}</p>
-	<Button icon={Download} on:click={downloadGCode}>{$_('home.gcode.download.helperText')}</Button>
+	<ButtonSet>
+		<Button icon={Download} on:click={downloadGCode}>{$_('home.gcode.download.helperText')}</Button>
+		<Button icon={ChartStepper} on:click={() => goto(`/gcode?id=${modelId}`)} kind="secondary"
+			>{$_('home.gcode.download.check')}</Button
+		>
+	</ButtonSet>
 </div>
 
 <style>
