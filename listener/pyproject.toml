@@ -1,18 +1,18 @@
 [tool.poetry]
 name = "listener"
-version = "0.2.2"
+version = "0.3.0"
 description = ""
 authors = ["yuichiroaoki <45054071+yuichiroaoki@users.noreply.github.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.13"
-websockets = "^11.0.3"
 requests = "^2.31.0"
 mysql-connector-python = "^8.1.0"
 cncmark = {path = "../cncmark"}
 cnceye = "^0.4.2"
 ping3 = "^4.0.4"
+paho-mqtt = "^1.6.1"
 
 
 [tool.poetry.group.dev.dependencies]
