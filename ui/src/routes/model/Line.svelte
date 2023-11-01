@@ -3,7 +3,7 @@
 	import { DataTable } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import { displayLengthDifference } from '../Result/utils';
+	import { displayLengthDifference } from '$lib/utils/display';
 
 	let loaded = false;
 

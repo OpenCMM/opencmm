@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
+	import { displayCoordinates, displayLengthDifference } from '$lib/utils/display';
 	import { DataTable } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import { displayCoordinates, displayLengthDifference } from '../Result/utils';
 
 	export let modelId: string;
 	let loaded = false;
@@ -20,9 +20,9 @@
 	const headers = [
 		{ key: 'id', value: 'ID' },
 		{ key: 'radius', value: $_('home.result.arc.radius') },
-		{ key: 'center', value: $_('home.result.arc.center') },
 		{ key: 'rradius', value: $_('home.result.arc.rradius') },
 		{ key: 'radiusDiff', value: $_('home.result.arc.radiusDiff') },
+		{ key: 'center', value: $_('home.result.arc.center') },
 		{ key: 'rcenter', value: $_('home.result.arc.rcenter') }
 	];
 	let row: Arc[] = [];
@@ -33,9 +33,9 @@
 			row.push({
 				id: d[0],
 				radius: d[1],
-				center: displayCoordinates(d[2], d[3], d[4]),
 				rradius: d[5],
 				radiusDiff: displayLengthDifference(d[1], d[5]),
+				center: displayCoordinates(d[2], d[3], d[4]),
 				rcenter: displayCoordinates(d[6], d[7], d[8])
 			});
 		}

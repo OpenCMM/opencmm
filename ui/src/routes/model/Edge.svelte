@@ -5,8 +5,9 @@
 	import { DataTable } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import { displayCoordinates } from '../Result/utils';
+	import { displayCoordinates } from '$lib/utils/display';
 
+	export let modelId: string;
 	let loaded = false;
 
 	interface Edge {
@@ -22,7 +23,7 @@
 	];
 	let row: Edge[] = [];
 	const load_table_data = async () => {
-		const res = await fetch(`${BACKEND_URL_LOCAL}/result/edges`);
+		const res = await fetch(`${BACKEND_URL_LOCAL}/result/edges/${modelId}`);
 		const data = await res.json();
 		for (const d of data['edges']) {
 			row.push({
@@ -41,7 +42,7 @@
 
 <div id="data-table">
 	{#if !loaded}
-		<p>loading...</p>
+		<p>Loading...</p>
 	{:else}
 		<DataTable size="short" title={$_('home.result.edge.title')} {headers} rows={row} />
 	{/if}

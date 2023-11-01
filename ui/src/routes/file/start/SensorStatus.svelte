@@ -2,19 +2,28 @@
 	import { BACKEND_WS_URL_LOCAL } from '$lib/constants/backend';
 	import { _ } from 'svelte-i18n';
 	import { InlineLoading } from 'carbon-components-svelte';
+	import { onMount } from 'svelte';
 
 	export let modelId: string;
 	export let sensorStatus: string;
+	let ws: WebSocket;
 
-	const ws = new WebSocket(`${BACKEND_WS_URL_LOCAL}/ws/${modelId}`);
-	ws.addEventListener('open', function (event) {
-		console.log('WebSocket is open now.');
+	onMount(() => {
+		ws = new WebSocket(`${BACKEND_WS_URL_LOCAL}/ws/${modelId}`);
+		ws.addEventListener('open', function (_event) {
+			console.log('WebSocket is open now.');
+		});
+
+		ws.onmessage = function (event) {
+			const data = JSON.parse(event.data);
+			sensorStatus = data['status'];
+		};
+
+		// close connection when leaving the page
+		return () => {
+			ws.close();
+		};
 	});
-
-	ws.onmessage = function (event) {
-		const data = JSON.parse(event.data);
-		sensorStatus = data['status'];
-	};
 </script>
 
 <div>

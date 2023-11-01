@@ -6,10 +6,10 @@
 	import { GCodeLoader } from 'three/addons/loaders/GCodeLoader.js';
 	import { STLLoader } from 'three/addons/loaders/STLLoader.js';
 	import axios from 'axios';
-	import { page } from '$app/stores';
-	import { getSphereMesh } from './utils';
+	import { getSphereMesh } from '$lib/utils/mesh';
 
 	let container: HTMLDivElement;
+	export let modelId: string;
 
 	onMount(() => {
 		// Scene
@@ -19,20 +19,21 @@
 		// Camera
 		const camera = new THREE.PerspectiveCamera(50, 1000 / 1000, 1, 500);
 
-		camera.position.set(0, -100, 100);
+		camera.position.set(0, 0, 200);
 
-		const modelId = $page.url.searchParams.get('id');
 		const loader = new GCodeLoader();
-		loader.load(`http://127.0.0.1:8000/load/gcode/${modelId}`, function (obj: any) {
+		loader.load(`${BACKEND_URL_LOCAL}/load/gcode/${modelId}`, function (obj: any) {
 			// rotate the model
 			obj.rotateX(Math.PI / 2);
 			scene.add(obj);
 		});
 
 		const stlLoader = new STLLoader();
-		stlLoader.load(`http://127.0.0.1:8000/load/model/${modelId}`, function (geometry: any) {
+		stlLoader.load(`${BACKEND_URL_LOCAL}/load/model/${modelId}`, function (geometry: any) {
 			let material = new THREE.MeshPhongMaterial({
-				color: 0xf0f0f0
+				color: 0xf0f0f0,
+				opacity: 0.6,
+				transparent: true
 			});
 			// Colored binary STL
 			if (geometry.hasColors) {
@@ -42,7 +43,7 @@
 			scene.add(mesh);
 		});
 
-		axios.get(`${BACKEND_URL_LOCAL}/result/edges`).then((res) => {
+		axios.get(`${BACKEND_URL_LOCAL}/result/edges/${modelId}`).then((res) => {
 			if (res.status === 200) {
 				const edges = res.data['edges'];
 
@@ -50,30 +51,12 @@
 					const [, , x, y, z, rx, ry, rz] = edge;
 					const point = new THREE.Vector3(x, y, z);
 					const measuredEdge = new THREE.Vector3(rx, ry, rz);
-					const pointMesh = getSphereMesh(0.2, 0xfcba03);
-					const edgeMesh = getSphereMesh(0.2, 0x00f719);
+					const pointMesh = getSphereMesh(0.3, 0xfcba03);
+					const edgeMesh = getSphereMesh(0.3, 0x00f719);
 					pointMesh.position.copy(point);
 					edgeMesh.position.copy(measuredEdge);
 					scene.add(pointMesh);
 					scene.add(edgeMesh);
-				}
-			}
-		});
-
-		axios.get(`${BACKEND_URL_LOCAL}/result/arcs`).then((res) => {
-			if (res.status === 200) {
-				const edges = res.data['arcs'];
-
-				for (const edge of edges) {
-					const [, radius, cx, cy, cz, rradius, rcx, rcy, rcz] = edge;
-					const center = new THREE.Vector3(cx, cy, cz);
-					const measuredCenter = new THREE.Vector3(rcx, rcy, rcz);
-					const centerMesh = getSphereMesh(0.2, 0xfcba03);
-					const measuredCenterMesh = getSphereMesh(0.2, 0x00f719);
-					centerMesh.position.copy(center);
-					measuredCenterMesh.position.copy(measuredCenter);
-					scene.add(centerMesh);
-					scene.add(measuredCenterMesh);
 				}
 			}
 		});
@@ -87,7 +70,7 @@
 
 		// Renderer
 		const renderer = new THREE.WebGLRenderer({ antialias: true });
-		renderer.setSize(800, 800);
+		renderer.setSize(600, 600);
 
 		container.appendChild(renderer.domElement);
 
@@ -96,9 +79,9 @@
 
 		const controls = new OrbitControls(camera, renderer.domElement);
 		controls.mouseButtons = {
-			LEFT: THREE.MOUSE.PAN,
+			LEFT: THREE.MOUSE.ROTATE,
 			MIDDLE: THREE.MOUSE.DOLLY,
-			RIGHT: THREE.MOUSE.ROTATE
+			RIGHT: THREE.MOUSE.PAN
 		};
 		controls.target.set(0, 0, 2);
 		controls.update();

@@ -2,10 +2,11 @@
 	import { onMount } from 'svelte';
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
 	import { page } from '$app/stores';
-	import { _ } from 'svelte-i18n';
 	import { ContentSwitcher, Switch } from 'carbon-components-svelte';
+	import { Grid, Row, Column } from 'carbon-components-svelte';
 	import Arc from './Arc.svelte';
 	import Line from './Line.svelte';
+	import ModelCheck from './ModelCheck.svelte';
 
 	const modelId = $page.url.searchParams.get('id');
 
@@ -42,14 +43,32 @@
 	<h1>
 		{modelInfo.name}
 	</h1>
-	<ContentSwitcher bind:selectedIndex>
-		<Switch>Arc</Switch>
-		<Switch>Line</Switch>
-	</ContentSwitcher>
 
-	{#if selectedIndex === 0}
-		<Arc {modelId} />
-	{:else if selectedIndex === 1}
-		<Line {modelId} />
-	{/if}
+	<div id="model-page">
+		<Grid>
+			<Row>
+				<Column>
+					<ModelCheck {modelId} />
+				</Column>
+				<Column>
+					<ContentSwitcher bind:selectedIndex>
+						<Switch>Arc</Switch>
+						<Switch>Line</Switch>
+					</ContentSwitcher>
+
+					{#if selectedIndex === 0}
+						<Arc {modelId} />
+					{:else if selectedIndex === 1}
+						<Line {modelId} />
+					{/if}
+				</Column>
+			</Row>
+		</Grid>
+	</div>
 {/if}
+
+<style>
+	#model-page {
+		max-width: 2400px;
+	}
+</style>

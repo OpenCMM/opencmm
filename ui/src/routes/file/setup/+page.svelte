@@ -55,6 +55,5 @@
 <style>
 	#progress-indicator {
 		margin-top: 2rem;
-		margin-bottom: 2rem;
 	}
 </style>
