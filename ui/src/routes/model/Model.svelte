@@ -2,11 +2,14 @@
 	import { onMount } from 'svelte';
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
 	import { page } from '$app/stores';
-	import { ContentSwitcher, Switch } from 'carbon-components-svelte';
+	import { Button, ContentSwitcher, Loading, Switch } from 'carbon-components-svelte';
 	import { Grid, Row, Column } from 'carbon-components-svelte';
+	import ChartStepper from 'carbon-icons-svelte/lib/ChartStepper.svelte';
 	import Arc from './Arc.svelte';
 	import Line from './Line.svelte';
 	import ModelCheck from './ModelCheck.svelte';
+	import { redirectToFilePage } from '$lib/access/path';
+	import { goto } from '$app/navigation';
 
 	const modelId = $page.url.searchParams.get('id');
 
@@ -29,6 +32,8 @@
 			gcodeReady: data['gcode_ready'],
 			status: data['model_status']
 		};
+		// access control
+		redirectToFilePage(data['id'], data['model_status']);
 		loaded = true;
 	};
 
@@ -38,14 +43,20 @@
 </script>
 
 {#if !loaded || !modelId}
-	<p>Loading...</p>
+	<Loading />
 {:else}
-	<h1>
-		{modelInfo.name}
-	</h1>
-
 	<div id="model-page">
-		<Grid>
+		<Grid padding>
+			<Row>
+				<Column>
+					<h1>
+						{modelInfo.name}
+					</h1>
+				</Column>
+				<Column>
+					<Button icon={ChartStepper} on:click={() => goto(`/gcode?id=${modelId}`)}>GCode</Button>
+				</Column>
+			</Row>
 			<Row>
 				<Column>
 					<ModelCheck {modelId} />
@@ -56,11 +67,13 @@
 						<Switch>Line</Switch>
 					</ContentSwitcher>
 
-					{#if selectedIndex === 0}
-						<Arc {modelId} />
-					{:else if selectedIndex === 1}
-						<Line {modelId} />
-					{/if}
+					<div id="data-tale">
+						{#if selectedIndex === 0}
+							<Arc {modelId} />
+						{:else if selectedIndex === 1}
+							<Line {modelId} />
+						{/if}
+					</div>
 				</Column>
 			</Row>
 		</Grid>
@@ -70,5 +83,9 @@
 <style>
 	#model-page {
 		max-width: 2400px;
+	}
+
+	#data-tale {
+		margin-top: 2rem;
 	}
 </style>

@@ -77,6 +77,7 @@
 			}
 		},
 		"result": {
+			"title": "測定結果",
 			"edge": {
 				"title": "点",
 				"coordinate": "座標",

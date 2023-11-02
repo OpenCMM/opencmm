@@ -215,12 +215,12 @@ mysql-connector-python = ">=8.1.0,<9.0.0"
 
 [[package]]
 name = "cncmark"
-version = "0.3.4"
+version = "0.3.5"
 description = "CncMark generates G-code to measure workpiece dimensions using a laser triangulation sensor from a stl file."
 optional = false
 python-versions = ">=3.11,<3.13"
 files = []
-develop = true
+develop = false
 
 [package.dependencies]
 mysql-connector-python = "^8.1.0"
@@ -1631,4 +1631,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.13"
-content-hash = "5b73cc1a263e108fbb057840b146fb2053b6bb8b8c469739223c1e2db95f9e25"
+content-hash = "b1b9010504453be26937f4ae5d1778ccda8eb56ebffcb54cdcb56b4ed31720f9"

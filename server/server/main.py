@@ -18,6 +18,7 @@ from server.model import (
     get_recent_3dmodel_data,
     get_3dmodel_file_info,
     model_exists,
+    list_3dmodel,
     model_id_to_filename,
     add_new_3dmodel,
 )
@@ -90,6 +91,12 @@ async def list_3dmodels():
     return {"models": get_3dmodel_data()}
 
 
+@app.get("/list/all/3dmodels")
+async def list_all_3dmodels():
+    """List all uploaded 3d models"""
+    return {"models": list_3dmodel()}
+
+
 @app.get("/list/recent/3dmodels")
 async def list_recent_3dmodels(limit: int = 5):
     """List recently used 3d models"""
@@ -141,7 +148,9 @@ async def download_gcode(model_id: int):
     filename = model_id_to_filename(model_id)
     if not os.path.exists(f"data/gcode/{filename}.gcode"):
         raise HTTPException(status_code=400, detail="No gcode file generated")
-    return FileResponse(f"data/gcode/{filename}.gcode")
+    return FileResponse(
+        f"data/gcode/{filename}.gcode", media_type="blob", filename=f"{filename}.gcode"
+    )
 
 
 @app.post("/start/measurement")
@@ -191,6 +200,7 @@ async def get_sensor_status(model_id: int):
 @app.websocket("/ws/{model_id}")
 async def websocket_endpoint(model_id: int, websocket: WebSocket):
     await websocket.accept()
+    current_status = ""
     try:
         while True:
             _process_data = await get_sensor_status(model_id)
@@ -206,9 +216,10 @@ async def websocket_endpoint(model_id: int, websocket: WebSocket):
                     "status": _process_data["status"],
                     "error": "",
                 }
-            await websocket.send_json(status)
+            if current_status != status["status"]:
+                await websocket.send_json(status)
             await asyncio.sleep(1)
-    except ConnectionClosedOK or ConnectionClosedError:
+    except ConnectionClosedOK or ConnectionClosedError or KeyboardInterrupt:
         await websocket.close()
 
 
@@ -247,4 +258,6 @@ def start():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+    app.run(
+        debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080), workers=4)
+    )

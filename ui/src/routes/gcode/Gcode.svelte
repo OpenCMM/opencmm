@@ -19,7 +19,7 @@
 		// Camera
 		const camera = new THREE.PerspectiveCamera(50, 1000 / 1000, 1, 500);
 
-		camera.position.set(0, 0, 200);
+		camera.position.set(0, 0, 300);
 
 		const loader = new GCodeLoader();
 		loader.load(`${BACKEND_URL_LOCAL}/load/gcode/${modelId}`, function (obj: any) {

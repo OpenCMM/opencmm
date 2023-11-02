@@ -1,7 +1,7 @@
 <script lang="ts">
 	import StartSensor from './StartSensor.svelte';
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
-	import { ProgressIndicator, ProgressStep } from 'carbon-components-svelte';
+	import { Loading, ProgressIndicator, ProgressStep } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import 'carbon-components-svelte/css/all.css';
 	import { page } from '$app/stores';
@@ -36,7 +36,7 @@
 </script>
 
 {#if !loaded}
-	<p>Loading...</p>
+	<Loading />
 {:else}
 	<h1>
 		{modelInfo.name}

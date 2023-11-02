@@ -2,7 +2,7 @@
 
 <script lang="ts">
 	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
-	import { DataTable } from 'carbon-components-svelte';
+	import { DataTable, InlineLoading } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { displayCoordinates } from '$lib/utils/display';
@@ -40,16 +40,8 @@
 	});
 </script>
 
-<div id="data-table">
-	{#if !loaded}
-		<p>Loading...</p>
-	{:else}
-		<DataTable size="short" title={$_('home.result.edge.title')} {headers} rows={row} />
-	{/if}
-</div>
-
-<style>
-	#data-table {
-		margin-top: 40px;
-	}
-</style>
+{#if !loaded}
+	<InlineLoading />
+{:else}
+	<DataTable size="short" title={$_('home.result.edge.title')} {headers} rows={row} />
+{/if}

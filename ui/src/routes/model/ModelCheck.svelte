@@ -24,7 +24,7 @@
 		// Camera
 		const camera = new THREE.PerspectiveCamera(50, 1000 / 1000, 1, 500);
 
-		camera.position.set(0, 0, 200);
+		camera.position.set(0, 0, 300);
 
 		const stlLoader = new STLLoader();
 		stlLoader.load(`${BACKEND_URL_LOCAL}/load/model/${modelId}`, function (geometry: any) {
@@ -44,7 +44,7 @@
 		const labelRenderer = new CSS2DRenderer();
 		labelRenderer.setSize(canvasWidth, canvasHeight);
 		labelRenderer.domElement.style.position = 'absolute';
-		labelRenderer.domElement.style.top = '100px';
+		labelRenderer.domElement.style.top = '140px';
 		labelRenderer.domElement.style.pointerEvents = 'none';
 		container.appendChild(labelRenderer.domElement);
 
