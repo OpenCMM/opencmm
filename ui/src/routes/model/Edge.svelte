@@ -40,16 +40,8 @@
 	});
 </script>
 
-<div id="data-table">
-	{#if !loaded}
-		<InlineLoading />
-	{:else}
-		<DataTable size="short" title={$_('home.result.edge.title')} {headers} rows={row} />
-	{/if}
-</div>
-
-<style>
-	#data-table {
-		margin-top: 40px;
-	}
-</style>
+{#if !loaded}
+	<InlineLoading />
+{:else}
+	<DataTable size="short" title={$_('home.result.edge.title')} {headers} rows={row} />
+{/if}
