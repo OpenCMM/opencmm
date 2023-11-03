@@ -8,9 +8,7 @@ from server.prepare import process_stl
 from pydantic import BaseModel
 from typing import Optional
 from server import result
-from listener.main import listener_start
-from listener.status import get_process_status, start_measuring, get_running_process
-from listener.hakaru import ping_sensor
+from server.listener import listener_start, status, hakaru
 from server.coord import get_final_coordinates
 from server.config import MYSQL_CONFIG, MODEL_PATH, SENSOR_IP
 from server.model import (
@@ -166,7 +164,7 @@ async def start_measurement(
     mtconnect_url = "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
     # mqtt_urll = "ws://localhost:8081"
 
-    running_process = get_running_process(_conf.three_d_model_id, MYSQL_CONFIG)
+    running_process = status.get_running_process(_conf.three_d_model_id, MYSQL_CONFIG)
     if running_process is not None:
         raise HTTPException(
             status_code=400,
@@ -175,7 +173,7 @@ async def start_measurement(
 
     filename = model_id_to_filename(_conf.three_d_model_id)
     final_coordinates = get_final_coordinates(f"data/gcode/{filename}.gcode")
-    process_id = start_measuring(_conf.three_d_model_id, MYSQL_CONFIG, "running")
+    process_id = status.start_measuring(_conf.three_d_model_id, MYSQL_CONFIG, "running")
     background_tasks.add_task(
         listener_start,
         mqtt_url,
@@ -191,9 +189,9 @@ async def start_measurement(
 
 @app.get("/get_sensor_status/{model_id}")
 async def get_sensor_status(model_id: int):
-    if not ping_sensor(SENSOR_IP):
+    if not hakaru.ping_sensor(SENSOR_IP):
         return {"status": "sensor not found or turned off", "data": None}
-    running_process = get_running_process(model_id, MYSQL_CONFIG)
+    running_process = status.get_running_process(model_id, MYSQL_CONFIG)
     if running_process is None:
         return {"status": "process not found", "data": None}
     return {"status": "ok", "data": running_process}
@@ -251,7 +249,7 @@ async def get_result_arcs(model_id: int):
 
 @app.get("/get_measurement_status/{process_id}")
 async def get_measurement_status(process_id: int):
-    return get_process_status(MYSQL_CONFIG, process_id)
+    return status.get_process_status(MYSQL_CONFIG, process_id)
 
 
 def start():
