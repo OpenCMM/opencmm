@@ -15,7 +15,7 @@ WORKDIR $APP_HOME
 COPY . ./
 
 # Install production dependencies.
-RUN poetry install --without dev
+RUN $POETRY_HOME/bin/poetry install --without dev
 
 # Run the web service on container startup. Here we use the gunicorn
 # webserver, with one worker process and 8 threads.
