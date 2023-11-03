@@ -1,12 +1,17 @@
-FROM node:18.17 as build
+FROM node:18-17 AS builder
 
 WORKDIR /app
 
-ENV PATH /app/node_modules/.bin:$PATH
-
-COPY package.json .
-COPY yarn.lock .yarnrc.yml ./
-COPY .yarn ./.yarn
+COPY package*.json .
 RUN yarn install
-COPY . /app/
-RUN yarn dev --host
+COPY . .
+RUN yarn build
+
+FROM node:18-alpine
+WORKDIR /app
+COPY --from=builder /app/build build/
+COPY --from=builder /app/node_modules node_modules/
+COPY package.json .
+EXPOSE 3000
+ENV NODE_ENV=production
+CMD [ "node", "build" ]
