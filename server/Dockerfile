@@ -2,7 +2,8 @@ FROM python:3.11-slim
 
 # Install poetry
 RUN export POETRY_HOME=/opt/poetry
-RUN python3 install-poetry.py --version 1.5.1
+RUN python3 -m venv $POETRY_HOME
+RUN $POETRY_HOME/bin/pip install poetry==1.5.1
 RUN $POETRY_HOME/bin/poetry --version
 
 # Allow statements and log messages to immediately appear in the logs
