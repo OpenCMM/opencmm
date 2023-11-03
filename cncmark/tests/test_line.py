@@ -59,7 +59,7 @@ def test_import_arcs():
 
 def test_generate_gcode():
     path = get_edge_path(MYSQL_CONFIG, model_id)
-    gcode = generate_gcode(path)
+    gcode = generate_gcode(path, model_id)
     save_gcode(gcode, "tests/fixtures/gcode/edge.gcode")
 
 

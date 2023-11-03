@@ -1,5 +1,5 @@
 import requests
-from listener import mt
+from server.listener import mt
 import xml.etree.ElementTree as ET
 
 # endpoint = "https://demo.metalogi.io/sample?path=//Axes/Components/Linear/DataItems/DataItem[@id=%22Xpos%22]&interval=1000"

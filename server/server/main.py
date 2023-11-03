@@ -157,7 +157,6 @@ async def download_gcode(model_id: int):
 async def start_measurement(
     _conf: MeasurementConfig, background_tasks: BackgroundTasks
 ):
-    mqtt_url = "192.168.10.111"
     # mtconnect_url = (
     #     "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
     # )
@@ -176,7 +175,6 @@ async def start_measurement(
     process_id = status.start_measuring(_conf.three_d_model_id, MYSQL_CONFIG, "running")
     background_tasks.add_task(
         listener_start,
-        mqtt_url,
         MYSQL_CONFIG,
         (mtconnect_url, _conf.mtconnect_interval),
         process_id,

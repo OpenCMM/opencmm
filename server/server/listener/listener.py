@@ -4,6 +4,7 @@ import requests
 import xml.etree.ElementTree as ET
 import mysql.connector
 import threading
+from server.config import MQTT_BROKER_URL
 from . import status, hakaru, mt
 from cnceye.edge import find
 from cncmark import arc, pair
@@ -197,7 +198,6 @@ def mtconnect_streaming_reader(
 
 
 def listener_start(
-    mqtt_url: str,
     mysql_config: dict,
     mtconnect_config: tuple,
     process_id: int,
@@ -209,7 +209,7 @@ def listener_start(
         target=listen_sensor,
         args=(
             (
-                mqtt_url,
+                MQTT_BROKER_URL,
                 process_id,
             )
         ),
@@ -228,7 +228,7 @@ def listener_start(
         target=control_sensor_status,
         args=(
             (
-                mqtt_url,
+                MQTT_BROKER_URL,
                 mysql_config,
                 process_id,
                 model_id,

@@ -35,6 +35,7 @@ services:
       PORT: "8000"
       MYSQL_URL: "mysql"
       MYSQL_PORT: "3306"
+      MQTT_BROKER_URL: "mqtt"
     depends_on:
       - mysql
 
