@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
+	import { BACKEND_URL } from '$lib/constants/backend';
 	import { DataTable, Button } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import Add from 'carbon-icons-svelte/lib/Add.svelte';
@@ -37,7 +37,7 @@
 	];
 	let row: File[] = [];
 	const load_table_data = async () => {
-		const res = await fetch(`${BACKEND_URL_LOCAL}/list/3dmodels`);
+		const res = await fetch(`${BACKEND_URL}/list/3dmodels`);
 		const data = await res.json();
 		for (const d of data['models']) {
 			row.push({

@@ -6,7 +6,7 @@
 	import { InlineLoading } from 'carbon-components-svelte';
 	import { _ } from 'svelte-i18n';
 	import Upload3dModel from './Upload3dModel.svelte';
-	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
+	import { BACKEND_URL } from '$lib/constants/backend';
 	import FileTiles from './FileTiles.svelte';
 	import { goto } from '$app/navigation';
 
@@ -20,7 +20,7 @@
 	}
 	let recentFiles: RecentFile[] = [];
 	const load_recent_files = async () => {
-		const res = await fetch(`${BACKEND_URL_LOCAL}/list/recent/3dmodels?limit=3`);
+		const res = await fetch(`${BACKEND_URL}/list/recent/3dmodels?limit=3`);
 		const data = await res.json();
 		for (const d of data['models']) {
 			recentFiles.push({

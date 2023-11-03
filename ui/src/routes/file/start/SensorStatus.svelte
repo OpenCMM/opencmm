@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { BACKEND_WS_URL_LOCAL } from '$lib/constants/backend';
+	import { BACKEND_WS_URL } from '$lib/constants/backend';
 	import { _ } from 'svelte-i18n';
 	import { onDestroy } from 'svelte';
 	import { InlineLoading } from 'carbon-components-svelte';
@@ -16,7 +16,7 @@
 	});
 
 	onMount(() => {
-		ws = new WebSocket(`${BACKEND_WS_URL_LOCAL}/ws/${modelId}`);
+		ws = new WebSocket(`${BACKEND_WS_URL}/ws/${modelId}`);
 		ws.addEventListener('open', function (_event) {
 			console.log('WebSocket is open now.');
 		});

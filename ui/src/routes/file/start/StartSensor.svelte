@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
+	import { BACKEND_URL } from '$lib/constants/backend';
 	import axios from 'axios';
 	import { Form, FormGroup, TextInput, Button } from 'carbon-components-svelte';
 	import { _ } from 'svelte-i18n';
@@ -27,7 +27,7 @@
 				interval: Number(interval),
 				threshold: Number(threshold)
 			};
-			const res = await axios.post(`${BACKEND_URL_LOCAL}/start/measurement`, data);
+			const res = await axios.post(`${BACKEND_URL}/start/measurement`, data);
 			console.log(res);
 		} catch (err) {
 			console.error(err);

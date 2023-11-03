@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
+	import { BACKEND_URL } from '$lib/constants/backend';
 	import { DataTable, InlineLoading } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
@@ -23,7 +23,7 @@
 	];
 	let row: Line[] = [];
 	const load_table_data = async () => {
-		const res = await fetch(`${BACKEND_URL_LOCAL}/result/lines/${modelId}`);
+		const res = await fetch(`${BACKEND_URL}/result/lines/${modelId}`);
 		const data = await res.json();
 		for (const d of data['lines']) {
 			row.push({
