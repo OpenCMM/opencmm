@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
+	import { BACKEND_URL } from '$lib/constants/backend';
 	import { page } from '$app/stores';
 	import { Button, ContentSwitcher, Loading, Switch } from 'carbon-components-svelte';
 	import { Grid, Row, Column } from 'carbon-components-svelte';
@@ -24,7 +24,7 @@
 	}
 	let modelInfo = {} as ModelInfo;
 	const load_model_info = async () => {
-		const res = await fetch(`${BACKEND_URL_LOCAL}/get/3dmodel/info/${modelId}`);
+		const res = await fetch(`${BACKEND_URL}/get/3dmodel/info/${modelId}`);
 		const data = await res.json();
 		modelInfo = {
 			id: data['id'],

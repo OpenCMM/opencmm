@@ -2,7 +2,7 @@
 
 <script lang="ts">
 	import axios from 'axios';
-	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
+	import { BACKEND_URL } from '$lib/constants/backend';
 	import { FileUploader } from 'carbon-components-svelte';
 	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
@@ -20,7 +20,7 @@
 		formData.append('file', file);
 
 		try {
-			const res = await axios.post(`${BACKEND_URL_LOCAL}/upload/3dmodel`, formData, {
+			const res = await axios.post(`${BACKEND_URL}/upload/3dmodel`, formData, {
 				headers: {
 					'Content-Type': 'multipart/form-data'
 				}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
+	import { BACKEND_URL } from '$lib/constants/backend';
 	import { onMount } from 'svelte';
 	import * as THREE from 'three';
 	import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -22,14 +22,14 @@
 		camera.position.set(0, 0, 300);
 
 		const loader = new GCodeLoader();
-		loader.load(`${BACKEND_URL_LOCAL}/load/gcode/${modelId}`, function (obj: any) {
+		loader.load(`${BACKEND_URL}/load/gcode/${modelId}`, function (obj: any) {
 			// rotate the model
 			obj.rotateX(Math.PI / 2);
 			scene.add(obj);
 		});
 
 		const stlLoader = new STLLoader();
-		stlLoader.load(`${BACKEND_URL_LOCAL}/load/model/${modelId}`, function (geometry: any) {
+		stlLoader.load(`${BACKEND_URL}/load/model/${modelId}`, function (geometry: any) {
 			let material = new THREE.MeshPhongMaterial({
 				color: 0xf0f0f0,
 				opacity: 0.6,
@@ -43,7 +43,7 @@
 			scene.add(mesh);
 		});
 
-		axios.get(`${BACKEND_URL_LOCAL}/result/edges/${modelId}`).then((res) => {
+		axios.get(`${BACKEND_URL}/result/edges/${modelId}`).then((res) => {
 			if (res.status === 200) {
 				const edges = res.data['edges'];
 

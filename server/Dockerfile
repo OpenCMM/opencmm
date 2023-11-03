@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 
 # Install poetry
-RUN export POETRY_HOME=/opt/poetry
+ENV POETRY_HOME=/opt/poetry
 RUN python3 -m venv $POETRY_HOME
 RUN $POETRY_HOME/bin/pip install poetry==1.5.1
 RUN $POETRY_HOME/bin/poetry --version

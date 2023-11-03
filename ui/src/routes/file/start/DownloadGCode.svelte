@@ -1,7 +1,7 @@
 <!-- Download the GCode -->
 
 <script lang="ts">
-	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
+	import { BACKEND_URL } from '$lib/constants/backend';
 	import { Button, ButtonSet } from 'carbon-components-svelte';
 	import Download from 'carbon-icons-svelte/lib/Download.svelte';
 	import ChartStepper from 'carbon-icons-svelte/lib/ChartStepper.svelte';
@@ -16,7 +16,7 @@
 	<h3>{$_('home.gcode.download.label')}</h3>
 	<p class="download-description">{$_('home.gcode.download.description')}</p>
 	<ButtonSet>
-		<Button icon={Download} href={`${BACKEND_URL_LOCAL}/download/gcode/${modelId}`}
+		<Button icon={Download} href={`${BACKEND_URL}/download/gcode/${modelId}`}
 			>{$_('home.gcode.download.helperText')}</Button
 		>
 		<Button icon={ChartStepper} on:click={() => goto(`/gcode?id=${modelId}`)} kind="secondary"

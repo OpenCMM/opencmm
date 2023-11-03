@@ -3,8 +3,10 @@ FROM node:18.17 AS builder
 WORKDIR /app
 
 COPY package*.json .
+COPY yarn.lock .yarnrc.yml ./
+COPY .yarn ./.yarn
 RUN yarn install
-COPY . .
+COPY . /app/
 RUN yarn build
 
 FROM node:18-alpine

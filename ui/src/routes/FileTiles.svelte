@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
+	import { BACKEND_URL } from '$lib/constants/backend';
 	import { onMount } from 'svelte';
 	import { ClickableTile } from 'carbon-components-svelte';
 	import { goto } from '$app/navigation';
@@ -15,7 +15,7 @@
 
 	let files: File[] = [];
 	const load_recent_files = async () => {
-		const res = await fetch(`${BACKEND_URL_LOCAL}/list/3dmodels`);
+		const res = await fetch(`${BACKEND_URL}/list/3dmodels`);
 		const data = await res.json();
 		for (const d of data['models']) {
 			files.push({

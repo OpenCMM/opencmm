@@ -2,7 +2,7 @@
 
 <script lang="ts">
 	import axios from 'axios';
-	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
+	import { BACKEND_URL } from '$lib/constants/backend';
 	import { page } from '$app/stores';
 	import { InlineLoading } from 'carbon-components-svelte';
 	import { Form, FormGroup, TextInput, Button } from 'carbon-components-svelte';
@@ -33,7 +33,7 @@
 		};
 
 		try {
-			const res = await axios.post(`${BACKEND_URL_LOCAL}/setup/data`, data, {
+			const res = await axios.post(`${BACKEND_URL}/setup/data`, data, {
 				headers: {
 					'Content-Type': 'application/json'
 				}

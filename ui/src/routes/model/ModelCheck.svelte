@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { BACKEND_URL_LOCAL } from '$lib/constants/backend';
+	import { BACKEND_URL } from '$lib/constants/backend';
 	import { onMount } from 'svelte';
 	import * as THREE from 'three';
 	import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -27,7 +27,7 @@
 		camera.position.set(0, 0, 300);
 
 		const stlLoader = new STLLoader();
-		stlLoader.load(`${BACKEND_URL_LOCAL}/load/model/${modelId}`, function (geometry: any) {
+		stlLoader.load(`${BACKEND_URL}/load/model/${modelId}`, function (geometry: any) {
 			let material = new THREE.MeshPhongMaterial({
 				color: 0xf0f0f0,
 				opacity: 0.6,
@@ -48,7 +48,7 @@
 		labelRenderer.domElement.style.pointerEvents = 'none';
 		container.appendChild(labelRenderer.domElement);
 
-		axios.get(`${BACKEND_URL_LOCAL}/result/arcs/${modelId}`).then((res) => {
+		axios.get(`${BACKEND_URL}/result/arcs/${modelId}`).then((res) => {
 			if (res.status === 200) {
 				const arcs = res.data['arcs'];
 
@@ -78,7 +78,7 @@
 			}
 		});
 
-		axios.get(`${BACKEND_URL_LOCAL}/result/pairs/${modelId}`).then((res) => {
+		axios.get(`${BACKEND_URL}/result/pairs/${modelId}`).then((res) => {
 			if (res.status === 200) {
 				const pairs = res.data['pairs'];
 
