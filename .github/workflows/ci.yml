@@ -174,3 +174,15 @@ jobs:
 
       - name: Run the automated tests
         run: poetry run pytest -v
+
+  docker:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Docker Build
+        run: | 
+          docker build .

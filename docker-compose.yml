@@ -17,3 +17,23 @@ services:
       - PMA_HOSTS='mysql'
     ports:
       - "9000:80"
+
+  ui:
+    container_name: ui
+    build: ./ui
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+  backend:
+    container_name: backend
+    build: ./server
+    ports:
+      - "8000:8000"
+    environment:
+      PORT: "8000"
+      MYSQL_URL: "mysql"
+      MYSQL_PORT: "3306"
+    depends_on:
+      - mysql
