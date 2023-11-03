@@ -14,6 +14,9 @@ ENV APP_HOME /app
 WORKDIR $APP_HOME
 COPY . ./
 
+COPY ../listener ../listener
+COPY ../cncmark ../cncmark
+
 # Install production dependencies.
 RUN $POETRY_HOME/bin/poetry install --without dev
 
