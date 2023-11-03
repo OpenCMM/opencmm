@@ -22,7 +22,7 @@ services:
     container_name: ui
     build: ./ui
     ports:
-      - "80:80"
+      - "3000:5173"
     depends_on:
       - backend
 

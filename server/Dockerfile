@@ -1,7 +1,9 @@
 FROM python:3.11-slim
 
 # Install poetry
-RUN curl -sSL https://install.python-poetry.org | python3 -
+export POETRY_HOME=/opt/poetry
+python3 install-poetry.py --version 1.5.1
+$POETRY_HOME/bin/poetry --version
 
 # Allow statements and log messages to immediately appear in the logs
 ENV PYTHONUNBUFFERED True
