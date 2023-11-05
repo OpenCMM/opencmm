@@ -9,7 +9,6 @@ from pydantic import BaseModel
 from typing import Optional
 from server import result
 from server.listener import listener_start, status, hakaru
-from server.coord import get_final_coordinates
 from server.config import MYSQL_CONFIG, MODEL_PATH, SENSOR_IP
 from server.model import (
     get_3dmodel_data,
@@ -165,7 +164,6 @@ async def start_measurement(
     #     "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
     # )
     mtconnect_url = "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
-    # mqtt_urll = "ws://localhost:8081"
 
     running_process = status.get_running_process(_conf.three_d_model_id, MYSQL_CONFIG)
     if running_process is not None:
@@ -174,8 +172,6 @@ async def start_measurement(
             detail="Measurement already running (process id: {running_process[0]}))",
         )
 
-    filename = model_id_to_filename(_conf.three_d_model_id)
-    final_coordinates = get_final_coordinates(f"data/gcode/{filename}.gcode")
     process_id = status.start_measuring(_conf.three_d_model_id, MYSQL_CONFIG, "running")
     background_tasks.add_task(
         listener_start,
@@ -183,7 +179,6 @@ async def start_measurement(
         (mtconnect_url, _conf.mtconnect_interval),
         process_id,
         _conf.three_d_model_id,
-        final_coordinates,
         (_conf.interval, _conf.threshold),
     )
     return {"status": "ok"}

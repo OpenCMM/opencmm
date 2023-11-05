@@ -41,8 +41,7 @@
 				"title": "How to measure",
 				"step1": "1. Download GCode",
 				"step2": "2. Send GCode to CNC machine",
-				"step3": "3. Make the sensor state to active",
-				"step4": "4. Start CNC machine"
+				"step3": "3. Select GCode & start CNC machine"
 			},
 			"title": "Start measurement",
 			"description": "Click this button to make the sensor state to active. Then the sensor will be ready to measure the work.",
