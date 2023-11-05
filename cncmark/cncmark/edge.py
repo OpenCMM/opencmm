@@ -1,4 +1,3 @@
-import random
 import mysql.connector
 from .line import get_side
 from .arc import get_arc

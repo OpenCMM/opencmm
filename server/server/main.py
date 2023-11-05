@@ -40,6 +40,10 @@ class MeasurementConfig(BaseModel):
     threshold: int
 
 
+class MeasurementConfigWithProgram(MeasurementConfig):
+    program_name: str
+
+
 app = FastAPI()
 
 origins = [
@@ -183,6 +187,21 @@ async def start_measurement(
         (_conf.interval, _conf.threshold),
     )
     return {"status": "ok"}
+
+
+@app.post("/start/measurement/with/program_name")
+async def start_measurement_with_program_name(
+    _conf: MeasurementConfigWithProgram, background_tasks: BackgroundTasks
+):
+    print(_conf)
+    return {"status": "ok"}
+
+
+@app.get("/get_model_id/from/program_name/{program_name}")
+async def get_model_id_from_program_name(program_name: str):
+    if program_name == "3789":
+        return {"model_id": 1}
+    return {"model_id": None}
 
 
 @app.get("/get_sensor_status/{model_id}")
