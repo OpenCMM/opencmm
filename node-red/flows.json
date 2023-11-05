@@ -1118,7 +1118,7 @@
         "timeout": "1",
         "timeoutUnits": "seconds",
         "rate": "1",
-        "nbRateUnits": "0.1",
+        "nbRateUnits": "0.5",
         "rateUnits": "second",
         "randomFirst": "1",
         "randomLast": "5",
@@ -1519,7 +1519,8 @@
         "wires": [
             [
                 "a41ab951299cd47d",
-                "45076f0c77a67474"
+                "170208632310229a",
+                "04f5d350e9f0a665"
             ]
         ]
     },
@@ -1566,7 +1567,7 @@
         "type": "mqtt out",
         "z": "344499584571a0ed",
         "name": "",
-        "topic": "process/command",
+        "topic": "process/control",
         "qos": "0",
         "retain": "",
         "respTopic": "",
@@ -1575,8 +1576,80 @@
         "correl": "",
         "expiry": "",
         "broker": "8e7d86e88ee54c5e",
-        "x": 1570,
-        "y": 200,
+        "x": 1720,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "170208632310229a",
+        "type": "change",
+        "z": "344499584571a0ed",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "stop",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1500,
+        "y": 220,
+        "wires": [
+            [
+                "45076f0c77a67474"
+            ]
+        ]
+    },
+    {
+        "id": "04f5d350e9f0a665",
+        "type": "change",
+        "z": "344499584571a0ed",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{ \"command\": \"deepSleep\" }",
+                "tot": "json"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1500,
+        "y": 280,
+        "wires": [
+            [
+                "3179ba1fabb7d2cb"
+            ]
+        ]
+    },
+    {
+        "id": "3179ba1fabb7d2cb",
+        "type": "mqtt out",
+        "z": "344499584571a0ed",
+        "name": "",
+        "topic": "sensor/control",
+        "qos": "0",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8e7d86e88ee54c5e",
+        "x": 1720,
+        "y": 280,
         "wires": []
     }
 ]

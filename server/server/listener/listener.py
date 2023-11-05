@@ -1,5 +1,4 @@
 import paho.mqtt.client as mqtt
-import paho.mqtt.publish as publish
 import requests
 import xml.etree.ElementTree as ET
 import mysql.connector
@@ -9,7 +8,6 @@ from . import status, hakaru, mt
 from cnceye.edge import find
 from cncmark import arc, pair
 import logging
-from time import sleep
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
 logger = logging.getLogger(__name__)
@@ -38,14 +36,16 @@ def listen_sensor(mqtt_url: str, process_id: int):
 
     def on_message(client, userdata, msg):
         print(msg.topic + " " + str(msg.payload))
-        while not done:
-            distance = float(msg.payload.decode("utf-8"))
-            if xyz is not None:
-                (x, y, z) = xyz
-                data_to_insert.append((x, y, z, process_id, distance))
+        distance = float(msg.payload.decode("utf-8"))
+        if xyz is not None:
+            (x, y, z) = xyz
+            data_to_insert.append((x, y, z, process_id, distance))
 
     client.on_message = on_message
     client.connect(mqtt_url, 1883, 60)
+
+    while not done:
+        client.loop()
 
 
 def control_sensor_status(
@@ -53,38 +53,33 @@ def control_sensor_status(
     mysql_config: dict,
     process_id: int,
     model_id: int,
-    final_coordinates: tuple,
     streaming_config: tuple,
 ):
     global done
     control_sensor_topic = "sensor/control"
+    process_control_topic = "process/control"
 
-    def is_same_coord(target_coord, current_coord):
-        return (
-            target_coord[0] == current_coord[0] and target_coord[1] == current_coord[1]
-        )
+    client = mqtt.Client()
+    client.username_pw_set(USERNAME, PASSWORD)
 
-    # send config to sensor
-    logger.info("send config to sensor")
-    (interval, threshold) = streaming_config
-    publish.single(
-        control_sensor_topic,
-        hakaru.send_config(interval, threshold),
-        hostname=mqtt_url,
-        auth={"username": USERNAME, "password": PASSWORD},
-    )
+    def on_connect(client, userdata, flags, rc):
+        logger.info("Connected with result code " + str(rc))
+        logger.info("control_sensor_status(): connected")
 
-    while not done:
-        sleep(1)
-        if xyz is not None and is_same_coord(final_coordinates, xyz):
-            logger.info("ready to stop streaming")
-            publish.single(
-                control_sensor_topic,
-                hakaru.deep_sleep(),
-                hostname=mqtt_url,
-                auth={"username": USERNAME, "password": PASSWORD},
-            )
-            logger.info("stop streaming")
+        # send config to sensor
+        (interval, threshold) = streaming_config
+        client.publish(control_sensor_topic, hakaru.send_config(interval, threshold))
+        logger.info("sent config to sensor")
+
+        client.subscribe(process_control_topic)
+
+    def on_message(client, userdata, msg):
+        global done
+        msg_payload = msg.payload.decode("utf-8")
+        print(msg.topic + " " + msg_payload)
+
+        if msg_payload == "stop":
+            logger.info("stop measurement")
             done = True
 
             try:
@@ -110,7 +105,7 @@ def control_sensor_status(
                         "Error at find_edges()",
                         "No edge found",
                     )
-                    break
+                    return
                 find.add_measured_edge_coord(update_list, mysql_config)
                 logger.info(f"{edge_count} edges found")
                 pair.add_line_length(mysql_config)
@@ -123,6 +118,13 @@ def control_sensor_status(
 
             status.update_process_status(mysql_config, process_id, "done")
             logger.info("done")
+
+    client.on_connect = on_connect
+    client.on_message = on_message
+    client.connect(mqtt_url, 1883, 60)
+
+    while not done:
+        client.loop()
 
 
 def combine_data(mysql_config: dict):
@@ -202,7 +204,6 @@ def listener_start(
     mtconnect_config: tuple,
     process_id: int,
     model_id: int,
-    final_coordinates: tuple,
     streaming_config: tuple,
 ):
     thread1 = threading.Thread(
@@ -232,7 +233,6 @@ def listener_start(
                 mysql_config,
                 process_id,
                 model_id,
-                final_coordinates,
                 streaming_config,
             )
         ),
