@@ -523,28 +523,6 @@ MarkupSafe = ">=2.0"
 i18n = ["Babel (>=2.7)"]
 
 [[package]]
-name = "listener"
-version = "0.2.2"
-description = ""
-optional = false
-python-versions = ">=3.11,<3.13"
-files = []
-develop = true
-
-[package.dependencies]
-cnceye = "^0.4.2"
-cncmark = {path = "../cncmark"}
-mysql-connector-python = "^8.1.0"
-paho-mqtt = "^1.6.1"
-ping3 = "^4.0.4"
-requests = "^2.31.0"
-websockets = "^11.0.3"
-
-[package.source]
-type = "directory"
-url = "../listener"
-
-[[package]]
 name = "markupsafe"
 version = "2.1.3"
 description = "Safely add untrusted strings to HTML/XML markup."
@@ -1631,4 +1609,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.13"
-content-hash = "b1b9010504453be26937f4ae5d1778ccda8eb56ebffcb54cdcb56b4ed31720f9"
+content-hash = "8767489016100af1fa8aa2ad7b297a7a09796f6f2360bbe4d8faf2341731aae7"

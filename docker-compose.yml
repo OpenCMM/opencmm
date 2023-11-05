@@ -35,5 +35,17 @@ services:
       PORT: "8000"
       MYSQL_URL: "mysql"
       MYSQL_PORT: "3306"
+      MQTT_BROKER_URL: "mqtt"
     depends_on:
       - mysql
+
+  mqtt:
+    container_name: mqtt
+    image: eclipse-mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log

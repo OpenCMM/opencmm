@@ -8,9 +8,7 @@ from server.prepare import process_stl
 from pydantic import BaseModel
 from typing import Optional
 from server import result
-from listener.main import listener_start
-from listener.status import get_process_status, start_measuring, get_running_process
-from listener.hakaru import ping_sensor
+from server.listener import listener_start, status, hakaru
 from server.coord import get_final_coordinates
 from server.config import MYSQL_CONFIG, MODEL_PATH, SENSOR_IP
 from server.model import (
@@ -40,6 +38,10 @@ class MeasurementConfig(BaseModel):
     mtconnect_interval: int
     interval: int
     threshold: int
+
+
+class MeasurementConfigWithProgram(MeasurementConfig):
+    program_name: str
 
 
 app = FastAPI()
@@ -159,14 +161,13 @@ async def download_gcode(model_id: int):
 async def start_measurement(
     _conf: MeasurementConfig, background_tasks: BackgroundTasks
 ):
-    mqtt_url = "192.168.10.111"
     # mtconnect_url = (
     #     "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
     # )
     mtconnect_url = "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
     # mqtt_urll = "ws://localhost:8081"
 
-    running_process = get_running_process(_conf.three_d_model_id, MYSQL_CONFIG)
+    running_process = status.get_running_process(_conf.three_d_model_id, MYSQL_CONFIG)
     if running_process is not None:
         raise HTTPException(
             status_code=400,
@@ -175,10 +176,9 @@ async def start_measurement(
 
     filename = model_id_to_filename(_conf.three_d_model_id)
     final_coordinates = get_final_coordinates(f"data/gcode/{filename}.gcode")
-    process_id = start_measuring(_conf.three_d_model_id, MYSQL_CONFIG, "running")
+    process_id = status.start_measuring(_conf.three_d_model_id, MYSQL_CONFIG, "running")
     background_tasks.add_task(
         listener_start,
-        mqtt_url,
         MYSQL_CONFIG,
         (mtconnect_url, _conf.mtconnect_interval),
         process_id,
@@ -189,11 +189,26 @@ async def start_measurement(
     return {"status": "ok"}
 
 
+@app.post("/start/measurement/with/program_name")
+async def start_measurement_with_program_name(
+    _conf: MeasurementConfigWithProgram, background_tasks: BackgroundTasks
+):
+    print(_conf)
+    return {"status": "ok"}
+
+
+@app.get("/get_model_id/from/program_name/{program_name}")
+async def get_model_id_from_program_name(program_name: str):
+    if program_name == "3789":
+        return {"model_id": 1}
+    return {"model_id": None}
+
+
 @app.get("/get_sensor_status/{model_id}")
 async def get_sensor_status(model_id: int):
-    if not ping_sensor(SENSOR_IP):
+    if not hakaru.ping_sensor(SENSOR_IP):
         return {"status": "sensor not found or turned off", "data": None}
-    running_process = get_running_process(model_id, MYSQL_CONFIG)
+    running_process = status.get_running_process(model_id, MYSQL_CONFIG)
     if running_process is None:
         return {"status": "process not found", "data": None}
     return {"status": "ok", "data": running_process}
@@ -251,7 +266,7 @@ async def get_result_arcs(model_id: int):
 
 @app.get("/get_measurement_status/{process_id}")
 async def get_measurement_status(process_id: int):
-    return get_process_status(MYSQL_CONFIG, process_id)
+    return status.get_process_status(MYSQL_CONFIG, process_id)
 
 
 def start():

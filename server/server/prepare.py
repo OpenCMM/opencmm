@@ -23,7 +23,7 @@ def process_stl(
     )
 
     # save gcode
-    gcode = edge.generate_gcode(path)
+    gcode = edge.generate_gcode(path, model_id)
     edge.save_gcode(gcode, f"{GCODE_PATH}/{stl_filename}.gcode")
 
 

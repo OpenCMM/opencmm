@@ -1,15 +1,14 @@
 import paho.mqtt.client as mqtt
 import paho.mqtt.publish as publish
 import requests
-from listener import mt
 import xml.etree.ElementTree as ET
 import mysql.connector
 import threading
-from listener import status
+from server.config import MQTT_BROKER_URL
+from . import status, hakaru, mt
 from cnceye.edge import find
 from cncmark import arc, pair
 import logging
-from listener import hakaru
 from time import sleep
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
@@ -199,7 +198,6 @@ def mtconnect_streaming_reader(
 
 
 def listener_start(
-    mqtt_url: str,
     mysql_config: dict,
     mtconnect_config: tuple,
     process_id: int,
@@ -211,7 +209,7 @@ def listener_start(
         target=listen_sensor,
         args=(
             (
-                mqtt_url,
+                MQTT_BROKER_URL,
                 process_id,
             )
         ),
@@ -230,7 +228,7 @@ def listener_start(
         target=control_sensor_status,
         args=(
             (
-                mqtt_url,
+                MQTT_BROKER_URL,
                 mysql_config,
                 process_id,
                 model_id,
