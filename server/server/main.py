@@ -4,7 +4,7 @@ from fastapi import FastAPI, UploadFile, HTTPException, BackgroundTasks, WebSock
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from websockets.exceptions import ConnectionClosedOK, ConnectionClosedError
-from server.prepare import process_stl
+from server.prepare import process_stl, get_gcode_filename, model_id_to_program_number
 from pydantic import BaseModel
 from typing import Optional
 from server import result
@@ -144,6 +144,20 @@ async def setup_data(job_info: JobInfo):
     )
 
     return {"status": "ok"}
+
+
+@app.get("/get/gcode/info/{model_id}")
+async def get_gcode_info(model_id: int):
+    """Get gcode info"""
+    filename = model_id_to_filename(model_id)
+    if not os.path.exists(f"data/gcode/{filename}.gcode"):
+        raise HTTPException(status_code=400, detail="No gcode file generated")
+    gcode_filename = get_gcode_filename(filename)
+    program_number = model_id_to_program_number(model_id)
+    return {
+        "filename": gcode_filename,
+        "program_number": program_number,
+    }
 
 
 @app.get("/download/gcode/{model_id}")

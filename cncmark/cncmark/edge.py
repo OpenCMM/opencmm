@@ -141,13 +141,8 @@ def get_edge_path(
     return sorted(path, key=lambda point: (point[2], point[3]))
 
 
-def model_id_to_program_number(model_id: int):
-    return str(model_id + 1000)
-    # return str(model_id).zfill(4)
 
-
-def generate_gcode(path, model_id: int):
-    program_number = model_id_to_program_number(model_id)
+def generate_gcode(path, program_number: str):
     gcode = ["%", f"O{program_number}", "G90 G54"]
     for row in path:
         gcode.append(row[0])

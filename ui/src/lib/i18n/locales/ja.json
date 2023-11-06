@@ -38,7 +38,8 @@
 		},
 		"start": {
 			"howto": {
-				"title": "測定の手順",
+				"instruction": "以下の名前のGCodeを選択し、マシニングセンタでプログラムを実行してください。",
+				"programNumber": "プログラム番号",
 				"step1": "1. GCodeをダウンロード",
 				"step2": "2. GCodeをマシニングセンタにセット",
 				"step3": "3. GCodeを選択しマシニングセンタをスタート"
@@ -72,7 +73,7 @@
 			"progress": {
 				"step1": "1. 3Dモデルアップロード",
 				"step2": "2. GCode作成",
-				"step3": "3. センサ起動"
+				"step3": "3. プログラム実行"
 			}
 		},
 		"result": {

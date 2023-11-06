@@ -1,21 +1,41 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
-	import { page } from '$app/stores';
 	import DownloadGCode from './DownloadGCode.svelte';
-	import { InlineNotification } from 'carbon-components-svelte';
+	import { InlineNotification, Loading } from 'carbon-components-svelte';
 	import SensorStatus from './SensorStatus.svelte';
+	import axios from 'axios';
+	import { onMount } from 'svelte';
+	import { BACKEND_URL } from '$lib/constants/backend';
 
-	const modelId = $page.url.searchParams.get('id');
+	export let modelId: string | null = null;
 	let error: string | null = null;
 	let sensorStatus = 'process not found';
+	let gcodeFilename = '';
+	let programNumber = '';
+	let loaded = false;
+
+	onMount(() => {
+		// Load the settings here
+		axios.get(`${BACKEND_URL}/get/gcode/info/${modelId}`).then((response) => {
+			console.log({ response });
+			gcodeFilename = response.data['filename'];
+			programNumber = response.data['program_number'];
+			loaded = true;
+		});
+	});
 </script>
 
-<div class="steps-to-measure">
-	<h2>{$_('home.start.howto.title')}</h2>
-	<p>{$_('home.start.howto.step1')}</p>
-	<p>{$_('home.start.howto.step2')}</p>
-	<p>{$_('home.start.howto.step3')}</p>
-</div>
+{#if !loaded}
+	<Loading />
+{:else}
+	<div id="instruction">
+		<h2>
+			{$_('home.start.howto.instruction')}
+		</h2>
+		<h2>{gcodeFilename}</h2>
+		<p>{$_('home.start.howto.programNumber')}: {programNumber}</p>
+	</div>
+{/if}
 
 {#if modelId}
 	<DownloadGCode {modelId} />
@@ -33,7 +53,7 @@
 	h2 {
 		margin-bottom: 1rem;
 	}
-	.steps-to-measure {
+	#instruction {
 		margin-top: 2rem;
 		margin-bottom: 2rem;
 	}

@@ -53,7 +53,7 @@
 			<ProgressStep complete={modelInfo.status > 1} label={$_('home.file.progress.step3')} />
 		</ProgressIndicator>
 	</div>
-	<StartSensor />
+	<StartSensor {modelId} />
 {/if}
 
 <style>
