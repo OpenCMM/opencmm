@@ -1,7 +1,7 @@
-from cncmark.point import (
+from server.mark.point import (
     get_shapes,
 )
-from cncmark import line, edge, arc
+from server.mark import line, edge, arc
 from server.config import MODEL_PATH, GCODE_PATH
 from server import machine
 
