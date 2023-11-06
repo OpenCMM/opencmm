@@ -72,3 +72,15 @@ def test_websocket():
     with client.websocket_connect(f"/ws/{model_id}") as websocket:
         data = websocket.receive_json()
         assert data == status
+
+
+def test_get_model_id_from_program_name():
+    program_name = "1001"
+    response = client.get(f"/get_model_id/from/program_name/{program_name}")
+    assert response.status_code == 200
+    assert response.json() == {"model_id": 1}
+
+    program_name = "34001 MIZO"
+    response = client.get(f"/get_model_id/from/program_name/{program_name}")
+    assert response.status_code == 200
+    assert response.json() == {"model_id": None}

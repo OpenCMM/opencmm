@@ -11,6 +11,13 @@ def model_id_to_program_number(model_id: int):
     # return str(model_id).zfill(4)
 
 
+def program_number_to_model_id(program_number: str):
+    try:
+        return int(program_number) - 1000
+    except ValueError:
+        return None
+
+
 def process_stl(
     mysql_config: dict,
     model_id: int,

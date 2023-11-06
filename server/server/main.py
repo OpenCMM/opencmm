@@ -4,7 +4,12 @@ from fastapi import FastAPI, UploadFile, HTTPException, BackgroundTasks, WebSock
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from websockets.exceptions import ConnectionClosedOK, ConnectionClosedError
-from server.prepare import process_stl, get_gcode_filename, model_id_to_program_number
+from server.prepare import (
+    process_stl,
+    get_gcode_filename,
+    model_id_to_program_number,
+    program_number_to_model_id,
+)
 from pydantic import BaseModel
 from typing import Optional
 from server import result
@@ -18,6 +23,7 @@ from server.model import (
     list_3dmodel,
     model_id_to_filename,
     add_new_3dmodel,
+    get_model_data,
 )
 from server import machine
 import asyncio
@@ -40,20 +46,21 @@ class MeasurementConfig(BaseModel):
     threshold: int
 
 
-class MeasurementConfigWithProgram(MeasurementConfig):
+class MeasurementConfigWithProgram(BaseModel):
     program_name: str
+    mtconnect_interval: int
+    interval: int
+    threshold: int
 
 
 app = FastAPI()
 
-origins = [
-    "http://localhost",
-    "http://192.168.0.19:3000",
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://localhost:4173",
-]
+origins = ["*"]
 
+mtconnect_url = (
+    "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
+)
+# mtconnect_url = "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
 
 app.add_middleware(
     CORSMiddleware,
@@ -175,11 +182,6 @@ async def download_gcode(model_id: int):
 async def start_measurement(
     _conf: MeasurementConfig, background_tasks: BackgroundTasks
 ):
-    # mtconnect_url = (
-    #     "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
-    # )
-    mtconnect_url = "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
-
     running_process = status.get_running_process(_conf.three_d_model_id, MYSQL_CONFIG)
     if running_process is not None:
         raise HTTPException(
@@ -203,15 +205,39 @@ async def start_measurement(
 async def start_measurement_with_program_name(
     _conf: MeasurementConfigWithProgram, background_tasks: BackgroundTasks
 ):
-    print(_conf)
-    return {"status": "ok"}
+    model_id = program_number_to_model_id(_conf.program_name)
+    if model_id is None:
+        return {"status": "Not a CMM program", "model_id": None}
+    model_id = get_model_data(model_id)
+    if model_id is None:
+        return {"status": "Not a CMM program", "model_id": None}
+    running_process = status.get_running_process(model_id, MYSQL_CONFIG)
+    if running_process is not None:
+        raise HTTPException(
+            status_code=400,
+            detail="Measurement already running (process id: {running_process[0]}))",
+        )
+
+    process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
+    background_tasks.add_task(
+        listener_start,
+        MYSQL_CONFIG,
+        (mtconnect_url, _conf.mtconnect_interval),
+        process_id,
+        model_id,
+        (_conf.interval, _conf.threshold),
+    )
+    return {"status": "ok", "model_id": model_id}
 
 
 @app.get("/get_model_id/from/program_name/{program_name}")
 async def get_model_id_from_program_name(program_name: str):
-    if program_name == "3789":
-        return {"model_id": 1}
-    return {"model_id": None}
+    model_id = program_number_to_model_id(program_name)
+    if model_id is None:
+        return {"model_id": None}
+    if get_model_data(model_id) is None:
+        return {"model_id": None}
+    return {"model_id": model_id}
 
 
 @app.get("/get_sensor_status/{model_id}")
@@ -282,6 +308,10 @@ async def get_measurement_status(process_id: int):
 @app.get("/get_first_machine")
 async def get_first_machine():
     machines = machine.get_machines(MYSQL_CONFIG)
+    if len(machines) == 0:
+        first_machine = (1, "192.168.0.1", "username", "password", "share_folder")
+        machine.insert_machine(MYSQL_CONFIG, machine.MachineInfo(*first_machine))
+        return first_machine
     return machines[0]
 
 

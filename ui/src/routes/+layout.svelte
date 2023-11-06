@@ -13,6 +13,10 @@
 	let isOpen = false;
 </script>
 
+<svelte:head>
+	<title>OpenCMM</title>
+</svelte:head>
+
 <div class="app">
 	<Header company="OpenCMM" href="/">
 		<svelte:fragment slot="skip-to-content">
