@@ -6,7 +6,6 @@ env
 tests
 
 Dockerfile
-README.md
 *.pyc
 *.pyo
 *.pyd

@@ -9,10 +9,8 @@ RUN $POETRY_HOME/bin/poetry --version
 # Allow statements and log messages to immediately appear in the logs
 ENV PYTHONUNBUFFERED True
 
-# Copy local code to the container image.
-ENV APP_HOME /app
-WORKDIR $APP_HOME
-COPY . ./
+COPY . /app
+WORKDIR /app
 
 # Install production dependencies.
 RUN $POETRY_HOME/bin/poetry install --without dev
