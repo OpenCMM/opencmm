@@ -19,6 +19,7 @@ from server.model import (
     model_id_to_filename,
     add_new_3dmodel,
 )
+from server import machine
 import asyncio
 
 
@@ -262,6 +263,18 @@ async def get_result_arcs(model_id: int):
 @app.get("/get_measurement_status/{process_id}")
 async def get_measurement_status(process_id: int):
     return status.get_process_status(MYSQL_CONFIG, process_id)
+
+
+@app.get("/get_first_machine")
+async def get_first_machine():
+    machines = machine.get_machines(MYSQL_CONFIG)
+    return machines[0]
+
+
+@app.post("/update_machine")
+async def update_machine(machine_info: tuple):
+    machine.update_machine(MYSQL_CONFIG, machine_info)
+    return {"status": "ok"}
 
 
 def start():

@@ -21,6 +21,12 @@
 				>
 					{$_('settings.theme.label')}
 				</ClickableTile>
+				<ClickableTile
+					on:click={() => goto('/settings/cnc')}
+					light={$page.url.pathname === '/settings/cnc'}
+				>
+					{$_('settings.cnc.label')}
+				</ClickableTile>
 			</Column>
 			<Column>
 				<slot />

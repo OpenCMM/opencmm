@@ -107,9 +107,19 @@
 		},
 		"theme": {
 			"label": "テーマ"
+		},
+		"cnc": {
+			"label": "マシニングセンタ",
+			"ip": "IPアドレス",
+			"username": "ユーザー名",
+			"password": "パスワード",
+			"sharedFolder": "共有フォルダ"
 		}
 	},
 	"common": {
-		"cancel": "戻る"
+		"cancel": "戻る",
+		"save": "保存",
+		"delete": "削除",
+		"ok": "OK"
 	}
 }

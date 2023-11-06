@@ -107,9 +107,19 @@
 		},
 		"theme": {
 			"label": "Theme"
+		},
+		"cnc": {
+			"label": "CNC machine",
+			"ip": "IP address",
+			"username": "Username",
+			"password": "Password",
+			"sharedFolder": "Shared folder"
 		}
 	},
 	"common": {
-		"cancel": "Go back"
+		"cancel": "Go back",
+		"save": "Save",
+		"delete": "Delete",
+		"ok": "OK"
 	}
 }
