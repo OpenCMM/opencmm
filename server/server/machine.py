@@ -37,6 +37,19 @@ def get_machines(mysql_config: dict):
     cnx.close()
     return machines
 
+def insert_machine(mysql_config: dict, machine_info: MachineInfo):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
+    cursor = cnx.cursor()
+    query = (
+        "INSERT INTO machine (ip, username, password, shared_folder)"
+        "VALUES (%s, %s, %s, %s)"
+    )
+    machine_id, ip, username, password, shared_folder = machine_info
+    cursor.execute(query, (ip, username, password, shared_folder))
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+    return True
 
 def update_machine(mysql_config: dict, machine_info: MachineInfo):
     cnx = mysql.connector.connect(**mysql_config, database="coord")

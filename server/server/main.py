@@ -278,6 +278,10 @@ async def get_measurement_status(process_id: int):
 @app.get("/get_first_machine")
 async def get_first_machine():
     machines = machine.get_machines(MYSQL_CONFIG)
+    if len(machines) == 0:
+        first_machine = (1, "192.168.0.1", "username", "password", "share_folder")
+        machine.insert_machine(MYSQL_CONFIG, machine.MachineInfo(*first_machine))
+        return first_machine
     return machines[0]
 
 
