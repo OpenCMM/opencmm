@@ -60,7 +60,9 @@ origins = ["*"]
 mtconnect_url = (
     "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
 )
-# mtconnect_url = "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
+# mtconnect_url = (
+#     "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
+# )
 
 app.add_middleware(
     CORSMiddleware,
@@ -186,7 +188,7 @@ async def start_measurement(
     if running_process is not None:
         raise HTTPException(
             status_code=400,
-            detail="Measurement already running (process id: {running_process[0]}))",
+            detail="Measurement already running",
         )
 
     process_id = status.start_measuring(_conf.three_d_model_id, MYSQL_CONFIG, "running")
@@ -324,9 +326,3 @@ async def update_machine(machine_info: machine.MachineInfo):
 def start():
     """Launched with `poetry run start` at root level"""
     uvicorn.run("server.main:app", host="0.0.0.0", port=8000, reload=False)
-
-
-if __name__ == "__main__":
-    app.run(
-        debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080), workers=4)
-    )
