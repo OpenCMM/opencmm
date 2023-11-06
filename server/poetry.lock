@@ -278,24 +278,6 @@ files = [
 mysql-connector-python = ">=8.1.0,<9.0.0"
 
 [[package]]
-name = "cncmark"
-version = "0.3.5"
-description = "CncMark generates G-code to measure workpiece dimensions using a laser triangulation sensor from a stl file."
-optional = false
-python-versions = ">=3.11,<3.13"
-files = []
-develop = false
-
-[package.dependencies]
-mysql-connector-python = "^8.1.0"
-numpy-stl = "^3.0.1"
-scipy = "^1.11.3"
-
-[package.source]
-type = "directory"
-url = "../cncmark"
-
-[[package]]
 name = "colorama"
 version = "0.4.6"
 description = "Cross-platform colored terminal text."
@@ -1825,4 +1807,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.13"
-content-hash = "28b0ca8d8883218752d5e5b828cc0932c3d278b9c951e502712699eec8e9647a"
+content-hash = "d5d371733a7975489d00645e8d399939b8ca8b84494cd7ef9bb212ecd9a5cdd8"
