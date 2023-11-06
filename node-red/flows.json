@@ -257,7 +257,7 @@
         "topic": "sensor/data",
         "qos": "2",
         "datatype": "auto-detect",
-        "broker": "f22ff96264479ed8",
+        "broker": "8e7d86e88ee54c5e",
         "nl": false,
         "rap": true,
         "rh": 0,
@@ -279,7 +279,7 @@
         "topic": "sensor/control",
         "qos": "2",
         "datatype": "auto-detect",
-        "broker": "f22ff96264479ed8",
+        "broker": "8e7d86e88ee54c5e",
         "nl": false,
         "rap": true,
         "rh": 0,
@@ -288,8 +288,7 @@
         "y": 180,
         "wires": [
             [
-                "c7d534091ac103e9",
-                "6ac72a5cfd90b84d"
+                "c7d534091ac103e9"
             ]
         ]
     },
@@ -315,9 +314,9 @@
         "z": "25496ff795f33417",
         "name": "",
         "group": "5d1c5e22bf3e332a",
-        "order": 0,
-        "width": 0,
-        "height": 0,
+        "order": 1,
+        "width": "0",
+        "height": "0",
         "label": "Distance",
         "chartType": "line",
         "legend": "false",
@@ -351,43 +350,6 @@
         "y": 120,
         "wires": [
             []
-        ]
-    },
-    {
-        "id": "aae8a0a218dfac12",
-        "type": "ui_text",
-        "z": "25496ff795f33417",
-        "group": "5d1c5e22bf3e332a",
-        "order": 1,
-        "width": 0,
-        "height": 0,
-        "name": "",
-        "label": "Command",
-        "format": "{{msg.payload}}",
-        "layout": "row-spread",
-        "className": "",
-        "style": false,
-        "font": "",
-        "fontSize": 16,
-        "color": "#000000",
-        "x": 450,
-        "y": 240,
-        "wires": []
-    },
-    {
-        "id": "6ac72a5cfd90b84d",
-        "type": "json",
-        "z": "25496ff795f33417",
-        "name": "",
-        "property": "payload",
-        "action": "",
-        "pretty": false,
-        "x": 450,
-        "y": 320,
-        "wires": [
-            [
-                "aae8a0a218dfac12"
-            ]
         ]
     },
     {
@@ -723,7 +685,7 @@
         "method": "POST",
         "ret": "txt",
         "paytoqs": "ignore",
-        "url": "http://backend:8000",
+        "url": "http://backend:8000/get_model_id/from/program_name/{{{program}}}",
         "tls": "",
         "persist": false,
         "proxy": "",
@@ -732,13 +694,19 @@
         "senderr": false,
         "headers": [
             {
-                "keyType": "msg",
-                "keyValue": "three_d_mode_id",
-                "valueType": "other",
-                "valueValue": "1"
+                "keyType": "Accept",
+                "keyValue": "",
+                "valueType": "application/json",
+                "valueValue": ""
+            },
+            {
+                "keyType": "Content-Type",
+                "keyValue": "",
+                "valueType": "application/json",
+                "valueValue": ""
             }
         ],
-        "x": 1270,
+        "x": 1550,
         "y": 360,
         "wires": [
             [
@@ -819,7 +787,7 @@
         "y": 360,
         "wires": [
             [
-                "68acacd425eab798"
+                "4a21ee4e99070a9c"
             ],
             [
                 "0a479a79756d8ee2"
@@ -1118,7 +1086,7 @@
         "timeout": "1",
         "timeoutUnits": "seconds",
         "rate": "1",
-        "nbRateUnits": "0.5",
+        "nbRateUnits": "1",
         "rateUnits": "second",
         "randomFirst": "1",
         "randomLast": "5",
@@ -1214,7 +1182,7 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1460,
+        "x": 1740,
         "y": 360,
         "wires": []
     },
@@ -1234,7 +1202,9 @@
         "y": 140,
         "wires": [
             [
-                "6b4720c3944ed3cd"
+                "6b4720c3944ed3cd",
+                "af62189e27f45025",
+                "a0665810dbce66ee"
             ]
         ]
     },
@@ -1651,5 +1621,95 @@
         "x": 1720,
         "y": 280,
         "wires": []
+    },
+    {
+        "id": "af62189e27f45025",
+        "type": "ui_text",
+        "z": "344499584571a0ed",
+        "group": "5d1c5e22bf3e332a",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Execution status",
+        "format": "{{msg.payload.execution}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 580,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "a0665810dbce66ee",
+        "type": "ui_text",
+        "z": "344499584571a0ed",
+        "group": "5d1c5e22bf3e332a",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Program",
+        "format": "{{msg.payload.program}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 580,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "4a21ee4e99070a9c",
+        "type": "change",
+        "z": "344499584571a0ed",
+        "name": "post payload",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload.mtconnect_interval",
+                "pt": "msg",
+                "to": "10",
+                "tot": "num"
+            },
+            {
+                "t": "set",
+                "p": "payload.interval",
+                "pt": "msg",
+                "to": "10",
+                "tot": "num"
+            },
+            {
+                "t": "set",
+                "p": "payload.threshold",
+                "pt": "msg",
+                "to": "100",
+                "tot": "num"
+            },
+            {
+                "t": "set",
+                "p": "payload.program_name",
+                "pt": "msg",
+                "to": "payload.program",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1350,
+        "y": 360,
+        "wires": [
+            [
+                "68acacd425eab798"
+            ]
+        ]
     }
 ]
