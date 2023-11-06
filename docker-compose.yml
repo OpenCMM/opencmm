@@ -43,7 +43,6 @@ services:
 
   mosquitto:
     image: eclipse-mosquitto:latest
-    container_name: mosquitto
     ports:
       - "1883:1883"
       - "9001:9001"
@@ -54,7 +53,6 @@ services:
       - ./mosquitto/log:/mosquitto/log
 
   nodered:
-    container_name: nodered
     image: nodered/node-red
     ports:
       - "1880:1880"
