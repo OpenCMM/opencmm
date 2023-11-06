@@ -156,3 +156,17 @@ def model_exists(filename: str):
     Check if model exists
     """
     return os.path.exists(f"{MODEL_PATH}/{filename}")
+
+
+def get_model_data(model_id: int):
+    """
+    Get model data
+    """
+    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+    cursor = cnx.cursor()
+    query = "SELECT * FROM model WHERE id = %s"
+    cursor.execute(query, (model_id,))
+    model_data = cursor.fetchone()
+    cursor.close()
+    cnx.close()
+    return model_data

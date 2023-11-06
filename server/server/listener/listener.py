@@ -35,7 +35,6 @@ def listen_sensor(mqtt_url: str, process_id: int):
     client.on_connect = on_connect
 
     def on_message(client, userdata, msg):
-        print(msg.topic + " " + str(msg.payload))
         distance = float(msg.payload.decode("utf-8"))
         if xyz is not None:
             (x, y, z) = xyz
