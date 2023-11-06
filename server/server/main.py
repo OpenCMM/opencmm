@@ -272,7 +272,7 @@ async def get_first_machine():
 
 
 @app.post("/update_machine")
-async def update_machine(machine_info: tuple):
+async def update_machine(machine_info: machine.MachineInfo):
     machine.update_machine(MYSQL_CONFIG, machine_info)
     return {"status": "ok"}
 

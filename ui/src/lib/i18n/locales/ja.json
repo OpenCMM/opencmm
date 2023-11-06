@@ -119,6 +119,8 @@
 	"common": {
 		"cancel": "戻る",
 		"save": "保存",
+		"saveSuccess": "保存しました",
+		"saveFailed": "保存に失敗しました",
 		"delete": "削除",
 		"ok": "OK"
 	}

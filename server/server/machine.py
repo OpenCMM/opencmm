@@ -1,5 +1,30 @@
 import mysql.connector
 import smbclient
+from pydantic import BaseModel
+
+
+class MachineInfo(BaseModel):
+    machine_id: int
+    ip: str
+    username: str
+    password: str
+    shared_folder: str
+
+    def __init__(self, machine_id, ip, username, password, shared_folder):
+        super().__init__(
+            machine_id=machine_id,
+            ip=ip,
+            username=username,
+            password=password,
+            shared_folder=shared_folder,
+        )
+
+    def __iter__(self):
+        yield self.machine_id
+        yield self.ip
+        yield self.username
+        yield self.password
+        yield self.shared_folder
 
 
 def get_machines(mysql_config: dict):
@@ -13,7 +38,7 @@ def get_machines(mysql_config: dict):
     return machines
 
 
-def update_machine(mysql_config: dict, machine_info: tuple):
+def update_machine(mysql_config: dict, machine_info: MachineInfo):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     query = (
@@ -37,6 +62,13 @@ def send_file_with_smbclient(machine_info: tuple, file_path: str):
         mode="w",
     ) as f:
         f.write(file_path)
+
+
+def list_shared_folder_with_smbclient(machine_info: tuple):
+    machine_id, ip, username, password, shared_folder = machine_info
+    smbclient.ClientConfig(username=username, password=password)
+    files = smbclient.listdir(r"//{}/{}".format(ip, shared_folder))
+    return files
 
 
 def delete_file_with_smbclient(machine_info: tuple, file_path: str):

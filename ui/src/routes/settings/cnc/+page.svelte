@@ -2,6 +2,7 @@
 	import { BACKEND_URL } from '$lib/constants/backend';
 	import axios from 'axios';
 	import { Form, FormGroup, TextInput, Button, Loading } from 'carbon-components-svelte';
+	import { ToastNotification } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	let cncIpAddress = '';
@@ -9,6 +10,8 @@
 	let password = '';
 	let sharedFolder = '';
 	let loaded = false;
+	let saveFailed = false;
+	let success = false;
 
 	onMount(() => {
 		// Load the settings here
@@ -22,9 +25,30 @@
 		});
 	});
 
-	function saveSettings() {
-		// Save the settings here
-	}
+	const saveSettings = async (e: Event) => {
+		e.preventDefault();
+		const data = {
+			machine_id: 1,
+			ip: cncIpAddress,
+			username,
+			password,
+			shared_folder: sharedFolder
+		};
+		try {
+			const res = await axios.post(`${BACKEND_URL}/update_machine`, data, {
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+			console.log(res);
+			if (res.status === 200 && res.data['status'] === 'ok') {
+				success = true;
+			}
+		} catch (err) {
+			console.error(err);
+			saveFailed = true;
+		}
+	};
 </script>
 
 {#if !loaded}
@@ -48,4 +72,22 @@
 		</FormGroup>
 		<Button on:click={saveSettings}>{$_('common.save')}</Button>
 	</Form>
+{/if}
+
+{#if success}
+	<ToastNotification
+		kind="success"
+		title={$_('common.saveSuccess')}
+		timeout={3000}
+		on:close={() => (success = false)}
+	/>
+{/if}
+
+{#if saveFailed}
+	<ToastNotification
+		kind="error"
+		title={$_('common.saveFailed')}
+		timeout={5000}
+		on:close={() => (saveFailed = false)}
+	/>
 {/if}

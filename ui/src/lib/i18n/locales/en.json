@@ -119,6 +119,8 @@
 	"common": {
 		"cancel": "Go back",
 		"save": "Save",
+		"saveSuccess": "Saved successfully",
+		"saveFailed": "Save failed",
 		"delete": "Delete",
 		"ok": "OK"
 	}
