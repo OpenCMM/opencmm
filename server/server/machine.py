@@ -37,6 +37,7 @@ def get_machines(mysql_config: dict):
     cnx.close()
     return machines
 
+
 def insert_machine(mysql_config: dict, machine_info: MachineInfo):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
@@ -50,6 +51,7 @@ def insert_machine(mysql_config: dict, machine_info: MachineInfo):
     cursor.close()
     cnx.close()
     return True
+
 
 def update_machine(mysql_config: dict, machine_info: MachineInfo):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
