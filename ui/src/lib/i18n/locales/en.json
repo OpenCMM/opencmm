@@ -38,7 +38,8 @@
 		},
 		"start": {
 			"howto": {
-				"title": "How to measure",
+				"instruction": "Select the GCode file named as follows and run the program.",
+				"programNumber": "Program number",
 				"step1": "1. Download GCode",
 				"step2": "2. Send GCode to CNC machine",
 				"step3": "3. Select GCode & start CNC machine"
@@ -72,7 +73,7 @@
 			"progress": {
 				"step1": "1. Upload 3D model",
 				"step2": "2. Create GCode",
-				"step3": "3. Start Sensor"
+				"step3": "3. Run program"
 			}
 		},
 		"result": {
@@ -107,9 +108,21 @@
 		},
 		"theme": {
 			"label": "Theme"
+		},
+		"cnc": {
+			"label": "CNC machine",
+			"ip": "IP address",
+			"username": "Username",
+			"password": "Password",
+			"sharedFolder": "Shared folder"
 		}
 	},
 	"common": {
-		"cancel": "Go back"
+		"cancel": "Go back",
+		"save": "Save",
+		"saveSuccess": "Saved successfully",
+		"saveFailed": "Save failed",
+		"delete": "Delete",
+		"ok": "OK"
 	}
 }

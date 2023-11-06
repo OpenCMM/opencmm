@@ -29,6 +29,7 @@ def test_upload_duplicate_3dmodel():
         assert response.json() == {"status": "ok", "model_id": 1}
 
 
+@pytest.mark.skip(reason="Cannot test without windows machine")
 def test_setup_data():
     job_info = {
         "three_d_model_id": 1,
@@ -44,6 +45,7 @@ def test_setup_data():
     assert response.json() == {"status": "ok"}
 
 
+@pytest.mark.skip(reason="Cannot test without windows machine")
 def test_setup_data_with_duplicate_model_id():
     job_info = {
         "three_d_model_id": 1,

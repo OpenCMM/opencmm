@@ -4,7 +4,7 @@ from fastapi import FastAPI, UploadFile, HTTPException, BackgroundTasks, WebSock
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from websockets.exceptions import ConnectionClosedOK, ConnectionClosedError
-from server.prepare import process_stl
+from server.prepare import process_stl, get_gcode_filename, model_id_to_program_number
 from pydantic import BaseModel
 from typing import Optional
 from server import result
@@ -19,6 +19,7 @@ from server.model import (
     model_id_to_filename,
     add_new_3dmodel,
 )
+from server import machine
 import asyncio
 
 
@@ -145,6 +146,20 @@ async def setup_data(job_info: JobInfo):
     return {"status": "ok"}
 
 
+@app.get("/get/gcode/info/{model_id}")
+async def get_gcode_info(model_id: int):
+    """Get gcode info"""
+    filename = model_id_to_filename(model_id)
+    if not os.path.exists(f"data/gcode/{filename}.gcode"):
+        raise HTTPException(status_code=400, detail="No gcode file generated")
+    gcode_filename = get_gcode_filename(filename)
+    program_number = model_id_to_program_number(model_id)
+    return {
+        "filename": gcode_filename,
+        "program_number": program_number,
+    }
+
+
 @app.get("/download/gcode/{model_id}")
 async def download_gcode(model_id: int):
     """Download gcode file"""
@@ -262,6 +277,18 @@ async def get_result_arcs(model_id: int):
 @app.get("/get_measurement_status/{process_id}")
 async def get_measurement_status(process_id: int):
     return status.get_process_status(MYSQL_CONFIG, process_id)
+
+
+@app.get("/get_first_machine")
+async def get_first_machine():
+    machines = machine.get_machines(MYSQL_CONFIG)
+    return machines[0]
+
+
+@app.post("/update_machine")
+async def update_machine(machine_info: machine.MachineInfo):
+    machine.update_machine(MYSQL_CONFIG, machine_info)
+    return {"status": "ok"}
 
 
 def start():

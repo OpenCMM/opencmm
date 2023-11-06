@@ -6,7 +6,7 @@ import threading
 from server.config import MQTT_BROKER_URL
 from . import status, hakaru, mt
 from cnceye.edge import find
-from cncmark import arc, pair
+from server.mark import arc, pair
 import logging
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")

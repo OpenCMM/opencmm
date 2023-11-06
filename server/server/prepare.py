@@ -1,8 +1,14 @@
-from cncmark.point import (
+from server.mark.point import (
     get_shapes,
 )
-from cncmark import line, edge, arc
+from server.mark import line, edge, arc
 from server.config import MODEL_PATH, GCODE_PATH
+from server import machine
+
+
+def model_id_to_program_number(model_id: int):
+    return str(model_id + 1000)
+    # return str(model_id).zfill(4)
 
 
 def process_stl(
@@ -23,8 +29,19 @@ def process_stl(
     )
 
     # save gcode
-    gcode = edge.generate_gcode(path, model_id)
-    edge.save_gcode(gcode, f"{GCODE_PATH}/{stl_filename}.gcode")
+    program_number = model_id_to_program_number(model_id)
+    gcode = edge.generate_gcode(path, program_number)
+    gcode_filename = get_gcode_filename(stl_filename)
+    gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
+    edge.save_gcode(gcode, gcode_file_path)
+
+    # send gcode to cnc machine
+    machine_info = machine.get_machines(mysql_config)[0]
+    machine.send_file_with_smbclient(machine_info, gcode_file_path)
+
+
+def get_gcode_filename(model_filename: str):
+    return f"{model_filename}.gcode"
 
 
 def remove_data_with_model_id(model_id: int, mysql_config: dict):

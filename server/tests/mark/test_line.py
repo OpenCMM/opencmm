@@ -1,5 +1,5 @@
-from cncmark.point import get_shapes
-from cncmark.line import (
+from server.mark.point import get_shapes
+from server.mark.line import (
     get_parallel_lines,
     get_pairs,
     import_sides,
@@ -7,12 +7,12 @@ from cncmark.line import (
     import_edges_from_sides,
     import_lines,
 )
-from cncmark.edge import (
+from server.mark.edge import (
     get_edge_path,
     generate_gcode,
     save_gcode,
 )
-from cncmark.arc import import_arcs
+from server.mark.arc import import_arcs
 from .config import MYSQL_CONFIG
 
 model_id = 1
