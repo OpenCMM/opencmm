@@ -15,4 +15,4 @@ WORKDIR /app
 # Install production dependencies.
 RUN $POETRY_HOME/bin/poetry install --without dev
 
-CMD exec gunicorn --bind :$PORT --workers 4 --threads 8 --timeout 0 -k uvicorn.workers.UvicornWorker server.main:app
+CMD exec $POETRY_HOME/bin/poetry run gunicorn --bind :$PORT --workers 4 --threads 8 --timeout 0 -k uvicorn.workers.UvicornWorker server.main:app
