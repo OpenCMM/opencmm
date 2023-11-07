@@ -6,6 +6,8 @@ import threading
 from server.config import (
     CONTROL_SENSOR_TOPIC,
     MQTT_BROKER_URL,
+    MQTT_PASSWORD,
+    MQTT_USERNAME,
     PROCESS_CONTROL_TOPIC,
     RECEIVE_DATA_TOPIC,
 )
@@ -22,14 +24,12 @@ chunk_size = 1024
 xyz = None
 done = False
 data_to_insert = []
-USERNAME = "opencmm"
-PASSWORD = "opencmm"
 
 
 def listen_sensor(mqtt_url: str, process_id: int):
     global data_to_insert
     client = mqtt.Client()
-    client.username_pw_set(USERNAME, PASSWORD)
+    client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
 
     def on_connect(client, userdata, flags, rc):
         logger.info("Connected with result code " + str(rc))
@@ -68,7 +68,7 @@ def control_sensor_status(
     global done
 
     client = mqtt.Client()
-    client.username_pw_set(USERNAME, PASSWORD)
+    client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
 
     def on_connect(client, userdata, flags, rc):
         logger.info("Connected with result code " + str(rc))

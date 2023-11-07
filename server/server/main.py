@@ -14,7 +14,7 @@ from pydantic import BaseModel
 from typing import Optional
 from server import result
 from server.listener import listener_start, status, hakaru
-from server.config import MYSQL_CONFIG, MODEL_PATH, SENSOR_IP
+from server.config import MYSQL_CONFIG, MODEL_PATH
 from server.model import (
     get_3dmodel_data,
     get_recent_3dmodel_data,
@@ -244,7 +244,7 @@ async def get_model_id_from_program_name(program_name: str):
 
 @app.get("/get_sensor_status/{model_id}")
 async def get_sensor_status(model_id: int):
-    if not hakaru.ping_sensor(SENSOR_IP):
+    if not hakaru.ping_sensor():
         return {"status": "sensor not found or turned off", "data": None}
     running_process = status.get_running_process(model_id, MYSQL_CONFIG)
     if running_process is None:
