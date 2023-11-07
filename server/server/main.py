@@ -217,7 +217,7 @@ async def start_measurement_with_program_name(
     if running_process is not None:
         raise HTTPException(
             status_code=400,
-            detail="Measurement already running (process id: {running_process[0]}))",
+            detail="Measurement already running",
         )
 
     process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
