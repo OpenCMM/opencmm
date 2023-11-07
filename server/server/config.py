@@ -33,6 +33,7 @@ SENSOR_IP = f"{SENSOR_HOSTNAME}.local"
 CONTROL_SENSOR_TOPIC = "sensor/control"
 RECEIVE_DATA_TOPIC = "sensor/data"
 PING_TOPIC = "sensor/ping"
+PONG_TOPIC = "sensor/pong"
 PROCESS_CONTROL_TOPIC = "process/control"
 
 

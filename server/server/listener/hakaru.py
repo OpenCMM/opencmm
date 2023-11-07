@@ -6,6 +6,7 @@ from server.config import (
     MQTT_USERNAME,
     MQTT_PASSWORD,
     PING_TOPIC,
+    PONG_TOPIC,
 )
 
 sensor_online = False
@@ -34,7 +35,7 @@ def ping_sensor() -> bool:
     client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
 
     def on_connect(client, userdata, flags, rc):
-        client.subscribe(PING_TOPIC)
+        client.subscribe(PONG_TOPIC)
         client.publish(PING_TOPIC, "ping")
 
     client.on_connect = on_connect
@@ -42,7 +43,7 @@ def ping_sensor() -> bool:
     def on_message(client, userdata, msg):
         global sensor_online
         msg_payload = msg.payload.decode("utf-8")
-        if msg.topic == PING_TOPIC:
+        if msg.topic == PONG_TOPIC:
             if msg_payload == "pong":
                 sensor_online = True
 
@@ -50,7 +51,7 @@ def ping_sensor() -> bool:
     client.connect(MQTT_BROKER_URL, 1883, 60)
     client.loop_start()
     sleep(0.5)
-    client.unsubscribe(PING_TOPIC)
+    client.unsubscribe(PONG_TOPIC)
     client.disconnect()
     client.loop_stop()
     result = sensor_online
