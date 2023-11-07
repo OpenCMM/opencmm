@@ -2,14 +2,12 @@
 	import { _ } from 'svelte-i18n';
 	import DownloadGCode from './DownloadGCode.svelte';
 	import { InlineNotification, Loading } from 'carbon-components-svelte';
-	import SensorStatus from './SensorStatus.svelte';
 	import axios from 'axios';
 	import { onMount } from 'svelte';
 	import { BACKEND_URL } from '$lib/constants/backend';
 
 	export let modelId: string | null = null;
 	let error: string | null = null;
-	let sensorStatus = 'process not found';
 	let gcodeFilename = '';
 	let programNumber = '';
 	let loaded = false;
@@ -39,10 +37,6 @@
 
 {#if modelId}
 	<DownloadGCode {modelId} />
-{/if}
-
-{#if modelId}
-	<SensorStatus {modelId} {sensorStatus} />
 {/if}
 
 {#if error}
