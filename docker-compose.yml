@@ -36,6 +36,8 @@ services:
       MYSQL_URL: "mysql"
       MYSQL_PORT: "3306"
       MQTT_BROKER_URL: "mosquitto"
+    volumes:
+      - ./server/data:/app/data
     depends_on:
       - mysql
       - mosquitto

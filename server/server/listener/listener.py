@@ -3,7 +3,14 @@ import requests
 import xml.etree.ElementTree as ET
 import mysql.connector
 import threading
-from server.config import MQTT_BROKER_URL
+from server.config import (
+    CONTROL_SENSOR_TOPIC,
+    MQTT_BROKER_URL,
+    MQTT_PASSWORD,
+    MQTT_USERNAME,
+    PROCESS_CONTROL_TOPIC,
+    RECEIVE_DATA_TOPIC,
+)
 from . import status, hakaru, mt
 from cnceye.edge import find
 from server.mark import arc, pair
@@ -17,34 +24,38 @@ chunk_size = 1024
 xyz = None
 done = False
 data_to_insert = []
-USERNAME = "opencmm"
-PASSWORD = "opencmm"
 
 
 def listen_sensor(mqtt_url: str, process_id: int):
     global data_to_insert
     client = mqtt.Client()
-    client.username_pw_set(USERNAME, PASSWORD)
-    receive_data_topic = "sensor/data"
+    client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
 
     def on_connect(client, userdata, flags, rc):
         logger.info("Connected with result code " + str(rc))
         logger.info("receive_sensor_data(): connected")
-        client.subscribe(receive_data_topic)
+        client.subscribe(RECEIVE_DATA_TOPIC)
+        client.subscribe(PROCESS_CONTROL_TOPIC)
 
     client.on_connect = on_connect
 
     def on_message(client, userdata, msg):
-        distance = float(msg.payload.decode("utf-8"))
-        if xyz is not None:
-            (x, y, z) = xyz
-            data_to_insert.append((x, y, z, process_id, distance))
+        if msg.topic == RECEIVE_DATA_TOPIC:
+            distance = float(msg.payload.decode("utf-8"))
+            if xyz is not None:
+                (x, y, z) = xyz
+                data_to_insert.append((x, y, z, process_id, distance))
+
+        elif (
+            msg.topic == PROCESS_CONTROL_TOPIC and msg.payload.decode("utf-8") == "stop"
+        ):
+            logger.info("stop listening sensor data")
+            client.unsubscribe(PROCESS_CONTROL_TOPIC)
+            client.disconnect()
 
     client.on_message = on_message
     client.connect(mqtt_url, 1883, 60)
-
-    while not done:
-        client.loop()
+    client.loop_start()
 
 
 def control_sensor_status(
@@ -55,11 +66,9 @@ def control_sensor_status(
     streaming_config: tuple,
 ):
     global done
-    control_sensor_topic = "sensor/control"
-    process_control_topic = "process/control"
 
     client = mqtt.Client()
-    client.username_pw_set(USERNAME, PASSWORD)
+    client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
 
     def on_connect(client, userdata, flags, rc):
         logger.info("Connected with result code " + str(rc))
@@ -67,15 +76,15 @@ def control_sensor_status(
 
         # send config to sensor
         (interval, threshold) = streaming_config
-        client.publish(control_sensor_topic, hakaru.send_config(interval, threshold))
+        client.publish(CONTROL_SENSOR_TOPIC, hakaru.send_config(interval, threshold))
         logger.info("sent config to sensor")
 
-        client.subscribe(process_control_topic)
+        client.subscribe(PROCESS_CONTROL_TOPIC)
 
     def on_message(client, userdata, msg):
         global done
         msg_payload = msg.payload.decode("utf-8")
-        print(msg.topic + " " + msg_payload)
+        logger.info(msg.topic + " " + msg_payload)
 
         if msg_payload == "stop":
             logger.info("stop measurement")
@@ -104,6 +113,8 @@ def control_sensor_status(
                         "Error at find_edges()",
                         "No edge found",
                     )
+                    client.unsubscribe(PROCESS_CONTROL_TOPIC)
+                    client.disconnect()
                     return
                 find.add_measured_edge_coord(update_list, mysql_config)
                 logger.info(f"{edge_count} edges found")
@@ -117,13 +128,13 @@ def control_sensor_status(
 
             status.update_process_status(mysql_config, process_id, "done")
             logger.info("done")
+            client.unsubscribe(PROCESS_CONTROL_TOPIC)
+            client.disconnect()
 
     client.on_connect = on_connect
     client.on_message = on_message
     client.connect(mqtt_url, 1883, 60)
-
-    while not done:
-        client.loop()
+    client.loop_start()
 
 
 def combine_data(mysql_config: dict):

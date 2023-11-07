@@ -14,7 +14,7 @@ from pydantic import BaseModel
 from typing import Optional
 from server import result
 from server.listener import listener_start, status, hakaru
-from server.config import MYSQL_CONFIG, MODEL_PATH, SENSOR_IP
+from server.config import MYSQL_CONFIG, MODEL_PATH
 from server.model import (
     get_3dmodel_data,
     get_recent_3dmodel_data,
@@ -60,7 +60,9 @@ origins = ["*"]
 mtconnect_url = (
     "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
 )
-# mtconnect_url = "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
+# mtconnect_url = (
+#     "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
+# )
 
 app.add_middleware(
     CORSMiddleware,
@@ -186,7 +188,7 @@ async def start_measurement(
     if running_process is not None:
         raise HTTPException(
             status_code=400,
-            detail="Measurement already running (process id: {running_process[0]}))",
+            detail="Measurement already running",
         )
 
     process_id = status.start_measuring(_conf.three_d_model_id, MYSQL_CONFIG, "running")
@@ -215,7 +217,7 @@ async def start_measurement_with_program_name(
     if running_process is not None:
         raise HTTPException(
             status_code=400,
-            detail="Measurement already running (process id: {running_process[0]}))",
+            detail="Measurement already running",
         )
 
     process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
@@ -242,7 +244,7 @@ async def get_model_id_from_program_name(program_name: str):
 
 @app.get("/get_sensor_status/{model_id}")
 async def get_sensor_status(model_id: int):
-    if not hakaru.ping_sensor(SENSOR_IP):
+    if not hakaru.ping_sensor():
         return {"status": "sensor not found or turned off", "data": None}
     running_process = status.get_running_process(model_id, MYSQL_CONFIG)
     if running_process is None:
@@ -324,9 +326,3 @@ async def update_machine(machine_info: machine.MachineInfo):
 def start():
     """Launched with `poetry run start` at root level"""
     uvicorn.run("server.main:app", host="0.0.0.0", port=8000, reload=False)
-
-
-if __name__ == "__main__":
-    app.run(
-        debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080), workers=4)
-    )

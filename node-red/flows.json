@@ -179,7 +179,7 @@
         "clientid": "",
         "autoConnect": true,
         "usetls": false,
-        "protocolVersion": "5",
+        "protocolVersion": "4",
         "keepalive": "60",
         "cleansession": true,
         "autoUnsubscribe": true,
@@ -257,7 +257,7 @@
         "topic": "sensor/data",
         "qos": "2",
         "datatype": "auto-detect",
-        "broker": "c47df58c9700d702",
+        "broker": "8e7d86e88ee54c5e",
         "nl": false,
         "rap": true,
         "rh": 0,
@@ -279,7 +279,7 @@
         "topic": "sensor/control",
         "qos": "2",
         "datatype": "auto-detect",
-        "broker": "c47df58c9700d702",
+        "broker": "8e7d86e88ee54c5e",
         "nl": false,
         "rap": true,
         "rh": 0,
@@ -288,8 +288,7 @@
         "y": 180,
         "wires": [
             [
-                "c7d534091ac103e9",
-                "6ac72a5cfd90b84d"
+                "c7d534091ac103e9"
             ]
         ]
     },
@@ -315,9 +314,9 @@
         "z": "25496ff795f33417",
         "name": "",
         "group": "5d1c5e22bf3e332a",
-        "order": 0,
-        "width": 0,
-        "height": 0,
+        "order": 1,
+        "width": "0",
+        "height": "0",
         "label": "Distance",
         "chartType": "line",
         "legend": "false",
@@ -351,43 +350,6 @@
         "y": 120,
         "wires": [
             []
-        ]
-    },
-    {
-        "id": "aae8a0a218dfac12",
-        "type": "ui_text",
-        "z": "25496ff795f33417",
-        "group": "5d1c5e22bf3e332a",
-        "order": 1,
-        "width": 0,
-        "height": 0,
-        "name": "",
-        "label": "Command",
-        "format": "{{msg.payload}}",
-        "layout": "row-spread",
-        "className": "",
-        "style": false,
-        "font": "",
-        "fontSize": 16,
-        "color": "#000000",
-        "x": 450,
-        "y": 240,
-        "wires": []
-    },
-    {
-        "id": "6ac72a5cfd90b84d",
-        "type": "json",
-        "z": "25496ff795f33417",
-        "name": "",
-        "property": "payload",
-        "action": "",
-        "pretty": false,
-        "x": 450,
-        "y": 320,
-        "wires": [
-            [
-                "aae8a0a218dfac12"
-            ]
         ]
     },
     {
@@ -723,7 +685,7 @@
         "method": "POST",
         "ret": "txt",
         "paytoqs": "ignore",
-        "url": "http://192.168.122.1:8000",
+        "url": "http://backend:8000/get_model_id/from/program_name",
         "tls": "",
         "persist": false,
         "proxy": "",
@@ -732,17 +694,24 @@
         "senderr": false,
         "headers": [
             {
-                "keyType": "msg",
-                "keyValue": "three_d_mode_id",
-                "valueType": "other",
-                "valueValue": "1"
+                "keyType": "Accept",
+                "keyValue": "",
+                "valueType": "application/json",
+                "valueValue": ""
+            },
+            {
+                "keyType": "Content-Type",
+                "keyValue": "",
+                "valueType": "application/json",
+                "valueValue": ""
             }
         ],
-        "x": 1270,
+        "x": 1550,
         "y": 360,
         "wires": [
             [
-                "fa55f048f3b04d55"
+                "fa55f048f3b04d55",
+                "3d2592d4652c83ed"
             ]
         ]
     },
@@ -819,7 +788,7 @@
         "y": 360,
         "wires": [
             [
-                "68acacd425eab798"
+                "4a21ee4e99070a9c"
             ],
             [
                 "0a479a79756d8ee2"
@@ -893,7 +862,7 @@
         "checkall": "true",
         "repair": false,
         "outputs": 2,
-        "x": 880,
+        "x": 860,
         "y": 140,
         "wires": [
             [],
@@ -920,7 +889,7 @@
         "method": "GET",
         "ret": "txt",
         "paytoqs": "ignore",
-        "url": "http://192.168.122.1:8000/get_model_id/from/program_name/{{{program}}}",
+        "url": "http://backend:8000/get_model_id/from/program_name/{{{program}}}",
         "tls": "",
         "persist": false,
         "proxy": "",
@@ -997,26 +966,8 @@
         "name": "Test",
         "info": "",
         "x": 70,
-        "y": 480,
+        "y": 360,
         "wires": []
-    },
-    {
-        "id": "ae560550e9cba035",
-        "type": "file in",
-        "z": "344499584571a0ed",
-        "name": "Read mqtt log",
-        "filename": "/data/latest.json",
-        "filenameType": "str",
-        "format": "utf8",
-        "chunk": false,
-        "sendError": false,
-        "encoding": "none",
-        "allProps": false,
-        "x": 340,
-        "y": 420,
-        "wires": [
-            []
-        ]
     },
     {
         "id": "43d01b4614ff42b9",
@@ -1026,8 +977,8 @@
         "property": "payload",
         "action": "obj",
         "pretty": false,
-        "x": 310,
-        "y": 580,
+        "x": 470,
+        "y": 420,
         "wires": [
             [
                 "c6270391e0bd5fe1"
@@ -1056,7 +1007,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 100,
-        "y": 540,
+        "y": 420,
         "wires": [
             [
                 "b419185690dd35af"
@@ -1074,8 +1025,8 @@
         "arraySpltType": "len",
         "stream": false,
         "addname": "",
-        "x": 550,
-        "y": 680,
+        "x": 850,
+        "y": 420,
         "wires": [
             [
                 "fa7dfaf3282c67fc"
@@ -1101,8 +1052,8 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 360,
-        "y": 680,
+        "x": 680,
+        "y": 420,
         "wires": [
             [
                 "defcd05dbf9a2e1d"
@@ -1118,7 +1069,7 @@
         "timeout": "1",
         "timeoutUnits": "seconds",
         "rate": "1",
-        "nbRateUnits": "0.5",
+        "nbRateUnits": "1",
         "rateUnits": "second",
         "randomFirst": "1",
         "randomLast": "5",
@@ -1126,8 +1077,8 @@
         "drop": false,
         "allowrate": false,
         "outputs": 1,
-        "x": 670,
-        "y": 500,
+        "x": 410,
+        "y": 520,
         "wires": [
             [
                 "6e6aced3e4ebc03f"
@@ -1151,8 +1102,8 @@
         "checkall": "true",
         "repair": false,
         "outputs": 1,
-        "x": 580,
-        "y": 600,
+        "x": 200,
+        "y": 520,
         "wires": [
             [
                 "1259d762c632fd04"
@@ -1178,8 +1129,8 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 860,
-        "y": 500,
+        "x": 600,
+        "y": 520,
         "wires": [
             [
                 "05d60b1184327e3e"
@@ -1194,8 +1145,8 @@
         "property": "payload",
         "action": "",
         "pretty": false,
-        "x": 1050,
-        "y": 500,
+        "x": 770,
+        "y": 520,
         "wires": [
             [
                 "649eed872bca7e6f"
@@ -1214,7 +1165,7 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1460,
+        "x": 1780,
         "y": 360,
         "wires": []
     },
@@ -1234,7 +1185,9 @@
         "y": 140,
         "wires": [
             [
-                "6b4720c3944ed3cd"
+                "6b4720c3944ed3cd",
+                "af62189e27f45025",
+                "a0665810dbce66ee"
             ]
         ]
     },
@@ -1300,29 +1253,6 @@
         ]
     },
     {
-        "id": "520584bc39f1c4f1",
-        "type": "switch",
-        "z": "344499584571a0ed",
-        "name": "",
-        "property": "payload.model_id",
-        "propertyType": "msg",
-        "rules": [
-            {
-                "t": "nnull"
-            }
-        ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 1,
-        "x": 1830,
-        "y": 480,
-        "wires": [
-            [
-                "d5d0b9f9304d11b1"
-            ]
-        ]
-    },
-    {
         "id": "d5d0b9f9304d11b1",
         "type": "change",
         "z": "344499584571a0ed",
@@ -1361,8 +1291,8 @@
         "sendError": false,
         "encoding": "none",
         "allProps": false,
-        "x": 340,
-        "y": 460,
+        "x": 300,
+        "y": 420,
         "wires": [
             [
                 "43d01b4614ff42b9"
@@ -1436,6 +1366,13 @@
                 "pt": "msg",
                 "to": "100",
                 "tot": "num"
+            },
+            {
+                "t": "set",
+                "p": "status",
+                "pt": "flow",
+                "to": "Running",
+                "tot": "str"
             }
         ],
         "action": "",
@@ -1488,39 +1425,12 @@
         "septopics": true,
         "property": "payload.execution",
         "topi": "topic",
-        "x": 1110,
+        "x": 1090,
         "y": 60,
         "wires": [
             [
                 "21f4133c1674a7d0",
-                "7b26b062306de94e"
-            ]
-        ]
-    },
-    {
-        "id": "7b26b062306de94e",
-        "type": "switch",
-        "z": "344499584571a0ed",
-        "name": "",
-        "property": "current_execution",
-        "propertyType": "flow",
-        "rules": [
-            {
-                "t": "eq",
-                "v": "ACTIVE",
-                "vt": "str"
-            }
-        ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 1,
-        "x": 1330,
-        "y": 160,
-        "wires": [
-            [
-                "a41ab951299cd47d",
-                "170208632310229a",
-                "04f5d350e9f0a665"
+                "5cf47a929856651f"
             ]
         ]
     },
@@ -1540,27 +1450,9 @@
         "z": "344499584571a0ed",
         "name": "Stop measurement",
         "info": "",
-        "x": 1570,
+        "x": 1690,
         "y": 120,
         "wires": []
-    },
-    {
-        "id": "a41ab951299cd47d",
-        "type": "function",
-        "z": "344499584571a0ed",
-        "name": "function 3",
-        "func": "node.warn(\"stop measuring\");\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1520,
-        "y": 160,
-        "wires": [
-            []
-        ]
     },
     {
         "id": "45076f0c77a67474",
@@ -1576,7 +1468,7 @@
         "correl": "",
         "expiry": "",
         "broker": "8e7d86e88ee54c5e",
-        "x": 1720,
+        "x": 1920,
         "y": 220,
         "wires": []
     },
@@ -1599,7 +1491,7 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 1500,
+        "x": 1700,
         "y": 220,
         "wires": [
             [
@@ -1626,7 +1518,7 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 1500,
+        "x": 1700,
         "y": 280,
         "wires": [
             [
@@ -1648,8 +1540,445 @@
         "correl": "",
         "expiry": "",
         "broker": "8e7d86e88ee54c5e",
-        "x": 1720,
+        "x": 1920,
         "y": 280,
+        "wires": []
+    },
+    {
+        "id": "af62189e27f45025",
+        "type": "ui_text",
+        "z": "344499584571a0ed",
+        "group": "5d1c5e22bf3e332a",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Execution status",
+        "format": "{{msg.payload.execution}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 580,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "a0665810dbce66ee",
+        "type": "ui_text",
+        "z": "344499584571a0ed",
+        "group": "5d1c5e22bf3e332a",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Program",
+        "format": "{{msg.payload.program}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 580,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "4a21ee4e99070a9c",
+        "type": "change",
+        "z": "344499584571a0ed",
+        "name": "post payload",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload.mtconnect_interval",
+                "pt": "msg",
+                "to": "10",
+                "tot": "num"
+            },
+            {
+                "t": "set",
+                "p": "payload.interval",
+                "pt": "msg",
+                "to": "10",
+                "tot": "num"
+            },
+            {
+                "t": "set",
+                "p": "payload.threshold",
+                "pt": "msg",
+                "to": "100",
+                "tot": "num"
+            },
+            {
+                "t": "set",
+                "p": "payload.program_name",
+                "pt": "msg",
+                "to": "payload.program",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "status",
+                "pt": "flow",
+                "to": "Running",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1350,
+        "y": 360,
+        "wires": [
+            [
+                "68acacd425eab798"
+            ]
+        ]
+    },
+    {
+        "id": "4c78b1b7cc750e83",
+        "type": "function",
+        "z": "344499584571a0ed",
+        "name": "function 4",
+        "func": "node.warn(\"different execution\")\nnode.warn(`msg.payload.program: ${msg.payload.program}`)\nnode.warn(`msg.payload.exe: ${msg.payload.execution}`)\n\nnode.warn(`flow.program: ${flow.get('current_program')}`)\nnode.warn(`flow.exec: ${flow.get('current_execution')}`)\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1700,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5cf47a929856651f",
+        "type": "switch",
+        "z": "344499584571a0ed",
+        "name": "Status == Running",
+        "property": "status",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "Running",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 1190,
+        "y": 180,
+        "wires": [
+            [
+                "d058e8d1fabf1c67"
+            ]
+        ]
+    },
+    {
+        "id": "d058e8d1fabf1c67",
+        "type": "change",
+        "z": "344499584571a0ed",
+        "name": "Delete flow.status",
+        "rules": [
+            {
+                "t": "delete",
+                "p": "status",
+                "pt": "flow"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1410,
+        "y": 180,
+        "wires": [
+            [
+                "170208632310229a",
+                "04f5d350e9f0a665",
+                "4c78b1b7cc750e83"
+            ]
+        ]
+    },
+    {
+        "id": "cdd87dc1544887d9",
+        "type": "http request",
+        "z": "344499584571a0ed",
+        "name": "Run with model_id",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "query",
+        "url": "http://backend:8000/start/measurement",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "keyType": "Accept",
+                "keyValue": "",
+                "valueType": "application/json",
+                "valueValue": ""
+            },
+            {
+                "keyType": "Content-Type",
+                "keyValue": "",
+                "valueType": "application/json",
+                "valueValue": ""
+            }
+        ],
+        "x": 1870,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "520584bc39f1c4f1",
+        "type": "switch",
+        "z": "344499584571a0ed",
+        "name": "",
+        "property": "payload.model_id",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "nnull"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 1830,
+        "y": 480,
+        "wires": [
+            [
+                "d5d0b9f9304d11b1"
+            ]
+        ]
+    },
+    {
+        "id": "3866cc97d60af8ab",
+        "type": "inject",
+        "z": "344499584571a0ed",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "ping",
+        "payloadType": "str",
+        "x": 90,
+        "y": 660,
+        "wires": [
+            [
+                "a252846a75163dc6"
+            ]
+        ]
+    },
+    {
+        "id": "65cd3aeabdc11990",
+        "type": "mqtt out",
+        "z": "344499584571a0ed",
+        "name": "sensor ping",
+        "topic": "sensor/ping",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8e7d86e88ee54c5e",
+        "x": 810,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "3d2e4a37312524bc",
+        "type": "mqtt in",
+        "z": "344499584571a0ed",
+        "name": "receive pong",
+        "topic": "sensor/ping",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "8e7d86e88ee54c5e",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 100,
+        "y": 780,
+        "wires": [
+            [
+                "d8cb221a6d6abb3e"
+            ]
+        ]
+    },
+    {
+        "id": "69bb59210912bd61",
+        "type": "change",
+        "z": "344499584571a0ed",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "sensor_status",
+                "pt": "flow",
+                "to": "online",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 540,
+        "y": 780,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a252846a75163dc6",
+        "type": "change",
+        "z": "344499584571a0ed",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "sensor_status",
+                "pt": "flow",
+                "to": "offline",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "ping",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 420,
+        "y": 660,
+        "wires": [
+            [
+                "65cd3aeabdc11990"
+            ]
+        ]
+    },
+    {
+        "id": "2461ee18c6d9b318",
+        "type": "ui_text",
+        "z": "344499584571a0ed",
+        "group": "5d1c5e22bf3e332a",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "sensor status",
+        "label": "sensor",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 690,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "8360dfd7e2b3f981",
+        "type": "inject",
+        "z": "344499584571a0ed",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "sensor_status",
+        "payloadType": "flow",
+        "x": 280,
+        "y": 720,
+        "wires": [
+            [
+                "2461ee18c6d9b318"
+            ]
+        ]
+    },
+    {
+        "id": "d8cb221a6d6abb3e",
+        "type": "switch",
+        "z": "344499584571a0ed",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "pong",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 310,
+        "y": 780,
+        "wires": [
+            [
+                "69bb59210912bd61"
+            ]
+        ]
+    },
+    {
+        "id": "028a37f0a5c17405",
+        "type": "comment",
+        "z": "344499584571a0ed",
+        "name": "Sensor status check",
+        "info": "",
+        "x": 130,
+        "y": 600,
         "wires": []
     }
 ]
