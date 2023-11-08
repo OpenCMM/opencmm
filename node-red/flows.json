@@ -171,37 +171,6 @@
         "className": ""
     },
     {
-        "id": "f22ff96264479ed8",
-        "type": "mqtt-broker",
-        "name": "nom",
-        "broker": "192.168.0.19",
-        "port": "1883",
-        "clientid": "",
-        "autoConnect": true,
-        "usetls": false,
-        "protocolVersion": "4",
-        "keepalive": "60",
-        "cleansession": true,
-        "autoUnsubscribe": true,
-        "birthTopic": "",
-        "birthQos": "0",
-        "birthRetain": "false",
-        "birthPayload": "",
-        "birthMsg": {},
-        "closeTopic": "",
-        "closeQos": "0",
-        "closeRetain": "false",
-        "closePayload": "",
-        "closeMsg": {},
-        "willTopic": "",
-        "willQos": "0",
-        "willRetain": "false",
-        "willPayload": "",
-        "willMsg": {},
-        "userProps": "",
-        "sessionExpiry": ""
-    },
-    {
         "id": "8e7d86e88ee54c5e",
         "type": "mqtt-broker",
         "name": "yuchi-ubuntu-server",
@@ -609,7 +578,7 @@
         "topic": "MTConnect/Current/535E85A7_-1CF1-4D1C-9D5C-D386C0CFB37A",
         "qos": "2",
         "datatype": "auto-detect",
-        "broker": "f22ff96264479ed8",
+        "broker": "8e7d86e88ee54c5e",
         "nl": false,
         "rap": true,
         "rh": 0,
@@ -617,7 +586,9 @@
         "x": 100,
         "y": 140,
         "wires": [
-            []
+            [
+                "649eed872bca7e6f"
+            ]
         ]
     },
     {
@@ -665,9 +636,7 @@
         "x": 560,
         "y": 140,
         "wires": [
-            [
-                "0ec4047726b8501d"
-            ],
+            [],
             [],
             [
                 "6f37e4adef0a7443"
@@ -706,11 +675,10 @@
                 "valueValue": ""
             }
         ],
-        "x": 1550,
+        "x": 1490,
         "y": 360,
         "wires": [
             [
-                "fa55f048f3b04d55",
                 "3d2592d4652c83ed"
             ]
         ]
@@ -935,29 +903,10 @@
             }
         ],
         "x": 1870,
-        "y": 60,
+        "y": 20,
         "wires": [
-            [
-                "5ecc6a98be019750"
-            ]
+            []
         ]
-    },
-    {
-        "id": "0ec4047726b8501d",
-        "type": "debug",
-        "z": "344499584571a0ed",
-        "name": "unavailable",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 710,
-        "y": 40,
-        "wires": []
     },
     {
         "id": "d6cad028ae9e81b6",
@@ -989,7 +938,7 @@
         "id": "dbb1e5b8da5ccab0",
         "type": "inject",
         "z": "344499584571a0ed",
-        "name": "",
+        "name": "Start test",
         "props": [
             {
                 "p": "payload"
@@ -1148,26 +1097,8 @@
         "x": 770,
         "y": 520,
         "wires": [
-            [
-                "649eed872bca7e6f"
-            ]
+            []
         ]
-    },
-    {
-        "id": "fa55f048f3b04d55",
-        "type": "debug",
-        "z": "344499584571a0ed",
-        "name": "debug 8",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1780,
-        "y": 360,
-        "wires": []
     },
     {
         "id": "649eed872bca7e6f",
@@ -1271,12 +1202,10 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 2040,
-        "y": 480,
+        "x": 2000,
+        "y": 500,
         "wires": [
-            [
-                "ab12c6bf0f36e4b0"
-            ]
+            []
         ]
     },
     {
@@ -1300,24 +1229,6 @@
         ]
     },
     {
-        "id": "ab12c6bf0f36e4b0",
-        "type": "function",
-        "z": "344499584571a0ed",
-        "name": "function 2",
-        "func": "node.warn('update model id')\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 2260,
-        "y": 480,
-        "wires": [
-            []
-        ]
-    },
-    {
         "id": "5ecc6a98be019750",
         "type": "debug",
         "z": "344499584571a0ed",
@@ -1326,11 +1237,12 @@
         "tosidebar": true,
         "console": false,
         "tostatus": false,
-        "complete": "false",
+        "complete": "payload",
+        "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 2050,
-        "y": 60,
+        "x": 2180,
+        "y": 80,
         "wires": []
     },
     {
@@ -1384,7 +1296,7 @@
         "y": 60,
         "wires": [
             [
-                "6e6aee8c5e805a3e"
+                "cdd87dc1544887d9"
             ]
         ]
     },
@@ -1451,7 +1363,7 @@
         "name": "Stop measurement",
         "info": "",
         "x": 1690,
-        "y": 120,
+        "y": 160,
         "wires": []
     },
     {
@@ -1633,30 +1545,12 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 1350,
+        "x": 1290,
         "y": 360,
         "wires": [
             [
                 "68acacd425eab798"
             ]
-        ]
-    },
-    {
-        "id": "4c78b1b7cc750e83",
-        "type": "function",
-        "z": "344499584571a0ed",
-        "name": "function 4",
-        "func": "node.warn(\"different execution\")\nnode.warn(`msg.payload.program: ${msg.payload.program}`)\nnode.warn(`msg.payload.exe: ${msg.payload.execution}`)\n\nnode.warn(`flow.program: ${flow.get('current_program')}`)\nnode.warn(`flow.exec: ${flow.get('current_execution')}`)\n\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1700,
-        "y": 160,
-        "wires": [
-            []
         ]
     },
     {
@@ -1706,8 +1600,7 @@
         "wires": [
             [
                 "170208632310229a",
-                "04f5d350e9f0a665",
-                "4c78b1b7cc750e83"
+                "04f5d350e9f0a665"
             ]
         ]
     },
@@ -1741,9 +1634,11 @@
             }
         ],
         "x": 1870,
-        "y": 100,
+        "y": 80,
         "wires": [
-            []
+            [
+                "5ecc6a98be019750"
+            ]
         ]
     },
     {
@@ -1761,8 +1656,8 @@
         "checkall": "true",
         "repair": false,
         "outputs": 1,
-        "x": 1830,
-        "y": 480,
+        "x": 1810,
+        "y": 500,
         "wires": [
             [
                 "d5d0b9f9304d11b1"
@@ -1821,8 +1716,8 @@
         "type": "mqtt in",
         "z": "344499584571a0ed",
         "name": "receive pong",
-        "topic": "sensor/ping",
-        "qos": "2",
+        "topic": "sensor/pong",
+        "qos": "0",
         "datatype": "auto-detect",
         "broker": "8e7d86e88ee54c5e",
         "nl": false,
@@ -1980,5 +1875,78 @@
         "x": 130,
         "y": 600,
         "wires": []
+    },
+    {
+        "id": "fb36b7e487dc99f8",
+        "type": "mqtt in",
+        "z": "344499584571a0ed",
+        "name": "",
+        "topic": "log/listener",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "8e7d86e88ee54c5e",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 80,
+        "y": 860,
+        "wires": [
+            [
+                "0a6885bcb40b3305"
+            ]
+        ]
+    },
+    {
+        "id": "0a6885bcb40b3305",
+        "type": "debug",
+        "z": "344499584571a0ed",
+        "name": "debug 13",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 230,
+        "y": 860,
+        "wires": []
+    },
+    {
+        "id": "646e6fc98ed5dae9",
+        "type": "http request",
+        "z": "344499584571a0ed",
+        "name": "Get model_id",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://192.168.122.1:8000/get_model_id/from/program_name/{{{program}}}",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1490,
+        "y": 500,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "6e21209397d3df98",
+        "type": "json",
+        "z": "344499584571a0ed",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 2050,
+        "y": 80,
+        "wires": [
+            []
+        ]
     }
 ]
