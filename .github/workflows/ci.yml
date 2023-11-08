@@ -122,7 +122,7 @@ jobs:
           poetry run ruff --format=github --target-version=py37 .
 
       - name: Run the automated tests
-        run: poetry run pytest -v --cov=server tests/test_main.py
+        run: poetry run pytest -v --cov=server
 
   docker:
     runs-on: ubuntu-latest
