@@ -82,9 +82,11 @@ def read_root():
 def health_check():
     return {"status": "ok"}
 
+
 @app.get("/mtconnect_url")
 def get_mtconnect_url():
     return {"url": mtconnect_url}
+
 
 @app.post("/update/mtconnect_url")
 def update_mtconnect_url(url: str):

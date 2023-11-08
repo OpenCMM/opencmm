@@ -143,7 +143,6 @@ def control_sensor_status(
                 )
                 disconnect_and_publish_log("Error at find_edges()" + str(e))
 
-
     client.on_connect = on_connect
     client.on_message = on_message
     client.connect(mqtt_url, 1883, 60)
