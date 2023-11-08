@@ -3,6 +3,9 @@ CREATE TABLE IF NOT EXISTS `model` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `filename` varchar (255) NOT NULL,
   `status` varchar(255) ,
+  `offset_x` FLOAT NOT NULL DEFAULT 0,
+  `offset_y` FLOAT NOT NULL DEFAULT 0,
+  `offset_z` FLOAT NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `filename` (`filename`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;

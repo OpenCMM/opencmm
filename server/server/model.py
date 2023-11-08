@@ -170,3 +170,17 @@ def get_model_data(model_id: int):
     cursor.close()
     cnx.close()
     return model_data
+
+
+def update_offset(model_id: int, offset: tuple):
+    """
+    Update offset
+    """
+    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+    cursor = cnx.cursor()
+    query = "UPDATE model SET x_offset = %s, y_offset = %s, z_offset = %s WHERE id = %s"
+    cursor.execute(query, (*offset, model_id))
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+    return cursor.rowcount

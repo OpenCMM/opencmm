@@ -4,6 +4,9 @@ from server.mark.point import (
 from server.mark import line, edge, arc
 from server.config import MODEL_PATH, GCODE_PATH
 from server import machine
+from server.model import (
+    update_offset,
+)
 
 
 def model_id_to_program_number(model_id: int):
@@ -34,6 +37,7 @@ def process_stl(
     path = edge.get_edge_path(
         mysql_config, model_id, measure_length, measure_feedrate, move_feedrate, offset
     )
+    update_offset(model_id, offset)
 
     # save gcode
     program_number = model_id_to_program_number(model_id)
