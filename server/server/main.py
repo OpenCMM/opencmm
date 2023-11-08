@@ -83,6 +83,18 @@ def health_check():
     return {"status": "ok"}
 
 
+@app.get("/mtconnect_url")
+def get_mtconnect_url():
+    return {"url": mtconnect_url}
+
+
+@app.post("/update/mtconnect_url")
+def update_mtconnect_url(url: str):
+    global mtconnect_url
+    mtconnect_url = url
+    return {"status": "ok"}
+
+
 @app.post("/upload/3dmodel")
 async def upload_3dmodel(file: UploadFile):
     """Upload 3d model file"""
@@ -242,37 +254,20 @@ async def get_model_id_from_program_name(program_name: str):
     return {"model_id": model_id}
 
 
-@app.get("/get_sensor_status/{model_id}")
-async def get_sensor_status(model_id: int):
+@app.get("/get_sensor_status")
+async def get_sensor_status():
     if not hakaru.ping_sensor():
-        return {"status": "sensor not found or turned off", "data": None}
-    running_process = status.get_running_process(model_id, MYSQL_CONFIG)
-    if running_process is None:
-        return {"status": "process not found", "data": None}
-    return {"status": "ok", "data": running_process}
+        return {"status": "off"}
+    return {"status": "on"}
 
 
-@app.websocket("/ws/{model_id}")
-async def websocket_endpoint(model_id: int, websocket: WebSocket):
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    current_status = ""
     try:
         while True:
-            _process_data = await get_sensor_status(model_id)
-            if _process_data["status"] == "ok":
-                status = {
-                    "process_id": _process_data["data"][0],
-                    "status": _process_data["data"][2],
-                    "error": _process_data["data"][3],
-                }
-            else:
-                status = {
-                    "process_id": -1,
-                    "status": _process_data["status"],
-                    "error": "",
-                }
-            if current_status != status["status"]:
-                await websocket.send_json(status)
+            _sensor_status = await get_sensor_status()
+            await websocket.send_json(_sensor_status)
             await asyncio.sleep(1)
     except ConnectionClosedOK or ConnectionClosedError or KeyboardInterrupt:
         await websocket.close()

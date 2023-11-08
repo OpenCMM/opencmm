@@ -63,13 +63,10 @@ def test_setup_data_with_duplicate_model_id():
 
 @pytest.mark.skip(reason="Not implemented")
 def test_websocket():
-    model_id = 1
     status = {
-        "process_id": -1,
-        "status": "process not found",
-        "error": "",
+        "status": "off",
     }
-    with client.websocket_connect(f"/ws/{model_id}") as websocket:
+    with client.websocket_connect("/ws") as websocket:
         data = websocket.receive_json()
         assert data == status
 
