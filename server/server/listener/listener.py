@@ -131,7 +131,7 @@ def control_sensor_status(
                 _msg = f"{edge_count} edges found"
                 logger.info(_msg)
                 client.publish(LISTENER_LOG_TOPIC, _msg)
-                pair.add_line_length(mysql_config)
+                pair.add_line_length(model_id, mysql_config)
                 arc.add_measured_arc_info(model_id, mysql_config)
                 status.update_process_status(mysql_config, process_id, "done")
                 logger.info("done")
