@@ -82,6 +82,16 @@ def read_root():
 def health_check():
     return {"status": "ok"}
 
+@app.get("/mtconnect_url")
+def get_mtconnect_url():
+    return {"url": mtconnect_url}
+
+@app.post("/update/mtconnect_url")
+def update_mtconnect_url(url: str):
+    global mtconnect_url
+    mtconnect_url = url
+    return {"status": "ok"}
+
 
 @app.post("/upload/3dmodel")
 async def upload_3dmodel(file: UploadFile):

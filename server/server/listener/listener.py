@@ -5,6 +5,7 @@ import mysql.connector
 import threading
 from server.config import (
     CONTROL_SENSOR_TOPIC,
+    LISTENER_LOG_TOPIC,
     MQTT_BROKER_URL,
     MQTT_PASSWORD,
     MQTT_USERNAME,
@@ -49,7 +50,9 @@ def listen_sensor(mqtt_url: str, process_id: int):
         elif (
             msg.topic == PROCESS_CONTROL_TOPIC and msg.payload.decode("utf-8") == "stop"
         ):
-            logger.info("stop listening sensor data")
+            _msg = "stop listening sensor data"
+            logger.info(_msg)
+            client.publish(LISTENER_LOG_TOPIC, _msg)
             client.unsubscribe(PROCESS_CONTROL_TOPIC)
             client.disconnect()
 
@@ -86,19 +89,28 @@ def control_sensor_status(
         msg_payload = msg.payload.decode("utf-8")
         logger.info(msg.topic + " " + msg_payload)
 
+        def disconnect_and_publish_log(_msg: str):
+            client.publish(LISTENER_LOG_TOPIC, _msg)
+            client.unsubscribe(PROCESS_CONTROL_TOPIC)
+            client.disconnect()
+            client.loop_stop()
+
         if msg_payload == "stop":
             logger.info("stop measurement")
             done = True
 
             try:
                 combine_data(mysql_config)
-                logger.info("data combined")
-                status.update_process_status(mysql_config, process_id, "data combined")
+                _status = "data combined"
+                logger.info(_status)
+                client.publish(LISTENER_LOG_TOPIC, _status)
             except Exception as e:
                 logger.warning(e)
                 status.update_process_status(
                     mysql_config, process_id, "Error at combine_data()", str(e)
                 )
+                disconnect_and_publish_log("Error at combine_data()" + str(e))
+                return
 
             try:
                 measured_edges = find.find_edges(process_id, mysql_config=mysql_config)
@@ -113,23 +125,24 @@ def control_sensor_status(
                         "Error at find_edges()",
                         "No edge found",
                     )
-                    client.unsubscribe(PROCESS_CONTROL_TOPIC)
-                    client.disconnect()
+                    disconnect_and_publish_log("Error at find_edges(): No edge found")
                     return
                 find.add_measured_edge_coord(update_list, mysql_config)
-                logger.info(f"{edge_count} edges found")
+                _msg = f"{edge_count} edges found"
+                logger.info(_msg)
+                client.publish(LISTENER_LOG_TOPIC, _msg)
                 pair.add_line_length(mysql_config)
                 arc.add_measured_arc_info(model_id, mysql_config)
+                status.update_process_status(mysql_config, process_id, "done")
+                logger.info("done")
+                disconnect_and_publish_log("done")
             except Exception as e:
                 logger.warning(e)
                 status.update_process_status(
                     mysql_config, process_id, "Error at find_edges()", str(e)
                 )
+                disconnect_and_publish_log("Error at find_edges()" + str(e))
 
-            status.update_process_status(mysql_config, process_id, "done")
-            logger.info("done")
-            client.unsubscribe(PROCESS_CONTROL_TOPIC)
-            client.disconnect()
 
     client.on_connect = on_connect
     client.on_message = on_message
