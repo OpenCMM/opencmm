@@ -21,13 +21,8 @@ def program_number_to_model_id(program_number: str):
         return None
 
 
-def process_new_3dmodel(
-    stl_filename: str, model_id: int, is_new: bool, mysql_config: dict
-):
+def process_new_3dmodel(stl_filename: str, model_id: int, mysql_config: dict):
     lines, arcs = get_shapes(f"{MODEL_PATH}/{stl_filename}")
-
-    if not is_new:
-        remove_data_with_model_id(model_id, mysql_config)
     line.import_lines(model_id, lines, mysql_config)
     arc.import_arcs(model_id, arcs, mysql_config)
 

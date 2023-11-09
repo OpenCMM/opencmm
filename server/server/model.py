@@ -3,20 +3,19 @@ import os
 import mysql.connector
 
 
-def add_new_3dmodel(filename: str) -> (int, bool):
-    if not model_exists(filename):
-        cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
-        cursor = cnx.cursor()
-        query = "INSERT INTO model (filename) VALUES (%s)"
-        cursor.execute(query, (filename,))
-        cnx.commit()
-        cursor.close()
-        cnx.close()
-        is_new = True
-        return cursor.lastrowid, is_new
-    else:
-        is_new = False
-        return filename_to_model_id(filename), is_new
+def add_new_3dmodel(filename: str) -> int:
+    if model_exists(filename):
+        delete_model(filename_to_model_id(filename))
+        remove_if_gcode_exists(filename)
+
+    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+    cursor = cnx.cursor()
+    query = "INSERT INTO model (filename) VALUES (%s)"
+    cursor.execute(query, (filename,))
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+    return cursor.lastrowid
 
 
 def list_3dmodel():
@@ -42,6 +41,15 @@ def list_3dmodel():
     return models_data
 
 
+def has_gcode(model_filename: str):
+    os.path.exists(f"data/gcode/{model_filename}.gcode")
+
+
+def remove_if_gcode_exists(model_filename: str):
+    if has_gcode(model_filename):
+        os.remove(f"data/gcode/{model_filename}.gcode")
+
+
 def get_3dmodel_data():
     """
     Get 3d model data on the model path.
@@ -60,7 +68,7 @@ def get_3dmodel_data():
         model_path = os.path.join(MODEL_PATH, filename)
         model_size = os.path.getsize(model_path)
         model_modified_time = int(os.path.getmtime(model_path) * 1000)
-        gcode_ready = os.path.exists(f"data/gcode/{filename}.gcode")
+        gcode_ready = has_gcode(filename)
         sensor_status = get_sensor_status(model_id)
         model_status = get_model_status(gcode_ready, sensor_status)
         models_data.append(
@@ -185,4 +193,30 @@ def update_offset(model_id: int, offset: tuple):
     cnx.commit()
     cursor.close()
     cnx.close()
+    return cursor.rowcount
+
+
+def delete_model(model_id: int):
+    """
+    Delete model
+    """
+    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+    cursor = cnx.cursor()
+    tables_with_model_id = ["arc", "side", "edge", "pair", "process", "model"]
+    for table in tables_with_model_id:
+        delete_row_with_model_id(table, model_id, cursor, cnx)
+    cursor.close()
+    cnx.close()
+
+
+def delete_row_with_model_id(table_name: str, model_id: int, cursor, cnx):
+    """
+    Delete row with model id from table_name
+    model id is foreign key in table_name
+    """
+    query = f"DELETE FROM {table_name} WHERE model_id = %s"
+    if table_name == "model":
+        query = f"DELETE FROM {table_name} WHERE id = %s"
+    cursor.execute(query, (model_id,))
+    cnx.commit()
     return cursor.rowcount

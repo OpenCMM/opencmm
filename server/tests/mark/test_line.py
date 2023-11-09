@@ -43,7 +43,7 @@ def test_get_parallel_lines():
 
 
 def test_import_edges():
-    sides = get_sides(MYSQL_CONFIG)
+    sides = get_sides(MYSQL_CONFIG, model_id)
     import_edges_from_sides(sides, MYSQL_CONFIG, 2)
 
 
