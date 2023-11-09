@@ -38,6 +38,7 @@ class JobInfo(BaseModel):
     x_offset: Optional[float] = 0.0
     y_offset: Optional[float] = 0.0
     z_offset: Optional[float] = 0.0
+    send_gcode: Optional[bool] = True
 
 
 class MeasurementConfig(BaseModel):
@@ -163,6 +164,7 @@ async def setup_data(job_info: JobInfo):
         filename,
         (job_info.measure_length, job_info.measure_feedrate, job_info.move_feedrate),
         offset,
+        job_info.send_gcode,
     )
 
     return {"status": "ok"}

@@ -29,7 +29,7 @@ def test_upload_duplicate_3dmodel():
         assert response.json() == {"status": "ok", "model_id": 1}
 
 
-@pytest.mark.skip(reason="Cannot test without windows machine")
+# @pytest.mark.skip(reason="Cannot test without windows machine")
 def test_setup_data():
     job_info = {
         "three_d_model_id": 1,
@@ -39,13 +39,14 @@ def test_setup_data():
         "x_offset": 0.0,
         "y_offset": 0.0,
         "z_offset": 0.0,
+        "send_gcode": False,
     }
     response = client.post("/setup/data", json=job_info)
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
 
 
-@pytest.mark.skip(reason="Cannot test without windows machine")
+# @pytest.mark.skip(reason="Cannot test without windows machine")
 def test_setup_data_with_duplicate_model_id():
     job_info = {
         "three_d_model_id": 1,
@@ -55,6 +56,7 @@ def test_setup_data_with_duplicate_model_id():
         "x_offset": 0.0,
         "y_offset": 0.0,
         "z_offset": 0.0,
+        "send_gcode": False,
     }
     response = client.post("/setup/data", json=job_info)
     assert response.status_code == 200

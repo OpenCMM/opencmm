@@ -38,6 +38,7 @@ def process_stl(
     stl_filename: str,
     measure_config: tuple,
     offset: tuple,
+    send_gcode: bool,
 ):
     (measure_length, measure_feedrate, move_feedrate) = measure_config
     path = edge.get_edge_path(
@@ -53,8 +54,9 @@ def process_stl(
     edge.save_gcode(gcode, gcode_file_path)
 
     # send gcode to cnc machine
-    machine_info = machine.get_machines(mysql_config)[0]
-    machine.send_file_with_smbclient(machine_info, gcode_file_path)
+    if send_gcode:
+        machine_info = machine.get_machines(mysql_config)[0]
+        machine.send_file_with_smbclient(machine_info, gcode_file_path)
 
 
 def get_gcode_filename(model_filename: str):
