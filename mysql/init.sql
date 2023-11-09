@@ -3,9 +3,9 @@ CREATE TABLE IF NOT EXISTS `model` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `filename` varchar (255) NOT NULL,
   `status` varchar(255) ,
-  `offset_x` FLOAT NOT NULL DEFAULT 0,
-  `offset_y` FLOAT NOT NULL DEFAULT 0,
-  `offset_z` FLOAT NOT NULL DEFAULT 0,
+  `x_offset` FLOAT NOT NULL DEFAULT 0,
+  `y_offset` FLOAT NOT NULL DEFAULT 0,
+  `z_offset` FLOAT NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `filename` (`filename`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
@@ -78,9 +78,9 @@ CREATE TABLE IF NOT EXISTS `process` (
   `model_id` int(11) unsigned NOT NULL,
   `status` varchar(255) NOT NULL,
   `error` varchar(255),
-  `offset_x` FLOAT NOT NULL,
-  `offset_y` FLOAT NOT NULL,
-  `offset_z` FLOAT NOT NULL,
+  `x_offset` FLOAT NOT NULL,
+  `y_offset` FLOAT NOT NULL,
+  `z_offset` FLOAT NOT NULL,
   `start` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `end` TIMESTAMP,
   PRIMARY KEY (`id`)
