@@ -1,7 +1,7 @@
 from server.mark.point import (
     get_shapes,
 )
-from server.mark import line, edge, arc
+from server.mark import line, edge, arc, pair
 from server.config import MODEL_PATH, GCODE_PATH
 from server import machine
 from server.model import (
@@ -20,6 +20,14 @@ def program_number_to_model_id(program_number: str):
     except ValueError:
         return None
 
+def process_new_3dmodel(stl_filename: str, model_id: int, is_new: bool, mysql_config: dict):
+    lines, arcs = get_shapes(f"{MODEL_PATH}/{stl_filename}")
+
+    if not is_new:
+        remove_data_with_model_id(model_id, mysql_config)
+    line.import_lines(model_id, lines, mysql_config)
+    arc.import_arcs(model_id, arcs, mysql_config)
+
 
 def process_stl(
     mysql_config: dict,
@@ -29,11 +37,6 @@ def process_stl(
     offset: tuple,
 ):
     (measure_length, measure_feedrate, move_feedrate) = measure_config
-    lines, arcs = get_shapes(f"{MODEL_PATH}/{stl_filename}")
-
-    remove_data_with_model_id(model_id, mysql_config)
-    line.import_lines(model_id, lines, mysql_config)
-    arc.import_arcs(model_id, arcs, mysql_config)
     path = edge.get_edge_path(
         mysql_config, model_id, measure_length, measure_feedrate, move_feedrate, offset
     )
@@ -59,3 +62,4 @@ def remove_data_with_model_id(model_id: int, mysql_config: dict):
     line.delete_sides_with_model_id(model_id, mysql_config)
     arc.delete_arcs_with_model_id(model_id, mysql_config)
     edge.delete_edges_with_model_id(model_id, mysql_config)
+    pair.delete_row_with_model_id(model_id, mysql_config)

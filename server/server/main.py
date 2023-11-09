@@ -5,6 +5,7 @@ from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from websockets.exceptions import ConnectionClosedOK, ConnectionClosedError
 from server.prepare import (
+    process_new_3dmodel,
     process_stl,
     get_gcode_filename,
     model_id_to_program_number,
@@ -103,10 +104,10 @@ async def upload_3dmodel(file: UploadFile):
     if file_extension not in ["stl", "STL"]:
         raise HTTPException(status_code=400, detail="File extension not supported")
 
-    _model_id = add_new_3dmodel(file.filename)
+    _model_id, is_new = add_new_3dmodel(file.filename)
     with open(f"{MODEL_PATH}/{file.filename}", "wb") as buffer:
         buffer.write(await file.read())
-
+    process_new_3dmodel(file.filename, _model_id, is_new, MYSQL_CONFIG) 
     return {"status": "ok", "model_id": _model_id}
 
 

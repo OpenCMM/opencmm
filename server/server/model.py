@@ -3,7 +3,7 @@ import os
 import mysql.connector
 
 
-def add_new_3dmodel(filename: str) -> int:
+def add_new_3dmodel(filename: str) -> (int, bool):
     if not model_exists(filename):
         cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
         cursor = cnx.cursor()
@@ -12,9 +12,11 @@ def add_new_3dmodel(filename: str) -> int:
         cnx.commit()
         cursor.close()
         cnx.close()
-        return cursor.lastrowid
+        is_new = True
+        return cursor.lastrowid, is_new
     else:
-        return filename_to_model_id(filename)
+        is_new = False
+        return filename_to_model_id(filename), is_new
 
 
 def list_3dmodel():
