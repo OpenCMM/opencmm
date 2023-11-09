@@ -7,8 +7,12 @@ def start_measuring(model_id: int, mysql_config: dict, status: str):
     offset = (model_data[3], model_data[4], model_data[5])
     mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
     mysql_cur = mysql_conn.cursor()
+    query = (
+        "INSERT INTO process(model_id, status, offset_x, offset_y, offset_z) "
+        "VALUES (%s, %s, %s, %s, %s)"
+    )
     mysql_cur.execute(
-        "INSERT INTO process(model_id, status, offset_x, offset_y, offset_z) VALUES (%s, %s, %s, %s, %s)",
+        query,
         (
             model_id,
             status,
