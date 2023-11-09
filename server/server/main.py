@@ -107,7 +107,7 @@ async def upload_3dmodel(file: UploadFile):
     _model_id, is_new = add_new_3dmodel(file.filename)
     with open(f"{MODEL_PATH}/{file.filename}", "wb") as buffer:
         buffer.write(await file.read())
-    process_new_3dmodel(file.filename, _model_id, is_new, MYSQL_CONFIG) 
+    process_new_3dmodel(file.filename, _model_id, is_new, MYSQL_CONFIG)
     return {"status": "ok", "model_id": _model_id}
 
 

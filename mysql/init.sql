@@ -78,6 +78,9 @@ CREATE TABLE IF NOT EXISTS `process` (
   `model_id` int(11) unsigned NOT NULL,
   `status` varchar(255) NOT NULL,
   `error` varchar(255),
+  `offset_x` FLOAT NOT NULL,
+  `offset_y` FLOAT NOT NULL,
+  `offset_z` FLOAT NOT NULL,
   `start` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `end` TIMESTAMP,
   PRIMARY KEY (`id`)

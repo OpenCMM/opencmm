@@ -20,7 +20,10 @@ def program_number_to_model_id(program_number: str):
     except ValueError:
         return None
 
-def process_new_3dmodel(stl_filename: str, model_id: int, is_new: bool, mysql_config: dict):
+
+def process_new_3dmodel(
+    stl_filename: str, model_id: int, is_new: bool, mysql_config: dict
+):
     lines, arcs = get_shapes(f"{MODEL_PATH}/{stl_filename}")
 
     if not is_new:
