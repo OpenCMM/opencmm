@@ -13,6 +13,7 @@ MYSQL_CONFIG = dict(
     password="root",
 )
 
+
 def test_check_if_edge_is_found():
     assert find.check_if_edge_is_found("", "") is False
     assert find.check_if_edge_is_found("", 100.0) is True
