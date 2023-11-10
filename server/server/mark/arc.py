@@ -169,11 +169,10 @@ def add_measured_arc_info(model_id: int, mysql_config: dict):
             data = [round(x, 3) for x in data]
             data.append(arc_id)
             data.append(model_id)
+            cursor.execute(query, tuple(data))
+            cnx.commit()
         except TypeError:
             continue
-    cursor.execute(query, tuple(data))
-    cnx.commit()
-
     cursor.close()
     cnx.close()
 
