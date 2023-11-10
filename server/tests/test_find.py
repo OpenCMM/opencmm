@@ -1,4 +1,5 @@
 from server import find
+from server.mark import pair
 import csv
 
 MYSQL_URL = "192.168.122.76"
@@ -46,25 +47,29 @@ def read_csv(filename):
 
 
 def test_identify_close_edge_process_2():
-    # process_id = 2
-    # model_id = 2
+    process_id = 2
+    model_id = 2
     # measured_edges = find.find_edges(process_id, MYSQL_CONFIG)
     # save_csv(f"tests/fixtures/csv/process_{process_id}/measured_edges.csv", sensor_data)
     # edge_data = find.get_edge_data(model_id, MYSQL_CONFIG)
     # save_csv(f"tests/fixtures/csv/process_{process_id}/measured_edges.csv", sensor_data)
 
-    measured_edges = read_csv("tests/fixtures/csv/process_2/measured_edges.csv")
-    edge_data = read_csv("tests/fixtures/csv/process_2/edge_data.csv")
+    measured_edges = read_csv(
+        f"tests/fixtures/csv/process_{process_id}/measured_edges.csv"
+    )
+    edge_data = read_csv(f"tests/fixtures/csv/process_{process_id}/edge_data.csv")
     _offset = (50.0, -65.0, 0.0)
     update_list = find.identify_close_edge(edge_data, measured_edges, _offset)
     edge_count = len(update_list)
     print(edge_count)
     assert edge_count > 0
+    find.add_measured_edge_coord(update_list, MYSQL_CONFIG)
+    pair.add_line_length(model_id, MYSQL_CONFIG)
 
 
 def test_identify_close_edge_process_3():
     process_id = 3
-    # model_id = 3
+    model_id = 3
     # sensor_data = find.get_sensor_data(process_id, MYSQL_CONFIG)
     # save_csv(f"tests/fixtures/csv/process_{process_id}/measured_edges.csv", sensor_data)
 
@@ -82,11 +87,13 @@ def test_identify_close_edge_process_3():
     edge_count = len(update_list)
     print(edge_count)
     assert edge_count > 0
+    find.add_measured_edge_coord(update_list, MYSQL_CONFIG)
+    pair.add_line_length(model_id, MYSQL_CONFIG)
 
 
 def test_identify_close_edge_process_4():
     process_id = 4
-    # model_id = 3
+    model_id = 3
     # measured_edges = find.find_edges(process_id, MYSQL_CONFIG)
     # save_csv(
     #     f"tests/fixtures/csv/process_{process_id}/measured_edges.csv", measured_edges
@@ -103,20 +110,26 @@ def test_identify_close_edge_process_4():
     edge_count = len(update_list)
     print(edge_count)
     assert edge_count > 0
+    find.add_measured_edge_coord(update_list, MYSQL_CONFIG)
+    pair.add_line_length(model_id, MYSQL_CONFIG)
 
 
 def test_identify_close_edge_process_5():
-    # process_id = 5
-    # model_id = 2
+    process_id = 5
+    model_id = 2
     # measured_edges = find.find_edges(process_id, MYSQL_CONFIG)
     # save_csv(f"tests/fixtures/csv/process_{process_id}/measured_edges.csv", sensor_data)
     # edge_data = find.get_edge_data(model_id, MYSQL_CONFIG)
     # save_csv(f"tests/fixtures/csv/process_{process_id}/measured_edges.csv", sensor_data)
 
-    measured_edges = read_csv("tests/fixtures/csv/process_5/measured_edges.csv")
-    edge_data = read_csv("tests/fixtures/csv/process_5/edge_data.csv")
+    measured_edges = read_csv(
+        f"tests/fixtures/csv/process_{process_id}/measured_edges.csv"
+    )
+    edge_data = read_csv(f"tests/fixtures/csv/process_{process_id}/edge_data.csv")
     _offset = (50.0, -65.0, 0.0)
     update_list = find.identify_close_edge(edge_data, measured_edges, _offset)
     edge_count = len(update_list)
     print(edge_count)
     assert edge_count > 0
+    find.add_measured_edge_coord(update_list, MYSQL_CONFIG)
+    pair.add_line_length(model_id, MYSQL_CONFIG)

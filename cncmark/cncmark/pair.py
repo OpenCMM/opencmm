@@ -62,11 +62,21 @@ def add_line_length(model_id: int, mysql_config: dict):
         total_measured_length = 0
         edges1 = get_edges_by_side_id(side1[6], mysql_config)
         edges2 = get_edges_by_side_id(side2[6], mysql_config)
-        total_measured_length += point_to_line_distance(edges1, edges2[0])
-        total_measured_length += point_to_line_distance(edges1, edges2[1])
-        total_measured_length += point_to_line_distance(edges2, edges1[0])
-        total_measured_length += point_to_line_distance(edges2, edges1[1])
-        measured_length = round(total_measured_length / 4, 3)
+        sample_size = 0
+        line_edge_list = [
+            [edges1, edges2[0]],
+            [edges1, edges2[1]],
+            [edges2, edges1[0]],
+            [edges2, edges1[1]],
+        ]
+        for [edges, edge] in line_edge_list:
+            # check if edge is not None
+            if edge and edge[0] and edge[1]:
+                sample_size += 1
+                total_measured_length += point_to_line_distance(edges, edge)
+        if sample_size == 0:
+            return
+        measured_length = round(total_measured_length / sample_size, 3)
         add_measured_length(pair_id, length, measured_length, mysql_config)
 
 
