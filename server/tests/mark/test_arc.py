@@ -11,4 +11,4 @@ def test_fit_circle():
 
 
 def test_add_measured_arc_info():
-    add_measured_arc_info(1, MYSQL_CONFIG)
+    add_measured_arc_info(2, MYSQL_CONFIG)
