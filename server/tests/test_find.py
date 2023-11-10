@@ -1,5 +1,5 @@
 from server import find
-from server.mark import pair
+from server.mark import pair, arc
 import csv
 from server.config import MYSQL_CONFIG
 
@@ -51,6 +51,7 @@ def test_identify_close_edge_process_2():
     assert edge_count > 0
     find.add_measured_edge_coord(update_list, MYSQL_CONFIG)
     pair.add_line_length(model_id, MYSQL_CONFIG)
+    arc.add_measured_arc_info(model_id, MYSQL_CONFIG)
 
 
 def test_identify_close_edge_process_3():
@@ -102,3 +103,4 @@ def test_identify_close_edge_process_5():
     assert edge_count > 0
     find.add_measured_edge_coord(update_list, MYSQL_CONFIG)
     pair.add_line_length(model_id, MYSQL_CONFIG)
+    arc.add_measured_arc_info(model_id, MYSQL_CONFIG)
