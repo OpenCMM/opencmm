@@ -13,7 +13,6 @@ MYSQL_CONFIG = dict(
     password="root",
 )
 
-
 def test_check_if_edge_is_found():
     assert find.check_if_edge_is_found("", "") is False
     assert find.check_if_edge_is_found("", 100.0) is True
@@ -49,10 +48,6 @@ def read_csv(filename):
 def test_identify_close_edge_process_2():
     process_id = 2
     model_id = 2
-    # measured_edges = find.find_edges(process_id, MYSQL_CONFIG)
-    # save_csv(f"tests/fixtures/csv/process_{process_id}/measured_edges.csv", sensor_data)
-    # edge_data = find.get_edge_data(model_id, MYSQL_CONFIG)
-    # save_csv(f"tests/fixtures/csv/process_{process_id}/measured_edges.csv", sensor_data)
 
     measured_edges = read_csv(
         f"tests/fixtures/csv/process_{process_id}/measured_edges.csv"
@@ -70,13 +65,6 @@ def test_identify_close_edge_process_2():
 def test_identify_close_edge_process_3():
     process_id = 3
     model_id = 3
-    # sensor_data = find.get_sensor_data(process_id, MYSQL_CONFIG)
-    # save_csv(f"tests/fixtures/csv/process_{process_id}/measured_edges.csv", sensor_data)
-
-    # measured_edges = find.find_edges(process_id, MYSQL_CONFIG)
-    # save_csv(f"tests/fixtures/csv/process_{process_id}/measured_edges.csv", measured_edges)
-    # edge_data = find.get_edge_data(model_id, MYSQL_CONFIG)
-    # save_csv(f"tests/fixtures/csv/process_{process_id}/edge_data.csv", edge_data)
 
     measured_edges = read_csv(
         f"tests/fixtures/csv/process_{process_id}/measured_edges.csv"
@@ -94,12 +82,6 @@ def test_identify_close_edge_process_3():
 def test_identify_close_edge_process_4():
     process_id = 4
     model_id = 3
-    # measured_edges = find.find_edges(process_id, MYSQL_CONFIG)
-    # save_csv(
-    #     f"tests/fixtures/csv/process_{process_id}/measured_edges.csv", measured_edges
-    # )
-    # edge_data = find.get_edge_data(model_id, MYSQL_CONFIG)
-    # save_csv(f"tests/fixtures/csv/process_{process_id}/edge_data.csv", edge_data)
 
     measured_edges = read_csv(
         f"tests/fixtures/csv/process_{process_id}/measured_edges.csv"
@@ -117,10 +99,6 @@ def test_identify_close_edge_process_4():
 def test_identify_close_edge_process_5():
     process_id = 5
     model_id = 2
-    # measured_edges = find.find_edges(process_id, MYSQL_CONFIG)
-    # save_csv(f"tests/fixtures/csv/process_{process_id}/measured_edges.csv", sensor_data)
-    # edge_data = find.get_edge_data(model_id, MYSQL_CONFIG)
-    # save_csv(f"tests/fixtures/csv/process_{process_id}/measured_edges.csv", sensor_data)
 
     measured_edges = read_csv(
         f"tests/fixtures/csv/process_{process_id}/measured_edges.csv"
