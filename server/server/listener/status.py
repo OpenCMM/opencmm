@@ -1,14 +1,22 @@
 import mysql.connector
+from server.model import get_model_data
 
 
 def start_measuring(model_id: int, mysql_config: dict, status: str):
+    model_data = get_model_data(model_id)
+    offset = (model_data[3], model_data[4], model_data[5])
     mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
     mysql_cur = mysql_conn.cursor()
+    query = (
+        "INSERT INTO process(model_id, status, x_offset, y_offset, z_offset) "
+        "VALUES (%s, %s, %s, %s, %s)"
+    )
     mysql_cur.execute(
-        "INSERT INTO process(model_id, status) VALUES (%s, %s)",
+        query,
         (
             model_id,
             status,
+            *offset,
         ),
     )
     processs_id = mysql_cur.lastrowid

@@ -1,9 +1,12 @@
 from server.mark.point import (
     get_shapes,
 )
-from server.mark import line, edge, arc
+from server.mark import line, edge, arc, pair
 from server.config import MODEL_PATH, GCODE_PATH
 from server import machine
+from server.model import (
+    update_offset,
+)
 
 
 def model_id_to_program_number(model_id: int):
@@ -18,22 +21,25 @@ def program_number_to_model_id(program_number: str):
         return None
 
 
+def process_new_3dmodel(stl_filename: str, model_id: int, mysql_config: dict):
+    lines, arcs = get_shapes(f"{MODEL_PATH}/{stl_filename}")
+    line.import_lines(model_id, lines, mysql_config)
+    arc.import_arcs(model_id, arcs, mysql_config)
+
+
 def process_stl(
     mysql_config: dict,
     model_id: int,
     stl_filename: str,
     measure_config: tuple,
     offset: tuple,
+    send_gcode: bool,
 ):
     (measure_length, measure_feedrate, move_feedrate) = measure_config
-    lines, arcs = get_shapes(f"{MODEL_PATH}/{stl_filename}")
-
-    remove_data_with_model_id(model_id, mysql_config)
-    line.import_lines(model_id, lines, mysql_config)
-    arc.import_arcs(model_id, arcs, mysql_config)
     path = edge.get_edge_path(
         mysql_config, model_id, measure_length, measure_feedrate, move_feedrate, offset
     )
+    update_offset(model_id, offset)
 
     # save gcode
     program_number = model_id_to_program_number(model_id)
@@ -43,8 +49,9 @@ def process_stl(
     edge.save_gcode(gcode, gcode_file_path)
 
     # send gcode to cnc machine
-    machine_info = machine.get_machines(mysql_config)[0]
-    machine.send_file_with_smbclient(machine_info, gcode_file_path)
+    if send_gcode:
+        machine_info = machine.get_machines(mysql_config)[0]
+        machine.send_file_with_smbclient(machine_info, gcode_file_path)
 
 
 def get_gcode_filename(model_filename: str):
@@ -55,3 +62,4 @@ def remove_data_with_model_id(model_id: int, mysql_config: dict):
     line.delete_sides_with_model_id(model_id, mysql_config)
     arc.delete_arcs_with_model_id(model_id, mysql_config)
     edge.delete_edges_with_model_id(model_id, mysql_config)
+    pair.delete_row_with_model_id(model_id, mysql_config)

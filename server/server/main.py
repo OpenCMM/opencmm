@@ -5,6 +5,7 @@ from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from websockets.exceptions import ConnectionClosedOK, ConnectionClosedError
 from server.prepare import (
+    process_new_3dmodel,
     process_stl,
     get_gcode_filename,
     model_id_to_program_number,
@@ -37,6 +38,7 @@ class JobInfo(BaseModel):
     x_offset: Optional[float] = 0.0
     y_offset: Optional[float] = 0.0
     z_offset: Optional[float] = 0.0
+    send_gcode: Optional[bool] = True
 
 
 class MeasurementConfig(BaseModel):
@@ -106,7 +108,7 @@ async def upload_3dmodel(file: UploadFile):
     _model_id = add_new_3dmodel(file.filename)
     with open(f"{MODEL_PATH}/{file.filename}", "wb") as buffer:
         buffer.write(await file.read())
-
+    process_new_3dmodel(file.filename, _model_id, MYSQL_CONFIG)
     return {"status": "ok", "model_id": _model_id}
 
 
@@ -162,6 +164,7 @@ async def setup_data(job_info: JobInfo):
         filename,
         (job_info.measure_length, job_info.measure_feedrate, job_info.move_feedrate),
         offset,
+        job_info.send_gcode,
     )
 
     return {"status": "ok"}
@@ -303,7 +306,7 @@ async def get_measurement_status(process_id: int):
 
 
 @app.get("/get_first_machine")
-async def get_first_machine():
+def get_first_machine():
     machines = machine.get_machines(MYSQL_CONFIG)
     if len(machines) == 0:
         first_machine = (1, "192.168.0.1", "username", "password", "share_folder")
@@ -313,7 +316,7 @@ async def get_first_machine():
 
 
 @app.post("/update_machine")
-async def update_machine(machine_info: machine.MachineInfo):
+def update_machine(machine_info: machine.MachineInfo):
     machine.update_machine(MYSQL_CONFIG, machine_info)
     return {"status": "ok"}
 

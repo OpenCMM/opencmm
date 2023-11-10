@@ -13,7 +13,8 @@ from server.config import (
     RECEIVE_DATA_TOPIC,
 )
 from . import status, hakaru, mt
-from cnceye.edge import find
+from server import find
+from server.model import get_model_data
 from server.mark import arc, pair
 import logging
 
@@ -113,10 +114,14 @@ def control_sensor_status(
                 return
 
             try:
-                measured_edges = find.find_edges(process_id, mysql_config=mysql_config)
+                measured_edges = find.find_edges(process_id, mysql_config)
                 edge_data = find.get_edge_data(model_id, mysql_config)
+                _model_data = get_model_data(model_id)
+                _offset = (_model_data[3], _model_data[4], _model_data[5])
                 # distance_threshold should be passed as an argument
-                update_list = find.identify_close_edge(edge_data, measured_edges)
+                update_list = find.identify_close_edge(
+                    edge_data, measured_edges, _offset
+                )
                 edge_count = len(update_list)
                 if edge_count == 0:
                     status.update_process_status(
@@ -131,7 +136,7 @@ def control_sensor_status(
                 _msg = f"{edge_count} edges found"
                 logger.info(_msg)
                 client.publish(LISTENER_LOG_TOPIC, _msg)
-                pair.add_line_length(mysql_config)
+                pair.add_line_length(model_id, mysql_config)
                 arc.add_measured_arc_info(model_id, mysql_config)
                 status.update_process_status(mysql_config, process_id, "done")
                 logger.info("done")

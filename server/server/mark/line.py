@@ -74,11 +74,11 @@ def import_sides(model_id: int, pairs: np.ndarray, pair_type: str, mysql_config:
     cnx.close()
 
 
-def get_sides(mysql_config: dict):
+def get_sides(mysql_config: dict, model_id: int):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
-    query = "SELECT * FROM side"
-    cursor.execute(query)
+    query = "SELECT * FROM side WHERE model_id = %s"
+    cursor.execute(query, (model_id,))
     sides = cursor.fetchall()
     cursor.close()
     cnx.close()
@@ -163,7 +163,7 @@ def get_side(side_id: int, mysql_config: dict):
 
 def import_lines(model_id: int, lines: np.ndarray, mysql_config: dict):
     import_parallel_lines(model_id, lines, mysql_config)
-    sides = get_sides(mysql_config)
+    sides = get_sides(mysql_config, model_id)
     import_edges_from_sides(sides, mysql_config)
 
 

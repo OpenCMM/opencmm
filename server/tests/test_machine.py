@@ -8,6 +8,16 @@ from server.machine import (
 )
 from server.config import MYSQL_CONFIG
 import pytest
+from fastapi.testclient import TestClient
+from server.main import app
+
+client = TestClient(app)
+
+
+def test_get_first_machine():
+    response = client.get("/get_first_machine")
+    assert response.status_code == 200
+    assert response.json() == [1, "192.168.0.1", "username", "password", "share_folder"]
 
 
 def test_get_machines():
