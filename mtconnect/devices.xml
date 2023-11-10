@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MTConnectDevices xmlns:m="urn:mtconnect.org:MTConnectDevices:1.3"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns="urn:mtconnect.org:MTConnectDevices:1.3"
+xsi:schemaLocation="urn:mtconnect.org:MTConnectDevices:1.3 https://schemas.mtconnect.org/schemas/MTConnectDevices_1.3.xsd">
+<Header assetBufferSize="1024" assetCount="0" creationTime="2017-11-06T16:20:00Z" version="1.3" instanceId="1234" sender="localhost" bufferSize="2048"/>
+  <Devices>
+    <Device id="MITSUBISHI1_dev" uuid="MITSUBISHI1" name="MITSUBISHI1">
+	  <Description manufacturer="MitsubishiElectric" serialNumber="MITSUBISHI1"></Description>
+      <DataItems>
+        <DataItem type="AVAILABILITY" id="a1" name="avail" category="EVENT" />
+        <DataItem type="ASSET_CHANGED" id="asset_chg1" name="asset_chg1" category="EVENT" />
+        <DataItem type="ASSET_REMOVED" id="asset_rem1" name="asset_rem1" category="EVENT" />
+		<DataItem category="EVENT" id="ModelType_535E85A7"
+					name="ModelType"
+					type="MESSAGE" />
+      </DataItems>
+      <Components>
+        <Axes name='axes' id='axes_4'>
+          <Components>
+            <Linear name='X' id='X_5'>
+              <DataItems>
+                <DataItem type='POSITION' category='SAMPLE' id='X_6' name='Xact' subType='ACTUAL' units='MILLIMETER' nativeUnits='MILLIMETER'/>
+                <DataItem type='LOAD' category='SAMPLE' id='X_7' name='Xload' units='PERCENT' nativeUnits='PERCENT'/>
+              </DataItems>
+            </Linear>
+            <Linear name='Y' id='Y_11'>
+              <DataItems>
+                <DataItem type='POSITION' category='SAMPLE' id='Y_12' name='Yact' subType='ACTUAL' units='MILLIMETER' nativeUnits='MILLIMETER'/>
+                <DataItem type='LOAD' category='SAMPLE' id='Y_13' name='Yload' units='PERCENT' nativeUnits='PERCENT'/>
+              </DataItems>
+            </Linear>
+            <Linear name='Z' id='Z_17'>
+              <DataItems>
+                <DataItem type='POSITION' category='SAMPLE' id='Z_18' name='Zact' subType='ACTUAL' units='MILLIMETER' nativeUnits='MILLIMETER'/>
+                <DataItem type='LOAD' category='SAMPLE' id='Z_19' name='Zload' units='PERCENT' nativeUnits='PERCENT'/>
+              </DataItems>
+            </Linear>
+            <Rotary name='C5' nativeName='C' id='C5_23'>
+              <DataItems>
+                <DataItem type='ROTARY_MODE' category='EVENT' id='C5mode' name='C5mode'/>
+                <DataItem type='LOAD' category='SAMPLE' id='C5load' name='C5load' units='PERCENT' nativeUnits='PERCENT'/>
+                <DataItem type='ROTARY_VELOCITY' category='SAMPLE' id='C5speed' name='C5speed' units='REVOLUTION/MINUTE' nativeUnits='REVOLUTION/MINUTE' subType="ACTUAL"/>
+				<DataItem type="ROTARY_VELOCITY_OVERRIDE" name="spindle_override" category="EVENT" id="spindleoverride5"/>
+              </DataItems>
+            </Rotary>
+          </Components>
+        </Axes>
+		<Controller name="Controller" id="Lct1">
+		  <DataItems>
+			<DataItem type="ACCUMULATED_TIME" name="p1time" category="EVENT" id="p1time"/>
+			<DataItem type="ACCELERATION" name="acceleration" category="SAMPLE" id="acceleration2" units="MILLIMETER/SECOND^2" nativeUnits="MILLIMETER/SECOND^2"/>
+			<DataItem type="ACCUMULATED_TIME" name="power_on_time" category="SAMPLE" id="power_on_time1"/>
+			<DataItem type="CLOCK_TIME" name="clock_time" category="SAMPLE" id="clock_time1"/>
+			<DataItem type="CONTROLLER_MODE" name="mode" category="EVENT" id="mode1"/>
+            <DataItem type="ACTUATOR_STATE" name="actuator_state" category="EVENT" id="actuator_state1"/>
+            <DataItem type="EMERGENCY_STOP" name="estop" category="EVENT" id="estop"/>
+			<DataItem type="PART_COUNT" name="part_count" category="EVENT" id="part_count1"/>
+			<DataItem type="EXECUTION" name="execution1" category="EVENT" id="execution1"/>
+			<DataItem type="PROGRAM" name="program" category="EVENT" id="program1"/>
+			<DataItem type="PROGRAM_EDIT" name="program_edit" category="EVENT" id="programedit1"/>
+			<DataItem type="PROGRAM_EDIT_NAME" name="program_edit_name" category="EVENT" id="programeditname1"/>
+			<DataItem type="PROGRAM_COMMENT" name="program_comment" category="EVENT" id="programcomment1"/>
+			<DataItem type="PROGRAM_HEADER" name="program_header" category="EVENT" id="programheader1"/>
+			<DataItem type="AXIS_FEEDRATE" name="jog_override" category="EVENT" id="jogoverride1" subType="JOG"/>
+			<DataItem type="AXIS_FEEDRATE_OVERRIDE" name="rapid_override" category="EVENT" id="rapidoverride1" subType="RAPID"/>
+			<DataItem type="AXIS_INTERLOCK" name="axis_interlock" category="EVENT" id="axisinterlock1"/>
+			<DataItem type="AXIS_STATE" name="axis_state" category="EVENT" id="axisstate1"/>
+			<DataItem type="ROTARY_VELOCITY_OVERRIDE" name="spindle_rotating" category="EVENT" id="spindlerotating5"/>
+			<DataItem type="AXIS_FEEDRATE_OVERRIDE" name="cutting" category="EVENT" id="cutting1"/>
+			<DataItem type="TOOL_NUMBER" name="tool_number" category="EVENT" id="toolnumber1"/>
+			<DataItem type="DIRECTION" name="operation" category="EVENT" id="operationmode1"/>
+			<DataItem type="DIRECTION" name="direction" category="EVENT" id="direction1"/>
+			<DataItem type='POWER_STATE' category='EVENT' id='power_state_' />
+			<DataItem type='CONTROLLER_MODE' category='EVENT' id='dryrun1' name='dryrun' />
+			<DataItem type='MOTION_PROGRAM' category='CONDITION' id='motion1' name='motion1' />
+			<DataItem type='MOTION_PROGRAM' category='CONDITION' id='motion2' name='motion2' />
+			<DataItem type='MOTION_PROGRAM' category='CONDITION' id='motion3' name='motion3' />
+			<DataItem type='MOTION_PROGRAM' category='CONDITION' id='motion4' name='motion4' />
+			<DataItem type='LOGIC_PROGRAM' category='CONDITION' id='logic1' name='logic1' />
+			<DataItem type='LOGIC_PROGRAM' category='CONDITION' id='logic2' name='logic2' />
+			<DataItem type='LOGIC_PROGRAM' category='CONDITION' id='logic3' name='logic3' />
+			<DataItem type='LOGIC_PROGRAM' category='CONDITION' id='logic4' name='logic4' />
+			<DataItem type='EXECUTION' category='EVENT' id='optionalstop1' name='optional_stop' />
+			<DataItem type='FUNCTIONAL_MODE' category='EVENT' id='functionalmode1' name='functionalmode1' />
+			<DataItem type='SYSTEM' category='EVENT' id='reset1' name='reset1' />
+			<DataItem type='ACTIVE_AXES' category='EVENT' id='axes1' name='axes' />
+			<DataItem type='DOOR_STATE' category='EVENT' id='doorstate1' name='door' />
+			<DataItem type='END_OF_BAR' category='EVENT' id='endofbar1' name='endofbar1' />
+		  </DataItems>
+		  <Components>
+		    <Path id="lp1" name="path">
+				<DataItems>
+					<DataItem type="PATH_FEEDRATE" subType="ACTUAL" name="p1Fact" category="SAMPLE" id="path_feedrate1" units="MILLIMETER/SECOND" nativeUnits="MILLIMETER/MINUTE"/>
+					<DataItem type="PATH_FEEDRATE" subType="COMMANDED" name="p1Fcom" category="SAMPLE" id="path_feedrate2" units="MILLIMETER/SECOND" nativeUnits="MILLIMETER/MINUTE"/>
+					<DataItem type="PATH_MODE" name="p1mode" category="EVENT" id="path_mode1"/>
+					<DataItem type="BLOCK" name="block" category="EVENT" id="block1"/>
+					<DataItem type="BLOCK" name="block_delete" category="EVENT" id="blockdelete1"/>
+					<DataItem type="LINE" name="p1linelabel" category="EVENT" id="line1"/>
+				</DataItems>
+		    </Path>
+		  </Components>
+		</Controller>
+		<Systems id="systems" name="systems">
+		  <Components>
+			<Electric name="electric" id="elec">
+				<DataItems>
+					<DataItem type="SYSTEM" category="CONDITION" id="electric_cond"/>
+				</DataItems>
+			</Electric>
+			<Hydraulic name="hydraulic" id="hydraulic">
+				<DataItems>
+					<DataItem type="SYSTEM" category="CONDITION" id="hydra_cond"/>
+				</DataItems>
+			</Hydraulic>
+			<Coolant name="coolant" id="coolant1">
+				<DataItems>
+					<DataItem type="SYSTEM" category="EVENT" id="coolant"/>
+					<DataItem id="cooltemp" type="TEMPERATURE" category="SAMPLE" units="CELSIUS" />
+					<DataItem id="CONCENTRATION" type="CONCENTRATION" category="SAMPLE" units="PERCENT"/>
+				</DataItems>
+			</Coolant>
+			<Pneumatic name="pneumatic" id="pneumatic">
+				<DataItems>
+					<DataItem type="SYSTEM" category="CONDITION" id="pneu_cond"/>
+				</DataItems>
+			</Pneumatic>
+			<Lubrication id="lubrication" name="lubrication">
+				<DataItems>
+					<DataItem type="SYSTEM" category="CONDITION" id="lubrication_cond"/>
+					<DataItem id="lubelevel" type="LEVEL" category="EVENT" units="PERCENT"/>
+				</DataItems>
+			</Lubrication> 
+		  </Components>
+	    </Systems>
+      </Components>
+    </Device>
+  </Devices>
+</MTConnectDevices>
