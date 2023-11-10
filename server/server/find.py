@@ -2,27 +2,23 @@ import mysql.connector
 from mysql.connector.errors import IntegrityError
 
 
-def find_edges(process_id: int, mysql_config: dict, minimal_diff: float = 5.0):
+def find_edges(process_id: int, mysql_config: dict):
+    edges = get_sensor_data(process_id, mysql_config)
+    if len(edges) > 0:
+        # remove the starting point
+        edges.pop(0)
+    return edges
+
+
+def get_sensor_data(process_id: int, mysql_config: dict):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     query = "SELECT * FROM sensor WHERE process_id = %s"
     cursor.execute(query, (process_id,))
     rows = cursor.fetchall()
-    previous_distance = ""
-    edges = []
-    for row in rows:
-        # x, y, z, distance
-        distance = row[5]
-        if check_if_edge_is_found(distance, previous_distance, minimal_diff):
-            edges.append(row)
-        previous_distance = distance
-
-    # remove the starting point
-    edges.pop(0)
-
     cursor.close()
     cnx.close()
-    return edges
+    return rows
 
 
 def check_if_edge_is_found(
