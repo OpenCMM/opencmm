@@ -1,17 +1,7 @@
 from server import find
 from server.mark import pair
 import csv
-
-MYSQL_URL = "192.168.122.76"
-# MYSQL_URL = "192.168.0.19"
-MYSQL_PORT = "3306"
-
-MYSQL_CONFIG = dict(
-    host=MYSQL_URL,
-    port=MYSQL_PORT,
-    user="root",
-    password="root",
-)
+from server.config import MYSQL_CONFIG
 
 
 def test_check_if_edge_is_found():
