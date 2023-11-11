@@ -48,8 +48,8 @@ xsi:schemaLocation="urn:mtconnect.org:MTConnectDevices:1.3 https://schemas.mtcon
         </Axes>
 		<Controller name="Controller" id="Lct1">
 		  <DataItems>
-			<DataItem type="ACCUMULATED_TIME" name="p1time" category="EVENT" id="p1time"/>
-			<DataItem type="ACCELERATION" name="acceleration" category="SAMPLE" id="acceleration2" units="MILLIMETER/SECOND^2" nativeUnits="MILLIMETER/SECOND^2"/>
+			<DataItem type="ACCUMULATED_TIME" name="p1time" category="EVENT" id="p1time1"/>
+			<DataItem type="ACCELERATION" name="acceleration" category="SAMPLE" id="acceleration1" units="MILLIMETER/SECOND^2" nativeUnits="MILLIMETER/SECOND^2"/>
 			<DataItem type="ACCUMULATED_TIME" name="power_on_time" category="SAMPLE" id="power_on_time1"/>
 			<DataItem type="CLOCK_TIME" name="clock_time" category="SAMPLE" id="clock_time1"/>
 			<DataItem type="CONTROLLER_MODE" name="mode" category="EVENT" id="mode1"/>
@@ -65,12 +65,10 @@ xsi:schemaLocation="urn:mtconnect.org:MTConnectDevices:1.3 https://schemas.mtcon
 			<DataItem type="AXIS_FEEDRATE" name="jog_override" category="EVENT" id="jogoverride1" subType="JOG"/>
 			<DataItem type="AXIS_FEEDRATE_OVERRIDE" name="rapid_override" category="EVENT" id="rapidoverride1" subType="RAPID"/>
 			<DataItem type="AXIS_INTERLOCK" name="axis_interlock" category="EVENT" id="axisinterlock1"/>
-			<DataItem type="AXIS_STATE" name="axis_state" category="EVENT" id="axisstate1"/>
 			<DataItem type="ROTARY_VELOCITY_OVERRIDE" name="spindle_rotating" category="EVENT" id="spindlerotating5"/>
 			<DataItem type="AXIS_FEEDRATE_OVERRIDE" name="cutting" category="EVENT" id="cutting1"/>
 			<DataItem type="TOOL_NUMBER" name="tool_number" category="EVENT" id="toolnumber1"/>
 			<DataItem type="DIRECTION" name="operation" category="EVENT" id="operationmode1"/>
-			<DataItem type="DIRECTION" name="direction" category="EVENT" id="direction1"/>
 			<DataItem type='POWER_STATE' category='EVENT' id='power_state_' />
 			<DataItem type='CONTROLLER_MODE' category='EVENT' id='dryrun1' name='dryrun' />
 			<DataItem type='MOTION_PROGRAM' category='CONDITION' id='motion1' name='motion1' />
@@ -85,8 +83,8 @@ xsi:schemaLocation="urn:mtconnect.org:MTConnectDevices:1.3 https://schemas.mtcon
 			<DataItem type='FUNCTIONAL_MODE' category='EVENT' id='functionalmode1' name='functionalmode1' />
 			<DataItem type='SYSTEM' category='EVENT' id='reset1' name='reset1' />
 			<DataItem type='ACTIVE_AXES' category='EVENT' id='axes1' name='axes' />
-			<DataItem type='DOOR_STATE' category='EVENT' id='doorstate1' name='door' />
-			<DataItem type='END_OF_BAR' category='EVENT' id='endofbar1' name='endofbar1' />
+			<DataItem type='DOOR_STATE' category='EVENT' id='doorstate' name='door' />
+			<DataItem type='END_OF_BAR' category='CONDITION' id='endofbar1' name='endofbar1' />
 		  </DataItems>
 		  <Components>
 		    <Path id="lp1" name="path">

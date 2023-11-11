@@ -8,8 +8,8 @@ CI_MYSQL_CONFIG = dict(
     password="root",
 )
 
-MYSQL_URL = os.getenv("MYSQL_URL", "192.168.0.19")
-# MYSQL_URL = os.getenv("MYSQL_URL", "192.168.122.230")
+# MYSQL_URL = os.getenv("MYSQL_URL", "192.168.0.19")
+MYSQL_URL = os.getenv("MYSQL_URL", "192.168.122.76")
 MYSQL_PORT = os.getenv("MYSQL_PORT", "3306")
 
 MYSQL_CONFIG = dict(
