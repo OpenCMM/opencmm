@@ -1,5 +1,6 @@
 import mysql.connector
 from server.config import MYSQL_CONFIG
+import numpy as np
 
 
 def fetch_edges(model_id: int):
@@ -16,6 +17,35 @@ def fetch_edges(model_id: int):
     cnx.close()
 
     return points
+
+
+def fetch_unique_points(process_id: int):
+    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+    cursor = cnx.cursor()
+
+    query = """
+		SELECT id, x, y, z, distance
+		FROM sensor WHERE process_id = %s
+	"""
+    cursor.execute(query, (process_id,))
+    points = cursor.fetchall()
+    cursor.close()
+    cnx.close()
+
+    np_points = np.array(points)
+    # get rows with unique x, y, z
+    unique_points = np.unique(np_points[:, 1:4], axis=0)
+    unique_points_with_distance = []
+    for point in unique_points:
+        distance = np_points[
+            np.where(
+                (np_points[:, 1] == point[0])
+                & (np_points[:, 2] == point[1])
+                & (np_points[:, 3] == point[2])
+            )
+        ][0][4]
+        unique_points_with_distance.append([point[0], point[1], point[2], distance])
+    return unique_points_with_distance
 
 
 def fetch_pairs(model_id: int):

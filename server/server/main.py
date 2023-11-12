@@ -282,6 +282,17 @@ async def get_result_edges(model_id: int):
     return {"edges": edges}
 
 
+@app.get("/result/debug/points/{process_id}")
+def get_debug_points(process_id: int):
+    points = result.fetch_unique_points(process_id)
+    return {"points": points}
+
+
+@app.get("/get/model/table/data/{model_id}")
+def get_model_table_data(model_id: int):
+    return get_model_data(model_id)
+
+
 @app.get("/result/lines/{model_id}")
 async def get_result_lines(model_id: int):
     lines = result.fetch_lines(model_id)
