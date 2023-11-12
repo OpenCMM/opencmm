@@ -87,8 +87,12 @@ def import_sensor_data(mysql_config: dict):
     mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
     mysql_cur = mysql_conn.cursor()
 
+    query = (
+        "INSERT INTO sensor(process_id, timestamp, distance) "
+        "VALUES (%s, FROM_UNIXTIME(%s), %s)"
+    )
     mysql_cur.executemany(
-        "INSERT INTO sensor(process_id, timestamp, distance) VALUES (%s, FROM_UNIXTIME(%s), %s)",
+        query,
         sensor_data_list,
     )
     mysql_conn.commit()

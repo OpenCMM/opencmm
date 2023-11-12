@@ -1,3 +1,4 @@
+from server.type.measurement import MeasurementConfig, MeasurementConfigWithProgram
 import uvicorn
 import os
 from fastapi import FastAPI, UploadFile, HTTPException, BackgroundTasks, WebSocket
@@ -14,7 +15,12 @@ from server.prepare import (
 from pydantic import BaseModel
 from typing import Optional
 from server import result
-from server.listener import listener_start, status, hakaru
+from server.listener import (
+    listener_start,
+    update_data_after_measurement,
+    status,
+    hakaru,
+)
 from server.config import MYSQL_CONFIG, MODEL_PATH
 from server.model import (
     get_3dmodel_data,
@@ -39,20 +45,6 @@ class JobInfo(BaseModel):
     y_offset: Optional[float] = 0.0
     z_offset: Optional[float] = 0.0
     send_gcode: Optional[bool] = True
-
-
-class MeasurementConfig(BaseModel):
-    three_d_model_id: int
-    mtconnect_interval: int
-    interval: int
-    threshold: int
-
-
-class MeasurementConfigWithProgram(BaseModel):
-    program_name: str
-    mtconnect_interval: int
-    interval: int
-    threshold: int
 
 
 app = FastAPI()
@@ -243,6 +235,23 @@ async def start_measurement_with_program_name(
         (_conf.interval, _conf.threshold),
     )
     return {"status": "ok", "model_id": model_id}
+
+
+@app.post("/estimate/measurement")
+async def estimate_measurement(
+    model_id: int, process_id: int, background_tasks: BackgroundTasks
+):
+    _process = status.get_process_status(MYSQL_CONFIG, process_id)
+    if _process is not None:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid process_id",
+        )
+
+    # add process status check
+
+    update_data_after_measurement(model_id, process_id, MYSQL_CONFIG)
+    return {"status": "ok", "process_id": process_id}
 
 
 @app.get("/get_model_id/from/program_name/{program_name}")
