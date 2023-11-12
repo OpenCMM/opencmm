@@ -96,7 +96,9 @@ def import_sensor_data(mysql_config: dict):
     mysql_conn.close()
 
 
-def listen_sensor(mqtt_url: str, process_id: int, mysql_config: dict, streaming_config: tuple):
+def listen_sensor(
+    mqtt_url: str, process_id: int, mysql_config: dict, streaming_config: tuple
+):
     global sensor_data_list
     client = mqtt.Client()
     client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)

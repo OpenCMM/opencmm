@@ -1,10 +1,6 @@
 import paho.mqtt.client as mqtt
-import requests
-import xml.etree.ElementTree as ET
-import mysql.connector
 import threading
 from server.config import (
-    CONTROL_SENSOR_TOPIC,
     LISTENER_LOG_TOPIC,
     MQTT_BROKER_URL,
     MQTT_PASSWORD,
@@ -31,7 +27,6 @@ def control_sensor_status(
     mysql_config: dict,
     process_id: int,
     model_id: int,
-    streaming_config: tuple,
 ):
     global done
 
@@ -41,11 +36,6 @@ def control_sensor_status(
     def on_connect(client, userdata, flags, rc):
         logger.info("Connected with result code " + str(rc))
         logger.info("control_sensor_status(): connected")
-
-        # send config to sensor
-        (interval, threshold) = streaming_config
-        client.publish(CONTROL_SENSOR_TOPIC, hakaru.send_config(interval, threshold))
-        logger.info("sent config to sensor")
 
         client.subscribe(PROCESS_CONTROL_TOPIC)
 
@@ -65,7 +55,7 @@ def control_sensor_status(
             done = True
 
             try:
-                combine_data(mysql_config)
+                # combine_data(mysql_config)
                 _status = "data combined"
                 logger.info(_status)
                 client.publish(LISTENER_LOG_TOPIC, _status)
@@ -118,87 +108,10 @@ def control_sensor_status(
     client.loop_start()
 
 
-def combine_data(mysql_config: dict):
-    # Perform a bulk insert
-    mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
-    mysql_cur = mysql_conn.cursor()
-
-    query = (
-        "INSERT INTO mtconnect(process_id, timestamp, "
-        "x, y, z, line, feedrate) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-    )
-    mysql_cur.executemany(
-        query,
-        mt_data_list,
-    )
-    mysql_conn.commit()
-
-    mysql_cur.close()
-    mysql_conn.close()
-
-
-def mtconnect_streaming_reader(
-    mtconnect_config: tuple, mysql_config: dict, process_id: int
-):
-    (url, interval) = mtconnect_config
-    endpoint = f"{url}&interval={interval}"
-    try:
-        response = requests.get(endpoint, stream=True)
-        xml_buffer = ""
-        if response.status_code == 200:
-            for chunk in response.iter_content(chunk_size=chunk_size):
-                if not chunk:
-                    continue
-                if done:
-                    break
-
-                raw_data = chunk.decode("utf-8")
-                # print(raw_data)
-                if mt.is_first_chunk(raw_data):
-                    # beginning of xml
-                    xml_string = mt.remove_http_response_header(raw_data)
-                    xml_buffer = xml_string
-
-                    if mt.is_last_chunk(raw_data):
-                        try:
-                            xyz = mt.get_coordinates(xml_buffer)[:3]
-                        except ET.ParseError:
-                            pass
-                else:
-                    xml_buffer += raw_data
-                    if not mt.is_last_chunk(raw_data):
-                        continue
-
-                    # full xml data received
-                    try:
-                        xyz = mt.get_coordinates(xml_buffer)[:3]
-                    except ET.ParseError:
-                        err_msg = "ParseError"
-                        logger.warning(err_msg)
-                        status.update_process_status(
-                            mysql_config, process_id, err_msg, err_msg
-                        )
-
-        else:
-            err_msg = f"Error: {response.status_code}"
-            logger.warning(err_msg)
-            status.update_process_status(mysql_config, process_id, err_msg, err_msg)
-
-    except requests.ConnectionError:
-        err_msg = "Connection to the MTConnect agent was lost."
-        logger.warning(err_msg)
-        status.update_process_status(mysql_config, process_id, err_msg, err_msg)
-    except KeyboardInterrupt:
-        _msg = "Streaming stopped by user."
-        logger.info(_msg)
-        status.update_process_status(mysql_config, process_id, _msg)
-
-
 def listener_start(
     mysql_config: dict,
     mtconnect_config: tuple,
     process_id: int,
-    model_id: int,
     streaming_config: tuple,
 ):
     thread1 = threading.Thread(
@@ -208,11 +121,12 @@ def listener_start(
                 MQTT_BROKER_URL,
                 process_id,
                 mysql_config,
+                streaming_config,
             )
         ),
     )
     thread2 = threading.Thread(
-        target=mtconnect_streaming_reader,
+        target=mt.mtconnect_streaming_reader,
         args=(
             (
                 mtconnect_config,
@@ -222,16 +136,8 @@ def listener_start(
         ),
     )
     thread3 = threading.Thread(
-        target=control_sensor_status,
-        args=(
-            (
-                MQTT_BROKER_URL,
-                mysql_config,
-                process_id,
-                model_id,
-                streaming_config,
-            )
-        ),
+        target=mt.stop_mtconnect_reader,
+        args=((MQTT_BROKER_URL,)),
     )
 
     # Start the threads

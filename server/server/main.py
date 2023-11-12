@@ -212,7 +212,6 @@ async def start_measurement(
         MYSQL_CONFIG,
         (mtconnect_url, _conf.mtconnect_interval),
         process_id,
-        _conf.three_d_model_id,
         (_conf.interval, _conf.threshold),
     )
     return {"status": "ok"}
@@ -241,7 +240,6 @@ async def start_measurement_with_program_name(
         MYSQL_CONFIG,
         (mtconnect_url, _conf.mtconnect_interval),
         process_id,
-        model_id,
         (_conf.interval, _conf.threshold),
     )
     return {"status": "ok", "model_id": model_id}
