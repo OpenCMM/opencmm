@@ -16,6 +16,9 @@ def test_ping_sensor():
 
 @pytest.mark.skip(reason="No MQTT broker running")
 def test_listen_sensor():
+    interval = 100
+    threshold = 1000
+    streaming_config = (interval, threshold)
     process_id = 1
-    listen_sensor(MQTT_BROKER_URL, process_id, MYSQL_CONFIG)
+    listen_sensor(MQTT_BROKER_URL, process_id, MYSQL_CONFIG, streaming_config)
     sleep(20)

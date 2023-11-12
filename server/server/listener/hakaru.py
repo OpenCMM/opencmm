@@ -3,6 +3,7 @@ import paho.mqtt.client as mqtt
 from time import sleep
 import mysql.connector
 from server.config import (
+    CONTROL_SENSOR_TOPIC,
     LISTENER_LOG_TOPIC,
     MQTT_BROKER_URL,
     MQTT_USERNAME,
@@ -95,7 +96,7 @@ def import_sensor_data(mysql_config: dict):
     mysql_conn.close()
 
 
-def listen_sensor(mqtt_url: str, process_id: int, mysql_config: dict):
+def listen_sensor(mqtt_url: str, process_id: int, mysql_config: dict, streaming_config: tuple):
     global sensor_data_list
     client = mqtt.Client()
     client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
@@ -105,6 +106,11 @@ def listen_sensor(mqtt_url: str, process_id: int, mysql_config: dict):
         logger.info("receive_sensor_data(): connected")
         client.subscribe(RECEIVE_DATA_TOPIC)
         client.subscribe(PROCESS_CONTROL_TOPIC)
+
+        # send config to sensor
+        (interval, threshold) = streaming_config
+        client.publish(CONTROL_SENSOR_TOPIC, send_config(interval, threshold))
+        logger.info("sent config to sensor")
 
     client.on_connect = on_connect
 
