@@ -54,7 +54,7 @@ def stop_mtconnect_reader(
     client.loop_start()
 
 
-def import_mtconnect_data(mysql_config: dict):
+def import_mtconnect_data(mysql_config: dict, _mt_data_list: list):
     # Perform a bulk insert
     mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
     mysql_cur = mysql_conn.cursor()
@@ -65,10 +65,9 @@ def import_mtconnect_data(mysql_config: dict):
     )
     mysql_cur.executemany(
         query,
-        mt_data_list,
+        _mt_data_list,
     )
     mysql_conn.commit()
-
     mysql_cur.close()
     mysql_conn.close()
 
@@ -88,7 +87,7 @@ def mtconnect_streaming_reader(
                 if not chunk:
                     continue
                 if done:
-                    import_mtconnect_data(mysql_config)
+                    import_mtconnect_data(mysql_config, mt_data_list)
                     break
 
                 raw_data = chunk.decode("utf-8")
@@ -99,7 +98,9 @@ def mtconnect_streaming_reader(
 
                     if is_last_chunk(raw_data):
                         try:
-                            _current_row = mtconnect_table_row_data(xml_buffer, process_id)
+                            _current_row = mtconnect_table_row_data(
+                                xml_buffer, process_id
+                            )
                             if current_row is None or current_row != _current_row:
                                 mt_data_list.append(_current_row)
                                 current_row = _current_row

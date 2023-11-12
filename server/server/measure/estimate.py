@@ -1,12 +1,11 @@
 import paho.mqtt.client as mqtt
-import threading
+from server.listener import status
 from server.config import (
     LISTENER_LOG_TOPIC,
     MQTT_BROKER_URL,
     MQTT_PASSWORD,
     MQTT_USERNAME,
 )
-from . import status, hakaru, mt
 from server import find
 from server.model import get_model_data
 from server.mark import arc, pair
@@ -73,46 +72,3 @@ def update_data_after_measurement(
     client.on_message = on_message
     client.connect(MQTT_BROKER_URL, 1883, 60)
     client.loop_start()
-
-
-def listener_start(
-    mysql_config: dict,
-    mtconnect_config: tuple,
-    process_id: int,
-    streaming_config: tuple,
-):
-    thread1 = threading.Thread(
-        target=hakaru.listen_sensor,
-        args=(
-            (
-                MQTT_BROKER_URL,
-                process_id,
-                mysql_config,
-                streaming_config,
-            )
-        ),
-    )
-    thread2 = threading.Thread(
-        target=mt.mtconnect_streaming_reader,
-        args=(
-            (
-                mtconnect_config,
-                mysql_config,
-                process_id,
-            )
-        ),
-    )
-    thread3 = threading.Thread(
-        target=mt.stop_mtconnect_reader,
-        args=((MQTT_BROKER_URL,)),
-    )
-
-    # Start the threads
-    thread1.start()
-    thread2.start()
-    thread3.start()
-
-    # Join the threads (optional, to wait for them to finish)
-    thread1.join()
-    thread2.join()
-    thread3.join()
