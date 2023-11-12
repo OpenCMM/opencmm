@@ -78,6 +78,7 @@ def mtconnect_streaming_reader(
 ):
     (url, interval) = mtconnect_config
     endpoint = f"{url}&interval={interval}"
+    current_row = None
 
     try:
         response = requests.get(endpoint, stream=True)
@@ -98,9 +99,10 @@ def mtconnect_streaming_reader(
 
                     if is_last_chunk(raw_data):
                         try:
-                            mt_data_list.append(
-                                mtconnect_table_row_data(xml_buffer, process_id)
-                            )
+                            _current_row = mtconnect_table_row_data(xml_buffer, process_id)
+                            if current_row is None or current_row != _current_row:
+                                mt_data_list.append(_current_row)
+                                current_row = _current_row
                         except ET.ParseError:
                             pass
                 else:
@@ -110,9 +112,10 @@ def mtconnect_streaming_reader(
 
                     # full xml data received
                     try:
-                        mt_data_list.append(
-                            mtconnect_table_row_data(xml_buffer, process_id)
-                        )
+                        _current_row = mtconnect_table_row_data(xml_buffer, process_id)
+                        if current_row is None or current_row != _current_row:
+                            mt_data_list.append(_current_row)
+                            current_row = _current_row
                     except ET.ParseError:
                         err_msg = "ParseError"
                         logger.warning(err_msg)
