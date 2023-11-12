@@ -67,12 +67,22 @@ CREATE TABLE IF NOT EXISTS `pair` (
 
 CREATE TABLE IF NOT EXISTS `sensor` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `process_id` int(11) unsigned NOT NULL,
+  `timestamp` TIMESTAMP(3) NOT NULL,
+  `distance` FLOAT NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
+
+
+CREATE TABLE IF NOT EXISTS `mtconnect` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `process_id` int(11) unsigned NOT NULL,
+  `timestamp` TIMESTAMP(3) NOT NULL,
   `x` FLOAT NOT NULL,
   `y` FLOAT NOT NULL,
   `z` FLOAT NOT NULL,
-  `process_id` int(11) unsigned NOT NULL,
-  `distance` FLOAT NOT NULL,
-  `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `line` varchar(255) NOT NULL, 
+  `feedrate` FLOAT NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
 

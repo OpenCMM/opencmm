@@ -10,7 +10,6 @@ from server.config import (
     MQTT_PASSWORD,
     MQTT_USERNAME,
     PROCESS_CONTROL_TOPIC,
-    RECEIVE_DATA_TOPIC,
 )
 from . import status, hakaru, mt
 from server import find
@@ -23,43 +22,8 @@ logger = logging.getLogger(__name__)
 
 
 chunk_size = 1024
-xyz = None
 done = False
-data_to_insert = []
-
-
-def listen_sensor(mqtt_url: str, process_id: int):
-    global data_to_insert
-    client = mqtt.Client()
-    client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
-
-    def on_connect(client, userdata, flags, rc):
-        logger.info("Connected with result code " + str(rc))
-        logger.info("receive_sensor_data(): connected")
-        client.subscribe(RECEIVE_DATA_TOPIC)
-        client.subscribe(PROCESS_CONTROL_TOPIC)
-
-    client.on_connect = on_connect
-
-    def on_message(client, userdata, msg):
-        if msg.topic == RECEIVE_DATA_TOPIC:
-            distance = float(msg.payload.decode("utf-8"))
-            if xyz is not None:
-                (x, y, z) = xyz
-                data_to_insert.append((x, y, z, process_id, distance))
-
-        elif (
-            msg.topic == PROCESS_CONTROL_TOPIC and msg.payload.decode("utf-8") == "stop"
-        ):
-            _msg = "stop listening sensor data"
-            logger.info(_msg)
-            client.publish(LISTENER_LOG_TOPIC, _msg)
-            client.unsubscribe(PROCESS_CONTROL_TOPIC)
-            client.disconnect()
-
-    client.on_message = on_message
-    client.connect(mqtt_url, 1883, 60)
-    client.loop_start()
+mt_data_list = []
 
 
 def control_sensor_status(
@@ -159,11 +123,16 @@ def combine_data(mysql_config: dict):
     mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
     mysql_cur = mysql_conn.cursor()
 
+    query = (
+        "INSERT INTO mtconnect(process_id, timestamp, "
+        "x, y, z, line, feedrate) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+    )
     mysql_cur.executemany(
-        "INSERT INTO sensor(x, y, z, process_id, distance) VALUES (%s,%s,%s, %s, %s)",
-        data_to_insert,
+        query,
+        mt_data_list,
     )
     mysql_conn.commit()
+
     mysql_cur.close()
     mysql_conn.close()
 
@@ -171,7 +140,6 @@ def combine_data(mysql_config: dict):
 def mtconnect_streaming_reader(
     mtconnect_config: tuple, mysql_config: dict, process_id: int
 ):
-    global xyz
     (url, interval) = mtconnect_config
     endpoint = f"{url}&interval={interval}"
     try:
@@ -234,11 +202,12 @@ def listener_start(
     streaming_config: tuple,
 ):
     thread1 = threading.Thread(
-        target=listen_sensor,
+        target=hakaru.listen_sensor,
         args=(
             (
                 MQTT_BROKER_URL,
                 process_id,
+                mysql_config,
             )
         ),
     )
