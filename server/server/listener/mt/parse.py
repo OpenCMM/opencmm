@@ -74,7 +74,7 @@ def get_mtconnect_version(xml_string: str):
 
 
 def get_linelabel(root: ET.Element, ns: str):
-    linelabel = root.findall(f".//{ns}Line")[0] # ver1.3
+    linelabel = root.findall(f".//{ns}Line")[0]  # ver1.3
     # linelabel = root.findall(f".//{ns}LineLabel")[1]
     line = linelabel.text
     timestamp = linelabel.attrib["timestamp"]
