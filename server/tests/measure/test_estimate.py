@@ -5,7 +5,7 @@ import mysql.connector
 import random
 from datetime import datetime, timedelta
 
-process_id = 6
+process_id = 1
 z = 10.0
 
 
@@ -15,7 +15,7 @@ def import_sensor_data(mysql_config: dict, _sensor_data_list: list):
     mysql_cur = mysql_conn.cursor()
 
     query = (
-        "INSERT INTO sensor_test(process_id, timestamp, distance) "
+        "INSERT INTO sensor(process_id, timestamp, distance) "
         "VALUES (%s, %s, %s)"
     )
     mysql_cur.executemany(

@@ -10,6 +10,20 @@ CREATE TABLE IF NOT EXISTS `model` (
   UNIQUE KEY `filename` (`filename`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
 
+CREATE TABLE IF NOT EXISTS `process` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `model_id` int(11) unsigned NOT NULL,
+  `status` varchar(255) NOT NULL,
+  `error` varchar(255),
+  `x_offset` FLOAT NOT NULL,
+  `y_offset` FLOAT NOT NULL,
+  `z_offset` FLOAT NOT NULL,
+  `start` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `end` TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`model_id`) REFERENCES `model` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
+
 CREATE TABLE IF NOT EXISTS `arc` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `model_id` int(11) unsigned NOT NULL,
@@ -116,20 +130,6 @@ CREATE TABLE IF NOT EXISTS `mtconnect` (
   FOREIGN KEY (`process_id`) REFERENCES `process` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
 
-
-CREATE TABLE IF NOT EXISTS `process` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `model_id` int(11) unsigned NOT NULL,
-  `status` varchar(255) NOT NULL,
-  `error` varchar(255),
-  `x_offset` FLOAT NOT NULL,
-  `y_offset` FLOAT NOT NULL,
-  `z_offset` FLOAT NOT NULL,
-  `start` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `end` TIMESTAMP,
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`model_id`) REFERENCES `model` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
 
 CREATE TABLE IF NOT EXISTS `machine` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
