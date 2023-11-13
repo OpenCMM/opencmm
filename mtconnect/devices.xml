@@ -40,8 +40,9 @@ xsi:schemaLocation="urn:mtconnect.org:MTConnectDevices:1.3 https://schemas.mtcon
               <DataItems>
                 <DataItem type='ROTARY_MODE' category='EVENT' id='C5mode' name='C5mode'/>
                 <DataItem type='LOAD' category='SAMPLE' id='C5load' name='C5load' units='PERCENT' nativeUnits='PERCENT'/>
-                <DataItem type='ROTARY_VELOCITY' category='SAMPLE' id='C5speed' name='C5speed' units='REVOLUTION/MINUTE' nativeUnits='REVOLUTION/MINUTE' subType="ACTUAL"/>
-				<DataItem type="ROTARY_VELOCITY_OVERRIDE" name="spindle_override" category="EVENT" id="spindleoverride5"/>
+				<DataItem type='ROTARY_VELOCITY' category='SAMPLE' id='C5speed' name='C5speed' units='REVOLUTION/MINUTE' nativeUnits='REVOLUTION/MINUTE' subType="ACTUAL"/>
+			    <DataItem type="ROTARY_VELOCITY_OVERRIDE" name="spindle_override" category="EVENT" id="spindleoverride5"/>
+				<DataItem type="ROTARY_VELOCITY_OVERRIDE" name="spindle_rotating" category="EVENT" id="spindlerotating5"/>
               </DataItems>
             </Rotary>
           </Components>
@@ -65,10 +66,9 @@ xsi:schemaLocation="urn:mtconnect.org:MTConnectDevices:1.3 https://schemas.mtcon
 			<DataItem type="AXIS_FEEDRATE" name="jog_override" category="EVENT" id="jogoverride1" subType="JOG"/>
 			<DataItem type="AXIS_FEEDRATE_OVERRIDE" name="rapid_override" category="EVENT" id="rapidoverride1" subType="RAPID"/>
 			<DataItem type="AXIS_INTERLOCK" name="axis_interlock" category="EVENT" id="axisinterlock1"/>
-			<DataItem type="ROTARY_VELOCITY_OVERRIDE" name="spindle_rotating" category="EVENT" id="spindlerotating5"/>
 			<DataItem type="AXIS_FEEDRATE_OVERRIDE" name="cutting" category="EVENT" id="cutting1"/>
 			<DataItem type="TOOL_NUMBER" name="tool_number" category="EVENT" id="toolnumber1"/>
-			<DataItem type="DIRECTION" name="operation" category="EVENT" id="operationmode1"/>
+			<DataItem type="CONTROLLER_MODE" name="operation" category="EVENT" id="operationmode1"/>
 			<DataItem type='POWER_STATE' category='EVENT' id='power_state_' />
 			<DataItem type='CONTROLLER_MODE' category='EVENT' id='dryrun1' name='dryrun' />
 			<DataItem type='MOTION_PROGRAM' category='CONDITION' id='motion1' name='motion1' />

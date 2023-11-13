@@ -8,13 +8,13 @@ MQTT_BROKER_URL = "192.168.10.104"
 
 @pytest.mark.skip(reason="No MQTT broker running")
 def test_mtconnect_streaming_reader():
-    # mtconnect_url = (
-    # 	"http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
-    # )
-    mtconnect_url = "https://demo.metalogi.io/current?path=//Components"
+    mtconnect_url = (
+    	"http://192.168.0.19:5000/current?path=//Components"
+    )
+    # mtconnect_url = "https://demo.metalogi.io/current?path=//Components"
     # mtconnect_url = "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
 
-    interval = 200
+    interval = 1000
     mtconnect_config = (mtconnect_url, interval)
 
     thread1 = threading.Thread(
@@ -23,7 +23,7 @@ def test_mtconnect_streaming_reader():
             (
                 mtconnect_config,
                 MYSQL_CONFIG,
-                1,
+                7,
             )
         ),
     )
