@@ -7,6 +7,7 @@ from server.config import (
     MQTT_PASSWORD,
     MQTT_USERNAME,
 )
+from server.mark.edge import get_edge_ids_order_by_x_y, import_edge_results
 from .sensor import get_sensor_data
 import numpy as np
 from .gcode import (
@@ -15,9 +16,8 @@ from .gcode import (
     get_timestamp_at_point,
 )
 from .mtconnect import get_mtconnect_data
-from server import find
-from server.model import get_model_data
-from server.mark import arc, pair
+
+# from server.mark import arc, pair
 import logging
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
@@ -73,6 +73,8 @@ def update_data_after_measurement(
     line_idx = 0
     current_line = 0
     update_list = []
+    edge_ids = get_edge_ids_order_by_x_y(model_id, mysql_config)
+    idx = 0
     for row in np_mtconnect_data:
         line = int(row[6])
         if line % 2 != 0:
@@ -104,36 +106,39 @@ def update_data_after_measurement(
                     start_timestamp, sensor_timestamp, start, direction_vector, feedrate
                 )
                 print(sensor_row[0], edge_coord, sensor_timestamp)
-                update_list.append((edge_coord[0], edge_coord[1], z))
+                update_list.append(
+                    (edge_ids[idx], process_id, edge_coord[0], edge_coord[1], z)
+                )
                 line_idx = 0
 
         current_line = line
+        idx += 1
 
-    try:
-        _model_data = get_model_data(model_id)
-        _offset = (_model_data[3], _model_data[4], _model_data[5])
-        edge_count = len(update_list)
-        if edge_count == 0:
-            status.update_process_status(
-                mysql_config,
-                process_id,
-                "Error at find_edges()",
-                "No edge found",
-            )
-            disconnect_and_publish_log("Error at find_edges(): No edge found")
-            return
-        find.add_measured_edge_coord(update_list, mysql_config)
-        _msg = f"{edge_count} edges found"
-        logger.info(_msg)
-        client.publish(LISTENER_LOG_TOPIC, _msg)
-        pair.add_line_length(model_id, mysql_config)
-        arc.add_measured_arc_info(model_id, mysql_config)
-        status.update_process_status(mysql_config, process_id, "done")
-        logger.info("done")
-        disconnect_and_publish_log("done")
-    except Exception as e:
-        logger.warning(e)
+    edge_count = len(update_list)
+    if edge_count == 0:
         status.update_process_status(
-            mysql_config, process_id, "Error at find_edges()", str(e)
+            mysql_config,
+            process_id,
+            "Error at find_edges()",
+            "No edge found",
         )
-        disconnect_and_publish_log("Error at find_edges()" + str(e))
+        disconnect_and_publish_log("Error at find_edges(): No edge found")
+        return
+    import_edge_results(update_list, mysql_config)
+
+    _msg = f"{edge_count} edges found"
+    logger.info(_msg)
+    client.publish(LISTENER_LOG_TOPIC, _msg)
+
+    # try:
+    #     pair.add_line_length(model_id, mysql_config)
+    #     arc.add_measured_arc_info(model_id, mysql_config)
+    #     status.update_process_status(mysql_config, process_id, "done")
+    #     logger.info("done")
+    #     disconnect_and_publish_log("done")
+    # except Exception as e:
+    #     logger.warning(e)
+    #     status.update_process_status(
+    #         mysql_config, process_id, "Error at find_edges()", str(e)
+    #     )
+    #     disconnect_and_publish_log("Error at find_edges()" + str(e))

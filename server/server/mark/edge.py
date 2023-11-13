@@ -88,7 +88,7 @@ def get_edge_path(
     path = []
     edges = get_edges(mysql_config, model_id)
     for edge in edges:
-        edge_id, model_id, side_id, arc_id, x, y, z, rx, ry, rz = edge
+        edge_id, model_id, side_id, arc_id, x, y, z = edge
         if arc_id is None:
             side_id, model_id, x0, y0, z0, x1, y1, z1, pair_id = get_side(
                 side_id, mysql_config
@@ -123,9 +123,7 @@ def get_edge_path(
 
         else:
             assert side_id is None
-            arc_id, model_id, radius, cx, cy, cz, rradius, rcx, rcy, rcz = get_arc(
-                arc_id, mysql_config
-            )
+            arc_id, model_id, radius, cx, cy, cz = get_arc(arc_id, mysql_config)
             point1, point2 = get_arc_path((cx, cy, cz), (x, y, z), length)
             point1 = [x + xyz_offset[i] for i, x in enumerate(point1)]
             point2 = [x + xyz_offset[i] for i, x in enumerate(point2)]
@@ -160,6 +158,30 @@ def delete_edges_with_model_id(model_id: int, mysql_config: dict):
     cursor = cnx.cursor()
     query = "DELETE FROM edge WHERE model_id = %s"
     cursor.execute(query, (model_id,))
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+
+
+def get_edge_ids_order_by_x_y(model_id: int, mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
+    cursor = cnx.cursor()
+    query = "SELECT id FROM edge WHERE model_id = %s ORDER BY x,y"
+    cursor.execute(query, (model_id,))
+    edge_ids = cursor.fetchall()
+    cursor.close()
+    cnx.close()
+    if edge_ids:
+        return [x[0] for x in edge_ids]
+
+
+def import_edge_results(update_list: list, mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
+    cursor = cnx.cursor()
+    query = (
+        "INSERT edge_result (edge_id, process_id, x, y, z) VALUES (%s, %s, %s, %s, %s)"
+    )
+    cursor.executemany(query, update_list)
     cnx.commit()
     cursor.close()
     cnx.close()

@@ -1,10 +1,12 @@
 from server.measure.gcode import load_gcode, row_to_xyz_feedrate
 from server.listener.mt import reader
+from server.measure.estimate import update_data_after_measurement
 from server.config import MYSQL_CONFIG
 import mysql.connector
 import random
 from datetime import datetime, timedelta
 
+model_id = 1
 process_id = 1
 z = 10.0
 
@@ -14,10 +16,7 @@ def import_sensor_data(mysql_config: dict, _sensor_data_list: list):
     mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
     mysql_cur = mysql_conn.cursor()
 
-    query = (
-        "INSERT INTO sensor(process_id, timestamp, distance) "
-        "VALUES (%s, %s, %s)"
-    )
+    query = "INSERT INTO sensor(process_id, timestamp, distance) " "VALUES (%s, %s, %s)"
     mysql_cur.executemany(
         query,
         _sensor_data_list,
@@ -87,5 +86,5 @@ def create_mock_data():
 
 
 def test_update_data_after_measurement():
-    create_mock_data()
-    # update_data_after_measurement(MYSQL_CONFIG, process_id, 1)
+    # create_mock_data()
+    update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)

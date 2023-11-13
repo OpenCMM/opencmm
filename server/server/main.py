@@ -216,9 +216,10 @@ async def start_measurement_with_program_name(
     model_id = program_number_to_model_id(_conf.program_name)
     if model_id is None:
         return {"status": "Not a CMM program", "model_id": None}
-    model_id = get_model_data(model_id)
-    if model_id is None:
+    model_row = get_model_data(model_id)
+    if model_row is None:
         return {"status": "Not a CMM program", "model_id": None}
+    model_id = model_row[0]
     running_process = status.get_running_process(model_id, MYSQL_CONFIG)
     if running_process is not None:
         raise HTTPException(
