@@ -59,11 +59,15 @@ def get_arc_path(center, xyz, distance):
     return point1, point2
 
 
-def get_edges_by_side_id(side_id: int, mysql_config: dict):
+def get_edges_by_side_id(side_id: int, mysql_config: dict, process_id: int):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
-    query = "SELECT rx,ry,rz FROM edge WHERE side_id = %s"
-    cursor.execute(query, (side_id,))
+    query = (
+        "SELECT edge_result.x, edge_result.y, edge_result.z "
+        "FROM edge_result INNER JOIN edge ON edge.id = edge_result.edge_id "
+        "WHERE edge.side_id = %s AND edge_result.process_id = %s"
+    )
+    cursor.execute(query, (side_id, process_id))
     edges = cursor.fetchall()
     cursor.close()
     cnx.close()
@@ -179,7 +183,8 @@ def import_edge_results(update_list: list, mysql_config: dict):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     query = (
-        "INSERT edge_result (edge_id, process_id, x, y, z) VALUES (%s, %s, %s, %s, %s)"
+        "INSERT INTO edge_result (edge_id, process_id, "
+        "x, y, z) VALUES (%s, %s, %s, %s, %s)"
     )
     cursor.executemany(query, update_list)
     cnx.commit()

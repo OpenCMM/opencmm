@@ -52,7 +52,7 @@ def point_to_line_distance(edges_on_the_same_line: list, point: tuple):
     return distance
 
 
-def add_line_length(model_id: int, mysql_config: dict):
+def add_line_length(model_id: int, mysql_config: dict, process_id: int):
     pairs = get_pairs(model_id, mysql_config)
     for (pair_id,) in pairs:
         sides = get_sides_by_pair_id(pair_id, mysql_config)
@@ -60,14 +60,24 @@ def add_line_length(model_id: int, mysql_config: dict):
         side2 = sides[1]
         length = point_to_line_distance([side1[0:3], side1[3:6]], side2[0:3])
         total_measured_length = 0
-        edges1 = get_edges_by_side_id(side1[6], mysql_config)
-        edges2 = get_edges_by_side_id(side2[6], mysql_config)
-        total_measured_length += point_to_line_distance(edges1, edges2[0])
-        total_measured_length += point_to_line_distance(edges1, edges2[1])
-        total_measured_length += point_to_line_distance(edges2, edges1[0])
-        total_measured_length += point_to_line_distance(edges2, edges1[1])
-        measured_length = round(total_measured_length / 4, 3)
-        add_measured_length(pair_id, length, measured_length, mysql_config)
+        edges1 = get_edges_by_side_id(side1[6], mysql_config, process_id)
+        edges2 = get_edges_by_side_id(side2[6], mysql_config, process_id)
+        sample_size = 0
+        line_edge_list = [
+            [edges1, edges2[0]],
+            [edges1, edges2[1]],
+            [edges2, edges1[0]],
+            [edges2, edges1[1]],
+        ]
+        for [edges, edge] in line_edge_list:
+            # check if edge is not None
+            if edge and edge[0] and edge[1]:
+                sample_size += 1
+                total_measured_length += point_to_line_distance(edges, edge)
+        if sample_size == 0:
+            return
+        measured_length = round(total_measured_length / sample_size, 3)
+        add_measured_length(pair_id, length, measured_length, mysql_config, process_id)
 
 
 def get_sides_by_pair_id(pair_id: int, mysql_config: dict):
@@ -82,13 +92,24 @@ def get_sides_by_pair_id(pair_id: int, mysql_config: dict):
 
 
 def add_measured_length(
-    pair_id: int, length: float, measured_length: float, mysql_config: dict
+    pair_id: int,
+    length: float,
+    measured_length: float,
+    mysql_config: dict,
+    process_id: int,
 ):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
-    query = "UPDATE pair SET length = %s, rlength = %s WHERE id = %s"
-    cursor.execute(query, (length, measured_length, pair_id))
+    query = "UPDATE pair SET length = %s WHERE id = %s"
+    cursor.execute(query, (length, pair_id))
     cnx.commit()
+
+    query = (
+        "INSERT INTO pair_result (pair_id, " "process_id, length) VALUES (%s, %s, %s)"
+    )
+    cursor.execute(query, (pair_id, process_id, measured_length))
+    cnx.commit()
+
     cursor.close()
     cnx.close()
 

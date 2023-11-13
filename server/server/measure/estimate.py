@@ -16,6 +16,7 @@ from .gcode import (
     get_timestamp_at_point,
 )
 from .mtconnect import get_mtconnect_data
+from server.mark import pair
 
 # from server.mark import arc, pair
 import logging
@@ -105,7 +106,6 @@ def update_data_after_measurement(
                 edge_coord = sensor_timestamp_to_coord(
                     start_timestamp, sensor_timestamp, start, direction_vector, feedrate
                 )
-                print(sensor_row[0], edge_coord, sensor_timestamp)
                 update_list.append(
                     (edge_ids[idx], process_id, edge_coord[0], edge_coord[1], z)
                 )
@@ -130,15 +130,15 @@ def update_data_after_measurement(
     logger.info(_msg)
     client.publish(LISTENER_LOG_TOPIC, _msg)
 
-    # try:
-    #     pair.add_line_length(model_id, mysql_config)
-    #     arc.add_measured_arc_info(model_id, mysql_config)
-    #     status.update_process_status(mysql_config, process_id, "done")
-    #     logger.info("done")
-    #     disconnect_and_publish_log("done")
-    # except Exception as e:
-    #     logger.warning(e)
-    #     status.update_process_status(
-    #         mysql_config, process_id, "Error at find_edges()", str(e)
-    #     )
-    #     disconnect_and_publish_log("Error at find_edges()" + str(e))
+    try:
+        pair.add_line_length(model_id, mysql_config, process_id)
+        # arc.add_measured_arc_info(model_id, mysql_config)
+        status.update_process_status(mysql_config, process_id, "done")
+        logger.info("done")
+        disconnect_and_publish_log("done")
+    except Exception as e:
+        logger.warning(e)
+        status.update_process_status(
+            mysql_config, process_id, "Error at find_edges()", str(e)
+        )
+        disconnect_and_publish_log("Error at find_edges()" + str(e))
