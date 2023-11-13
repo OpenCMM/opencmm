@@ -88,7 +88,7 @@ jobs:
           
       - name: Run MySQL
         run: |
-          docker-compose up -d mysql
+          docker-compose up -d mysql mosquitto
         working-directory: .
 
       - name: Run image

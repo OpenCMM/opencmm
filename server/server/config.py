@@ -19,11 +19,13 @@ MYSQL_CONFIG = dict(
     password="root",
 )
 
-if os.environ.get("CI"):
-    MYSQL_CONFIG = CI_MYSQL_CONFIG
-
 # MQTT_BROKER_URL = os.getenv("MQTT_BROKER_URL", "192.168.0.19")
 MQTT_BROKER_URL = os.getenv("MQTT_BROKER_URL", "192.168.10.104")
+CI_MQTT_BROKER_URL = "localhost"
+
+if os.environ.get("CI"):
+    MYSQL_CONFIG = CI_MYSQL_CONFIG
+    MQTT_BROKER_URL = CI_MQTT_BROKER_URL
 
 MODEL_PATH = "data/3dmodel"
 GCODE_PATH = "data/gcode"
