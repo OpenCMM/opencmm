@@ -16,6 +16,7 @@
 	let loaded = false;
 
 	let selectedIndex = 0;
+	let processId = '1';
 	interface ModelInfo {
 		id: number;
 		name: string;
@@ -69,9 +70,9 @@
 
 					<div id="data-tale">
 						{#if selectedIndex === 0}
-							<Arc {modelId} />
+							<Arc {modelId} {processId} />
 						{:else if selectedIndex === 1}
-							<Line {modelId} />
+							<Line {modelId} {processId} />
 						{/if}
 					</div>
 				</Column>

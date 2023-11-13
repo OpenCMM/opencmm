@@ -4,10 +4,10 @@ from server.measure.estimate import update_data_after_measurement
 from server.config import MYSQL_CONFIG
 import mysql.connector
 import random
+from server.listener import status
 from datetime import datetime, timedelta
 
 model_id = 1
-process_id = 1
 z = 10.0
 
 
@@ -41,11 +41,12 @@ def get_random_timestamp_between_two_timestamps(first_timestamp, last_timestamp)
 
 
 def create_mock_data():
+    process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
     start_coord = (0.0, 0.0)
     mtconnect_mock_data = []
     sensor_mock_data = []
     sample_interval = 0.5
-    gcode = load_gcode("tests/fixtures/gcode/first.STL.gcode")
+    gcode = load_gcode("tests/fixtures/gcode/demo.STL.gcode")
     line = 3
     timestamp = datetime.now()
     for i in range(len(gcode)):
@@ -86,5 +87,5 @@ def create_mock_data():
 
 
 def test_update_data_after_measurement():
-    # create_mock_data()
+    process_id = create_mock_data()
     update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)

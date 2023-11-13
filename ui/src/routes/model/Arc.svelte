@@ -6,6 +6,7 @@
 	import { _ } from 'svelte-i18n';
 
 	export let modelId: string;
+	export let processId: string;
 	let loaded = false;
 
 	interface Arc {
@@ -27,7 +28,9 @@
 	];
 	let row: Arc[] = [];
 	const load_table_data = async () => {
-		const res = await fetch(`${BACKEND_URL}/result/arcs/${modelId}`);
+		const res = await fetch(
+			`${BACKEND_URL}/result/arcs?model_id=${modelId}&process_id=${processId}`
+		);
 		const data = await res.json();
 		for (const d of data['arcs']) {
 			row.push({

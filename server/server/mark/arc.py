@@ -157,7 +157,7 @@ def add_measured_arc_info(model_id: int, mysql_config: dict):
 
     arcs = get_arcs(mysql_config)
     for arc in arcs:
-        (arc_id, model_id, radius, cx, cy, cz, rradius, rcx, rcy, rcz) = arc
+        (arc_id, model_id, radius, cx, cy, cz) = arc
         edges = get_arc_edge(arc_id, mysql_config)
         try:
             radius, center = get_arc_info(np.array(edges))

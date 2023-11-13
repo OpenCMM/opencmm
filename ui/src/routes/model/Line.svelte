@@ -8,6 +8,7 @@
 	let loaded = false;
 
 	export let modelId: string;
+	export let processId: string;
 	interface Line {
 		id: number;
 		length: number;
@@ -23,7 +24,9 @@
 	];
 	let row: Line[] = [];
 	const load_table_data = async () => {
-		const res = await fetch(`${BACKEND_URL}/result/lines/${modelId}`);
+		const res = await fetch(
+			`${BACKEND_URL}/result/lines?model_id=${modelId}&process_id=${processId}`
+		);
 		const data = await res.json();
 		for (const d of data['lines']) {
 			row.push({

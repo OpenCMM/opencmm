@@ -307,9 +307,9 @@ def get_model_table_data(model_id: int):
     return get_model_data(model_id)
 
 
-@app.get("/result/lines/{model_id}")
-async def get_result_lines(model_id: int):
-    lines = result.fetch_lines(model_id)
+@app.get("/result/lines")
+async def get_result_lines(model_id: int, process_id: int):
+    lines = result.fetch_lines(model_id, process_id)
     return {"lines": lines}
 
 
@@ -319,9 +319,9 @@ async def get_result_pair(model_id: int):
     return {"pairs": pairs}
 
 
-@app.get("/result/arcs/{model_id}")
-async def get_result_arcs(model_id: int):
-    arcs = result.fetch_arcs(model_id)
+@app.get("/result/arcs")
+async def get_result_arcs(model_id: int, process_id: int):
+    arcs = result.fetch_arcs(model_id, process_id)
     return {"arcs": arcs}
 
 

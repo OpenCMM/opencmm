@@ -88,35 +88,38 @@ def fetch_pairs(model_id: int):
     return lines
 
 
-def fetch_lines(model_id: int):
+def fetch_lines(model_id: int, process_id: int):
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
     cursor = cnx.cursor()
 
     lines = []
     query = """
-		SELECT id, length, rlength
-		FROM pair WHERE model_id = %s
+		SELECT pair.id, pair.length, pair_result.length
+        FROM pair INNER JOIN pair_result ON pair.id = pair_result.pair_id
+		WHERE pair.model_id = %s AND pair_result.process_id = %s
 	"""
-    cursor.execute(query, (model_id,))
+    cursor.execute(query, (model_id, process_id))
     for line in cursor:
         lines.append((line[0], line[1], line[2]))
 
     cursor.close()
     cnx.close()
-
     return lines
 
 
-def fetch_arcs(model_id: int):
+def fetch_arcs(model_id: int, process_id: int):
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
     cursor = cnx.cursor()
 
     arcs = []
     query = """
-		SELECT id, radius, cx, cy, cz, rradius, rcx, rcy, rcz
-		FROM arc WHERE model_id = %s
+		SELECT arc.id, arc.radius, 
+        arc.cx, arc.cy, arc.cz, arc_result.radius, 
+        arc_result.cx, arc_result.cy, arc_result.cz
+        FROM arc INNER JOIN arc_result ON arc.id = arc_result.arc_id 
+        WHERE arc.model_id = %s AND arc_result.process_id = %s
 	"""
-    cursor.execute(query, (model_id,))
+    cursor.execute(query, (model_id, process_id))
     for arc in cursor:
         arcs.append(
             (arc[0], arc[1], arc[2], arc[3], arc[4], arc[5], arc[6], arc[7], arc[8])
@@ -124,5 +127,4 @@ def fetch_arcs(model_id: int):
 
     cursor.close()
     cnx.close()
-
     return arcs
