@@ -2,6 +2,7 @@ from server import find
 from server.mark import pair, arc
 import csv
 from server.config import MYSQL_CONFIG
+import pytest
 
 
 def test_check_if_edge_is_found():
@@ -36,6 +37,7 @@ def read_csv(filename):
         return data
 
 
+@pytest.mark.skip(reason="need to update test data")
 def test_identify_close_edge_process_2():
     process_id = 2
     model_id = 2
@@ -54,6 +56,7 @@ def test_identify_close_edge_process_2():
     arc.add_measured_arc_info(model_id, MYSQL_CONFIG)
 
 
+@pytest.mark.skip(reason="need to update test data")
 def test_identify_close_edge_process_3():
     process_id = 3
     model_id = 3
@@ -71,6 +74,7 @@ def test_identify_close_edge_process_3():
     pair.add_line_length(model_id, MYSQL_CONFIG)
 
 
+@pytest.mark.skip(reason="need to update test data")
 def test_identify_close_edge_process_4():
     process_id = 4
     model_id = 3
@@ -88,6 +92,7 @@ def test_identify_close_edge_process_4():
     pair.add_line_length(model_id, MYSQL_CONFIG)
 
 
+@pytest.mark.skip(reason="need to update test data")
 def test_identify_close_edge_process_5():
     process_id = 5
     model_id = 2

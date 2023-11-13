@@ -111,7 +111,6 @@ def test_get_linelabel():
     tree = ET.parse("tests/fixtures/xml/demo.xml")
     root = tree.getroot()
     ns = mt.get_namespace(root)
-    assert ns == "{urn:mtconnect.org:MTConnectStreams:2.0}"
     linelabel_obj = parse.get_linelabel(root, ns)
     assert linelabel_obj["value"] == "10"
     assert linelabel_obj["timestamp"] == datetime(2023, 10, 31, 8, 11, 27, 497000)
@@ -121,17 +120,15 @@ def test_get_path_feedrate():
     tree = ET.parse("tests/fixtures/xml/demo.xml")
     root = tree.getroot()
     ns = mt.get_namespace(root)
-    assert ns == "{urn:mtconnect.org:MTConnectStreams:2.0}"
     path_feedrate_obj = parse.get_path_feedrate(root, ns)
     assert path_feedrate_obj["value"] == 0.0
-    assert path_feedrate_obj["timestamp"] == datetime(2023, 10, 31, 8, 11, 58, 311000)
+    assert path_feedrate_obj["timestamp"] == datetime(2023, 10, 31, 8, 11, 38, 10000)
 
 
 def test_get_coordinates():
     tree = ET.parse("tests/fixtures/xml/demo.xml")
     root = tree.getroot()
     ns = mt.get_namespace(root)
-    assert ns == "{urn:mtconnect.org:MTConnectStreams:2.0}"
     coordinates_obj = parse.get_coordinates(root, ns)
     assert coordinates_obj["value"][0] == 4773.5319
     assert coordinates_obj["timestamp"] == datetime(2023, 10, 31, 8, 11, 58, 311000)

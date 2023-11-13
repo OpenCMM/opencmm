@@ -143,7 +143,7 @@ def get_arcs(mysql_config: dict):
 def get_arc_edge(arc_id: int, mysql_config: dict):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
-    query = "SELECT rx,ry,rz FROM edge WHERE arc_id = %s"
+    query = "SELECT x,y,z FROM edge WHERE arc_id = %s"
     cursor.execute(query, (arc_id,))
     edges = cursor.fetchall()
     cursor.close()

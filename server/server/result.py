@@ -8,7 +8,7 @@ def fetch_edges(model_id: int):
     cursor = cnx.cursor()
 
     query = """
-		SELECT id, side_id, x, y, z, rx, ry, rz
+		SELECT id, side_id, x, y, z
 		FROM edge WHERE model_id = %s
 	"""
     cursor.execute(query, (model_id,))

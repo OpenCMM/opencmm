@@ -74,8 +74,10 @@ def get_mtconnect_version(xml_string: str):
 
 
 def get_linelabel(root: ET.Element, ns: str):
-    linelabel = root.findall(f".//{ns}Line")[0]  # ver1.3
-    # linelabel = root.findall(f".//{ns}LineLabel")[1]
+    if ns == "{urn:mtconnect.org:MTConnectStreams:1.3}":
+        linelabel = root.findall(f".//{ns}Line")[0]  # ver1.3
+    else:
+        linelabel = root.findall(f".//{ns}LineLabel")[1]
     line = linelabel.text
     timestamp = linelabel.attrib["timestamp"]
     return {
@@ -93,7 +95,6 @@ def timestamp_str_to_datetime(timestamp: str, decimal_places=3):
 
 def get_path_feedrate(root: ET.Element, ns: str):
     axis_path_feedrate = root.findall(f".//{ns}PathFeedrate")[0]
-    # axis_path_feedrate = root.findall(f".//{ns}AxisFeedrate")[0]
     feedrate = axis_path_feedrate.text
     timestamp = axis_path_feedrate.attrib["timestamp"]
     return {
