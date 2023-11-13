@@ -295,6 +295,12 @@ def get_debug_points(process_id: int):
     return {"points": points}
 
 
+@app.get("/result/debug/mtconnect/points/{process_id}")
+def get_debug_mtconnect_points(process_id: int):
+    points = result.fetch_mtconnect_points(process_id)
+    return {"points": points}
+
+
 @app.get("/get/model/table/data/{model_id}")
 def get_model_table_data(model_id: int):
     return get_model_data(model_id)

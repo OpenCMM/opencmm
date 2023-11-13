@@ -48,11 +48,11 @@
 			scene.add(mesh);
 		});
 
-		axios.get(`${BACKEND_URL}/result/debug/points/${processId}`).then((res) => {
+		axios.get(`${BACKEND_URL}/result/debug/mtconnect/points/${processId}`).then((res) => {
 			if (res.status === 200) {
 				const points = res.data['points'];
 				for (const _point of points) {
-					const [x, y, _z, _distance] = _point;
+					const [_id, x, y, _z, _distance] = _point;
 					const point = new THREE.Vector3(x, y, 0.0);
 					const pointMesh = getSphereMesh(0.3, 0xfcba03);
 					pointMesh.position.copy(point);

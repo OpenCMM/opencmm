@@ -48,6 +48,21 @@ def fetch_unique_points(process_id: int):
     return unique_points_with_distance
 
 
+def fetch_mtconnect_points(process_id: int):
+    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+    cursor = cnx.cursor()
+
+    query = """
+		SELECT id, x, y, z
+		FROM mtconnect WHERE process_id = %s
+	"""
+    cursor.execute(query, (process_id,))
+    points = cursor.fetchall()
+    cursor.close()
+    cnx.close()
+    return points
+
+
 def fetch_pairs(model_id: int):
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
     cursor = cnx.cursor()
