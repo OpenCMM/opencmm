@@ -93,13 +93,15 @@ def create_mock_data(filename: str, process_id: int):
 
 def test_update_data_after_measurement():
     filename = "demo.STL"
-    model_id, process_id = prepare_mock_data(filename)
+    model_id = 3
+    process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
     create_mock_data(filename, process_id)
     update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)
 
 
 def test_update_data_after_measurement_with_arc():
     filename = "sample.stl"
-    model_id, process_id = prepare_mock_data(filename)
+    model_id = 4
+    process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
     create_mock_data(filename, process_id)
     update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)

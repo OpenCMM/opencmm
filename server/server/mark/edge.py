@@ -93,14 +93,13 @@ def get_edge_path(
     edges = get_edges(mysql_config, model_id)
     for edge in edges:
         edge_id, model_id, side_id, arc_id, x, y, z = edge
+        # add offset
+        (x, y, z) = (x + xyz_offset[0], y + xyz_offset[1], z + xyz_offset[2])
         if arc_id is None:
             side_id, model_id, x0, y0, z0, x1, y1, z1, pair_id = get_side(
                 side_id, mysql_config
             )
             direction = get_direction(x0, y0, x1, y1)
-
-            (x, y, z) = (x + xyz_offset[0], y + xyz_offset[1], z + xyz_offset[2])
-
             if direction == 0:
                 py0 = y - length
                 py1 = y + length
@@ -124,13 +123,12 @@ def get_edge_path(
                         y,
                     ]
                 )
-
         else:
             assert side_id is None
             arc_id, model_id, radius, cx, cy, cz = get_arc(arc_id, mysql_config)
+            # add offset to center
+            (cx, cy, cz) = (cx + xyz_offset[0], cy + xyz_offset[1], cz + xyz_offset[2])
             point1, point2 = get_arc_path((cx, cy, cz), (x, y, z), length)
-            point1 = [x + xyz_offset[i] for i, x in enumerate(point1)]
-            point2 = [x + xyz_offset[i] for i, x in enumerate(point2)]
             path.append(
                 [
                     to_gcode_row(point1[0], point1[1], move_feedrate),
@@ -139,7 +137,6 @@ def get_edge_path(
                     y,
                 ]
             )
-
     return sorted(path, key=lambda point: (point[2], point[3]))
 
 

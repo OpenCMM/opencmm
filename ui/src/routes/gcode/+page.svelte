@@ -11,7 +11,7 @@
 	import { BACKEND_URL } from '$lib/constants/backend';
 
 	const modelId = $page.url.searchParams.get('id');
-	const processId = $page.url.searchParams.get('processId');
+	const processId = $page.url.searchParams.get('process');
 	let offset = [0.0, 0.0, 0.0];
 	let offsetLoaded = false;
 	onMount(() => {
