@@ -11,6 +11,7 @@
 	let container: HTMLDivElement;
 
 	export let modelId: string;
+	export let processId: string;
 	const canvasWidth = 600;
 	const canvasHeight = 600;
 	const arcColor = '70a0ff';
@@ -48,35 +49,37 @@
 		labelRenderer.domElement.style.pointerEvents = 'none';
 		container.appendChild(labelRenderer.domElement);
 
-		axios.get(`${BACKEND_URL}/result/arcs/${modelId}`).then((res) => {
-			if (res.status === 200) {
-				const arcs = res.data['arcs'];
+		axios
+			.get(`${BACKEND_URL}/result/arcs?model_id=${modelId}&process_id=${processId}`)
+			.then((res) => {
+				if (res.status === 200) {
+					const arcs = res.data['arcs'];
 
-				for (const arc_info of arcs) {
-					const [arcId, radius, cx, cy, cz, rradius, rcx, rcy, rcz] = arc_info;
-					const center = new THREE.Vector3(cx, cy, cz);
-					const measuredCenter = new THREE.Vector3(rcx, rcy, rcz);
-					const centerMesh = getSphereMesh(0.3, 0xfcba03);
-					const measuredCenterMesh = getSphereMesh(0.3, 0x00f719);
-					centerMesh.position.copy(center);
-					measuredCenterMesh.position.copy(measuredCenter);
-					scene.add(centerMesh);
-					scene.add(measuredCenterMesh);
+					for (const arc_info of arcs) {
+						const [arcId, radius, cx, cy, cz, rradius, rcx, rcy, rcz] = arc_info;
+						const center = new THREE.Vector3(cx, cy, cz);
+						const measuredCenter = new THREE.Vector3(rcx, rcy, rcz);
+						const centerMesh = getSphereMesh(0.3, 0xfcba03);
+						const measuredCenterMesh = getSphereMesh(0.3, 0x00f719);
+						centerMesh.position.copy(center);
+						measuredCenterMesh.position.copy(measuredCenter);
+						scene.add(centerMesh);
+						scene.add(measuredCenterMesh);
 
-					// Add radius annotation
-					// https://sbcode.net/view_source/annotations.html
-					// https://sbcode.net/threejs/annotations/
-					// https://github.com/Sean-Bradley/Three.js-TypeScript-Boilerplate/tree/annotations
+						// Add radius annotation
+						// https://sbcode.net/view_source/annotations.html
+						// https://sbcode.net/threejs/annotations/
+						// https://github.com/Sean-Bradley/Three.js-TypeScript-Boilerplate/tree/annotations
 
-					const arcLabel = document.createElement('div');
-					arcLabel.textContent = arcId;
-					arcLabel.style.cssText = `color:#${arcColor};font-family:sans-serif;font-size: 17px;`;
-					const arcLabelObject = new CSS2DObject(arcLabel);
-					arcLabelObject.position.copy(center).add(new THREE.Vector3(-3.0, 3.0, 0));
-					scene.add(arcLabelObject);
+						const arcLabel = document.createElement('div');
+						arcLabel.textContent = arcId;
+						arcLabel.style.cssText = `color:#${arcColor};font-family:sans-serif;font-size: 17px;`;
+						const arcLabelObject = new CSS2DObject(arcLabel);
+						arcLabelObject.position.copy(center).add(new THREE.Vector3(-3.0, 3.0, 0));
+						scene.add(arcLabelObject);
+					}
 				}
-			}
-		});
+			});
 
 		axios.get(`${BACKEND_URL}/result/pairs/${modelId}`).then((res) => {
 			if (res.status === 200) {

@@ -4,7 +4,7 @@
 	import { _ } from 'svelte-i18n';
 	import { page } from '$app/stores';
 	import DataTable from 'carbon-icons-svelte/lib/DataTable.svelte';
-	import Edge from '../model/Edge.svelte';
+	import Edge from '../model/[modelId]/process/[processId]/Edge.svelte';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import axios from 'axios';
@@ -31,7 +31,7 @@
 	<Grid padding>
 		<Row>
 			<Column>
-				<Button icon={DataTable} on:click={() => goto(`/model?id=${modelId}`)}>
+				<Button icon={DataTable} on:click={() => goto(`/model/${modelId}`)}>
 					{$_('home.result.title')}
 				</Button>
 			</Column>

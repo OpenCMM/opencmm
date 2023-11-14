@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { BACKEND_URL } from '$lib/constants/backend';
-	import { page } from '$app/stores';
 	import { Button, ContentSwitcher, Loading, Switch } from 'carbon-components-svelte';
 	import { Grid, Row, Column } from 'carbon-components-svelte';
 	import ChartStepper from 'carbon-icons-svelte/lib/ChartStepper.svelte';
@@ -12,8 +11,8 @@
 	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
 
-	const modelId = $page.url.searchParams.get('id');
-	const processId = $page.url.searchParams.get('process');
+	export let modelId: string;
+	export let processId: string;
 
 	let loaded = false;
 
@@ -44,7 +43,7 @@
 	});
 </script>
 
-{#if !loaded || !modelId || !processId}
+{#if !loaded}
 	<Loading />
 {:else}
 	<div id="model-page">
@@ -56,14 +55,17 @@
 					</h1>
 				</Column>
 				<Column>
-					<Button icon={ChartStepper} on:click={() => goto(`/gcode?id=${modelId}`)}
-						>{$_('common.gcode')}</Button
+					<Button
+						icon={ChartStepper}
+						on:click={() => goto(`/gcode?id=${modelId}&process=${processId}`)}
+					>
+						{$_('common.gcode')}</Button
 					>
 				</Column>
 			</Row>
 			<Row>
 				<Column>
-					<ModelCheck {modelId} />
+					<ModelCheck {modelId} {processId} />
 				</Column>
 				<Column>
 					<ContentSwitcher bind:selectedIndex>

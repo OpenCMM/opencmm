@@ -70,7 +70,7 @@
 							<Button
 								class="menu-button"
 								kind="secondary"
-								on:click={() => goto(`/model?id=${file.modelId}`)}>{file.name}</Button
+								on:click={() => goto(`/model/${file.modelId}`)}>{file.name}</Button
 							>
 						{/each}
 					{/if}

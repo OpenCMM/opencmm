@@ -64,3 +64,13 @@ def get_running_process(model_id: int, mysql_config: dict):
     mysql_cur.close()
     mysql_conn.close()
     return process_status
+
+
+def get_process_list(mysql_config: dict, model_id: int):
+    mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
+    mysql_cur = mysql_conn.cursor()
+    mysql_cur.execute("SELECT * FROM process WHERE model_id = %s", (model_id,))
+    process_status = mysql_cur.fetchall()
+    mysql_cur.close()
+    mysql_conn.close()
+    return process_status

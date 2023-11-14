@@ -336,6 +336,12 @@ async def get_result_arcs(model_id: int, process_id: int):
     return {"arcs": arcs}
 
 
+@app.get("/list/processes/{model_id}")
+async def get_process_list(model_id: int):
+    processes = status.get_process_list(MYSQL_CONFIG, model_id)
+    return {"processes": processes}
+
+
 @app.get("/get_measurement_status/{process_id}")
 async def get_measurement_status(process_id: int):
     return status.get_process_status(MYSQL_CONFIG, process_id)
