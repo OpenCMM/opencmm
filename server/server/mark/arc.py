@@ -143,7 +143,7 @@ def get_arcs(mysql_config: dict):
 def get_arc_edge(arc_id: int, mysql_config: dict):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
-    query = "SELECT rx,ry,rz FROM edge WHERE arc_id = %s"
+    query = "SELECT x,y,z FROM edge WHERE arc_id = %s"
     cursor.execute(query, (arc_id,))
     edges = cursor.fetchall()
     cursor.close()
@@ -151,24 +151,24 @@ def get_arc_edge(arc_id: int, mysql_config: dict):
     return edges
 
 
-def add_measured_arc_info(model_id: int, mysql_config: dict):
+def add_measured_arc_info(mysql_config: dict, process_id: int):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
 
     arcs = get_arcs(mysql_config)
     for arc in arcs:
-        (arc_id, model_id, radius, cx, cy, cz, rradius, rcx, rcy, rcz) = arc
+        arc_id = arc[0]
         edges = get_arc_edge(arc_id, mysql_config)
         try:
             radius, center = get_arc_info(np.array(edges))
             query = (
-                "UPDATE arc SET rradius = %s, rcx = %s, rcy = %s, rcz = %s "
-                "WHERE id = %s and model_id = %s"
+                "INSERT INTO arc_result (arc_id, process_id, radius, cx, cy, cz) "
+                "VALUES (%s, %s, %s, %s, %s, %s) "
             )
             data = [radius, center[0], center[1], center[2]]
             data = [round(x, 3) for x in data]
             data.append(arc_id)
-            data.append(model_id)
+            data.append(process_id)
             cursor.execute(query, tuple(data))
             cnx.commit()
         except TypeError:

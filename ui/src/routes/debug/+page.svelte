@@ -1,11 +1,8 @@
 <script lang="ts">
-	import Gcode from './Gcode.svelte';
-	import { Grid, Row, Column, ProgressBar, Button } from 'carbon-components-svelte';
+	import Debug from './Debug.svelte';
+	import { Grid, Row, Column, ProgressBar } from 'carbon-components-svelte';
 	import { _ } from 'svelte-i18n';
 	import { page } from '$app/stores';
-	import DataTable from 'carbon-icons-svelte/lib/DataTable.svelte';
-	import Edge from '../model/Edge.svelte';
-	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import axios from 'axios';
 	import { BACKEND_URL } from '$lib/constants/backend';
@@ -25,24 +22,14 @@
 	});
 </script>
 
-{#if !modelId || !processId || !offsetLoaded}
-	<ProgressBar helperText="Loading..." />
-{:else}
+{#if modelId && processId && offsetLoaded}
 	<Grid padding>
 		<Row>
 			<Column>
-				<Button icon={DataTable} on:click={() => goto(`/model?id=${modelId}`)}>
-					{$_('home.result.title')}
-				</Button>
-			</Column>
-		</Row>
-		<Row>
-			<Column>
-				<Gcode {modelId} {processId} {offset} />
-			</Column>
-			<Column>
-				<Edge {modelId} />
+				<Debug {modelId} {processId} {offset} />
 			</Column>
 		</Row>
 	</Grid>
+{:else}
+	<ProgressBar helperText="Loading..." />
 {/if}

@@ -1,3 +1,4 @@
+from server.type.measurement import MeasurementConfig, MeasurementConfigWithProgram
 import uvicorn
 import os
 from fastapi import FastAPI, UploadFile, HTTPException, BackgroundTasks, WebSocket
@@ -14,7 +15,12 @@ from server.prepare import (
 from pydantic import BaseModel
 from typing import Optional
 from server import result
-from server.listener import listener_start, status, hakaru
+from server.listener import (
+    listener_start,
+    update_data_after_measurement,
+    status,
+    hakaru,
+)
 from server.config import MYSQL_CONFIG, MODEL_PATH
 from server.model import (
     get_3dmodel_data,
@@ -39,20 +45,6 @@ class JobInfo(BaseModel):
     y_offset: Optional[float] = 0.0
     z_offset: Optional[float] = 0.0
     send_gcode: Optional[bool] = True
-
-
-class MeasurementConfig(BaseModel):
-    three_d_model_id: int
-    mtconnect_interval: int
-    interval: int
-    threshold: int
-
-
-class MeasurementConfigWithProgram(BaseModel):
-    program_name: str
-    mtconnect_interval: int
-    interval: int
-    threshold: int
 
 
 app = FastAPI()
@@ -212,7 +204,6 @@ async def start_measurement(
         MYSQL_CONFIG,
         (mtconnect_url, _conf.mtconnect_interval),
         process_id,
-        _conf.three_d_model_id,
         (_conf.interval, _conf.threshold),
     )
     return {"status": "ok"}
@@ -225,9 +216,10 @@ async def start_measurement_with_program_name(
     model_id = program_number_to_model_id(_conf.program_name)
     if model_id is None:
         return {"status": "Not a CMM program", "model_id": None}
-    model_id = get_model_data(model_id)
-    if model_id is None:
+    model_row = get_model_data(model_id)
+    if model_row is None:
         return {"status": "Not a CMM program", "model_id": None}
+    model_id = model_row[0]
     running_process = status.get_running_process(model_id, MYSQL_CONFIG)
     if running_process is not None:
         raise HTTPException(
@@ -241,10 +233,26 @@ async def start_measurement_with_program_name(
         MYSQL_CONFIG,
         (mtconnect_url, _conf.mtconnect_interval),
         process_id,
-        model_id,
         (_conf.interval, _conf.threshold),
     )
     return {"status": "ok", "model_id": model_id}
+
+
+@app.post("/estimate/measurement")
+async def estimate_measurement(
+    model_id: int, process_id: int, background_tasks: BackgroundTasks
+):
+    _process = status.get_process_status(MYSQL_CONFIG, process_id)
+    if _process is not None:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid process_id",
+        )
+
+    # add process status check
+
+    update_data_after_measurement(model_id, process_id, MYSQL_CONFIG)
+    return {"status": "ok", "process_id": process_id}
 
 
 @app.get("/get_model_id/from/program_name/{program_name}")
@@ -282,9 +290,32 @@ async def get_result_edges(model_id: int):
     return {"edges": edges}
 
 
-@app.get("/result/lines/{model_id}")
-async def get_result_lines(model_id: int):
-    lines = result.fetch_lines(model_id)
+@app.get("/result/edges/result/{process_id}")
+async def get_edge_result(process_id: int):
+    edges = result.fetch_edge_result(process_id)
+    return {"edges": edges}
+
+
+@app.get("/result/debug/points/{process_id}")
+def get_debug_points(process_id: int):
+    points = result.fetch_unique_points(process_id)
+    return {"points": points}
+
+
+@app.get("/result/debug/mtconnect/points/{process_id}")
+def get_debug_mtconnect_points(process_id: int):
+    points = result.fetch_mtconnect_points(process_id)
+    return {"points": points}
+
+
+@app.get("/get/model/table/data/{model_id}")
+def get_model_table_data(model_id: int):
+    return get_model_data(model_id)
+
+
+@app.get("/result/lines")
+async def get_result_lines(model_id: int, process_id: int):
+    lines = result.fetch_lines(model_id, process_id)
     return {"lines": lines}
 
 
@@ -294,9 +325,9 @@ async def get_result_pair(model_id: int):
     return {"pairs": pairs}
 
 
-@app.get("/result/arcs/{model_id}")
-async def get_result_arcs(model_id: int):
-    arcs = result.fetch_arcs(model_id)
+@app.get("/result/arcs")
+async def get_result_arcs(model_id: int, process_id: int):
+    arcs = result.fetch_arcs(model_id, process_id)
     return {"arcs": arcs}
 
 

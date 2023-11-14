@@ -59,11 +59,15 @@ def get_arc_path(center, xyz, distance):
     return point1, point2
 
 
-def get_edges_by_side_id(side_id: int, mysql_config: dict):
+def get_edges_by_side_id(side_id: int, mysql_config: dict, process_id: int):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
-    query = "SELECT rx,ry,rz FROM edge WHERE side_id = %s"
-    cursor.execute(query, (side_id,))
+    query = (
+        "SELECT edge_result.x, edge_result.y, edge_result.z "
+        "FROM edge_result INNER JOIN edge ON edge.id = edge_result.edge_id "
+        "WHERE edge.side_id = %s AND edge_result.process_id = %s"
+    )
+    cursor.execute(query, (side_id, process_id))
     edges = cursor.fetchall()
     cursor.close()
     cnx.close()
@@ -88,15 +92,14 @@ def get_edge_path(
     path = []
     edges = get_edges(mysql_config, model_id)
     for edge in edges:
-        edge_id, model_id, side_id, arc_id, x, y, z, rx, ry, rz = edge
+        edge_id, model_id, side_id, arc_id, x, y, z = edge
+        # add offset
+        (x, y, z) = (x + xyz_offset[0], y + xyz_offset[1], z + xyz_offset[2])
         if arc_id is None:
             side_id, model_id, x0, y0, z0, x1, y1, z1, pair_id = get_side(
                 side_id, mysql_config
             )
             direction = get_direction(x0, y0, x1, y1)
-
-            (x, y, z) = (x + xyz_offset[0], y + xyz_offset[1], z + xyz_offset[2])
-
             if direction == 0:
                 py0 = y - length
                 py1 = y + length
@@ -120,15 +123,12 @@ def get_edge_path(
                         y,
                     ]
                 )
-
         else:
             assert side_id is None
-            arc_id, model_id, radius, cx, cy, cz, rradius, rcx, rcy, rcz = get_arc(
-                arc_id, mysql_config
-            )
+            arc_id, model_id, radius, cx, cy, cz = get_arc(arc_id, mysql_config)
+            # add offset to center
+            (cx, cy, cz) = (cx + xyz_offset[0], cy + xyz_offset[1], cz + xyz_offset[2])
             point1, point2 = get_arc_path((cx, cy, cz), (x, y, z), length)
-            point1 = [x + xyz_offset[i] for i, x in enumerate(point1)]
-            point2 = [x + xyz_offset[i] for i, x in enumerate(point2)]
             path.append(
                 [
                     to_gcode_row(point1[0], point1[1], move_feedrate),
@@ -137,7 +137,6 @@ def get_edge_path(
                     y,
                 ]
             )
-
     return sorted(path, key=lambda point: (point[2], point[3]))
 
 
@@ -160,6 +159,31 @@ def delete_edges_with_model_id(model_id: int, mysql_config: dict):
     cursor = cnx.cursor()
     query = "DELETE FROM edge WHERE model_id = %s"
     cursor.execute(query, (model_id,))
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+
+
+def get_edge_ids_order_by_x_y(model_id: int, mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
+    cursor = cnx.cursor()
+    query = "SELECT id FROM edge WHERE model_id = %s ORDER BY x,y"
+    cursor.execute(query, (model_id,))
+    edge_ids = cursor.fetchall()
+    cursor.close()
+    cnx.close()
+    if edge_ids:
+        return [x[0] for x in edge_ids]
+
+
+def import_edge_results(update_list: list, mysql_config: dict):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
+    cursor = cnx.cursor()
+    query = (
+        "INSERT INTO edge_result (edge_id, process_id, "
+        "x, y, z) VALUES (%s, %s, %s, %s, %s)"
+    )
+    cursor.executemany(query, update_list)
     cnx.commit()
     cursor.close()
     cnx.close()

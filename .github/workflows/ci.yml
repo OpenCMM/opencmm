@@ -86,9 +86,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           
-      - name: Run MySQL
+      - name: Run MySQL & Mosquitto
         run: |
-          docker-compose up -d mysql
+          docker-compose up -d mysql mosquitto
         working-directory: .
 
       - name: Run image

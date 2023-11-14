@@ -12,6 +12,7 @@
 	import { goto } from '$app/navigation';
 
 	const modelId = $page.url.searchParams.get('id');
+	const processId = $page.url.searchParams.get('process');
 
 	let loaded = false;
 
@@ -42,7 +43,7 @@
 	});
 </script>
 
-{#if !loaded || !modelId}
+{#if !loaded || !modelId || !processId}
 	<Loading />
 {:else}
 	<div id="model-page">
@@ -69,9 +70,9 @@
 
 					<div id="data-tale">
 						{#if selectedIndex === 0}
-							<Arc {modelId} />
+							<Arc {modelId} {processId} />
 						{:else if selectedIndex === 1}
-							<Line {modelId} />
+							<Line {modelId} {processId} />
 						{/if}
 					</div>
 				</Column>

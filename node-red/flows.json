@@ -575,7 +575,7 @@
         "type": "mqtt in",
         "z": "344499584571a0ed",
         "name": "MTConnect data",
-        "topic": "MTConnect/Current/535E85A7_-1CF1-4D1C-9D5C-D386C0CFB37A",
+        "topic": "MTConnect/Current/MITSUBISHI1",
         "qos": "2",
         "datatype": "auto-detect",
         "broker": "8e7d86e88ee54c5e",
