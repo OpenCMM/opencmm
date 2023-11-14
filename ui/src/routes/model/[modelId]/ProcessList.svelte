@@ -36,15 +36,24 @@
 {#if !loaded}
 	<Loading />
 {:else}
-	<DataTable rows={processes} {headers}>
-		<svelte:fragment slot="cell" let:cell>
-			{#if cell.key === 'id'}
-				<Link href={`/model/${modelId}/process/${cell.value}`}>
+	<div id="process-list">
+		<DataTable title={$_('home.process.title')} rows={processes} {headers}>
+			<svelte:fragment slot="cell" let:cell>
+				{#if cell.key === 'id'}
+					<Link href={`/model/${modelId}/process/${cell.value}`}>
+						{cell.value}
+					</Link>
+				{:else}
 					{cell.value}
-				</Link>
-			{:else}
-				{cell.value}
-			{/if}
-		</svelte:fragment>
-	</DataTable>
+				{/if}
+			</svelte:fragment>
+		</DataTable>
+	</div>
 {/if}
+
+<style>
+	#process-list {
+		margin: 1rem;
+		max-width: 1000px;
+	}
+</style>

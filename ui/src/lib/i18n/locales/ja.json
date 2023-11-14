@@ -25,6 +25,7 @@
 				"label": "移動時の送り速度"
 			},
 			"offset": "オフセット",
+			"sendFile": "Gコードをマシニングセンタに送信",
 			"submit": "設定",
 			"done": "設定が完了しました。"
 		},
@@ -76,6 +77,9 @@
 				"step3": "3. プログラム実行"
 			}
 		},
+		"process": {
+			"title": "測定結果一覧"
+		},
 		"result": {
 			"title": "測定結果",
 			"edge": {
@@ -87,7 +91,7 @@
 				"title": "線",
 				"length": "長さ",
 				"rlength": "測定長さ",
-				"lengthDiff": "誤差(μm)"
+				"lengthDiff": "誤差"
 			},
 			"arc": {
 				"title": "円弧",

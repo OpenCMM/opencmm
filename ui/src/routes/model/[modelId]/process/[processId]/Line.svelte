@@ -50,7 +50,7 @@
 	<DataTable size="short" title={$_('home.result.line.title')} {headers} rows={row}>
 		<svelte:fragment slot="cell" let:cell>
 			{#if cell.key === 'lengthDiff'}
-				{#if Math.abs(parseFloat(cell.value)) < 100.0}
+				{#if Math.abs(parseFloat(cell.value)) < 0.05}
 					<span style="color: green;">{cell.value}</span>
 				{:else}
 					<span style="color: red;">{cell.value}</span>
