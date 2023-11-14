@@ -17,10 +17,10 @@ from typing import Optional
 from server import result
 from server.listener import (
     listener_start,
-    update_data_after_measurement,
     status,
     hakaru,
 )
+from server.measure import update_data_after_measurement
 from server.config import MYSQL_CONFIG, MODEL_PATH
 from server.model import (
     get_3dmodel_data,
@@ -251,7 +251,12 @@ async def estimate_measurement(
 
     # add process status check
 
-    update_data_after_measurement(model_id, process_id, MYSQL_CONFIG)
+    background_tasks.add_task(
+        update_data_after_measurement,
+        MYSQL_CONFIG,
+        process_id,
+        model_id,
+    )
     return {"status": "ok", "process_id": process_id}
 
 
