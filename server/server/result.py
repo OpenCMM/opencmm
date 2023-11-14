@@ -15,7 +15,21 @@ def fetch_edges(model_id: int):
     points = cursor.fetchall()
     cursor.close()
     cnx.close()
+    return points
 
+
+def fetch_edge_result(process_id: int):
+    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+    cursor = cnx.cursor()
+
+    query = """
+		SELECT id, x, y, z
+		FROM edge_result WHERE process_id = %s
+	"""
+    cursor.execute(query, (process_id,))
+    points = cursor.fetchall()
+    cursor.close()
+    cnx.close()
     return points
 
 

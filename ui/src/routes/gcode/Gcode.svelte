@@ -10,6 +10,8 @@
 
 	let container: HTMLDivElement;
 	export let modelId: string;
+	export let processId: string;
+	export let offset: number[];
 
 	onMount(() => {
 		// Scene
@@ -40,6 +42,7 @@
 				material = new THREE.MeshPhongMaterial({ opacity: geometry.alpha, vertexColors: true });
 			}
 			const mesh = new THREE.Mesh(geometry, material);
+			mesh.geometry.translate(offset[0], offset[1], offset[2]); // apply translation
 			scene.add(mesh);
 		});
 
@@ -48,14 +51,25 @@
 				const edges = res.data['edges'];
 
 				for (const edge of edges) {
-					const [, , x, y, z, rx, ry, rz] = edge;
+					const [, , x, y, z] = edge;
 					const point = new THREE.Vector3(x, y, z);
-					const measuredEdge = new THREE.Vector3(rx, ry, rz);
 					const pointMesh = getSphereMesh(0.3, 0xfcba03);
-					const edgeMesh = getSphereMesh(0.3, 0x00f719);
 					pointMesh.position.copy(point);
-					edgeMesh.position.copy(measuredEdge);
+					pointMesh.geometry.translate(offset[0], offset[1], offset[2]);
 					scene.add(pointMesh);
+				}
+			}
+		});
+
+		axios.get(`${BACKEND_URL}/result/edges/result/${processId}`).then((res) => {
+			if (res.status === 200) {
+				const edges = res.data['edges'];
+
+				for (const edge of edges) {
+					const [, x, y, z] = edge;
+					const measuredEdge = new THREE.Vector3(x, y, z);
+					const edgeMesh = getSphereMesh(0.3, 0x00f719);
+					edgeMesh.position.copy(measuredEdge);
 					scene.add(edgeMesh);
 				}
 			}

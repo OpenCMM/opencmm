@@ -290,6 +290,12 @@ async def get_result_edges(model_id: int):
     return {"edges": edges}
 
 
+@app.get("/result/edges/result/{process_id}")
+async def get_edge_result(process_id: int):
+    edges = result.fetch_edge_result(process_id)
+    return {"edges": edges}
+
+
 @app.get("/result/debug/points/{process_id}")
 def get_debug_points(process_id: int):
     points = result.fetch_unique_points(process_id)

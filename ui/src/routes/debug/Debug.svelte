@@ -32,8 +32,6 @@
 
 		const stlLoader = new STLLoader();
 		stlLoader.load(`${BACKEND_URL}/load/model/${modelId}`, function (geometry: any) {
-			console.log(offset);
-
 			let material = new THREE.MeshPhongMaterial({
 				color: 0xf0f0f0,
 				opacity: 0.6,

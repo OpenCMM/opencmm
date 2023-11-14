@@ -12,11 +12,11 @@
 	import { goto } from '$app/navigation';
 
 	const modelId = $page.url.searchParams.get('id');
+	const processId = $page.url.searchParams.get('process');
 
 	let loaded = false;
 
 	let selectedIndex = 0;
-	let processId = '1';
 	interface ModelInfo {
 		id: number;
 		name: string;
@@ -43,7 +43,7 @@
 	});
 </script>
 
-{#if !loaded || !modelId}
+{#if !loaded || !modelId || !processId}
 	<Loading />
 {:else}
 	<div id="model-page">

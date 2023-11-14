@@ -9,6 +9,7 @@ from server.config import (
 )
 from server.mark.edge import get_edge_ids_order_by_x_y, import_edge_results
 from .sensor import get_sensor_data
+from server.model import get_model_data
 import numpy as np
 from .gcode import (
     load_gcode,
@@ -16,9 +17,7 @@ from .gcode import (
     get_timestamp_at_point,
 )
 from .mtconnect import get_mtconnect_data
-from server.mark import pair
-
-# from server.mark import arc, pair
+from server.mark import arc, pair
 import logging
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
@@ -64,7 +63,10 @@ def update_data_after_measurement(
     client.on_message = on_message
     client.connect(MQTT_BROKER_URL, 1883, 60)
 
-    gcode = load_gcode("tests/fixtures/gcode/first.STL.gcode")
+    model_row = get_model_data(model_id)
+    filename = model_row[1]
+    # offset = (model_row[3], model_row[4], model_row[5])
+    gcode = load_gcode(f"tests/fixtures/gcode/{filename}.gcode")
     mtconnect_data = get_mtconnect_data(process_id, mysql_config)
     np_mtconnect_data = np.array(mtconnect_data)
     z = np_mtconnect_data[0][5]
@@ -132,7 +134,7 @@ def update_data_after_measurement(
 
     try:
         pair.add_line_length(model_id, mysql_config, process_id)
-        # arc.add_measured_arc_info(model_id, mysql_config)
+        arc.add_measured_arc_info(mysql_config, process_id)
         status.update_process_status(mysql_config, process_id, "done")
         logger.info("done")
         disconnect_and_publish_log("done")
