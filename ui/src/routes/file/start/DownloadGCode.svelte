@@ -13,8 +13,6 @@
 </script>
 
 <div class="bx--form-item">
-	<h3>{$_('home.gcode.download.label')}</h3>
-	<p class="download-description">{$_('home.gcode.download.description')}</p>
 	<ButtonSet>
 		<Button icon={Download} href={`${BACKEND_URL}/download/gcode/${modelId}`}
 			>{$_('home.gcode.download.helperText')}</Button
@@ -28,10 +26,5 @@
 <style>
 	.bx--form-item {
 		margin-top: 1rem;
-	}
-
-	.download-description {
-		margin-top: 1rem;
-		margin-bottom: 1rem;
 	}
 </style>

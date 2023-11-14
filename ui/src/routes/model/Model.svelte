@@ -9,6 +9,7 @@
 	import Line from './Line.svelte';
 	import ModelCheck from './ModelCheck.svelte';
 	import { redirectToFilePage } from '$lib/access/path';
+	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
 
 	const modelId = $page.url.searchParams.get('id');
@@ -55,7 +56,9 @@
 					</h1>
 				</Column>
 				<Column>
-					<Button icon={ChartStepper} on:click={() => goto(`/gcode?id=${modelId}`)}>GCode</Button>
+					<Button icon={ChartStepper} on:click={() => goto(`/gcode?id=${modelId}`)}
+						>{$_('common.gcode')}</Button
+					>
 				</Column>
 			</Row>
 			<Row>

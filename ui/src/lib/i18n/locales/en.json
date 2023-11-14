@@ -118,6 +118,7 @@
 		}
 	},
 	"common": {
+		"gcode": "GCode",
 		"cancel": "Go back",
 		"save": "Save",
 		"saveSuccess": "Saved successfully",

@@ -1,4 +1,3 @@
-import paho.mqtt.client as mqtt
 import threading
 from server.config import (
     MQTT_BROKER_URL,
