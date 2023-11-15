@@ -13,11 +13,11 @@
 			"labelDescription": "STLファイルのみ対応しています"
 		},
 		"setup": {
-			"title": "GCode作成",
+			"title": "Gコード作成",
 			"measureLength": {
 				"label": "測定箇所の長さ"
 			},
-			"loading": "GCode作成中...",
+			"loading": "Gコード作成中...",
 			"measureFeedRate": {
 				"label": "測定時の送り速度"
 			},
@@ -25,24 +25,25 @@
 				"label": "移動時の送り速度"
 			},
 			"offset": "オフセット",
+			"sendFile": "Gコードをマシニングセンタに送信",
 			"submit": "設定",
 			"done": "設定が完了しました。"
 		},
 		"gcode": {
 			"download": {
-				"label": "GCodeをダウンロード",
-				"description": "GCodeをダウンロードしマシニングセンタにセットしてください。",
-				"check": "GCodeを確認",
+				"label": "Gコードをダウンロード",
+				"description": "Gコードをダウンロードしマシニングセンタにセットしてください。",
+				"check": "Gコードを確認",
 				"helperText": "ダウンロード"
 			}
 		},
 		"start": {
 			"howto": {
-				"instruction": "以下の名前のGCodeを選択し、マシニングセンタでプログラムを実行してください。",
+				"instruction": "以下の名前のGコードを選択し、マシニングセンタでプログラムを実行してください。",
 				"programNumber": "プログラム番号",
-				"step1": "1. GCodeをダウンロード",
-				"step2": "2. GCodeをマシニングセンタにセット",
-				"step3": "3. GCodeを選択しマシニングセンタをスタート"
+				"step1": "1. Gコードをダウンロード",
+				"step2": "2. Gコードをマシニングセンタにセット",
+				"step3": "3. Gコードを選択しマシニングセンタをスタート"
 			},
 			"title": "測定を開始します",
 			"description": "こちらのボタンをクリックしてセンサを測定可能な状態にしてください。",
@@ -64,38 +65,41 @@
 				"name": "ファイル名",
 				"size": "サイズ",
 				"lastModified": "最終更新日時",
-				"gcodeReady": "GCode",
-				"createGcode": "GCode作成",
+				"gcodeReady": "Gコード",
+				"createGcode": "Gコード作成",
 				"modelView": "3Dモデル",
-				"downloadGcode": "GCodeダウンロード",
+				"downloadGcode": "Gコードダウンロード",
 				"delete": "削除"
 			},
 			"progress": {
 				"step1": "1. 3Dモデルアップロード",
-				"step2": "2. GCode作成",
+				"step2": "2. Gコード作成",
 				"step3": "3. プログラム実行"
 			}
+		},
+		"process": {
+			"title": "測定結果一覧"
 		},
 		"result": {
 			"title": "測定結果",
 			"edge": {
 				"title": "点",
 				"coordinate": "座標",
-				"rcoordinate": "推定座標"
+				"rcoordinate": "測定座標"
 			},
 			"line": {
 				"title": "線",
 				"length": "長さ",
-				"rlength": "推定長さ",
-				"lengthDiff": "誤差(μm)"
+				"rlength": "測定長さ",
+				"lengthDiff": "誤差"
 			},
 			"arc": {
 				"title": "円弧",
 				"radius": "半径",
 				"center": "中心",
-				"rradius": "推定半径",
+				"rradius": "測定半径",
 				"radiusDiff": "誤差",
-				"rcenter": "推定中心"
+				"rcenter": "測定中心"
 			}
 		}
 	},
@@ -118,6 +122,7 @@
 		}
 	},
 	"common": {
+		"gcode": "Gコード",
 		"cancel": "戻る",
 		"save": "保存",
 		"saveSuccess": "保存しました",

@@ -3,5 +3,5 @@ export const displayCoordinates = (x: number, y: number, z: number) => {
 };
 
 export const displayLengthDifference = (length: number, rlength: number) => {
-	return ((rlength - length) * 1000).toFixed(2);
+	return (rlength - length).toFixed(3);
 };

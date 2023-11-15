@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Debug from './Debug.svelte';
 	import { Grid, Row, Column, ProgressBar } from 'carbon-components-svelte';
-	import { _ } from 'svelte-i18n';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import axios from 'axios';

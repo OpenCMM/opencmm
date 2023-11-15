@@ -134,7 +134,7 @@ def update_data_after_measurement(
 
     try:
         pair.add_line_length(model_id, mysql_config, process_id)
-        arc.add_measured_arc_info(mysql_config, process_id)
+        arc.add_measured_arc_info(model_id, mysql_config, process_id)
         status.update_process_status(mysql_config, process_id, "done")
         logger.info("done")
         disconnect_and_publish_log("done")

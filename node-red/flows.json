@@ -24,37 +24,6 @@
         "out": []
     },
     {
-        "id": "c47df58c9700d702",
-        "type": "mqtt-broker",
-        "name": "mos",
-        "broker": "192.168.10.104",
-        "port": "1883",
-        "clientid": "",
-        "autoConnect": true,
-        "usetls": false,
-        "protocolVersion": "4",
-        "keepalive": "60",
-        "cleansession": true,
-        "autoUnsubscribe": true,
-        "birthTopic": "",
-        "birthQos": "0",
-        "birthRetain": "false",
-        "birthPayload": "",
-        "birthMsg": {},
-        "closeTopic": "",
-        "closeQos": "0",
-        "closeRetain": "false",
-        "closePayload": "",
-        "closeMsg": {},
-        "willTopic": "",
-        "willQos": "0",
-        "willRetain": "false",
-        "willPayload": "",
-        "willMsg": {},
-        "userProps": "",
-        "sessionExpiry": ""
-    },
-    {
         "id": "09a4da490bb9cdd6",
         "type": "ui_base",
         "theme": {
@@ -322,43 +291,6 @@
         ]
     },
     {
-        "id": "19710fc8d505f383",
-        "type": "mqtt in",
-        "z": "25496ff795f33417",
-        "name": "",
-        "topic": "mtconnect/demo",
-        "qos": "2",
-        "datatype": "auto-detect",
-        "broker": "c47df58c9700d702",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 140,
-        "y": 420,
-        "wires": [
-            [
-                "5540e18fdffcfede"
-            ]
-        ]
-    },
-    {
-        "id": "5540e18fdffcfede",
-        "type": "debug",
-        "z": "25496ff795f33417",
-        "name": "debug 3",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 440,
-        "y": 420,
-        "wires": []
-    },
-    {
         "id": "28b5056b2ea2b762",
         "type": "http request",
         "z": "25496ff795f33417",
@@ -381,8 +313,8 @@
                 "valueValue": "payload.model_id"
             }
         ],
-        "x": 510,
-        "y": 580,
+        "x": 550,
+        "y": 260,
         "wires": [
             [
                 "a7f642b0ed5f98d2"
@@ -401,8 +333,8 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 680,
-        "y": 580,
+        "x": 720,
+        "y": 260,
         "wires": []
     },
     {
@@ -426,8 +358,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 100,
-        "y": 580,
+        "x": 140,
+        "y": 260,
         "wires": [
             [
                 "22bbe12e58927ac2"
@@ -453,8 +385,8 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 270,
-        "y": 580,
+        "x": 310,
+        "y": 260,
         "wires": [
             [
                 "28b5056b2ea2b762"
@@ -490,8 +422,8 @@
                 "valueValue": ""
             }
         ],
-        "x": 500,
-        "y": 740,
+        "x": 540,
+        "y": 420,
         "wires": [
             [
                 "717f6e78c7680f89"
@@ -510,8 +442,8 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 680,
-        "y": 740,
+        "x": 720,
+        "y": 420,
         "wires": []
     },
     {
@@ -535,8 +467,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 100,
-        "y": 740,
+        "x": 140,
+        "y": 420,
         "wires": [
             [
                 "e532f3297773b9d8"
@@ -562,8 +494,8 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 300,
-        "y": 740,
+        "x": 340,
+        "y": 420,
         "wires": [
             [
                 "3d5164f4898a5899"
@@ -1044,7 +976,7 @@
         "rules": [
             {
                 "t": "eq",
-                "v": "MTConnect/Current/535E85A7_-1CF1-4D1C-9D5C-D386C0CFB37A",
+                "v": "MTConnect/Current/MITSUBISHI1",
                 "vt": "str"
             }
         ],
@@ -1707,7 +1639,7 @@
         "correl": "",
         "expiry": "",
         "broker": "8e7d86e88ee54c5e",
-        "x": 810,
+        "x": 650,
         "y": 660,
         "wires": []
     },
@@ -1751,7 +1683,7 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 540,
+        "x": 500,
         "y": 780,
         "wires": [
             []
@@ -1808,7 +1740,7 @@
         "font": "",
         "fontSize": 16,
         "color": "#000000",
-        "x": 690,
+        "x": 610,
         "y": 720,
         "wires": []
     },
@@ -1909,7 +1841,7 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 230,
+        "x": 340,
         "y": 860,
         "wires": []
     },
@@ -1948,5 +1880,268 @@
         "wires": [
             []
         ]
+    },
+    {
+        "id": "04821f5e8209f1e3",
+        "type": "mqtt in",
+        "z": "344499584571a0ed",
+        "name": "",
+        "topic": "import/mtconnect",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "8e7d86e88ee54c5e",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 860,
+        "y": 620,
+        "wires": [
+            [
+                "1a1c42145c451ea3"
+            ]
+        ]
+    },
+    {
+        "id": "1887edfee23bcbd1",
+        "type": "mqtt in",
+        "z": "344499584571a0ed",
+        "name": "",
+        "topic": "import/sensor",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "8e7d86e88ee54c5e",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 850,
+        "y": 680,
+        "wires": [
+            [
+                "4f3c715e7111dc42"
+            ]
+        ]
+    },
+    {
+        "id": "33043f7f4f2760f5",
+        "type": "join",
+        "z": "344499584571a0ed",
+        "name": "",
+        "mode": "custom",
+        "build": "object",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "payload.db",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": true,
+        "timeout": "",
+        "count": "2",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "num",
+        "reduceFixup": "",
+        "x": 1230,
+        "y": 640,
+        "wires": [
+            [
+                "894e962eb7091723"
+            ]
+        ]
+    },
+    {
+        "id": "1a1c42145c451ea3",
+        "type": "change",
+        "z": "344499584571a0ed",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload.db",
+                "pt": "msg",
+                "to": "mtconnect",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1050,
+        "y": 620,
+        "wires": [
+            [
+                "33043f7f4f2760f5"
+            ]
+        ]
+    },
+    {
+        "id": "4f3c715e7111dc42",
+        "type": "change",
+        "z": "344499584571a0ed",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload.db",
+                "pt": "msg",
+                "to": "sensor",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1050,
+        "y": 680,
+        "wires": [
+            [
+                "33043f7f4f2760f5"
+            ]
+        ]
+    },
+    {
+        "id": "894e962eb7091723",
+        "type": "switch",
+        "z": "344499584571a0ed",
+        "name": "check process_id",
+        "property": "payload.mtconnect.process_id",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "payload.sensor.process_id",
+                "vt": "msg"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 1430,
+        "y": 640,
+        "wires": [
+            [
+                "4568b0713f50b561",
+                "4e77d38e01431020"
+            ]
+        ]
+    },
+    {
+        "id": "4568b0713f50b561",
+        "type": "debug",
+        "z": "344499584571a0ed",
+        "name": "debug 15",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1660,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "4e77d38e01431020",
+        "type": "change",
+        "z": "344499584571a0ed",
+        "name": "post payload",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload.process_id",
+                "pt": "msg",
+                "to": "payload.sensor.process_id",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1410,
+        "y": 720,
+        "wires": [
+            [
+                "863b0944d5c512e4"
+            ]
+        ]
+    },
+    {
+        "id": "863b0944d5c512e4",
+        "type": "http request",
+        "z": "344499584571a0ed",
+        "name": "Estimate measurement",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "query",
+        "url": "http://backend:8000/estimate/measurement",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "keyType": "Accept",
+                "keyValue": "",
+                "valueType": "application/json",
+                "valueValue": ""
+            },
+            {
+                "keyType": "Content-Type",
+                "keyValue": "",
+                "valueType": "application/json",
+                "valueValue": ""
+            }
+        ],
+        "x": 1630,
+        "y": 720,
+        "wires": [
+            [
+                "7c21a2fe02e55289"
+            ]
+        ]
+    },
+    {
+        "id": "7c21a2fe02e55289",
+        "type": "json",
+        "z": "344499584571a0ed",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 1810,
+        "y": 720,
+        "wires": [
+            [
+                "452a187324c07cc7"
+            ]
+        ]
+    },
+    {
+        "id": "452a187324c07cc7",
+        "type": "debug",
+        "z": "344499584571a0ed",
+        "name": "debug 16",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1960,
+        "y": 720,
+        "wires": []
     }
 ]

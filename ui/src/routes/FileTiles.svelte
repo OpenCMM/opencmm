@@ -38,7 +38,7 @@
 		<Loading description="Loading..." />
 	{:else}
 		{#each files as file}
-			<ClickableTile on:click={() => goto(`/model?id=${file.modelId}`)}>
+			<ClickableTile on:click={() => goto(`/model/${file.modelId}`)}>
 				{file.name}
 			</ClickableTile>
 		{/each}

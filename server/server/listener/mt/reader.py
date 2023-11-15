@@ -2,13 +2,17 @@ import requests
 import xml.etree.ElementTree as ET
 import mysql.connector
 import logging
+import paho.mqtt.publish as publish
 from server.config import (
+    IMPORT_MTCONNECT_TOPIC,
     LISTENER_LOG_TOPIC,
     MQTT_USERNAME,
     MQTT_PASSWORD,
     PROCESS_CONTROL_TOPIC,
 )
+from server.measure import import_topic_payload
 from .parse import (
+    MTConnectParseError,
     is_first_chunk,
     remove_http_response_header,
     is_last_chunk,
@@ -73,7 +77,10 @@ def import_mtconnect_data(mysql_config: dict, _mt_data_list: list):
 
 
 def mtconnect_streaming_reader(
-    mtconnect_config: tuple, mysql_config: dict, process_id: int
+    mtconnect_config: tuple,
+    mysql_config: dict,
+    process_id: int,
+    mqtt_url: str,
 ):
     (url, interval) = mtconnect_config
     endpoint = f"{url}&interval={interval}"
@@ -88,6 +95,13 @@ def mtconnect_streaming_reader(
                     continue
                 if done:
                     import_mtconnect_data(mysql_config, mt_data_list)
+                    logger.info("mtconnect data imported")
+                    publish.single(
+                        IMPORT_MTCONNECT_TOPIC,
+                        import_topic_payload(process_id),
+                        hostname=mqtt_url,
+                        auth={"username": MQTT_USERNAME, "password": MQTT_PASSWORD},
+                    )
                     break
 
                 raw_data = chunk.decode("utf-8")
@@ -106,6 +120,12 @@ def mtconnect_streaming_reader(
                                 current_row = _current_row
                         except ET.ParseError:
                             pass
+                        except MTConnectParseError as e:
+                            logger.warning(e)
+                            status.update_process_status(
+                                mysql_config, process_id, "MTConnectParseError", str(e)
+                            )
+
                 else:
                     xml_buffer += raw_data
                     if not is_last_chunk(raw_data):
@@ -123,6 +143,13 @@ def mtconnect_streaming_reader(
                         status.update_process_status(
                             mysql_config, process_id, err_msg, err_msg
                         )
+                        break
+                    except MTConnectParseError as e:
+                        logger.warning(e)
+                        status.update_process_status(
+                            mysql_config, process_id, "MTConnectParseError", str(e)
+                        )
+                        break
 
         else:
             err_msg = f"Error: {response.status_code}"

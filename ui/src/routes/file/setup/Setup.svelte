@@ -5,7 +5,7 @@
 	import { BACKEND_URL } from '$lib/constants/backend';
 	import { page } from '$app/stores';
 	import { InlineLoading } from 'carbon-components-svelte';
-	import { Form, FormGroup, TextInput, Button } from 'carbon-components-svelte';
+	import { Form, FormGroup, TextInput, Button, Checkbox } from 'carbon-components-svelte';
 	import { _ } from 'svelte-i18n';
 
 	const modelId = $page.url.searchParams.get('id');
@@ -18,6 +18,7 @@
 	let error: string | null = null;
 	let settingDone = false;
 	let loading = false;
+	let sendFile = true;
 	const handleSubmit = async (e: Event) => {
 		loading = true;
 		e.preventDefault();
@@ -29,7 +30,8 @@
 			move_feedrate: Number(moveFeedRate),
 			x_offset: Number(xOffset),
 			y_offset: Number(yOffset),
-			z_offset: Number(zOffset)
+			z_offset: Number(zOffset),
+			send_gcode: sendFile
 		};
 
 		try {
@@ -88,6 +90,9 @@
 			</FormGroup>
 			<FormGroup>
 				<TextInput labelText="z" id="zOffset" bind:value={zOffset} />
+			</FormGroup>
+			<FormGroup>
+				<Checkbox bind:checked={sendFile} labelText={$_('home.setup.sendFile')} />
 			</FormGroup>
 			{#if loading}
 				<InlineLoading description={$_('home.setup.loading')} />

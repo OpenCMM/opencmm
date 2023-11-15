@@ -97,6 +97,8 @@ def test_update_data_after_measurement():
     process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
     create_mock_data(filename, process_id)
     update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)
+    process_result = status.get_process_status(MYSQL_CONFIG, process_id)
+    assert process_result[2] == "done"
 
 
 def test_update_data_after_measurement_with_arc():
@@ -105,3 +107,5 @@ def test_update_data_after_measurement_with_arc():
     process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
     create_mock_data(filename, process_id)
     update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)
+    process_result = status.get_process_status(MYSQL_CONFIG, process_id)
+    assert process_result[2] == "done"

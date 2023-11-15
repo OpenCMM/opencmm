@@ -129,40 +129,45 @@ def get_arc(arc_id: int, mysql_config: dict):
     return arc
 
 
-def get_arcs(mysql_config: dict):
+def get_arcs(mysql_config: dict, model_id: int):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
-    query = "SELECT * FROM arc"
-    cursor.execute(query)
+    query = "SELECT * FROM arc WHERE model_id = %s"
+    cursor.execute(query, (model_id,))
     arcs = cursor.fetchall()
     cursor.close()
     cnx.close()
     return arcs
 
 
-def get_arc_edge(arc_id: int, mysql_config: dict):
+def get_arc_edge_result(arc_id: int, process_id: int, mysql_config: dict):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
-    query = "SELECT x,y,z FROM edge WHERE arc_id = %s"
-    cursor.execute(query, (arc_id,))
+    query = (
+        "SELECT edge_result.x,edge_result.y,edge_result.z FROM edge "
+        "INNER JOIN edge_result "
+        "ON edge.id = edge_result.edge_id "
+        "WHERE arc_id = %s AND process_id = %s"
+    )
+    cursor.execute(query, (arc_id, process_id))
     edges = cursor.fetchall()
     cursor.close()
     cnx.close()
     return edges
 
 
-def add_measured_arc_info(mysql_config: dict, process_id: int):
+def add_measured_arc_info(model_id: int, mysql_config: dict, process_id: int):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
 
-    arcs = get_arcs(mysql_config)
+    arcs = get_arcs(mysql_config, model_id)
     for arc in arcs:
         arc_id = arc[0]
-        edges = get_arc_edge(arc_id, mysql_config)
+        edges = get_arc_edge_result(arc_id, process_id, mysql_config)
         try:
             radius, center = get_arc_info(np.array(edges))
             query = (
-                "INSERT INTO arc_result (arc_id, process_id, radius, cx, cy, cz) "
+                "INSERT INTO arc_result (radius, cx, cy, cz, arc_id, process_id) "
                 "VALUES (%s, %s, %s, %s, %s, %s) "
             )
             data = [radius, center[0], center[1], center[2]]

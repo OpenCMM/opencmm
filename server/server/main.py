@@ -17,10 +17,10 @@ from typing import Optional
 from server import result
 from server.listener import (
     listener_start,
-    update_data_after_measurement,
     status,
     hakaru,
 )
+from server.measure import EstimateConfig, update_data_after_measurement
 from server.config import MYSQL_CONFIG, MODEL_PATH
 from server.model import (
     get_3dmodel_data,
@@ -51,12 +51,12 @@ app = FastAPI()
 
 origins = ["*"]
 
-mtconnect_url = (
-    "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
-)
 # mtconnect_url = (
-#     "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
+#     "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
 # )
+mtconnect_url = (
+    "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -240,10 +240,10 @@ async def start_measurement_with_program_name(
 
 @app.post("/estimate/measurement")
 async def estimate_measurement(
-    model_id: int, process_id: int, background_tasks: BackgroundTasks
+    _conf: EstimateConfig, background_tasks: BackgroundTasks
 ):
-    _process = status.get_process_status(MYSQL_CONFIG, process_id)
-    if _process is not None:
+    _process = status.get_process_status(MYSQL_CONFIG, _conf.process_id)
+    if _process is None:
         raise HTTPException(
             status_code=400,
             detail="Invalid process_id",
@@ -251,8 +251,14 @@ async def estimate_measurement(
 
     # add process status check
 
-    update_data_after_measurement(model_id, process_id, MYSQL_CONFIG)
-    return {"status": "ok", "process_id": process_id}
+    model_id = _process[1]
+    background_tasks.add_task(
+        update_data_after_measurement,
+        MYSQL_CONFIG,
+        _conf.process_id,
+        model_id,
+    )
+    return {"status": "ok", "process_id": _conf.process_id}
 
 
 @app.get("/get_model_id/from/program_name/{program_name}")
@@ -329,6 +335,12 @@ async def get_result_pair(model_id: int):
 async def get_result_arcs(model_id: int, process_id: int):
     arcs = result.fetch_arcs(model_id, process_id)
     return {"arcs": arcs}
+
+
+@app.get("/list/processes/{model_id}")
+async def get_process_list(model_id: int):
+    processes = status.get_process_list(MYSQL_CONFIG, model_id)
+    return {"processes": processes}
 
 
 @app.get("/get_measurement_status/{process_id}")

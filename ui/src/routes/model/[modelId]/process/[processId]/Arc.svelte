@@ -56,7 +56,7 @@
 	<DataTable size="short" title={$_('home.result.arc.title')} {headers} rows={row}>
 		<svelte:fragment slot="cell" let:cell>
 			{#if cell.key === 'radiusDiff'}
-				{#if Math.abs(parseFloat(cell.value)) < 100.0}
+				{#if Math.abs(parseFloat(cell.value)) < 0.05}
 					<span style="color: green;">{cell.value}</span>
 				{:else}
 					<span style="color: red;">{cell.value}</span>
