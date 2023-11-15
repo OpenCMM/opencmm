@@ -4,8 +4,10 @@ from datetime import datetime
 
 xml_start = '<?xml version="1.0" encoding="UTF-8"?>'
 
+
 class MTConnectParseError(Exception):
     pass
+
 
 def remove_http_response_header(res: str):
     xml_str = res[res.find(xml_start) :]
