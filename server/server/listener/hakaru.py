@@ -4,6 +4,7 @@ from time import sleep
 import mysql.connector
 from server.config import (
     CONTROL_SENSOR_TOPIC,
+    IMPORT_SENSOR_TOPIC,
     LISTENER_LOG_TOPIC,
     MQTT_BROKER_URL,
     MQTT_USERNAME,
@@ -14,6 +15,7 @@ from server.config import (
     RECEIVE_DATA_TOPIC,
 )
 import logging
+from server.measure import import_topic_payload
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
 logger = logging.getLogger(__name__)
@@ -138,8 +140,9 @@ def listen_sensor(
             logger.info(_msg)
             client.publish(LISTENER_LOG_TOPIC, _msg)
             client.unsubscribe(PROCESS_CONTROL_TOPIC)
-            client.disconnect()
             import_sensor_data(mysql_config)
+            client.publish(IMPORT_SENSOR_TOPIC, import_topic_payload(process_id))
+            client.disconnect()
 
     client.on_message = on_message
     client.connect(mqtt_url, 1883, 60)

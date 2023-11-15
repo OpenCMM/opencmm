@@ -33,6 +33,7 @@ def listener_start(
                 mtconnect_config,
                 mysql_config,
                 process_id,
+                MQTT_BROKER_URL,
             )
         ),
     )

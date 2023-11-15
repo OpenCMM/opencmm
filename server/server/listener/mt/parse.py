@@ -4,6 +4,8 @@ from datetime import datetime
 
 xml_start = '<?xml version="1.0" encoding="UTF-8"?>'
 
+class MTConnectParseError(Exception):
+    pass
 
 def remove_http_response_header(res: str):
     xml_str = res[res.find(xml_start) :]
@@ -105,15 +107,18 @@ def get_path_feedrate(root: ET.Element, ns: str):
 
 def mtconnect_table_row_data(xml_string: str, process_id: int):
     root = ET.fromstring(xml_string)
-    timestamp = datetime(1970, 1, 1, 0, 0)
-    xyz = get_coordinates(root, get_namespace(root))
-    line = get_linelabel(root, get_namespace(root))
-    feedrate = get_path_feedrate(root, get_namespace(root))
-    columns = [xyz, line, feedrate]
-    for c in columns:
-        if timestamp < c["timestamp"]:
-            timestamp = c["timestamp"]
-    x = xyz["value"][0]
-    y = xyz["value"][1]
-    z = xyz["value"][2]
+    try:
+        timestamp = datetime(1970, 1, 1, 0, 0)
+        xyz = get_coordinates(root, get_namespace(root))
+        line = get_linelabel(root, get_namespace(root))
+        feedrate = get_path_feedrate(root, get_namespace(root))
+        columns = [xyz, line, feedrate]
+        for c in columns:
+            if timestamp < c["timestamp"]:
+                timestamp = c["timestamp"]
+        x = xyz["value"][0]
+        y = xyz["value"][1]
+        z = xyz["value"][2]
+    except Exception as e:
+        raise MTConnectParseError(e)
     return (process_id, timestamp, x, y, z, line["value"], feedrate["value"])

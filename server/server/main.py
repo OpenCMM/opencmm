@@ -20,7 +20,7 @@ from server.listener import (
     status,
     hakaru,
 )
-from server.measure import update_data_after_measurement
+from server.measure import EstimateConfig, update_data_after_measurement
 from server.config import MYSQL_CONFIG, MODEL_PATH
 from server.model import (
     get_3dmodel_data,
@@ -51,12 +51,12 @@ app = FastAPI()
 
 origins = ["*"]
 
-mtconnect_url = (
-    "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
-)
 # mtconnect_url = (
-#     "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
+#     "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
 # )
+mtconnect_url = (
+    "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -240,10 +240,10 @@ async def start_measurement_with_program_name(
 
 @app.post("/estimate/measurement")
 async def estimate_measurement(
-    model_id: int, process_id: int, background_tasks: BackgroundTasks
+    _conf: EstimateConfig, background_tasks: BackgroundTasks
 ):
-    _process = status.get_process_status(MYSQL_CONFIG, process_id)
-    if _process is not None:
+    _process = status.get_process_status(MYSQL_CONFIG, _conf.process_id)
+    if _process is None:
         raise HTTPException(
             status_code=400,
             detail="Invalid process_id",
@@ -251,13 +251,14 @@ async def estimate_measurement(
 
     # add process status check
 
+    model_id = _process[1]
     background_tasks.add_task(
         update_data_after_measurement,
         MYSQL_CONFIG,
-        process_id,
+        _conf.process_id,
         model_id,
     )
-    return {"status": "ok", "process_id": process_id}
+    return {"status": "ok", "process_id": _conf.process_id}
 
 
 @app.get("/get_model_id/from/program_name/{program_name}")

@@ -40,6 +40,8 @@ PING_TOPIC = "sensor/ping"
 PONG_TOPIC = "sensor/pong"
 PROCESS_CONTROL_TOPIC = "process/control"
 LISTENER_LOG_TOPIC = "log/listener"
+IMPORT_SENSOR_TOPIC = "import/sensor"
+IMPORT_MTCONNECT_TOPIC = "import/mtconnect"
 
 
 MQTT_USERNAME = "opencmm"
