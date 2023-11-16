@@ -14,11 +14,14 @@
 	const processId = $page.url.searchParams.get('process');
 	let offset = [0.0, 0.0, 0.0];
 	let offsetLoaded = false;
+	let filename = '';
 	onMount(() => {
 		axios.get(`${BACKEND_URL}/get/model/table/data/${modelId}`).then((res) => {
 			if (res.status === 200) {
-				const [, , , offsetX, offsetY] = res.data;
+				console.log(res.data);
+				const [, _filename, , offsetX, offsetY] = res.data;
 				offset = [offsetX, offsetY, 0.0];
+				filename = _filename;
 				offsetLoaded = true;
 			}
 		});
@@ -31,7 +34,12 @@
 	<Grid padding>
 		<Row>
 			<Column>
-				<Button icon={DataTable} on:click={() => goto(`/model/${modelId}`)}>
+				<h1>
+					{filename}
+				</h1>
+			</Column>
+			<Column>
+				<Button icon={DataTable} on:click={() => goto(`/model/${modelId}/process/${processId}`)}>
 					{$_('home.result.title')}
 				</Button>
 			</Column>
