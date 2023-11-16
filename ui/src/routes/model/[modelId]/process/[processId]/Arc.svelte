@@ -53,7 +53,7 @@
 {#if !loaded}
 	<InlineLoading />
 {:else}
-	<DataTable size="short" title={$_('home.result.arc.title')} {headers} rows={row}>
+	<DataTable size="short" {headers} rows={row}>
 		<svelte:fragment slot="cell" let:cell>
 			{#if cell.key === 'radiusDiff'}
 				{#if Math.abs(parseFloat(cell.value)) < 0.05}

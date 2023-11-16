@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.optimize import least_squares
 import mysql.connector
+from server.config import get_config
 from mysql.connector.errors import IntegrityError
 
 
@@ -32,7 +33,8 @@ def import_arcs(model_id: int, arcs: list, mysql_config: dict):
     for arc_points in arcs:
         arc_info = to_arc_info(model_id, arc_points)
         arc_id = import_arc(arc_info, mysql_config)
-        edges = get_edges_for_arc(model_id, arc_id, arc_points, 3)
+        sample_size = get_config()["edge"]["arc"]["number"]
+        edges = get_edges_for_arc(model_id, arc_id, arc_points, sample_size)
         import_edges(edges, mysql_config)
 
 
@@ -164,6 +166,9 @@ def add_measured_arc_info(model_id: int, mysql_config: dict, process_id: int):
     for arc in arcs:
         arc_id = arc[0]
         edges = get_arc_edge_result(arc_id, process_id, mysql_config)
+        if len(edges) < 3:
+            # cannot calculate arc with less than 3 edges
+            continue
         try:
             radius, center = get_arc_info(np.array(edges))
             query = (

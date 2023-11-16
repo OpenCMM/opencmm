@@ -21,7 +21,7 @@ from server.listener import (
     hakaru,
 )
 from server.measure import EstimateConfig, update_data_after_measurement
-from server.config import MYSQL_CONFIG, MODEL_PATH
+from server.config import MYSQL_CONFIG, MODEL_PATH, get_config, update_conf
 from server.model import (
     get_3dmodel_data,
     get_recent_3dmodel_data,
@@ -51,13 +51,6 @@ app = FastAPI()
 
 origins = ["*"]
 
-# mtconnect_url = (
-#     "http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems"
-# )
-mtconnect_url = (
-    "https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem"
-)
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -79,13 +72,15 @@ def health_check():
 
 @app.get("/mtconnect_url")
 def get_mtconnect_url():
-    return {"url": mtconnect_url}
+    conf = get_config()
+    return {"url": conf["mtconnect"]["url"]}
 
 
 @app.post("/update/mtconnect_url")
 def update_mtconnect_url(url: str):
-    global mtconnect_url
-    mtconnect_url = url
+    conf = get_config()
+    conf["mtconnect"]["url"] = url
+    update_conf(conf)
     return {"status": "ok"}
 
 
@@ -202,7 +197,7 @@ async def start_measurement(
     background_tasks.add_task(
         listener_start,
         MYSQL_CONFIG,
-        (mtconnect_url, _conf.mtconnect_interval),
+        _conf.mtconnect_interval,
         process_id,
         (_conf.interval, _conf.threshold),
     )
@@ -231,7 +226,7 @@ async def start_measurement_with_program_name(
     background_tasks.add_task(
         listener_start,
         MYSQL_CONFIG,
-        (mtconnect_url, _conf.mtconnect_interval),
+        _conf.mtconnect_interval,
         process_id,
         (_conf.interval, _conf.threshold),
     )

@@ -16,6 +16,7 @@ smbprotocol = "^1.11.0"
 numpy-stl = "^3.0.1"
 gunicorn = "^21.2.0"
 mysql-connector-python = "^8.2.0"
+pyyaml = "^6.0.1"
 
 
 [tool.poetry.group.dev.dependencies]

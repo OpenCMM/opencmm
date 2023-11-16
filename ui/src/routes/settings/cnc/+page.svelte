@@ -16,7 +16,6 @@
 	onMount(() => {
 		// Load the settings here
 		axios.get(`${BACKEND_URL}/get_first_machine`).then((response) => {
-			console.log({ response });
 			cncIpAddress = response.data[1];
 			username = response.data[2];
 			password = response.data[3];

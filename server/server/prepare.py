@@ -43,6 +43,7 @@ def process_stl(
 
     # save gcode
     program_number = model_id_to_program_number(model_id)
+    edge.add_line_number_from_path(mysql_config, path)
     gcode = edge.generate_gcode(path, program_number)
     gcode_filename = get_gcode_filename(stl_filename)
     gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"

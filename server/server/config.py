@@ -1,4 +1,5 @@
 import os
+import yaml
 
 # For github actions
 CI_MYSQL_CONFIG = dict(
@@ -46,3 +47,16 @@ IMPORT_MTCONNECT_TOPIC = "import/mtconnect"
 
 MQTT_USERNAME = "opencmm"
 MQTT_PASSWORD = "opencmm"
+
+CONFIG_PATH = "data/config/dev.yaml"
+
+
+def get_config():
+    with open(CONFIG_PATH) as f:
+        config = yaml.load(f, Loader=yaml.FullLoader)
+    return config
+
+
+def update_conf(config: dict):
+    with open(CONFIG_PATH, "w") as f:
+        yaml.dump(config, f)

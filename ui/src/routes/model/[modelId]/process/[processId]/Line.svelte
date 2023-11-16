@@ -47,7 +47,7 @@
 {#if !loaded}
 	<InlineLoading />
 {:else}
-	<DataTable size="short" title={$_('home.result.line.title')} {headers} rows={row}>
+	<DataTable size="short" {headers} rows={row}>
 		<svelte:fragment slot="cell" let:cell>
 			{#if cell.key === 'lengthDiff'}
 				{#if Math.abs(parseFloat(cell.value)) < 0.05}

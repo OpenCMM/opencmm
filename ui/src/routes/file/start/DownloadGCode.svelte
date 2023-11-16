@@ -17,7 +17,7 @@
 		<Button icon={Download} href={`${BACKEND_URL}/download/gcode/${modelId}`}
 			>{$_('home.gcode.download.helperText')}</Button
 		>
-		<Button icon={ChartStepper} on:click={() => goto(`/gcode?id=${modelId}`)} kind="secondary"
+		<Button icon={ChartStepper} on:click={() => goto(`/file/gcode?id=${modelId}`)} kind="secondary"
 			>{$_('home.gcode.download.check')}</Button
 		>
 	</ButtonSet>
