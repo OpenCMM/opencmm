@@ -51,6 +51,7 @@ def point_to_line_distance(edges_on_the_same_line: list, point: tuple):
 
     return distance
 
+
 def validate_measured_edges(edges1, edges2):
     edge1_count = len(edges1)
     edge2_count = len(edges2)
@@ -65,6 +66,7 @@ def validate_measured_edges(edges1, edges2):
         return [[edges1, edges2[0]]]
     if edge2_count == 2 and edge1_count == 1:
         return [[edges2, edges1[0]]]
+
 
 def add_line_length(model_id: int, mysql_config: dict, process_id: int):
     pairs = get_pairs(model_id, mysql_config)

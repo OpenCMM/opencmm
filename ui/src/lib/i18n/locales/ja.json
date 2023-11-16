@@ -128,6 +128,8 @@
 		"saveSuccess": "保存しました",
 		"saveFailed": "保存に失敗しました",
 		"delete": "削除",
-		"ok": "OK"
+		"ok": "OK",
+		"arc": "円弧",
+		"line": "線"
 	}
 }

@@ -4,6 +4,7 @@
 	import { Button, ContentSwitcher, Loading, Switch } from 'carbon-components-svelte';
 	import { Grid, Row, Column } from 'carbon-components-svelte';
 	import ChartStepper from 'carbon-icons-svelte/lib/ChartStepper.svelte';
+	import Table from 'carbon-icons-svelte/lib/Table.svelte';
 	import Arc from './Arc.svelte';
 	import Line from './Line.svelte';
 	import ModelCheck from './ModelCheck.svelte';
@@ -62,6 +63,11 @@
 						{$_('common.gcode')}</Button
 					>
 				</Column>
+				<Column>
+					<Button icon={Table} on:click={() => goto(`/model/${modelId}`)}>
+						{$_('home.process.title')}</Button
+					>
+				</Column>
 			</Row>
 			<Row>
 				<Column>
@@ -69,8 +75,8 @@
 				</Column>
 				<Column>
 					<ContentSwitcher bind:selectedIndex>
-						<Switch>Arc</Switch>
-						<Switch>Line</Switch>
+						<Switch>{$_('common.arc')}</Switch>
+						<Switch>{$_('common.line')}</Switch>
 					</ContentSwitcher>
 
 					<div id="data-tale">
