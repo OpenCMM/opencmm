@@ -32,7 +32,7 @@ def import_arcs(model_id: int, arcs: list, mysql_config: dict):
     for arc_points in arcs:
         arc_info = to_arc_info(model_id, arc_points)
         arc_id = import_arc(arc_info, mysql_config)
-        edges = get_edges_for_arc(model_id, arc_id, arc_points, 3)
+        edges = get_edges_for_arc(model_id, arc_id, arc_points, 4)
         import_edges(edges, mysql_config)
 
 

@@ -93,6 +93,7 @@ def create_mock_data(filename: str, process_id: int):
     reader.import_mtconnect_data(MYSQL_CONFIG, mtconnect_mock_data)
     import_sensor_data(MYSQL_CONFIG, sensor_mock_data)
 
+
 def create_mock_missing_data(filename: str, process_id: int):
     start_coord = (0.0, 0.0)
     mtconnect_mock_data = []
@@ -114,11 +115,21 @@ def create_mock_missing_data(filename: str, process_id: int):
             random_number = random.random() * 0.2 + 0.9
             _x = (
                 start_coord[0]
-                + (x - start_coord[0]) * j * feedrate * sample_interval / distance * random_number
+                + (x - start_coord[0])
+                * j
+                * feedrate
+                * sample_interval
+                / distance
+                * random_number
             )
             _y = (
                 start_coord[1]
-                + (y - start_coord[1]) * j * feedrate * sample_interval / distance * random_number
+                + (y - start_coord[1])
+                * j
+                * feedrate
+                * sample_interval
+                / distance
+                * random_number
             )
             _x = round(_x, 3)
             _y = round(_y, 3)
@@ -140,7 +151,6 @@ def create_mock_missing_data(filename: str, process_id: int):
 
     reader.import_mtconnect_data(MYSQL_CONFIG, mtconnect_mock_data)
     import_sensor_data(MYSQL_CONFIG, sensor_mock_data)
-
 
 
 def test_update_data_after_measurement():
