@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def listener_start(
     mysql_config: dict,
-    mtconnect_config: tuple,
+    mtconnect_interval: int,
     process_id: int,
     streaming_config: tuple,
 ):
@@ -30,7 +30,7 @@ def listener_start(
         target=mt.mtconnect_streaming_reader,
         args=(
             (
-                mtconnect_config,
+                mtconnect_interval,
                 mysql_config,
                 process_id,
                 MQTT_BROKER_URL,

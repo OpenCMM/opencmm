@@ -1,0 +1,12 @@
+mtconnect:
+  url: http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems
+
+edge:
+  arc:
+    number: 4
+
+mqtt:
+  host: 192.168.0.19
+  port: 1883
+  username: opencmm
+  password: opencmm

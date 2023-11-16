@@ -9,6 +9,7 @@ from server.config import (
     MQTT_USERNAME,
     MQTT_PASSWORD,
     PROCESS_CONTROL_TOPIC,
+    get_config,
 )
 from server.measure import import_topic_payload
 from .parse import (
@@ -77,13 +78,14 @@ def import_mtconnect_data(mysql_config: dict, _mt_data_list: list):
 
 
 def mtconnect_streaming_reader(
-    mtconnect_config: tuple,
+    mtconnect_interval: int,
     mysql_config: dict,
     process_id: int,
     mqtt_url: str,
 ):
-    (url, interval) = mtconnect_config
-    endpoint = f"{url}&interval={interval}"
+    conf = get_config()
+    mtconnect_url = conf["mtconnect"]["url"]
+    endpoint = f"{mtconnect_url}&interval={mtconnect_interval}"
     current_row = None
 
     try:
