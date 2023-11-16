@@ -2,12 +2,14 @@ import paho.mqtt.client as mqtt
 from server.listener import status
 from datetime import datetime
 from server.config import (
+    GCODE_PATH,
     LISTENER_LOG_TOPIC,
     MQTT_BROKER_URL,
     MQTT_PASSWORD,
     MQTT_USERNAME,
 )
 from server.mark.edge import get_edge_ids_order_by_x_y, import_edge_results
+from server.prepare import get_gcode_filename
 from .sensor import get_sensor_data
 from server.model import get_model_data
 import numpy as np
@@ -66,7 +68,9 @@ def update_data_after_measurement(
     model_row = get_model_data(model_id)
     filename = model_row[1]
     # offset = (model_row[3], model_row[4], model_row[5])
-    gcode = load_gcode(f"tests/fixtures/gcode/{filename}.gcode")
+    gcode_filename = get_gcode_filename(filename)
+    gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
+    gcode = load_gcode(gcode_file_path)
     mtconnect_data = get_mtconnect_data(process_id, mysql_config)
     np_mtconnect_data = np.array(mtconnect_data)
     z = np_mtconnect_data[0][5]
