@@ -166,6 +166,9 @@ def add_measured_arc_info(model_id: int, mysql_config: dict, process_id: int):
     for arc in arcs:
         arc_id = arc[0]
         edges = get_arc_edge_result(arc_id, process_id, mysql_config)
+        if len(edges) < 3:
+            # cannot calculate arc with less than 3 edges
+            continue
         try:
             radius, center = get_arc_info(np.array(edges))
             query = (

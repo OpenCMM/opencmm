@@ -30,7 +30,7 @@ def test_update_mtconnect():
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
 
-    response = client.get("/mtconnect")
+    response = client.get("/mtconnect_url")
     assert response.status_code == 200
     assert response.json() == {"url": new_url}
 
