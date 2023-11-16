@@ -158,6 +158,7 @@ def create_mock_missing_data(filename: str, process_id: int):
     reader.import_mtconnect_data(MYSQL_CONFIG, mtconnect_mock_data)
     import_sensor_data(MYSQL_CONFIG, sensor_mock_data)
 
+
 def create_mock_multiple_edges(filename: str, process_id: int):
     """
     random mtconnect interval

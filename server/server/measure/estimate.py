@@ -8,7 +8,10 @@ from server.config import (
     MQTT_PASSWORD,
     MQTT_USERNAME,
 )
-from server.mark.edge import get_edge_ids_order_by_x_y, import_edge_results
+from server.mark.edge import (
+    import_edge_results,
+    get_edge_id_from_line_number,
+)
 from server.prepare import get_gcode_filename
 from .sensor import get_sensor_data
 from server.model import get_model_data
@@ -80,11 +83,10 @@ def update_data_after_measurement(
     line_idx = 0
     current_line = 0
     update_list = []
-    edge_ids = get_edge_ids_order_by_x_y(model_id, mysql_config)
-    idx = 0
     for row in np_mtconnect_data:
         line = int(row[6])
         if line % 2 != 0:
+            # Not measuring
             continue
 
         if line == current_line:
@@ -112,13 +114,19 @@ def update_data_after_measurement(
                 edge_coord = sensor_timestamp_to_coord(
                     start_timestamp, sensor_timestamp, start, direction_vector, feedrate
                 )
+                edge_id = get_edge_id_from_line_number(mysql_config, model_id, line)
                 update_list.append(
-                    (edge_ids[idx], process_id, edge_coord[0], edge_coord[1], z)
+                    (edge_id, process_id, edge_coord[0], edge_coord[1], z)
                 )
                 line_idx = 0
+                # ignore the rest of the sensor data
+                # multiple edges can be measured due to the following reasons:
+                # - noise (can be reduced by increasing the sensor threshold)
+                # - sensor restart
+                # - timestamp is not accurate
+                break
 
         current_line = line
-        idx += 1
 
     edge_count = len(update_list)
     if edge_count == 0:

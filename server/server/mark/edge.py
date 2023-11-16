@@ -81,6 +81,35 @@ def to_gcode_row(x, y, feedrate):
     return f"G1 X{x} Y{y} F{feedrate}"
 
 
+def add_line_number_from_path(mysql_config: dict, path: list):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
+    cursor = cnx.cursor()
+    cursor = cnx.cursor()
+    update_list = []
+    initial_line_number = 4
+    for idx, row in enumerate(path):
+        edge_id = row[4]
+        update_list.append((initial_line_number + idx * 2, edge_id))
+    query = "UPDATE edge SET line = %s WHERE id = %s"
+    cursor.executemany(query, update_list)
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+    return cursor.rowcount
+
+
+def get_edge_id_from_line_number(mysql_config: dict, model_id: int, line_number: int):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
+    cursor = cnx.cursor()
+    query = "SELECT id FROM edge WHERE model_id = %s AND line = %s"
+    cursor.execute(query, (model_id, line_number))
+    edge_id = cursor.fetchone()
+    cursor.close()
+    cnx.close()
+    if edge_id:
+        return edge_id[0]
+
+
 def get_edge_path(
     mysql_config: dict,
     model_id: int,
@@ -109,6 +138,7 @@ def get_edge_path(
                         to_gcode_row(x, py1, measure_feedrate),
                         x,
                         y,
+                        edge_id,
                     ]
                 )
 
@@ -121,6 +151,7 @@ def get_edge_path(
                         to_gcode_row(px1, y, measure_feedrate),
                         x,
                         y,
+                        edge_id,
                     ]
                 )
         else:
@@ -135,6 +166,7 @@ def get_edge_path(
                     to_gcode_row(point2[0], point2[1], measure_feedrate),
                     x,
                     y,
+                    edge_id,
                 ]
             )
     return sorted(path, key=lambda point: (point[2], point[3]))
