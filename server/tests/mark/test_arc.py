@@ -37,7 +37,6 @@ def test_get_edges_for_arc_many_edges():
 
         edges = get_edges_for_arc(1, 1, arc_points, 6)
         assert len(edges) == 6
-        breakpoint()
 
 
 @pytest.mark.skip(reason="not implemented")
