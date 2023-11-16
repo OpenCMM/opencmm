@@ -15,7 +15,6 @@ from server.config import (
     RECEIVE_DATA_TOPIC,
 )
 import logging
-from server.measure import import_topic_payload
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
 logger = logging.getLogger(__name__)
@@ -141,7 +140,7 @@ def listen_sensor(
             client.publish(LISTENER_LOG_TOPIC, _msg)
             client.unsubscribe(PROCESS_CONTROL_TOPIC)
             import_sensor_data(mysql_config)
-            client.publish(IMPORT_SENSOR_TOPIC, import_topic_payload(process_id))
+            client.publish(IMPORT_SENSOR_TOPIC, json.dumps({"process_id": process_id}))
             client.disconnect()
 
     client.on_message = on_message

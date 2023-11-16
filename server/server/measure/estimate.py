@@ -125,10 +125,10 @@ def update_data_after_measurement(
         status.update_process_status(
             mysql_config,
             process_id,
-            "Error at find_edges()",
+            "Error at update_data_after_measurement()",
             "No edge found",
         )
-        disconnect_and_publish_log("Error at find_edges(): No edge found")
+        disconnect_and_publish_log("No edge found")
         return
     import_edge_results(update_list, mysql_config)
 
@@ -145,6 +145,6 @@ def update_data_after_measurement(
     except Exception as e:
         logger.warning(e)
         status.update_process_status(
-            mysql_config, process_id, "Error at find_edges()", str(e)
+            mysql_config, process_id, "Error at update_data_after_measurement()", str(e)
         )
-        disconnect_and_publish_log("Error at find_edges()" + str(e))
+        disconnect_and_publish_log(str(e))

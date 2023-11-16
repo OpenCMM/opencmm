@@ -2,6 +2,7 @@ import requests
 import xml.etree.ElementTree as ET
 import mysql.connector
 import logging
+import json
 import paho.mqtt.publish as publish
 from server.config import (
     IMPORT_MTCONNECT_TOPIC,
@@ -11,7 +12,6 @@ from server.config import (
     PROCESS_CONTROL_TOPIC,
     get_config,
 )
-from server.measure import import_topic_payload
 from .parse import (
     MTConnectParseError,
     is_first_chunk,
@@ -100,7 +100,7 @@ def mtconnect_streaming_reader(
                     logger.info("mtconnect data imported")
                     publish.single(
                         IMPORT_MTCONNECT_TOPIC,
-                        import_topic_payload(process_id),
+                        json.dumps({"process_id": process_id}),
                         hostname=mqtt_url,
                         auth={"username": MQTT_USERNAME, "password": MQTT_PASSWORD},
                     )
