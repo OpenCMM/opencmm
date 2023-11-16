@@ -121,7 +121,7 @@ def get_edge_path(
     path = []
     edges = get_edges(mysql_config, model_id)
     for edge in edges:
-        edge_id, model_id, side_id, arc_id, x, y, z = edge
+        edge_id, model_id, side_id, arc_id, x, y, z, _line = edge
         # add offset
         (x, y, z) = (x + xyz_offset[0], y + xyz_offset[1], z + xyz_offset[2])
         if arc_id is None:
