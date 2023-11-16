@@ -62,6 +62,7 @@ def create_mock_data(filename: str, process_id: int):
         distance = ((x - start_coord[0]) ** 2 + (y - start_coord[1]) ** 2) ** 0.5
         feedrate = round(feedrate_per_min / 60.0, 3)
 
+        timestamp += timedelta(seconds=sample_interval)
         first_timestamp = timestamp
         for j in range(1, int(distance / (feedrate * sample_interval))):
             _x = (
@@ -109,6 +110,7 @@ def create_mock_missing_data(filename: str, process_id: int):
         distance = ((x - start_coord[0]) ** 2 + (y - start_coord[1]) ** 2) ** 0.5
         feedrate = round(feedrate_per_min / 60.0, 3)
 
+        timestamp += timedelta(seconds=sample_interval)
         first_timestamp = timestamp
         for j in range(1, int(distance / (feedrate * sample_interval))):
             # between 0.9 ~ 1.1

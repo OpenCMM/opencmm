@@ -51,6 +51,20 @@ def point_to_line_distance(edges_on_the_same_line: list, point: tuple):
 
     return distance
 
+def validate_measured_edges(edges1, edges2):
+    edge1_count = len(edges1)
+    edge2_count = len(edges2)
+    if edge1_count == 2 and edge2_count == 2:
+        return [
+            [edges1, edges2[0]],
+            [edges1, edges2[1]],
+            [edges2, edges1[0]],
+            [edges2, edges1[1]],
+        ]
+    if edge1_count == 2 and edge2_count == 1:
+        return [[edges1, edges2[0]]]
+    if edge2_count == 2 and edge1_count == 1:
+        return [[edges2, edges1[0]]]
 
 def add_line_length(model_id: int, mysql_config: dict, process_id: int):
     pairs = get_pairs(model_id, mysql_config)
@@ -63,19 +77,16 @@ def add_line_length(model_id: int, mysql_config: dict, process_id: int):
         edges1 = get_edges_by_side_id(side1[6], mysql_config, process_id)
         edges2 = get_edges_by_side_id(side2[6], mysql_config, process_id)
         sample_size = 0
-        line_edge_list = [
-            [edges1, edges2[0]],
-            [edges1, edges2[1]],
-            [edges2, edges1[0]],
-            [edges2, edges1[1]],
-        ]
+        line_edge_list = validate_measured_edges(edges1, edges2)
+        if not line_edge_list:
+            continue
         for [edges, edge] in line_edge_list:
             # check if edge is not None
             if edge and edge[0] and edge[1]:
                 sample_size += 1
                 total_measured_length += point_to_line_distance(edges, edge)
         if sample_size == 0:
-            return
+            continue
         measured_length = round(total_measured_length / sample_size, 3)
         add_measured_length(pair_id, length, measured_length, mysql_config, process_id)
 

@@ -18,7 +18,6 @@
 	onMount(() => {
 		axios.get(`${BACKEND_URL}/get/model/table/data/${modelId}`).then((res) => {
 			if (res.status === 200) {
-				console.log(res.data);
 				const [, _filename, , offsetX, offsetY] = res.data;
 				offset = [offsetX, offsetY, 0.0];
 				filename = _filename;
