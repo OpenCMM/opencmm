@@ -10,11 +10,13 @@
 
 	interface Process {
 		id: number;
+		datetime: string;
 		status: number;
 	}
 	const headers = [
 		{ key: 'id', value: 'id' },
-		{ key: 'status', value: 'status' }
+		{ key: 'datetime', value: $_('home.process.datetime') },
+		{ key: 'status', value: $_('home.process.status') }
 	];
 	let processes: Process[] = [];
 	onMount(() => {
@@ -24,6 +26,7 @@
 				for (const p of res.data['processes']) {
 					processes.push({
 						id: p[0],
+						datetime: p[7],
 						status: p[2]
 					});
 				}
@@ -43,6 +46,8 @@
 					<Link href={`/model/${modelId}/process/${cell.value}`}>
 						{cell.value}
 					</Link>
+				{:else if cell.key === 'datetime'}
+					{new Date(cell.value).toLocaleString()}
 				{:else}
 					{cell.value}
 				{/if}

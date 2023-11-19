@@ -78,7 +78,9 @@
 			}
 		},
 		"process": {
-			"title": "測定結果一覧"
+			"title": "測定結果一覧",
+			"datetime": "測定日時",
+			"status": "状態"
 		},
 		"result": {
 			"title": "測定結果",
@@ -120,6 +122,11 @@
 			"password": "パスワード",
 			"sharedFolder": "共有フォルダ"
 		}
+	},
+	"page": {
+		"page": "ページ",
+		"forwardText": "次へ",
+		"backwardText": "戻る"
 	},
 	"common": {
 		"gcode": "Gコード",

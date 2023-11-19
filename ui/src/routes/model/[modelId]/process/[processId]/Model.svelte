@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { BACKEND_URL } from '$lib/constants/backend';
-	import { Button, ContentSwitcher, Loading, Switch } from 'carbon-components-svelte';
+	import CaretRight from 'carbon-icons-svelte/lib/CaretRight.svelte';
+	import CaretLeft from 'carbon-icons-svelte/lib/CaretLeft.svelte';
+	import { Button, ButtonSet, ContentSwitcher, Loading, Switch } from 'carbon-components-svelte';
 	import { Grid, Row, Column } from 'carbon-components-svelte';
 	import ChartStepper from 'carbon-icons-svelte/lib/ChartStepper.svelte';
 	import Table from 'carbon-icons-svelte/lib/Table.svelte';
@@ -84,6 +86,14 @@
 						{$_('home.process.title')}</Button
 					>
 				</Column>
+				<Column>
+					<div id="page-button">
+						<ButtonSet>
+							<Button iconDescription={$_('page.backwardText')} icon={CaretLeft} />
+							<Button iconDescription={$_('page.forwardText')} icon={CaretRight} />
+						</ButtonSet>
+					</div>
+				</Column>
 			</Row>
 			<Row>
 				<Column>
@@ -119,5 +129,12 @@
 
 	#data-tale {
 		margin-top: 2rem;
+	}
+
+	#page-button {
+		position: absolute;
+		top: 4rem;
+		right: 4rem;
+		width: 3rem;
 	}
 </style>
