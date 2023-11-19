@@ -12,6 +12,7 @@
 
 	export let modelId: string;
 	export let processId: string;
+	export let offset: number[];
 	const canvasWidth = 600;
 	const canvasHeight = 600;
 	const arcColor = '70a0ff';
@@ -39,6 +40,7 @@
 				material = new THREE.MeshPhongMaterial({ opacity: geometry.alpha, vertexColors: true });
 			}
 			const mesh = new THREE.Mesh(geometry, material);
+			mesh.geometry.translate(offset[0], offset[1], offset[2]); // apply translation
 			scene.add(mesh);
 		});
 
@@ -48,6 +50,8 @@
 		labelRenderer.domElement.style.top = '140px';
 		labelRenderer.domElement.style.pointerEvents = 'none';
 		container.appendChild(labelRenderer.domElement);
+
+		const vectorOffset = new THREE.Vector3(offset[0], offset[1], offset[2]);
 
 		axios
 			.get(`${BACKEND_URL}/result/arcs?model_id=${modelId}&process_id=${processId}`)
@@ -63,6 +67,7 @@
 						const measuredCenterMesh = getSphereMesh(0.3, 0x00f719);
 						centerMesh.position.copy(center);
 						measuredCenterMesh.position.copy(measuredCenter);
+						centerMesh.geometry.translate(offset[0], offset[1], offset[2]);
 						scene.add(centerMesh);
 						scene.add(measuredCenterMesh);
 
@@ -75,7 +80,10 @@
 						arcLabel.textContent = arcId;
 						arcLabel.style.cssText = `color:#${arcColor};font-family:sans-serif;font-size: 17px;`;
 						const arcLabelObject = new CSS2DObject(arcLabel);
-						arcLabelObject.position.copy(center).add(new THREE.Vector3(-3.0, 3.0, 0));
+						arcLabelObject.position
+							.copy(center)
+							.add(new THREE.Vector3(-3.0, 3.0, 0))
+							.add(vectorOffset);
 						scene.add(arcLabelObject);
 					}
 				}
@@ -92,6 +100,7 @@
 					const lineGeometry = new THREE.BufferGeometry().setFromPoints([point0, point1]);
 					const lineMaterial = new THREE.LineBasicMaterial({ color: parseInt(pairColor, 16) });
 					const line = new THREE.Line(lineGeometry, lineMaterial);
+					line.geometry.translate(offset[0], offset[1], offset[2]);
 					scene.add(line);
 
 					const lineLabel = document.createElement('div');
@@ -100,6 +109,10 @@
 					const lineLabelObject = new CSS2DObject(lineLabel);
 					const midpoint = new THREE.Vector3().lerpVectors(point0, point1, 0.5);
 					lineLabelObject.position.copy(midpoint).add(new THREE.Vector3(-3.0, 3.0, 0));
+					lineLabelObject.position
+						.copy(midpoint)
+						.add(new THREE.Vector3(-3.0, 3.0, 0))
+						.add(vectorOffset);
 					scene.add(lineLabelObject);
 				}
 			}

@@ -11,6 +11,7 @@
 	import { redirectToFilePage } from '$lib/access/path';
 	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
+	import axios from 'axios';
 
 	export let modelId: string;
 	export let processId: string;
@@ -24,8 +25,12 @@
 		gcodeReady: boolean;
 		status: number;
 	}
+
+	let offset = [0.0, 0.0, 0.0];
+	let offsetLoaded = false;
+
 	let modelInfo = {} as ModelInfo;
-	const load_model_info = async () => {
+	const loadModelInfo = async () => {
 		const res = await fetch(`${BACKEND_URL}/get/3dmodel/info/${modelId}`);
 		const data = await res.json();
 		modelInfo = {
@@ -39,8 +44,19 @@
 		loaded = true;
 	};
 
+	const loadModelTableData = async () => {
+		axios.get(`${BACKEND_URL}/get/model/table/data/${modelId}`).then((res) => {
+			if (res.status === 200) {
+				const [, _filename, , offsetX, offsetY] = res.data;
+				offset = [offsetX, offsetY, 0.0];
+				offsetLoaded = true;
+			}
+		});
+	};
+
 	onMount(() => {
-		load_model_info();
+		loadModelInfo();
+		loadModelTableData();
 	});
 </script>
 
@@ -71,7 +87,11 @@
 			</Row>
 			<Row>
 				<Column>
-					<ModelCheck {modelId} {processId} />
+					{#if !offsetLoaded}
+						<Loading />
+					{:else}
+						<ModelCheck {modelId} {processId} {offset} />
+					{/if}
 				</Column>
 				<Column>
 					<ContentSwitcher bind:selectedIndex>

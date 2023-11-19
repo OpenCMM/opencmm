@@ -8,6 +8,7 @@
 	import { displayCoordinates } from '$lib/utils/display';
 
 	export let modelId: string;
+	export let processId: string;
 	let loaded = false;
 
 	interface Edge {
@@ -23,14 +24,22 @@
 	];
 	let row: Edge[] = [];
 	const load_table_data = async () => {
-		const res = await fetch(`${BACKEND_URL}/result/edges/${modelId}`);
+		const res = await fetch(`${BACKEND_URL}/result/edges/result/combined/${modelId}/${processId}`);
 		const data = await res.json();
 		for (const d of data['edges']) {
-			row.push({
-				id: d[0],
-				coordinate: displayCoordinates(d[2], d[3], d[4]),
-				rcoordinate: displayCoordinates(d[5], d[6], d[7])
-			});
+			if (d[4] === null) {
+				row.push({
+					id: d[0],
+					coordinate: displayCoordinates(d[1], d[2], d[3]),
+					rcoordinate: ''
+				});
+			} else {
+				row.push({
+					id: d[0],
+					coordinate: displayCoordinates(d[1], d[2], d[3]),
+					rcoordinate: displayCoordinates(d[4], d[5], d[6])
+				});
+			}
 		}
 		loaded = true;
 	};
