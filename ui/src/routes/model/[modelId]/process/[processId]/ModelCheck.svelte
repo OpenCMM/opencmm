@@ -12,6 +12,7 @@
 
 	export let modelId: string;
 	export let processId: string;
+	export let offset: number[];
 	const canvasWidth = 600;
 	const canvasHeight = 600;
 	const arcColor = '70a0ff';
@@ -39,6 +40,7 @@
 				material = new THREE.MeshPhongMaterial({ opacity: geometry.alpha, vertexColors: true });
 			}
 			const mesh = new THREE.Mesh(geometry, material);
+			mesh.geometry.translate(offset[0], offset[1], offset[2]); // apply translation
 			scene.add(mesh);
 		});
 
@@ -49,20 +51,24 @@
 		labelRenderer.domElement.style.pointerEvents = 'none';
 		container.appendChild(labelRenderer.domElement);
 
+		const vectorOffset = new THREE.Vector3(offset[0], offset[1], offset[2]);
+
 		axios
 			.get(`${BACKEND_URL}/result/arcs?model_id=${modelId}&process_id=${processId}`)
 			.then((res) => {
 				if (res.status === 200) {
 					const arcs = res.data['arcs'];
 
+					let arcId = 1;
 					for (const arc_info of arcs) {
-						const [arcId, radius, cx, cy, cz, rradius, rcx, rcy, rcz] = arc_info;
+						const [, radius, cx, cy, cz, rradius, rcx, rcy, rcz] = arc_info;
 						const center = new THREE.Vector3(cx, cy, cz);
 						const measuredCenter = new THREE.Vector3(rcx, rcy, rcz);
 						const centerMesh = getSphereMesh(0.3, 0xfcba03);
 						const measuredCenterMesh = getSphereMesh(0.3, 0x00f719);
 						centerMesh.position.copy(center);
 						measuredCenterMesh.position.copy(measuredCenter);
+						centerMesh.geometry.translate(offset[0], offset[1], offset[2]);
 						scene.add(centerMesh);
 						scene.add(measuredCenterMesh);
 
@@ -72,10 +78,14 @@
 						// https://github.com/Sean-Bradley/Three.js-TypeScript-Boilerplate/tree/annotations
 
 						const arcLabel = document.createElement('div');
-						arcLabel.textContent = arcId;
+						arcLabel.textContent = arcId.toString();
+						arcId += 1;
 						arcLabel.style.cssText = `color:#${arcColor};font-family:sans-serif;font-size: 17px;`;
 						const arcLabelObject = new CSS2DObject(arcLabel);
-						arcLabelObject.position.copy(center).add(new THREE.Vector3(-3.0, 3.0, 0));
+						arcLabelObject.position
+							.copy(center)
+							.add(new THREE.Vector3(-3.0, 3.0, 0))
+							.add(vectorOffset);
 						scene.add(arcLabelObject);
 					}
 				}
@@ -85,21 +95,28 @@
 			if (res.status === 200) {
 				const pairs = res.data['pairs'];
 
+				let pairId = 1;
 				for (const pair of pairs) {
-					const [pairId, x0, y0, z0, x1, y1, z1] = pair;
+					const [, x0, y0, z0, x1, y1, z1] = pair;
 					const point0 = new THREE.Vector3(x0, y0, z0);
 					const point1 = new THREE.Vector3(x1, y1, z1);
 					const lineGeometry = new THREE.BufferGeometry().setFromPoints([point0, point1]);
 					const lineMaterial = new THREE.LineBasicMaterial({ color: parseInt(pairColor, 16) });
 					const line = new THREE.Line(lineGeometry, lineMaterial);
+					line.geometry.translate(offset[0], offset[1], offset[2]);
 					scene.add(line);
 
 					const lineLabel = document.createElement('div');
-					lineLabel.textContent = pairId;
+					lineLabel.textContent = pairId.toString();
+					pairId += 1;
 					lineLabel.style.cssText = `color:#${pairColor};font-family:sans-serif;font-size: 17px;`;
 					const lineLabelObject = new CSS2DObject(lineLabel);
 					const midpoint = new THREE.Vector3().lerpVectors(point0, point1, 0.5);
 					lineLabelObject.position.copy(midpoint).add(new THREE.Vector3(-3.0, 3.0, 0));
+					lineLabelObject.position
+						.copy(midpoint)
+						.add(new THREE.Vector3(-3.0, 3.0, 0))
+						.add(vectorOffset);
 					scene.add(lineLabelObject);
 				}
 			}

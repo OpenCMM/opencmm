@@ -33,6 +33,31 @@ def fetch_edge_result(process_id: int):
     return points
 
 
+def fetch_edge_result_combined(model_id: int, process_id: int):
+    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+    cursor = cnx.cursor()
+
+    query = """
+        SELECT edge.id, edge.x, edge.y, edge.z,
+        edge_result.x, edge_result.y, edge_result.z
+        FROM edge
+        LEFT JOIN edge_result ON edge.id = edge_result.edge_id 
+        AND edge_result.process_id = %s
+        WHERE edge.model_id = %s ORDER BY edge.id
+    """
+    cursor.execute(
+        query,
+        (
+            process_id,
+            model_id,
+        ),
+    )
+    points = cursor.fetchall()
+    cursor.close()
+    cnx.close()
+    return points
+
+
 def fetch_unique_points(process_id: int):
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
     cursor = cnx.cursor()

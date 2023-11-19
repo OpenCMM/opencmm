@@ -78,7 +78,9 @@
 			}
 		},
 		"process": {
-			"title": "All measurements"
+			"title": "All measurements",
+			"datetime": "Datetime",
+			"status": "Status"
 		},
 		"result": {
 			"title": "Result",
@@ -120,6 +122,11 @@
 			"password": "Password",
 			"sharedFolder": "Shared folder"
 		}
+	},
+	"page": {
+		"page": "page",
+		"forwardText": "Next page",
+		"backwardText": "Previous page"
 	},
 	"common": {
 		"gcode": "GCode",

@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { BACKEND_URL } from '$lib/constants/backend';
-	import { Button, ContentSwitcher, Loading, Switch } from 'carbon-components-svelte';
+	import CaretRight from 'carbon-icons-svelte/lib/CaretRight.svelte';
+	import CaretLeft from 'carbon-icons-svelte/lib/CaretLeft.svelte';
+	import Add from 'carbon-icons-svelte/lib/Add.svelte';
+	import { Button, ButtonSet, ContentSwitcher, Loading, Switch } from 'carbon-components-svelte';
 	import { Grid, Row, Column } from 'carbon-components-svelte';
 	import ChartStepper from 'carbon-icons-svelte/lib/ChartStepper.svelte';
 	import Table from 'carbon-icons-svelte/lib/Table.svelte';
@@ -10,7 +13,7 @@
 	import ModelCheck from './ModelCheck.svelte';
 	import { redirectToFilePage } from '$lib/access/path';
 	import { _ } from 'svelte-i18n';
-	import { goto } from '$app/navigation';
+	import axios from 'axios';
 
 	export let modelId: string;
 	export let processId: string;
@@ -24,8 +27,12 @@
 		gcodeReady: boolean;
 		status: number;
 	}
+
+	let offset = [0.0, 0.0, 0.0];
+	let offsetLoaded = false;
+
 	let modelInfo = {} as ModelInfo;
-	const load_model_info = async () => {
+	const loadModelInfo = async () => {
 		const res = await fetch(`${BACKEND_URL}/get/3dmodel/info/${modelId}`);
 		const data = await res.json();
 		modelInfo = {
@@ -39,8 +46,47 @@
 		loaded = true;
 	};
 
+	const loadModelTableData = async () => {
+		axios.get(`${BACKEND_URL}/get/model/table/data/${modelId}`).then((res) => {
+			if (res.status === 200) {
+				const [, _filename, , offsetX, offsetY] = res.data;
+				offset = [offsetX, offsetY, 0.0];
+				offsetLoaded = true;
+			}
+		});
+	};
+
+	let isLastProcess = true;
+	let isFirstProcess = false;
+	let nextProcess = processId;
+	let previousProcess = processId;
+	const loadProcesses = async () => {
+		axios.get(`${BACKEND_URL}/list/processes/${modelId}`).then((res) => {
+			if (res.status === 200) {
+				console.log(res.data);
+				const processes = res.data['processes'];
+				const lastProcessId = processes[processes.length - 1][0];
+				const firstProcessId = processes[0][0];
+				if (lastProcessId === parseInt(processId)) {
+					isLastProcess = true;
+					previousProcess = processes[processes.length - 2][0];
+				} else {
+					isLastProcess = false;
+				}
+				if (firstProcessId === parseInt(processId)) {
+					isFirstProcess = true;
+					nextProcess = processes[1][0];
+				} else {
+					isFirstProcess = false;
+				}
+			}
+		});
+	};
+
 	onMount(() => {
-		load_model_info();
+		loadModelInfo();
+		loadModelTableData();
+		loadProcesses();
 	});
 </script>
 
@@ -56,22 +102,46 @@
 					</h1>
 				</Column>
 				<Column>
-					<Button
-						icon={ChartStepper}
-						on:click={() => goto(`/gcode?id=${modelId}&process=${processId}`)}
-					>
+					<Button icon={ChartStepper} href={`/gcode?id=${modelId}&process=${processId}`}>
 						{$_('common.gcode')}</Button
 					>
 				</Column>
 				<Column>
-					<Button icon={Table} on:click={() => goto(`/model/${modelId}`)}>
+					<Button icon={Table} href={`/model/processes?id=${modelId}`}>
 						{$_('home.process.title')}</Button
 					>
+				</Column>
+				<Column>
+					<Button icon={Add} href={`/file/setup?id=${modelId}`}>
+						{$_('home.file.3dmodel.createGcode')}</Button
+					>
+				</Column>
+				<Column>
+					<div id="page-button">
+						<ButtonSet>
+							<Button
+								iconDescription={$_('page.backwardText')}
+								icon={CaretLeft}
+								disabled={isFirstProcess}
+								href={`/model/${modelId}/process/${previousProcess}`}
+							/>
+							<Button
+								iconDescription={$_('page.forwardText')}
+								icon={CaretRight}
+								disabled={isLastProcess}
+								href={`/model/${modelId}/process/${nextProcess}`}
+							/>
+						</ButtonSet>
+					</div>
 				</Column>
 			</Row>
 			<Row>
 				<Column>
-					<ModelCheck {modelId} {processId} />
+					{#if !offsetLoaded}
+						<Loading />
+					{:else}
+						<ModelCheck {modelId} {processId} {offset} />
+					{/if}
 				</Column>
 				<Column>
 					<ContentSwitcher bind:selectedIndex>
@@ -99,5 +169,12 @@
 
 	#data-tale {
 		margin-top: 2rem;
+	}
+
+	#page-button {
+		position: absolute;
+		top: 4rem;
+		right: 4rem;
+		width: 3rem;
 	}
 </style>

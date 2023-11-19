@@ -2,13 +2,17 @@
 
 <script lang="ts">
 	import { BACKEND_URL } from '$lib/constants/backend';
-	import { DataTable, InlineLoading } from 'carbon-components-svelte';
+	import { DataTable, InlineLoading, Pagination } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { displayCoordinates } from '$lib/utils/display';
 
 	export let modelId: string;
+	export let processId: string;
 	let loaded = false;
+
+	let pageSize = 10;
+	let page = 1;
 
 	interface Edge {
 		id: number;
@@ -23,14 +27,22 @@
 	];
 	let row: Edge[] = [];
 	const load_table_data = async () => {
-		const res = await fetch(`${BACKEND_URL}/result/edges/${modelId}`);
+		const res = await fetch(`${BACKEND_URL}/result/edges/result/combined/${modelId}/${processId}`);
 		const data = await res.json();
 		for (const d of data['edges']) {
-			row.push({
-				id: d[0],
-				coordinate: displayCoordinates(d[2], d[3], d[4]),
-				rcoordinate: displayCoordinates(d[5], d[6], d[7])
-			});
+			if (d[4] === null) {
+				row.push({
+					id: d[0],
+					coordinate: displayCoordinates(d[1], d[2], d[3]),
+					rcoordinate: ''
+				});
+			} else {
+				row.push({
+					id: d[0],
+					coordinate: displayCoordinates(d[1], d[2], d[3]),
+					rcoordinate: displayCoordinates(d[4], d[5], d[6])
+				});
+			}
 		}
 		loaded = true;
 	};
@@ -43,5 +55,22 @@
 {#if !loaded}
 	<InlineLoading />
 {:else}
-	<DataTable size="short" title={$_('home.result.edge.title')} {headers} rows={row} />
+	<DataTable
+		size="short"
+		title={$_('home.result.edge.title')}
+		{headers}
+		rows={row}
+		{pageSize}
+		{page}
+	/>
+	<Pagination
+		bind:pageSize
+		bind:page
+		totalItems={row.length}
+		pageSizeInputDisabled
+		forwardText={$_('page.forwardText')}
+		backwardText={$_('page.backwardText')}
+		itemRangeText={(min, max, total) => `${min}–${max} (${total})`}
+		pageRangeText={(_, total) => `${total}`}
+	/>
 {/if}

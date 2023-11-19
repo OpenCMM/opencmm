@@ -48,7 +48,7 @@
 				<Gcode {modelId} {processId} {offset} />
 			</Column>
 			<Column>
-				<Edge {modelId} />
+				<Edge {modelId} {processId} />
 			</Column>
 		</Row>
 	</Grid>
