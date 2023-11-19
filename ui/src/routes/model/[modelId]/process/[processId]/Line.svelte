@@ -28,13 +28,15 @@
 			`${BACKEND_URL}/result/lines?model_id=${modelId}&process_id=${processId}`
 		);
 		const data = await res.json();
+		let idx = 1;
 		for (const d of data['lines']) {
 			row.push({
-				id: d[0],
+				id: idx,
 				length: d[1],
 				rlength: d[2],
 				lengthDiff: displayLengthDifference(d[1], d[2])
 			});
+			idx += 1;
 		}
 		loaded = true;
 	};

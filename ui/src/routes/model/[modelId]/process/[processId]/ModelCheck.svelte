@@ -59,8 +59,9 @@
 				if (res.status === 200) {
 					const arcs = res.data['arcs'];
 
+					let arcId = 1;
 					for (const arc_info of arcs) {
-						const [arcId, radius, cx, cy, cz, rradius, rcx, rcy, rcz] = arc_info;
+						const [, radius, cx, cy, cz, rradius, rcx, rcy, rcz] = arc_info;
 						const center = new THREE.Vector3(cx, cy, cz);
 						const measuredCenter = new THREE.Vector3(rcx, rcy, rcz);
 						const centerMesh = getSphereMesh(0.3, 0xfcba03);
@@ -77,7 +78,8 @@
 						// https://github.com/Sean-Bradley/Three.js-TypeScript-Boilerplate/tree/annotations
 
 						const arcLabel = document.createElement('div');
-						arcLabel.textContent = arcId;
+						arcLabel.textContent = arcId.toString();
+						arcId += 1;
 						arcLabel.style.cssText = `color:#${arcColor};font-family:sans-serif;font-size: 17px;`;
 						const arcLabelObject = new CSS2DObject(arcLabel);
 						arcLabelObject.position
@@ -93,8 +95,9 @@
 			if (res.status === 200) {
 				const pairs = res.data['pairs'];
 
+				let pairId = 1;
 				for (const pair of pairs) {
-					const [pairId, x0, y0, z0, x1, y1, z1] = pair;
+					const [, x0, y0, z0, x1, y1, z1] = pair;
 					const point0 = new THREE.Vector3(x0, y0, z0);
 					const point1 = new THREE.Vector3(x1, y1, z1);
 					const lineGeometry = new THREE.BufferGeometry().setFromPoints([point0, point1]);
@@ -104,7 +107,8 @@
 					scene.add(line);
 
 					const lineLabel = document.createElement('div');
-					lineLabel.textContent = pairId;
+					lineLabel.textContent = pairId.toString();
+					pairId += 1;
 					lineLabel.style.cssText = `color:#${pairColor};font-family:sans-serif;font-size: 17px;`;
 					const lineLabelObject = new CSS2DObject(lineLabel);
 					const midpoint = new THREE.Vector3().lerpVectors(point0, point1, 0.5);

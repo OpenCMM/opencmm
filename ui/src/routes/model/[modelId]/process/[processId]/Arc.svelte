@@ -32,15 +32,17 @@
 			`${BACKEND_URL}/result/arcs?model_id=${modelId}&process_id=${processId}`
 		);
 		const data = await res.json();
+		let idx = 1;
 		for (const d of data['arcs']) {
 			row.push({
-				id: d[0],
+				id: idx,
 				radius: d[1],
 				rradius: d[5],
 				radiusDiff: displayLengthDifference(d[1], d[5]),
 				center: displayCoordinates(d[2], d[3], d[4]),
 				rcenter: displayCoordinates(d[6], d[7], d[8])
 			});
+			idx += 1;
 		}
 		loaded = true;
 	};

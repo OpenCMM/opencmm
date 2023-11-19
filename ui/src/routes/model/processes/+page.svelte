@@ -1,11 +1,12 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import { BACKEND_URL } from '$lib/constants/backend';
 	import axios from 'axios';
 	import { DataTable, Link, Loading } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
 
-	export let modelId: string;
+	const modelId = $page.url.searchParams.get('id');
 	let loaded = false;
 
 	interface Process {
