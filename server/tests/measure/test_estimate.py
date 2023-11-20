@@ -78,6 +78,52 @@ def get_distance_between_two_points(start_coord, end_coord):
     ) ** 0.5
 
 
+def create_mock_perfect_data(filename: str, process_id: int):
+    start_coord = (0.0, 0.0)
+    mtconnect_mock_data = []
+    sensor_mock_data = []
+    sample_interval = 0.5
+    gcode_filename = get_gcode_filename(filename)
+    gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
+    gcode = load_gcode(gcode_file_path)
+    line = 3
+    timestamp = datetime.now()
+    for i in range(len(gcode)):
+        init_coord = start_coord
+        (x, y, feedrate_per_min) = row_to_xyz_feedrate(gcode[i])
+        distance = get_distance_between_two_points(start_coord, (x, y))
+        feedrate = round(feedrate_per_min / 60.0, 3)
+
+        timestamp += timedelta(seconds=sample_interval)
+        for j in range(1, int(distance / (feedrate * sample_interval))):
+            _x, _y = create_xy_for_mtconnect(
+                start_coord, feedrate, sample_interval, distance, x, y, j
+            )
+            _current_row = (process_id, timestamp, _x, _y, z, line, feedrate)
+            mtconnect_mock_data.append(_current_row)
+            timestamp += timedelta(seconds=sample_interval)
+            start_coord = (_x, _y)
+        if line % 2 == 0:
+            sensor_output = get_random_sensor_data()
+            target_coord = ((x + init_coord[0]) / 2, (y + init_coord[1]) / 2)
+            distance_to_target = get_distance_between_two_points(
+                start_coord, target_coord
+            )
+            time_to_substract = distance_to_target / feedrate
+            _timestamp = timestamp - timedelta(seconds=sample_interval)
+            sensor_timestamp = _timestamp - timedelta(seconds=time_to_substract)
+            unix_timestamp = sensor_timestamp.timestamp()
+            rounded_unix_timestamp = round(unix_timestamp, 3)
+            sensor_timestamp = datetime.fromtimestamp(rounded_unix_timestamp)
+            sensor_mock_data.append((process_id, sensor_timestamp, sensor_output))
+
+        line += 1
+        start_coord = (x, y)
+
+    reader.import_mtconnect_data(MYSQL_CONFIG, mtconnect_mock_data)
+    import_sensor_data(MYSQL_CONFIG, sensor_mock_data)
+
+
 def create_mock_data(filename: str, process_id: int):
     start_coord = (0.0, 0.0)
     mtconnect_mock_data = []
@@ -384,6 +430,54 @@ def test_different_gcode_params_with_arc():
     update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)
     process_result = status.get_process_status(MYSQL_CONFIG, process_id)
     assert process_result[2] == "done"
+
+
+def test_update_data_after_measurement_perfect_data():
+    filename = "demo.STL"
+    model_id = 3
+    process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
+    create_mock_perfect_data(filename, process_id)
+    update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)
+    process_result = status.get_process_status(MYSQL_CONFIG, process_id)
+    assert process_result[2] == "done"
+
+    response = client.get(f"/result/lines?model_id={model_id}&process_id={process_id}")
+    assert response.status_code == 200
+    lines = response.json()
+    for [_id, length, estimated_length] in lines:
+        assert abs(length - estimated_length) < 0.005
+
+    response = client.get(f"/result/arcs?model_id={model_id}&process_id={process_id}")
+    assert response.status_code == 200
+    arcs = response.json()
+    for arc in arcs:
+        radius = arc[1]
+        estimated_radius = arc[5]
+        assert abs(radius - estimated_radius) < 0.005
+
+
+def test_update_data_after_measurement_perfect_data_with_arc():
+    filename = "sample.stl"
+    model_id = 4
+    process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
+    create_mock_perfect_data(filename, process_id)
+    update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)
+    process_result = status.get_process_status(MYSQL_CONFIG, process_id)
+    assert process_result[2] == "done"
+
+    response = client.get(f"/result/lines?model_id={model_id}&process_id={process_id}")
+    assert response.status_code == 200
+    lines = response.json()
+    for [_id, length, estimated_length] in lines:
+        assert abs(length - estimated_length) < 0.005
+
+    response = client.get(f"/result/arcs?model_id={model_id}&process_id={process_id}")
+    assert response.status_code == 200
+    arcs = response.json()
+    for arc in arcs:
+        radius = arc[1]
+        estimated_radius = arc[5]
+        assert abs(radius - estimated_radius) < 0.005
 
 
 def test_update_data_after_measurement_missing_mtconnect_data():
