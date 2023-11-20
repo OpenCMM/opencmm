@@ -8,7 +8,10 @@ from server.model import add_new_3dmodel
 from server.listener import status
 from datetime import datetime, timedelta
 from server.prepare import get_gcode_filename
+from fastapi.testclient import TestClient
+from server.main import app
 
+client = TestClient(app)
 z = 10.0
 
 
@@ -209,14 +212,16 @@ def create_mock_multiple_edges(filename: str, process_id: int):
             timestamp += timedelta(seconds=sample_interval)
             start_coord = (_x, _y)
         last_timestamp = timestamp
-        if random_number > 1:
+
+        sensor_random_number = random.random()
+        if sensor_random_number > 0.1:
             sensor_output = get_random_sensor_data()
             sensor_timestamp = get_random_timestamp_between_two_timestamps(
                 first_timestamp, last_timestamp
             )
             sensor_mock_data.append((process_id, sensor_timestamp, sensor_output))
 
-            if random_number > 1.04:
+            if sensor_random_number > 0.8:
                 sensor_output = get_random_sensor_data()
                 sensor_timestamp = get_random_timestamp_between_two_timestamps(
                     sensor_timestamp, last_timestamp
@@ -281,6 +286,54 @@ def test_update_data_after_measurement_multiple_edges():
 
 
 def test_update_data_after_measurement_with_arc_multiple_edges():
+    filename = "sample.stl"
+    model_id = 4
+    process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
+    create_mock_multiple_edges(filename, process_id)
+    update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)
+    process_result = status.get_process_status(MYSQL_CONFIG, process_id)
+    assert process_result[2] == "done"
+
+
+def test_different_gcode_params():
+    job_info = {
+        "three_d_model_id": 3,
+        "measure_length": 2.5,
+        "measure_feedrate": 100.0,
+        "move_feedrate": 2000.0,
+        "x_offset": 0.0,
+        "y_offset": 0.0,
+        "z_offset": 0.0,
+        "send_gcode": False,
+    }
+    response = client.post("/setup/data", json=job_info)
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+    filename = "demo.STL"
+    model_id = 3
+    process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
+    create_mock_multiple_edges(filename, process_id)
+    update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)
+    process_result = status.get_process_status(MYSQL_CONFIG, process_id)
+    assert process_result[2] == "done"
+
+
+def test_different_gcode_params_with_arc():
+    job_info = {
+        "three_d_model_id": 4,
+        "measure_length": 2.5,
+        "measure_feedrate": 100.0,
+        "move_feedrate": 2000.0,
+        "x_offset": 50.0,
+        "y_offset": -65.0,
+        "z_offset": 0.0,
+        "send_gcode": False,
+    }
+    response = client.post("/setup/data", json=job_info)
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
     filename = "sample.stl"
     model_id = 4
     process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
