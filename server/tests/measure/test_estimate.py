@@ -443,13 +443,13 @@ def test_update_data_after_measurement_perfect_data():
 
     response = client.get(f"/result/lines?model_id={model_id}&process_id={process_id}")
     assert response.status_code == 200
-    lines = response.json()
+    lines = response.json()["lines"]
     for [_id, length, estimated_length] in lines:
         assert abs(length - estimated_length) < 0.005
 
     response = client.get(f"/result/arcs?model_id={model_id}&process_id={process_id}")
     assert response.status_code == 200
-    arcs = response.json()
+    arcs = response.json()["arcs"]
     for arc in arcs:
         radius = arc[1]
         estimated_radius = arc[5]
@@ -467,13 +467,13 @@ def test_update_data_after_measurement_perfect_data_with_arc():
 
     response = client.get(f"/result/lines?model_id={model_id}&process_id={process_id}")
     assert response.status_code == 200
-    lines = response.json()
+    lines = response.json()["lines"]
     for [_id, length, estimated_length] in lines:
         assert abs(length - estimated_length) < 0.005
 
     response = client.get(f"/result/arcs?model_id={model_id}&process_id={process_id}")
     assert response.status_code == 200
-    arcs = response.json()
+    arcs = response.json()["arcs"]
     for arc in arcs:
         radius = arc[1]
         estimated_radius = arc[5]
