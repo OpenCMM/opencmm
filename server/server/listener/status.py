@@ -74,3 +74,23 @@ def get_process_list(mysql_config: dict, model_id: int):
     mysql_cur.close()
     mysql_conn.close()
     return process_status
+
+
+def get_prev_next_process(mysql_config: dict, model_id: int, process_id: int):
+    mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
+    mysql_cur = mysql_conn.cursor()
+    mysql_cur.execute("SELECT id FROM process WHERE model_id = %s", (model_id,))
+    process_status = mysql_cur.fetchall()
+    mysql_cur.close()
+    mysql_conn.close()
+
+    prev_process = None
+    next_process = None
+    for i, process in enumerate(process_status):
+        if process[0] == process_id:
+            if i > 0:
+                prev_process = process_status[i - 1][0]
+            if i < len(process_status) - 1:
+                next_process = process_status[i + 1][0]
+            break
+    return prev_process, next_process

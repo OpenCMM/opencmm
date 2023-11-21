@@ -344,6 +344,12 @@ async def get_process_list(model_id: int):
     return {"processes": processes}
 
 
+@app.get("/get/prev/next/processes/{model_id}/{process_id}")
+async def fetch_next_prev_process(model_id: int, process_id: int):
+    prev, next = status.get_prev_next_process(MYSQL_CONFIG, model_id, process_id)
+    return {"prev": prev, "next": next}
+
+
 @app.get("/get_measurement_status/{process_id}")
 async def get_measurement_status(process_id: int):
     return status.get_process_status(MYSQL_CONFIG, process_id)

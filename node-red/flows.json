@@ -1194,7 +1194,7 @@
                 "t": "set",
                 "p": "payload.mtconnect_interval",
                 "pt": "msg",
-                "to": "10",
+                "to": "50",
                 "tot": "num"
             },
             {
@@ -1208,7 +1208,7 @@
                 "t": "set",
                 "p": "payload.threshold",
                 "pt": "msg",
-                "to": "100",
+                "to": "1000",
                 "tot": "num"
             },
             {
@@ -1440,7 +1440,7 @@
                 "t": "set",
                 "p": "payload.mtconnect_interval",
                 "pt": "msg",
-                "to": "10",
+                "to": "50",
                 "tot": "num"
             },
             {
@@ -1454,7 +1454,7 @@
                 "t": "set",
                 "p": "payload.threshold",
                 "pt": "msg",
-                "to": "100",
+                "to": "1000",
                 "tot": "num"
             },
             {

@@ -1,5 +1,6 @@
 mtconnect:
   url: http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems
+  latency: 30 # ms
 
 edge:
   arc:

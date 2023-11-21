@@ -1,5 +1,6 @@
 mtconnect:
   url: https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem
+  latency: 30 # ms
 
 edge:
   arc:

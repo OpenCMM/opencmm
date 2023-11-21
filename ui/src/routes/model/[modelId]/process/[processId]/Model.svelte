@@ -56,31 +56,19 @@
 		});
 	};
 
-	let isLastProcess = true;
-	let isFirstProcess = false;
-	let nextProcess = processId;
-	let previousProcess = processId;
+	let nextProcess: string;
+	let previousProcess: string;
 	const loadProcesses = async () => {
-		axios.get(`${BACKEND_URL}/list/processes/${modelId}`).then((res) => {
+		axios.get(`${BACKEND_URL}/get/prev/next/processes/${modelId}/${processId}`).then((res) => {
 			if (res.status === 200) {
-				console.log(res.data);
-				const processes = res.data['processes'];
-				const lastProcessId = processes[processes.length - 1][0];
-				const firstProcessId = processes[0][0];
-				if (lastProcessId === parseInt(processId)) {
-					isLastProcess = true;
-					previousProcess = processes[processes.length - 2][0];
-				} else {
-					isLastProcess = false;
-				}
-				if (firstProcessId === parseInt(processId)) {
-					isFirstProcess = true;
-					nextProcess = processes[1][0];
-				} else {
-					isFirstProcess = false;
-				}
+				previousProcess = res.data['prev'];
+				nextProcess = res.data['next'];
 			}
 		});
+	};
+	const goToDifferentPage = (nextProcess: string) => {
+		processId = nextProcess;
+		window.location.href = `/model/${modelId}/process/${nextProcess}`;
 	};
 
 	onMount(() => {
@@ -122,14 +110,14 @@
 							<Button
 								iconDescription={$_('page.backwardText')}
 								icon={CaretLeft}
-								disabled={isFirstProcess}
-								href={`/model/${modelId}/process/${previousProcess}`}
+								disabled={previousProcess === null}
+								on:click={() => goToDifferentPage(previousProcess)}
 							/>
 							<Button
 								iconDescription={$_('page.forwardText')}
 								icon={CaretRight}
-								disabled={isLastProcess}
-								href={`/model/${modelId}/process/${nextProcess}`}
+								disabled={nextProcess === null}
+								on:click={() => goToDifferentPage(nextProcess)}
 							/>
 						</ButtonSet>
 					</div>
