@@ -104,6 +104,7 @@ def mtconnect_streaming_reader(
                         hostname=mqtt_url,
                         auth={"username": MQTT_USERNAME, "password": MQTT_PASSWORD},
                     )
+                    status.add_end_timestamp(mysql_config, process_id)
                     break
 
                 raw_data = chunk.decode("utf-8")
