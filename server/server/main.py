@@ -237,9 +237,7 @@ async def start_measurement(
     background_tasks.add_task(
         listener_start,
         MYSQL_CONFIG,
-        _conf.mtconnect_interval,
         process_id,
-        (_conf.interval, _conf.threshold),
     )
     return {"status": "ok"}
 
@@ -266,9 +264,7 @@ async def start_measurement_with_program_name(
     background_tasks.add_task(
         listener_start,
         MYSQL_CONFIG,
-        _conf.mtconnect_interval,
         process_id,
-        (_conf.interval, _conf.threshold),
     )
     return {"status": "ok", "model_id": model_id}
 

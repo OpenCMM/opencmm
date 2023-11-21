@@ -12,9 +12,7 @@ from time import sleep
 def test_listener_start():
     listener_start(
         MYSQL_CONFIG,
-        1000,
         1,
-        (100, 1000),
     )
 
     sleep(2)

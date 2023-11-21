@@ -1,6 +1,7 @@
 import threading
 from server.config import (
     MQTT_BROKER_URL,
+    get_config,
 )
 from . import hakaru, mt
 import logging
@@ -11,10 +12,13 @@ logger = logging.getLogger(__name__)
 
 def listener_start(
     mysql_config: dict,
-    mtconnect_interval: int,
     process_id: int,
-    streaming_config: tuple,
 ):
+    conf = get_config()
+    mtconnect_interval = conf["mtconnect"]["interval"]
+    sensor_interval = conf["sensor"]["interval"]
+    sensor_threshold = conf["sensor"]["threshold"]
+
     thread1 = threading.Thread(
         target=hakaru.listen_sensor,
         args=(
@@ -22,7 +26,7 @@ def listener_start(
                 MQTT_BROKER_URL,
                 process_id,
                 mysql_config,
-                streaming_config,
+                (sensor_interval, sensor_threshold),
             )
         ),
     )
