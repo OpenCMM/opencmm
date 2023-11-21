@@ -12,4 +12,4 @@ mtconnect:
   url: https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem
 sensor:
   interval: 10 # ms
-  threshold: 1000 # ms
+  threshold: 1000

@@ -127,6 +127,11 @@
 			"url": "MTConnect URL",
 			"interval": "Data fetch interval",
 			"latency": "Latency"
+		},
+		"sensor": {
+			"label": "Sensor",
+			"interval": "Data fetch interval",
+			"threshold": "Threshold"
 		}
 	},
 	"page": {

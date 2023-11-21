@@ -1,3 +1,4 @@
+from server.type.sensor import SensorConfig
 from server.type.mtconnect import MTConnectConfig
 from server.type.measurement import MeasurementConfig, MeasurementConfigWithProgram
 import uvicorn
@@ -101,6 +102,24 @@ def update_mtconnect_config(_conf: MTConnectConfig):
     conf["mtconnect"]["url"] = _conf.url
     conf["mtconnect"]["interval"] = _conf.interval
     conf["mtconnect"]["latency"] = _conf.latency
+    update_conf(conf)
+    return {"status": "ok"}
+
+
+@app.get("/get/sensor_config")
+def get_sensor_config():
+    conf = get_config()["sensor"]
+    return {
+        "interval": conf["interval"],
+        "threshold": conf["threshold"],
+    }
+
+
+@app.post("/update/sensor_config")
+def update_sensor_config(_conf: SensorConfig):
+    conf = get_config()
+    conf["sensor"]["interval"] = _conf.interval
+    conf["sensor"]["threshold"] = _conf.threshold
     update_conf(conf)
     return {"status": "ok"}
 

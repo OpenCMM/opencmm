@@ -127,6 +127,11 @@
 			"url": "MTConnect URL",
 			"interval": "データ取得間隔",
 			"latency": "データ取得遅延時間"
+		},
+		"sensor": {
+			"label": "センサー",
+			"interval": "データ取得間隔",
+			"threshold": "段差検知閾値"
 		}
 	},
 	"page": {

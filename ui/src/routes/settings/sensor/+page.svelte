@@ -5,21 +5,19 @@
 	import { ToastNotification } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	let url = '';
 	let interval = 100;
-	let latency = 30;
+	let threshold = 1000;
 	let loaded = false;
 	let saveFailed = false;
 	let success = false;
 
 	onMount(() => {
 		// Load the settings here
-		axios.get(`${BACKEND_URL}/get/mtconnect_config`).then((response) => {
+		axios.get(`${BACKEND_URL}/get/sensor_config`).then((response) => {
 			if (response.status === 200) {
 				const data = response.data;
-				url = data['url'];
 				interval = data['interval'];
-				latency = data['latency'];
+				threshold = data['threshold'];
 				console.log(data);
 				loaded = true;
 			}
@@ -30,11 +28,10 @@
 		e.preventDefault();
 		try {
 			const data = {
-				url,
 				interval,
-				latency
+				threshold
 			};
-			const res = await axios.post(`${BACKEND_URL}/update/mtconnect_config`, data, {
+			const res = await axios.post(`${BACKEND_URL}/update/sensor_config`, data, {
 				headers: {
 					'Content-Type': 'application/json'
 				}
@@ -55,18 +52,17 @@
 {:else}
 	<Form>
 		<FormGroup>
-			<TextInput bind:value={url} id="url" labelText={$_('settings.mtconnect.url')} />
 			<TextInput
 				bind:value={interval}
 				id="interval"
 				type="number"
-				labelText={$_('settings.mtconnect.interval')}
+				labelText={$_('settings.sensor.interval')}
 			/>
 			<TextInput
-				bind:value={latency}
-				id="latency"
+				bind:value={threshold}
+				id="threshold"
 				type="number"
-				labelText={$_('settings.mtconnect.latency')}
+				labelText={$_('settings.sensor.threshold')}
 			/>
 		</FormGroup>
 		<Button on:click={saveSettings}>{$_('common.save')}</Button>

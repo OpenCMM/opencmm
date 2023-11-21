@@ -33,6 +33,12 @@
 				>
 					{$_('settings.mtconnect.label')}
 				</ClickableTile>
+				<ClickableTile
+					on:click={() => goto('/settings/sensor')}
+					light={$page.url.pathname === '/settings/sensor'}
+				>
+					{$_('settings.sensor.label')}
+				</ClickableTile>
 			</Column>
 			<Column>
 				<slot />
