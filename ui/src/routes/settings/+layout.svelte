@@ -27,6 +27,12 @@
 				>
 					{$_('settings.cnc.label')}
 				</ClickableTile>
+				<ClickableTile
+					on:click={() => goto('/settings/mtconnect')}
+					light={$page.url.pathname === '/settings/mtconnect'}
+				>
+					{$_('settings.mtconnect.label')}
+				</ClickableTile>
 			</Column>
 			<Column>
 				<slot />

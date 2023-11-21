@@ -121,6 +121,12 @@
 			"username": "Username",
 			"password": "Password",
 			"sharedFolder": "Shared folder"
+		},
+		"mtconnect": {
+			"label": "MTConnect",
+			"url": "MTConnect URL",
+			"interval": "Data fetch interval",
+			"latency": "Latency"
 		}
 	},
 	"page": {

@@ -1,3 +1,4 @@
+from server.type.mtconnect import MTConnectConfig
 from server.type.measurement import MeasurementConfig, MeasurementConfigWithProgram
 import uvicorn
 import os
@@ -80,6 +81,26 @@ def get_mtconnect_url():
 def update_mtconnect_url(url: str):
     conf = get_config()
     conf["mtconnect"]["url"] = url
+    update_conf(conf)
+    return {"status": "ok"}
+
+
+@app.get("/get/mtconnect_config")
+def get_mtconnect_config():
+    conf = get_config()["mtconnect"]
+    return {
+        "url": conf["url"],
+        "interval": conf["interval"],
+        "latency": conf["latency"],
+    }
+
+
+@app.post("/update/mtconnect_config")
+def update_mtconnect_config(_conf: MTConnectConfig):
+    conf = get_config()
+    conf["mtconnect"]["url"] = _conf.url
+    conf["mtconnect"]["interval"] = _conf.interval
+    conf["mtconnect"]["latency"] = _conf.latency
     update_conf(conf)
     return {"status": "ok"}
 

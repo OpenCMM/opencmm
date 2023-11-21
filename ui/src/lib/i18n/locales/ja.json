@@ -121,6 +121,12 @@
 			"username": "ユーザー名",
 			"password": "パスワード",
 			"sharedFolder": "共有フォルダ"
+		},
+		"mtconnect": {
+			"label": "MTConnect",
+			"url": "MTConnect URL",
+			"interval": "データ取得間隔",
+			"latency": "データ取得遅延時間"
 		}
 	},
 	"page": {
