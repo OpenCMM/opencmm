@@ -58,15 +58,10 @@ def create_sensor_data_row(_first_timestamp, _last_timestamp, _process_id):
     return (_process_id, sensor_timestamp, sensor_output)
 
 
-def create_xy_for_mtconnect(start_coord, feedrate, sample_interval, distance, x, y, j):
-    _x = (
-        start_coord[0]
-        + (x - start_coord[0]) * j * feedrate * sample_interval / distance
-    )
-    _y = (
-        start_coord[1]
-        + (y - start_coord[1]) * j * feedrate * sample_interval / distance
-    )
+def get_xy_for_mtconnect(start_coord, feedrate, sample_interval, direction):
+    (x, y) = start_coord
+    _x = x + direction[0] * feedrate * sample_interval
+    _y = y + direction[1] * feedrate * sample_interval
     _x = round(_x, 3)
     _y = round(_y, 3)
     return _x, _y
@@ -76,6 +71,14 @@ def get_distance_between_two_points(start_coord, end_coord):
     return (
         (end_coord[0] - start_coord[0]) ** 2 + (end_coord[1] - start_coord[1]) ** 2
     ) ** 0.5
+
+
+def get_direction(start_coord, end_coord):
+    distance = get_distance_between_two_points(start_coord, end_coord)
+    direction = (end_coord[0] - start_coord[0], end_coord[1] - start_coord[1])
+    # direction to unit vector
+    direction = tuple([round(x / distance, 3) for x in direction])
+    return direction
 
 
 def create_mock_perfect_data(filename: str, process_id: int):
@@ -93,15 +96,16 @@ def create_mock_perfect_data(filename: str, process_id: int):
         (x, y, feedrate_per_min) = row_to_xyz_feedrate(gcode[i])
         distance = get_distance_between_two_points(start_coord, (x, y))
         feedrate = round(feedrate_per_min / 60.0, 3)
-
+        direction = get_direction(start_coord, (x, y))
         timestamp += timedelta(seconds=sample_interval)
-        for j in range(1, int(distance / (feedrate * sample_interval))):
-            _x, _y = create_xy_for_mtconnect(
-                start_coord, feedrate, sample_interval, distance, x, y, j
+        for j in range(int(distance / (feedrate * sample_interval))):
+            timestamp += timedelta(seconds=sample_interval)
+            _x, _y = get_xy_for_mtconnect(
+                start_coord, feedrate, sample_interval, direction
             )
             _current_row = (process_id, timestamp, _x, _y, z, line, feedrate)
-            mtconnect_mock_data.append(_current_row)
-            timestamp += timedelta(seconds=sample_interval)
+            if j != 0:
+                mtconnect_mock_data.append(_current_row)
             start_coord = (_x, _y)
         if line % 2 == 0:
             sensor_output = get_random_sensor_data()
@@ -110,8 +114,7 @@ def create_mock_perfect_data(filename: str, process_id: int):
                 start_coord, target_coord
             )
             time_to_substract = distance_to_target / feedrate
-            _timestamp = timestamp - timedelta(seconds=sample_interval)
-            sensor_timestamp = _timestamp - timedelta(seconds=time_to_substract)
+            sensor_timestamp = timestamp - timedelta(seconds=time_to_substract)
             unix_timestamp = sensor_timestamp.timestamp()
             rounded_unix_timestamp = round(unix_timestamp, 3)
             sensor_timestamp = datetime.fromtimestamp(rounded_unix_timestamp)
@@ -138,12 +141,13 @@ def create_mock_data(filename: str, process_id: int):
         (x, y, feedrate_per_min) = row_to_xyz_feedrate(gcode[i])
         distance = get_distance_between_two_points(start_coord, (x, y))
         feedrate = round(feedrate_per_min / 60.0, 3)
+        direction = get_direction(start_coord, (x, y))
 
         timestamp += timedelta(seconds=sample_interval)
         first_timestamp = timestamp
         for j in range(1, int(distance / (feedrate * sample_interval))):
-            _x, _y = create_xy_for_mtconnect(
-                start_coord, feedrate, sample_interval, distance, x, y, j
+            _x, _y = get_xy_for_mtconnect(
+                start_coord, feedrate, sample_interval, direction
             )
             _current_row = (process_id, timestamp, _x, _y, z, line, feedrate)
             mtconnect_mock_data.append(_current_row)
@@ -181,15 +185,14 @@ def create_mock_missing_data(filename: str, process_id: int):
         (x, y, feedrate_per_min) = row_to_xyz_feedrate(gcode[i])
         distance = get_distance_between_two_points(start_coord, (x, y))
         feedrate = round(feedrate_per_min / 60.0, 3)
+        direction = get_direction(start_coord, (x, y))
 
         timestamp += timedelta(seconds=sample_interval)
         first_timestamp = timestamp
         for j in range(1, int(distance / (feedrate * sample_interval))):
             # between 0.9 ~ 1.1
             random_number = random.random() * 0.2 + 0.9
-            _x, _y = create_xy_for_mtconnect(
-                start_coord, feedrate, sample_interval, distance, x, y, j
-            )
+            _x, _y = get_direction(start_coord, feedrate, sample_interval, direction)
             _x = round(_x * random_number, 3)
             _y = round(_y * random_number, 3)
 
@@ -229,14 +232,15 @@ def create_mock_multiple_edges(filename: str, process_id: int):
         (x, y, feedrate_per_min) = row_to_xyz_feedrate(gcode[i])
         distance = get_distance_between_two_points(start_coord, (x, y))
         feedrate = round(feedrate_per_min / 60.0, 3)
+        direction = get_direction(start_coord, (x, y))
 
         timestamp += timedelta(seconds=sample_interval)
         first_timestamp = timestamp
         for j in range(1, int(distance / (feedrate * sample_interval))):
             # between 0.9 ~ 1.1
             random_number = random.random() * 0.2 + 0.9
-            _x, _y = create_xy_for_mtconnect(
-                start_coord, feedrate, sample_interval, distance, x, y, j
+            _x, _y = get_xy_for_mtconnect(
+                start_coord, feedrate, sample_interval, direction
             )
             _x = round(_x * random_number, 3)
             _y = round(_y * random_number, 3)
@@ -282,14 +286,15 @@ def create_mock_missing_mtconnect_data(filename: str, process_id: int):
         (x, y, feedrate_per_min) = row_to_xyz_feedrate(gcode[i])
         distance = get_distance_between_two_points(start_coord, (x, y))
         feedrate = round(feedrate_per_min / 60.0, 3)
+        direction = get_direction(start_coord, (x, y))
 
         timestamp += timedelta(seconds=sample_interval)
         first_timestamp = timestamp
         for j in range(1, int(distance / (feedrate * sample_interval))):
             # between 0.9 ~ 1.1
             random_number = random.random() * 0.2 + 0.9
-            _x, _y = create_xy_for_mtconnect(
-                start_coord, feedrate, sample_interval, distance, x, y, j
+            _x, _y = get_xy_for_mtconnect(
+                start_coord, feedrate, sample_interval, direction
             )
             _x = round(_x * random_number, 3)
             _y = round(_y * random_number, 3)
