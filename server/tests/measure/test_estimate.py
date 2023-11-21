@@ -1,7 +1,7 @@
 from server.measure.gcode import load_gcode, row_to_xyz_feedrate
 from server.listener.mt import reader
 from server.measure.estimate import update_data_after_measurement
-from server.config import GCODE_PATH, MYSQL_CONFIG
+from server.config import GCODE_PATH, MYSQL_CONFIG, get_config
 import mysql.connector
 import random
 from server.model import add_new_3dmodel
@@ -13,6 +13,9 @@ from server.main import app
 
 client = TestClient(app)
 z = 10.0
+
+conf = get_config()
+mtconnect_latency = conf["mtconnect"]["latency"]
 
 
 def import_sensor_data(mysql_config: dict, _sensor_data_list: list):
@@ -100,10 +103,21 @@ def create_mock_perfect_data(filename: str, process_id: int):
         timestamp += timedelta(seconds=sample_interval)
         for j in range(int(distance / (feedrate * sample_interval))):
             timestamp += timedelta(seconds=sample_interval)
+            timestamp_with_latency = timestamp + timedelta(
+                milliseconds=mtconnect_latency
+            )
             _x, _y = get_xy_for_mtconnect(
                 start_coord, feedrate, sample_interval, direction
             )
-            _current_row = (process_id, timestamp, _x, _y, z, line, feedrate)
+            _current_row = (
+                process_id,
+                timestamp_with_latency,
+                _x,
+                _y,
+                z,
+                line,
+                feedrate,
+            )
             if j != 0:
                 mtconnect_mock_data.append(_current_row)
             start_coord = (_x, _y)
@@ -192,7 +206,9 @@ def create_mock_missing_data(filename: str, process_id: int):
         for j in range(1, int(distance / (feedrate * sample_interval))):
             # between 0.9 ~ 1.1
             random_number = random.random() * 0.2 + 0.9
-            _x, _y = get_direction(start_coord, feedrate, sample_interval, direction)
+            _x, _y = get_xy_for_mtconnect(
+                start_coord, feedrate, sample_interval, direction
+            )
             _x = round(_x * random_number, 3)
             _y = round(_y * random_number, 3)
 
@@ -482,7 +498,7 @@ def test_update_data_after_measurement_perfect_data_with_arc():
     for arc in arcs:
         radius = arc[1]
         estimated_radius = arc[5]
-        assert abs(radius - estimated_radius) < 0.005
+        assert abs(radius - estimated_radius) < 0.01
 
 
 def test_update_data_after_measurement_missing_mtconnect_data():

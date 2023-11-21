@@ -1,12 +1,13 @@
 import paho.mqtt.client as mqtt
 from server.listener import status
-from datetime import datetime
+from datetime import datetime, timedelta
 from server.config import (
     GCODE_PATH,
     LISTENER_LOG_TOPIC,
     MQTT_BROKER_URL,
     MQTT_PASSWORD,
     MQTT_USERNAME,
+    get_config,
 )
 from server.mark.edge import (
     import_edge_results,
@@ -56,6 +57,8 @@ def update_data_after_measurement(
     """
     Estimate edges from mtconnect data and sensor data
     """
+    conf = get_config(mysql_config)
+    mtconnect_latency = conf["mtconnect"]["latency"]
     client = mqtt.Client()
     client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
 
@@ -97,7 +100,7 @@ def update_data_after_measurement(
         if line == current_line:
             continue
 
-        _timestamp = row[2]
+        _timestamp = row[2] - timedelta(milliseconds=mtconnect_latency)
         xy = (row[3], row[4])
         feedrate = row[7]
         (start, end) = get_start_end_points_from_line_number(gcode, line)
