@@ -57,7 +57,7 @@ def update_data_after_measurement(
     """
     Estimate edges from mtconnect data and sensor data
     """
-    conf = get_config(mysql_config)
+    conf = get_config()
     mtconnect_latency = conf["mtconnect"]["latency"]
     client = mqtt.Client()
     client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
