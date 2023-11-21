@@ -36,6 +36,9 @@ def sensor_timestamp_to_coord(
     direction_vector: tuple,
     feedrate: float,
 ):
+    """
+    Estimate the coordinate of the edge from sensor timestamp
+    """
     timestamp_diff = sensor_timestamp - start_timestamp
     distance = feedrate * timestamp_diff.total_seconds()
     direction_vector = np.array(direction_vector)
@@ -50,6 +53,9 @@ def update_data_after_measurement(
     process_id: int,
     model_id: int,
 ):
+    """
+    Estimate edges from mtconnect data and sensor data
+    """
     client = mqtt.Client()
     client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
 
@@ -80,7 +86,6 @@ def update_data_after_measurement(
     sensor_data = get_sensor_data(process_id, mysql_config)
     np_sensor_data = np.array(sensor_data)
 
-    line_idx = 0
     current_line = 0
     update_list = []
     for row in np_mtconnect_data:
@@ -90,10 +95,6 @@ def update_data_after_measurement(
             continue
 
         if line == current_line:
-            continue
-
-        if line_idx != 3:
-            line_idx += 1
             continue
 
         _timestamp = row[2]
@@ -118,7 +119,6 @@ def update_data_after_measurement(
                 update_list.append(
                     (edge_id, process_id, edge_coord[0], edge_coord[1], z)
                 )
-                line_idx = 0
                 # ignore the rest of the sensor data
                 # multiple edges can be measured due to the following reasons:
                 # - noise (can be reduced by increasing the sensor threshold)
