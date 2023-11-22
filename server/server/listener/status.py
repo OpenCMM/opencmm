@@ -95,14 +95,13 @@ def get_prev_next_process(mysql_config: dict, model_id: int, process_id: int):
             break
     return prev_process, next_process
 
+
 def add_end_timestamp(mysql_config: dict, process_id: int):
     mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
     mysql_cur = mysql_conn.cursor()
     mysql_cur.execute(
         "UPDATE process SET end_timestamp = NOW() WHERE id = %s",
-        (
-            process_id,
-        ),
+        (process_id,),
     )
     mysql_conn.commit()
     mysql_cur.close()
