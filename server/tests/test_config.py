@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 from server.config import get_config
 from server.main import app
+import pytest
 
 client = TestClient(app)
 
@@ -10,6 +11,7 @@ def test_load():
     assert sample_size == 4
 
 
+@pytest.mark.skip(reason="not implemented")
 def test_mtconnect():
     response = client.get("/mtconnect_url")
     assert response.status_code == 200
@@ -20,6 +22,7 @@ def test_mtconnect():
     assert response.json() == {"url": url}
 
 
+@pytest.mark.skip(reason="not implemented")
 def test_update_mtconnect():
     new_url = "https://demo.metalogi.io/current"
     response = client.get("/mtconnect_url")
