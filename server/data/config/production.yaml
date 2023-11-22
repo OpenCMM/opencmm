@@ -1,13 +1,15 @@
-mtconnect:
-  url: http://192.168.0.19:5000/current?path=//Axes/Components/Linear/DataItems
-  latency: 30 # ms
-
 edge:
   arc:
     number: 4
-
 mqtt:
   host: 192.168.0.19
+  password: opencmm
   port: 1883
   username: opencmm
-  password: opencmm
+mtconnect:
+  interval: 100 # ms
+  latency: 30 # ms
+  url: http://192.168.0.19:5000/current?path=//Components
+sensor:
+  interval: 10 # ms
+  threshold: 1000
