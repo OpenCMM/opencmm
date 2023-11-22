@@ -9,7 +9,7 @@ mqtt:
 mtconnect:
   interval: 100 # ms
   latency: 30 # ms
-  url: https://demo.metalogi.io/current?path=//Axes/Components/Linear/DataItems/DataItem
+  url: https://demo.metalogi.io/current?path=//Components
 sensor:
   interval: 10 # ms
   threshold: 1000
