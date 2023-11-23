@@ -100,7 +100,7 @@ def add_end_timestamp(mysql_config: dict, process_id: int):
     mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
     mysql_cur = mysql_conn.cursor()
     mysql_cur.execute(
-        "UPDATE process SET end_timestamp = NOW() WHERE id = %s",
+        "UPDATE process SET end = NOW() WHERE id = %s",
         (process_id,),
     )
     mysql_conn.commit()
