@@ -21,12 +21,13 @@ def get_start_end_points_from_line_number(gcode: list, line: int):
     assert line >= 3
     line -= 3
     row = gcode[line]
-    (x, y, feedrate) = row_to_xyz_feedrate(row)
+    (x, y, first_feedrate) = row_to_xyz_feedrate(row)
+    feedrate = first_feedrate / 60 # mm/s
     if line == 0:
-        return ((0.0, 0.0), (x, y))
+        return ((0.0, 0.0), (x, y), feedrate)
     prev_row = gcode[line - 1]
     (_x, _y, _feedrate) = row_to_xyz_feedrate(prev_row)
-    return ((_x, _y), (x, y))
+    return ((_x, _y), (x, y), feedrate)
 
 
 def get_timestamp_at_point(

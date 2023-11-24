@@ -102,8 +102,8 @@ def update_data_after_measurement(
 
         _timestamp = row[2] - timedelta(milliseconds=mtconnect_latency)
         xy = (row[3], row[4])
-        feedrate = row[7]
-        (start, end) = get_start_end_points_from_line_number(gcode, line)
+        # feedrate = row[7] # feedrate from MTConnect is not accurate
+        (start, end, feedrate) = get_start_end_points_from_line_number(gcode, line)
         # get timestamp at start and end
         start_timestamp = get_timestamp_at_point(xy, start, feedrate, _timestamp, True)
         end_timestamp = get_timestamp_at_point(xy, end, feedrate, _timestamp, False)
