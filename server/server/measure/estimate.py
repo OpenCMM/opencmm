@@ -21,6 +21,7 @@ from .gcode import (
     load_gcode,
     get_start_end_points_from_line_number,
     get_timestamp_at_point,
+    get_true_line_number,
 )
 from .mtconnect import get_mtconnect_data
 from server.mark import arc, pair
@@ -92,7 +93,12 @@ def update_data_after_measurement(
     current_line = 0
     update_list = []
     for row in np_mtconnect_data:
+        xy = (row[3], row[4])
         line = int(row[6])
+        line = get_true_line_number(xy, line, gcode)
+        if not line:
+            # Not on line
+            continue
         if line % 2 != 0:
             # Not measuring
             continue
@@ -101,7 +107,6 @@ def update_data_after_measurement(
             continue
 
         _timestamp = row[2] - timedelta(milliseconds=mtconnect_latency)
-        xy = (row[3], row[4])
         # feedrate = row[7] # feedrate from MTConnect is not accurate
         (start, end, feedrate) = get_start_end_points_from_line_number(gcode, line)
         # get timestamp at start and end

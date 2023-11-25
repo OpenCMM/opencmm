@@ -22,7 +22,7 @@ def get_start_end_points_from_line_number(gcode: list, line: int):
     line -= 3
     row = gcode[line]
     (x, y, first_feedrate) = row_to_xyz_feedrate(row)
-    feedrate = first_feedrate / 60 # mm/s
+    feedrate = first_feedrate / 60  # mm/s
     if line == 0:
         return ((0.0, 0.0), (x, y), feedrate)
     prev_row = gcode[line - 1]
@@ -40,3 +40,35 @@ def get_timestamp_at_point(
     if is_start:
         return timestamp - timedelta(seconds=time_diff)
     return timestamp + timedelta(seconds=time_diff)
+
+
+def is_on_line(xy: tuple, start: tuple, end: tuple):
+    (x, y) = xy
+    (_x, _y) = start
+    (__x, __y) = end
+    if _x == __x:
+        return x == _x
+    if _y == __y:
+        return y == _y
+    return (x - _x) / (_x - __x) == (y - _y) / (_y - __y)
+
+
+def get_true_line_number(xy: tuple, line: int, gcode: list) -> int:
+    """
+    Use xy coordinates as a ground truth to find the line number
+    Check if the xy coordinates are within the line
+    """
+    (start, end, _feedrate) = get_start_end_points_from_line_number(gcode, line)
+    if is_on_line(xy, start, end):
+        return line
+
+    # check the previous line
+    (start, end, _feedrate) = get_start_end_points_from_line_number(gcode, line - 1)
+    if is_on_line(xy, start, end):
+        return line - 1
+
+    (start, end, _feedrate) = get_start_end_points_from_line_number(gcode, line - 2)
+    if is_on_line(xy, start, end):
+        return line - 2
+
+    return None
