@@ -117,12 +117,23 @@ def add_measured_length(
     cursor.execute(query, (length, pair_id))
     cnx.commit()
 
-    query = (
-        "INSERT INTO pair_result (pair_id, " "process_id, length) VALUES (%s, %s, %s)"
-    )
+    query = "INSERT INTO pair_result (pair_id, process_id, length) VALUES (%s, %s, %s)"
     cursor.execute(query, (pair_id, process_id, measured_length))
     cnx.commit()
 
+    cursor.close()
+    cnx.close()
+
+
+def delete_measured_length(
+    mysql_config: dict,
+    process_id: int,
+):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
+    cursor = cnx.cursor()
+    query = "DELETE FROM pair_result WHERE process_id = %s"
+    cursor.execute(query, (process_id,))
+    cnx.commit()
     cursor.close()
     cnx.close()
 

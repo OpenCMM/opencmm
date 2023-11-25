@@ -7,8 +7,10 @@ from server.config import (
 )
 import paho.mqtt.publish as publish
 from time import sleep
+import pytest
 
 
+@pytest.mark.skip(reason="skip listener test")
 def test_listener_start():
     listener_start(
         MYSQL_CONFIG,

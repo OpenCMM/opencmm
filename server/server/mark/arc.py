@@ -187,6 +187,19 @@ def add_measured_arc_info(model_id: int, mysql_config: dict, process_id: int):
     cnx.close()
 
 
+def delete_measured_arc_info(
+    mysql_config: dict,
+    process_id: int,
+):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
+    cursor = cnx.cursor()
+    query = "DELETE FROM arc_result WHERE process_id = %s"
+    cursor.execute(query, (process_id,))
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+
+
 def delete_arcs_with_model_id(model_id: int, mysql_config: dict):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()

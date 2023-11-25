@@ -12,6 +12,7 @@ from server.config import (
 from server.mark.edge import (
     import_edge_results,
     get_edge_id_from_line_number,
+    delete_edge_results,
 )
 from server.prepare import get_gcode_filename
 from .sensor import get_sensor_data
@@ -78,6 +79,42 @@ def update_data_after_measurement(
     client.on_message = on_message
     client.connect(MQTT_BROKER_URL, 1883, 60)
 
+    update_list = compute_edge_results(
+        mysql_config, model_id, process_id, mtconnect_latency
+    )
+    edge_count = len(update_list)
+    if edge_count == 0:
+        status.update_process_status(
+            mysql_config,
+            process_id,
+            "Error at update_data_after_measurement()",
+            "No edge found",
+        )
+        disconnect_and_publish_log("No edge found")
+        return
+    import_edge_results(update_list, mysql_config)
+
+    _msg = f"{edge_count} edges found"
+    logger.info(_msg)
+    client.publish(LISTENER_LOG_TOPIC, _msg)
+
+    try:
+        pair.add_line_length(model_id, mysql_config, process_id)
+        arc.add_measured_arc_info(model_id, mysql_config, process_id)
+        status.update_process_status(mysql_config, process_id, "done")
+        logger.info("done")
+        disconnect_and_publish_log("done")
+    except Exception as e:
+        logger.warning(e)
+        status.update_process_status(
+            mysql_config, process_id, "Error at update_data_after_measurement()", str(e)
+        )
+        disconnect_and_publish_log(str(e))
+
+
+def compute_edge_results(
+    mysql_config: dict, model_id: int, process_id: int, mtconnect_latency: int
+):
     model_row = get_model_data(model_id)
     filename = model_row[1]
     # offset = (model_row[3], model_row[4], model_row[5])
@@ -135,6 +172,18 @@ def update_data_after_measurement(
                 break
 
         current_line = line
+    return update_list
+
+
+def recompute(mysql_config: dict, process_id: int):
+    # remove previous results
+    delete_edge_results(mysql_config, process_id)
+    arc.delete_measured_arc_info(mysql_config, process_id)
+    pair.delete_measured_length(mysql_config, process_id)
+
+    conf = get_config()
+    mtconnect_latency = conf["mtconnect"]["latency"]
+    update_list = compute_edge_results(mysql_config, process_id, mtconnect_latency)
 
     edge_count = len(update_list)
     if edge_count == 0:
@@ -144,23 +193,21 @@ def update_data_after_measurement(
             "Error at update_data_after_measurement()",
             "No edge found",
         )
-        disconnect_and_publish_log("No edge found")
         return
     import_edge_results(update_list, mysql_config)
 
     _msg = f"{edge_count} edges found"
     logger.info(_msg)
-    client.publish(LISTENER_LOG_TOPIC, _msg)
 
+    process_data = status.get_process_status(mysql_config, process_id)
+    model_id = process_data[1]
     try:
         pair.add_line_length(model_id, mysql_config, process_id)
         arc.add_measured_arc_info(model_id, mysql_config, process_id)
         status.update_process_status(mysql_config, process_id, "done")
         logger.info("done")
-        disconnect_and_publish_log("done")
     except Exception as e:
         logger.warning(e)
         status.update_process_status(
             mysql_config, process_id, "Error at update_data_after_measurement()", str(e)
         )
-        disconnect_and_publish_log(str(e))
