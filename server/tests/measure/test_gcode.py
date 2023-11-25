@@ -1,11 +1,11 @@
-from server.measure.gcode import is_on_line, get_true_line_number, load_gcode
+from server.measure.gcode import is_point_on_line, get_true_line_number, load_gcode
 
 
-def test_is_on_line():
+def test_is_point_on_line():
     xy = (0.0, 0.0)
     start = (-1.0, -1.0)
     end = (1.0, 1.0)
-    assert is_on_line(xy, start, end) is True
+    assert is_point_on_line(xy, start, end) is True
 
 
 def test_get_true_line_number():

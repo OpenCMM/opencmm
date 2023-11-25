@@ -42,15 +42,25 @@ def get_timestamp_at_point(
     return timestamp + timedelta(seconds=time_diff)
 
 
-def is_on_line(xy: tuple, start: tuple, end: tuple):
-    (x, y) = xy
-    (_x, _y) = start
-    (__x, __y) = end
-    if _x == __x:
-        return x == _x
-    if _y == __y:
-        return y == _y
-    return (x - _x) / (_x - __x) == (y - _y) / (_y - __y)
+def are_points_equal(p1: tuple, p2: tuple):
+    return round(p1[0], 3) == round(p2[0], 3) and round(p1[1], 3) == round(p2[1], 3)
+
+
+def is_point_on_line(p: tuple, p1: tuple, p2: tuple):
+    if are_points_equal(p1, p2):
+        # The points are the same, so the line has zero length.
+        return are_points_equal(p1, p)
+
+    # Check if the slope of the line formed by p1 and p2 is the same as the slope
+    # of the line formed by p1 and p.
+    slope1 = (p2[1] - p1[1]) / (p2[0] - p1[0]) if (p2[0] - p1[0]) != 0 else float("inf")
+    slope2 = (p[1] - p1[1]) / (p[0] - p1[0]) if (p[0] - p1[0]) != 0 else float("inf")
+
+    return (
+        round(slope1, 3) == round(slope2, 3)
+        and min(p1[0], p2[0]) <= p[0] <= max(p1[0], p2[0])
+        and min(p1[1], p2[1]) <= p[1] <= max(p1[1], p2[1])
+    )
 
 
 def get_true_line_number(xy: tuple, line: int, gcode: list) -> int:
@@ -59,16 +69,16 @@ def get_true_line_number(xy: tuple, line: int, gcode: list) -> int:
     Check if the xy coordinates are within the line
     """
     (start, end, _feedrate) = get_start_end_points_from_line_number(gcode, line)
-    if is_on_line(xy, start, end):
+    if is_point_on_line(xy, start, end):
         return line
 
     # check the previous line
     (start, end, _feedrate) = get_start_end_points_from_line_number(gcode, line - 1)
-    if is_on_line(xy, start, end):
+    if is_point_on_line(xy, start, end):
         return line - 1
 
     (start, end, _feedrate) = get_start_end_points_from_line_number(gcode, line - 2)
-    if is_on_line(xy, start, end):
+    if is_point_on_line(xy, start, end):
         return line - 2
 
     return None
