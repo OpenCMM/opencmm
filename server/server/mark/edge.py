@@ -221,7 +221,7 @@ def import_edge_results(update_list: list, mysql_config: dict):
     cnx.close()
 
 
-def delete_edge_results(process_id: int, mysql_config: dict):
+def delete_edge_results(mysql_config: dict, process_id: int):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     query = "DELETE FROM edge_result WHERE process_id = %s"

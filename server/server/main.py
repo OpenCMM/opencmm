@@ -293,8 +293,13 @@ async def estimate_measurement(
 
 
 @app.post("/recompute/process/{process_id}")
-async def recompute_process(process_id: int):
-    recompute(MYSQL_CONFIG, process_id)
+async def recompute_process(process_id: int, background_tasks: BackgroundTasks):
+    background_tasks.add_task(
+        recompute,
+        MYSQL_CONFIG,
+        process_id,
+    )
+    return {"status": "ok"}
 
 
 @app.get("/get_model_id/from/program_name/{program_name}")

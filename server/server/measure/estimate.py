@@ -183,7 +183,11 @@ def recompute(mysql_config: dict, process_id: int):
 
     conf = get_config()
     mtconnect_latency = conf["mtconnect"]["latency"]
-    update_list = compute_edge_results(mysql_config, process_id, mtconnect_latency)
+    process_data = status.get_process_status(mysql_config, process_id)
+    model_id = process_data[1]
+    update_list = compute_edge_results(
+        mysql_config, model_id, process_id, mtconnect_latency
+    )
 
     edge_count = len(update_list)
     if edge_count == 0:
@@ -199,8 +203,6 @@ def recompute(mysql_config: dict, process_id: int):
     _msg = f"{edge_count} edges found"
     logger.info(_msg)
 
-    process_data = status.get_process_status(mysql_config, process_id)
-    model_id = process_data[1]
     try:
         pair.add_line_length(model_id, mysql_config, process_id)
         arc.add_measured_arc_info(model_id, mysql_config, process_id)
