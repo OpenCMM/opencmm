@@ -2,6 +2,10 @@ from datetime import datetime, timedelta
 import csv
 
 
+class LineNumberTooSmall(Exception):
+    pass
+
+
 def load_gcode(filepath: str):
     with open(filepath, newline="") as csvfile:
         reader = csv.reader(csvfile, delimiter=" ")
@@ -18,7 +22,8 @@ def row_to_xyz_feedrate(row):
 
 
 def get_start_end_points_from_line_number(gcode: list, line: int):
-    assert line >= 3
+    if line < 3:
+        raise LineNumberTooSmall(f"Line number {line} is too small")
     line -= 3
     row = gcode[line]
     (x, y, first_feedrate) = row_to_xyz_feedrate(row)
@@ -67,18 +72,32 @@ def get_true_line_number(xy: tuple, line: int, gcode: list) -> int:
     """
     Use xy coordinates as a ground truth to find the line number
     Check if the xy coordinates are within the line
+    If true line number cannot be found, return None
     """
-    (start, end, _feedrate) = get_start_end_points_from_line_number(gcode, line)
-    if is_point_on_line(xy, start, end):
-        return line
+    if line == 1:
+        # the very last line sometimes turns 1 before it supposed to
+        last_line = len(gcode) + 2
+        (start, end, _feedrate) = get_start_end_points_from_line_number(
+            gcode, last_line
+        )
+        if is_point_on_line(xy, start, end):
+            return last_line
+        return None
 
-    # check the previous line
-    (start, end, _feedrate) = get_start_end_points_from_line_number(gcode, line - 1)
-    if is_point_on_line(xy, start, end):
-        return line - 1
+    try:
+        (start, end, _feedrate) = get_start_end_points_from_line_number(gcode, line)
+        if is_point_on_line(xy, start, end):
+            return line
 
-    (start, end, _feedrate) = get_start_end_points_from_line_number(gcode, line - 2)
-    if is_point_on_line(xy, start, end):
-        return line - 2
+        # check the previous line
+        (start, end, _feedrate) = get_start_end_points_from_line_number(gcode, line - 1)
+        if is_point_on_line(xy, start, end):
+            return line - 1
+
+        (start, end, _feedrate) = get_start_end_points_from_line_number(gcode, line - 2)
+        if is_point_on_line(xy, start, end):
+            return line - 2
+    except LineNumberTooSmall:
+        return None
 
     return None
