@@ -1,5 +1,8 @@
 from server.measure.gcode import is_point_on_line, get_true_line_number, load_gcode
 
+# from server.measure.mtconnect import get_mtconnect_data
+# from server.config import MYSQL_CONFIG
+
 
 def test_is_point_on_line():
     xy = (0.0, 0.0)
@@ -25,3 +28,15 @@ def test_get_true_line_number():
     xy = (1.668, -43.333)
     line = 8
     assert get_true_line_number(xy, line, gcode) == 6
+
+
+# def test_is_point_on_line_from_mtconnect_data():
+#     mtconnect_data = get_mtconnect_data(6, MYSQL_CONFIG)
+#     gcode = load_gcode("data/gcode/demo.STL.gcode")
+#     for row in mtconnect_data:
+#         line = int(row[6])
+#         xy = (row[3], row[4])
+#         # if get_true_line_number(xy, line, gcode) is None:
+#         #     breakpoint()
+
+#         assert get_true_line_number(xy, line, gcode) == line
