@@ -207,17 +207,19 @@ def create_mock_missing_data(filename: str, process_id: int):
             # between 0.9 ~ 1.1
             random_number = random.random() * 0.2 + 0.9
             _x, _y = get_xy_for_mtconnect(
-                start_coord, feedrate, sample_interval, direction
+                start_coord, feedrate, sample_interval * random_number, direction
             )
-            _x = round(_x * random_number, 3)
-            _y = round(_y * random_number, 3)
+            _x = round(_x, 3)
+            _y = round(_y, 3)
 
             _current_row = (process_id, timestamp, _x, _y, z, line, feedrate)
             mtconnect_mock_data.append(_current_row)
             timestamp += timedelta(seconds=sample_interval)
             start_coord = (_x, _y)
         last_timestamp = timestamp
-        if random_number > 1:
+
+        sensor_random_number = random.random()
+        if sensor_random_number > 0.1:
             sensor_data_row = create_sensor_data_row(
                 first_timestamp, last_timestamp, process_id
             )
@@ -256,10 +258,10 @@ def create_mock_multiple_edges(filename: str, process_id: int):
             # between 0.9 ~ 1.1
             random_number = random.random() * 0.2 + 0.9
             _x, _y = get_xy_for_mtconnect(
-                start_coord, feedrate, sample_interval, direction
+                start_coord, feedrate, sample_interval * random_number, direction
             )
-            _x = round(_x * random_number, 3)
-            _y = round(_y * random_number, 3)
+            _x = round(_x, 3)
+            _y = round(_y, 3)
 
             _current_row = (process_id, timestamp, _x, _y, z, line, feedrate)
             mtconnect_mock_data.append(_current_row)
@@ -310,10 +312,10 @@ def create_mock_missing_mtconnect_data(filename: str, process_id: int):
             # between 0.9 ~ 1.1
             random_number = random.random() * 0.2 + 0.9
             _x, _y = get_xy_for_mtconnect(
-                start_coord, feedrate, sample_interval, direction
+                start_coord, feedrate, sample_interval * random_number, direction
             )
-            _x = round(_x * random_number, 3)
-            _y = round(_y * random_number, 3)
+            _x = round(_x, 3)
+            _y = round(_y, 3)
 
             _current_row = (process_id, timestamp, _x, _y, z, line, feedrate)
 

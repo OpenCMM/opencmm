@@ -114,7 +114,8 @@ def mtconnect_table_row_data(xml_string: str, process_id: int):
         xyz = get_coordinates(root, get_namespace(root))
         line = get_linelabel(root, get_namespace(root))
         feedrate = get_path_feedrate(root, get_namespace(root))
-        columns = [xyz, line, feedrate]
+        columns = [xyz]
+        # columns = [xyz, line, feedrate]
         for c in columns:
             if timestamp < c["timestamp"]:
                 timestamp = c["timestamp"]

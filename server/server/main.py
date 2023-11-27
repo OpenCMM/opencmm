@@ -22,7 +22,7 @@ from server.listener import (
     status,
     hakaru,
 )
-from server.measure import EstimateConfig, update_data_after_measurement
+from server.measure import EstimateConfig, update_data_after_measurement, recompute
 from server.config import MYSQL_CONFIG, MODEL_PATH, get_config, update_conf
 from server.model import (
     get_3dmodel_data,
@@ -290,6 +290,16 @@ async def estimate_measurement(
         model_id,
     )
     return {"status": "ok", "process_id": _conf.process_id}
+
+
+@app.post("/recompute/process/{process_id}")
+async def recompute_process(process_id: int, background_tasks: BackgroundTasks):
+    background_tasks.add_task(
+        recompute,
+        MYSQL_CONFIG,
+        process_id,
+    )
+    return {"status": "ok"}
 
 
 @app.get("/get_model_id/from/program_name/{program_name}")
