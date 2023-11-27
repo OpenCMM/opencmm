@@ -1,7 +1,9 @@
 import mysql.connector
+from server.config import MODEL_PATH
 from .line import get_side
 from .arc import get_arc
 import math
+from .point import ray_cast
 
 
 def get_direction(x0, y0, x1, y1):
@@ -43,20 +45,20 @@ def get_arc_path(center, xyz, distance):
     )
 
     # Calculate the coordinates of the two points at distance 'distance' from point A
-    point1 = (
+    outside_point = (
         x + distance * normalized_direction[0],
         y + distance * normalized_direction[1],
         z + distance * normalized_direction[2],
     )
-    point2 = (
+    inside_point = (
         x - distance * normalized_direction[0],
         y - distance * normalized_direction[1],
         z - distance * normalized_direction[2],
     )
     # round to 3 decimal places
-    point1 = [round(x, 3) for x in point1]
-    point2 = [round(x, 3) for x in point2]
-    return point1, point2
+    outside_point = [round(x, 3) for x in outside_point]
+    inside_point = [round(x, 3) for x in inside_point]
+    return outside_point, inside_point
 
 
 def get_edges_by_side_id(side_id: int, mysql_config: dict, process_id: int):
@@ -113,9 +115,10 @@ def get_edge_id_from_line_number(mysql_config: dict, model_id: int, line_number:
 def get_edge_path(
     mysql_config: dict,
     model_id: int,
-    length: float = 2.5,
-    measure_feedrate: float = 300,
-    move_feedrate: float = 600,
+    stl_filename: str,
+    length: float,
+    measure_feedrate: float,
+    move_feedrate: float,
     xyz_offset: tuple = (0, 0, 0),
 ):
     path = []
@@ -130,8 +133,11 @@ def get_edge_path(
             )
             direction = get_direction(x0, y0, x1, y1)
             if direction == 0:
-                py0 = y - length
-                py1 = y + length
+                hit = ray_cast(
+                    f"{MODEL_PATH}/{stl_filename}",
+                    (x - xyz_offset[0], y + length - xyz_offset[1], 1000),
+                )
+                py0, py1 = (y - length, y + length) if hit else (y + length, y - length)
                 path.append(
                     [
                         to_gcode_row(x, py0, move_feedrate),
@@ -143,8 +149,11 @@ def get_edge_path(
                 )
 
             elif direction == 1:
-                px0 = x - length
-                px1 = x + length
+                hit = ray_cast(
+                    f"{MODEL_PATH}/{stl_filename}",
+                    (x + length - xyz_offset[0], y - xyz_offset[1], 1000),
+                )
+                px0, px1 = (x - length, x + length) if hit else (x + length, x - length)
                 path.append(
                     [
                         to_gcode_row(px0, y, move_feedrate),
@@ -159,11 +168,22 @@ def get_edge_path(
             arc_id, model_id, radius, cx, cy, cz = get_arc(arc_id, mysql_config)
             # add offset to center
             (cx, cy, cz) = (cx + xyz_offset[0], cy + xyz_offset[1], cz + xyz_offset[2])
-            point1, point2 = get_arc_path((cx, cy, cz), (x, y, z), length)
+            outside_point, inside_point = get_arc_path((cx, cy, cz), (x, y, z), length)
+            hit = ray_cast(
+                f"{MODEL_PATH}/{stl_filename}",
+                (
+                    outside_point[0] - xyz_offset[0],
+                    outside_point[1] - xyz_offset[1],
+                    1000,
+                ),
+            )
+            first, second = (
+                (inside_point, outside_point) if hit else (outside_point, inside_point)
+            )
             path.append(
                 [
-                    to_gcode_row(point1[0], point1[1], move_feedrate),
-                    to_gcode_row(point2[0], point2[1], measure_feedrate),
+                    to_gcode_row(first[0], first[1], move_feedrate),
+                    to_gcode_row(second[0], second[1], measure_feedrate),
                     x,
                     y,
                     edge_id,

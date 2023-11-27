@@ -37,7 +37,13 @@ def process_stl(
 ):
     (measure_length, measure_feedrate, move_feedrate) = measure_config
     path = edge.get_edge_path(
-        mysql_config, model_id, measure_length, measure_feedrate, move_feedrate, offset
+        mysql_config,
+        model_id,
+        stl_filename,
+        measure_length,
+        measure_feedrate,
+        move_feedrate,
+        offset,
     )
     update_offset(model_id, offset)
 
