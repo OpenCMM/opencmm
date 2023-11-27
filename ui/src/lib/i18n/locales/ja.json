@@ -82,6 +82,10 @@
 			"datetime": "測定日時",
 			"status": "状態"
 		},
+		"recompute": {
+			"button": "再計算",
+			"start": "再計算を開始しました"
+		},
 		"result": {
 			"title": "測定結果",
 			"edge": {

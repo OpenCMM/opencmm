@@ -82,6 +82,10 @@
 			"datetime": "Datetime",
 			"status": "Status"
 		},
+		"recompute": {
+			"button": "Recompute",
+			"start": "Recompute started"
+		},
 		"result": {
 			"title": "Result",
 			"edge": {
