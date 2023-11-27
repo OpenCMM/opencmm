@@ -1061,7 +1061,7 @@
         "z": "344499584571a0ed",
         "name": "Stop measurement",
         "info": "",
-        "x": 1690,
+        "x": 1790,
         "y": 160,
         "wires": []
     },
@@ -1079,7 +1079,7 @@
         "correl": "",
         "expiry": "",
         "broker": "8e7d86e88ee54c5e",
-        "x": 1920,
+        "x": 2020,
         "y": 220,
         "wires": []
     },
@@ -1102,7 +1102,7 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 1700,
+        "x": 1800,
         "y": 220,
         "wires": [
             [
@@ -1129,7 +1129,7 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 1700,
+        "x": 1800,
         "y": 280,
         "wires": [
             [
@@ -1151,7 +1151,7 @@
         "correl": "",
         "expiry": "",
         "broker": "8e7d86e88ee54c5e",
-        "x": 1920,
+        "x": 2020,
         "y": 280,
         "wires": []
     },
@@ -1277,8 +1277,7 @@
         "y": 180,
         "wires": [
             [
-                "170208632310229a",
-                "04f5d350e9f0a665"
+                "675e6067c1b54aeb"
             ]
         ]
     },
@@ -1889,5 +1888,31 @@
         "x": 1960,
         "y": 720,
         "wires": []
+    },
+    {
+        "id": "675e6067c1b54aeb",
+        "type": "delay",
+        "z": "344499584571a0ed",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 1600,
+        "y": 220,
+        "wires": [
+            [
+                "170208632310229a",
+                "04f5d350e9f0a665"
+            ]
+        ]
     }
 ]
