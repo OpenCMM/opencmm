@@ -1,5 +1,6 @@
 from stl import mesh
 import numpy as np
+import trimesh
 
 
 def point_id(point: np.ndarray):
@@ -90,3 +91,28 @@ def round_shape_values(shapes: np.ndarray, decimal_places: int = 3):
         shapes[i] = np.round(shapes[i], decimals=decimal_places)
 
     return shapes
+
+
+def ray_cast(stl_file_path: str, ray_origin: tuple):
+    """
+    Check if a point hits an STL file
+
+    Parameters
+    ----------
+    stl_file_path : str
+        Path to STL file
+    ray_origin : tuple
+        Point to check
+
+    Returns
+    -------
+    hit : bool
+        True if point hits STL file
+    """
+    mesh = trimesh.load_mesh(stl_file_path)
+    ray_origins = np.array([ray_origin])
+    ray_directions = np.array([[0, 0, -1]])
+
+    # Check if the ray intersects the mesh
+    index = mesh.ray.intersects_first(ray_origins, ray_directions)[0]
+    return index != -1

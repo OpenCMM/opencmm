@@ -115,11 +115,16 @@ def fetch_pairs(model_id: int):
 	"""
     cursor.execute(query, (model_id,))
     current_pair_id = -1
+    current_line = []
     for line in cursor:
-        if current_pair_id == line[0]:
-            continue
-        lines.append((line[0], line[1], line[2], line[3], line[4], line[5], line[6]))
-        current_pair_id = line[0]
+        pair_id = line[0]
+        if current_pair_id != pair_id:
+            current_line = [pair_id, line[1], line[2], line[3]]
+            current_pair_id = pair_id
+        else:
+            current_line += [line[4], line[5], line[6]]
+            lines.append(current_line)
+            current_line = []
 
     cursor.close()
     cnx.close()
@@ -134,10 +139,11 @@ def fetch_lines(model_id: int, process_id: int):
     lines = []
     query = """
 		SELECT pair.id, pair.length, pair_result.length
-        FROM pair INNER JOIN pair_result ON pair.id = pair_result.pair_id
-		WHERE pair.model_id = %s AND pair_result.process_id = %s
+        FROM pair LEFT JOIN pair_result ON pair.id = pair_result.pair_id
+        AND pair_result.process_id = %s 
+		WHERE pair.model_id = %s
 	"""
-    cursor.execute(query, (model_id, process_id))
+    cursor.execute(query, (process_id, model_id))
     for line in cursor:
         lines.append((line[0], line[1], line[2]))
 
@@ -155,10 +161,11 @@ def fetch_arcs(model_id: int, process_id: int):
 		SELECT arc.id, arc.radius, 
         arc.cx, arc.cy, arc.cz, arc_result.radius, 
         arc_result.cx, arc_result.cy, arc_result.cz
-        FROM arc INNER JOIN arc_result ON arc.id = arc_result.arc_id 
-        WHERE arc.model_id = %s AND arc_result.process_id = %s
+        FROM arc LEFT JOIN arc_result ON arc.id = arc_result.arc_id 
+        AND arc_result.process_id = %s 
+        WHERE arc.model_id = %s
 	"""
-    cursor.execute(query, (model_id, process_id))
+    cursor.execute(query, (process_id, model_id))
     for arc in cursor:
         arcs.append(
             (arc[0], arc[1], arc[2], arc[3], arc[4], arc[5], arc[6], arc[7], arc[8])

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { BACKEND_URL } from '$lib/constants/backend';
-	import { displayCoordinates, displayLengthDifference } from '$lib/utils/display';
+	import { displayCoordinates, displayLengthDifference, displayRadius } from '$lib/utils/display';
 	import { DataTable, InlineLoading } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
@@ -13,7 +13,7 @@
 		id: number;
 		radius: number;
 		center: string;
-		rradius: number;
+		rradius: string;
 		radiusDiff: string;
 		rcenter: string;
 	}
@@ -32,12 +32,13 @@
 			`${BACKEND_URL}/result/arcs?model_id=${modelId}&process_id=${processId}`
 		);
 		const data = await res.json();
+		console.log(data);
 		let idx = 1;
 		for (const d of data['arcs']) {
 			row.push({
 				id: idx,
 				radius: d[1],
-				rradius: d[5],
+				rradius: displayRadius(d[5]),
 				radiusDiff: displayLengthDifference(d[1], d[5]),
 				center: displayCoordinates(d[2], d[3], d[4]),
 				rcenter: displayCoordinates(d[6], d[7], d[8])

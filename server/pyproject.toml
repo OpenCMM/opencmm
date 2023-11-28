@@ -17,6 +17,8 @@ numpy-stl = "^3.0.1"
 gunicorn = "^21.2.0"
 mysql-connector-python = "^8.2.0"
 pyyaml = "^6.0.1"
+trimesh = "^4.0.5"
+rtree = "^1.1.0"
 
 
 [tool.poetry.group.dev.dependencies]

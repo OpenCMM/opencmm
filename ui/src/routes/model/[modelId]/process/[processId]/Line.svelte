@@ -3,7 +3,7 @@
 	import { DataTable, InlineLoading } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import { displayLengthDifference } from '$lib/utils/display';
+	import { displayLength, displayLengthDifference } from '$lib/utils/display';
 
 	let loaded = false;
 
@@ -12,7 +12,7 @@
 	interface Line {
 		id: number;
 		length: number;
-		rlength: number;
+		rlength: string;
 		lengthDiff: string;
 	}
 
@@ -33,7 +33,7 @@
 			row.push({
 				id: idx,
 				length: d[1],
-				rlength: d[2],
+				rlength: displayLength(d[2]),
 				lengthDiff: displayLengthDifference(d[1], d[2])
 			});
 			idx += 1;

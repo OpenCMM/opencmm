@@ -16,6 +16,7 @@ z = 10.0
 
 conf = get_config()
 mtconnect_latency = conf["mtconnect"]["latency"]
+beam_diameter = conf["sensor"]["beam_diameter"]
 
 
 def import_sensor_data(mysql_config: dict, _sensor_data_list: list):
@@ -127,6 +128,7 @@ def create_mock_perfect_data(filename: str, process_id: int):
             distance_to_target = get_distance_between_two_points(
                 start_coord, target_coord
             )
+            distance_to_target += beam_diameter / 1000
             time_to_substract = distance_to_target / feedrate
             sensor_timestamp = timestamp - timedelta(seconds=time_to_substract)
             unix_timestamp = sensor_timestamp.timestamp()

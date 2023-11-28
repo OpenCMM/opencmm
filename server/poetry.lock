@@ -1291,6 +1291,25 @@ socks = ["PySocks (>=1.5.6,!=1.5.7)"]
 use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
+name = "rtree"
+version = "1.1.0"
+description = "R-Tree spatial index for Python GIS"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "Rtree-1.1.0-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:5dc612959233cf07f31c8f1a4cf1587eea86dc2fc6d6938f35f28d312bbbbd3e"},
+    {file = "Rtree-1.1.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:eac35fc095e36f5e5678f7777f296b6a076332c65cfbe00e5cd54b0518f6d71f"},
+    {file = "Rtree-1.1.0-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:91d3e4b19efa77fc3c09fbbbed48c588bfa056c8b73b5bd084fb0d2d37654775"},
+    {file = "Rtree-1.1.0-py3-none-manylinux2014_i686.manylinux_2_17_i686.whl", hash = "sha256:f1787187b7d74845484e2da029775928ac6af2d453d401e0082022c6552c49b1"},
+    {file = "Rtree-1.1.0-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:96307058e0149b6124b5af1d48a145b3c1e0086db44de50b435f173e934fc510"},
+    {file = "Rtree-1.1.0-py3-none-musllinux_1_1_aarch64.whl", hash = "sha256:22c670ed503de4f42789a7ca1554b219d5820133edaf2a28a051bad2ac90bbca"},
+    {file = "Rtree-1.1.0-py3-none-musllinux_1_1_i686.whl", hash = "sha256:818dde0ef54166edfb438a3bbf97bcc2eb0b984ab9ec5e7d20779479e456bfad"},
+    {file = "Rtree-1.1.0-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:696a5f3ecf8b622ab5827e107e762ecffa0555944433f2824dd7f46b4afc410b"},
+    {file = "Rtree-1.1.0-py3-none-win_amd64.whl", hash = "sha256:d346ab57eabee139890a51bf7e02c17c5bcbff68db84e1571ed5247fe108b8e7"},
+    {file = "Rtree-1.1.0.tar.gz", hash = "sha256:6f8ee504dde5d005b25b08aaf5be0b3404af3ad5fece6e1ddcde35908a798a95"},
+]
+
+[[package]]
 name = "ruff"
 version = "0.0.283"
 description = "An extremely fast Python linter, written in Rust."
@@ -1442,6 +1461,26 @@ anyio = ">=3.4.0,<5"
 
 [package.extras]
 full = ["httpx (>=0.22.0)", "itsdangerous", "jinja2", "python-multipart", "pyyaml"]
+
+[[package]]
+name = "trimesh"
+version = "4.0.5"
+description = "Import, export, process, analyze and view triangular meshes."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "trimesh-4.0.5-py3-none-any.whl", hash = "sha256:d139a9108fc7d68a9cd3f5788528eadc20f25a10ae915922b4a2768e0b23d943"},
+    {file = "trimesh-4.0.5.tar.gz", hash = "sha256:b9bfcfec03b70ab4d21f055df1ab73e8740dd0bc8fd5648273eef8fec76cddf9"},
+]
+
+[package.dependencies]
+numpy = "*"
+
+[package.extras]
+all = ["trimesh[easy,recommend,test]"]
+easy = ["chardet", "colorlog", "embreex", "httpx", "jsonschema", "lxml", "mapbox-earcut", "networkx", "pillow", "pycollada", "rtree", "scipy", "setuptools", "shapely", "svg.path", "xxhash"]
+recommend = ["glooey", "manifold3d", "meshio", "psutil", "pyglet (<2)", "python-fcl", "scikit-image", "sympy", "vhacdx", "xatlas"]
+test = ["black", "coveralls", "ezdxf", "matplotlib", "mypy", "pyinstrument", "pymeshlab", "pytest", "pytest-cov", "ruff"]
 
 [[package]]
 name = "typing-extensions"
@@ -1784,4 +1823,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.13"
-content-hash = "e2f8426ceefccaa00346e9e2536ac745960cf19b9c28e0679356c62346166795"
+content-hash = "a5ec233bce15f26354942252d5ddacca9939c85163f7b6435d1812735e0d0688"
