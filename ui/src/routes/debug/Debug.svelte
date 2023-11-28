@@ -12,6 +12,7 @@
 	export let modelId: string;
 	export let processId: string;
 	export let offset: number[];
+	const missingDataColor = 'cae643';
 
 	onMount(() => {
 		// Scene
@@ -58,6 +59,30 @@
 				}
 			}
 		});
+
+		axios
+			.get(`${BACKEND_URL}/result/check/mtconnect/points/${modelId}/${processId}`)
+			.then((res) => {
+				if (res.status === 200) {
+					const missingData = res.data['lines'];
+					if (missingData.length === 0) {
+						return;
+					}
+
+					for (const data of missingData) {
+						const start = data['start'];
+						const end = data['end'];
+						const point0 = new THREE.Vector3(start[0], start[1], 0.0);
+						const point1 = new THREE.Vector3(end[0], end[1], 0.0);
+						const lineGeometry = new THREE.BufferGeometry().setFromPoints([point0, point1]);
+						const lineMaterial = new THREE.LineBasicMaterial({
+							color: parseInt(missingDataColor, 16)
+						});
+						const line = new THREE.Line(lineGeometry, lineMaterial);
+						scene.add(line);
+					}
+				}
+			});
 
 		// Grid on xy plane
 		const size = 500;

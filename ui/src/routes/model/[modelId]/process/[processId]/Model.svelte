@@ -4,8 +4,15 @@
 	import CaretRight from 'carbon-icons-svelte/lib/CaretRight.svelte';
 	import CaretLeft from 'carbon-icons-svelte/lib/CaretLeft.svelte';
 	import Add from 'carbon-icons-svelte/lib/Add.svelte';
-	import { Button, ButtonSet, ContentSwitcher, Loading, Switch, ToastNotification } from 'carbon-components-svelte';
-	import Calculator from "carbon-icons-svelte/lib/Calculator.svelte";
+	import {
+		Button,
+		ButtonSet,
+		ContentSwitcher,
+		Loading,
+		Switch,
+		ToastNotification
+	} from 'carbon-components-svelte';
+	import Calculator from 'carbon-icons-svelte/lib/Calculator.svelte';
 	import { Grid, Row, Column } from 'carbon-components-svelte';
 	import ChartStepper from 'carbon-icons-svelte/lib/ChartStepper.svelte';
 	import Table from 'carbon-icons-svelte/lib/Table.svelte';
@@ -79,11 +86,11 @@
 				if (res.status === 200) {
 					recomputeSuccess = true;
 				}
-			})
+			});
 		} catch (e) {
 			console.log(e);
 		}
-	}
+	};
 
 	onMount(() => {
 		loadModelInfo();
@@ -122,6 +129,9 @@
 					<Button icon={Calculator} on:click={recomputeStart}>
 						{$_('home.recompute.button')}</Button
 					>
+				</Column>
+				<Column>
+					<Button href={`/debug?id=${modelId}&process=${processId}`}>MTConnect</Button>
 				</Column>
 				<Column>
 					<div id="page-button">
@@ -177,7 +187,6 @@
 		on:close={() => (recomputeSuccess = false)}
 	/>
 {/if}
-
 
 <style>
 	#model-page {

@@ -23,6 +23,7 @@ from server.listener import (
     hakaru,
 )
 from server.measure import EstimateConfig, update_data_after_measurement, recompute
+from server.measure.mtconnect import check_if_mtconnect_data_is_missing
 from server.config import MYSQL_CONFIG, MODEL_PATH, get_config, update_conf
 from server.model import (
     get_3dmodel_data,
@@ -359,6 +360,12 @@ def get_debug_points(process_id: int):
 def get_debug_mtconnect_points(process_id: int):
     points = result.fetch_mtconnect_points(process_id)
     return {"points": points}
+
+
+@app.get("/result/check/mtconnect/points/{model_id}/{process_id}")
+def check_mtconnect_points(model_id: int, process_id: int):
+    lines = check_if_mtconnect_data_is_missing(MYSQL_CONFIG, model_id, process_id)
+    return {"lines": lines}
 
 
 @app.get("/get/model/table/data/{model_id}")

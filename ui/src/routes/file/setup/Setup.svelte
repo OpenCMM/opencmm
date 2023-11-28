@@ -13,8 +13,8 @@
 	let yOffset = 0;
 	let zOffset = 0;
 	let measureLength = 2.5;
-	let measureFeedRate = 300.0;
-	let moveFeedRate = 600.0;
+	let measureFeedRate = 100.0;
+	let moveFeedRate = 1000.0;
 	let error: string | null = null;
 	let settingDone = false;
 	let loading = false;

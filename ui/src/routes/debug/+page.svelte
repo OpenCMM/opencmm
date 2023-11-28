@@ -5,27 +5,32 @@
 	import { onMount } from 'svelte';
 	import axios from 'axios';
 	import { BACKEND_URL } from '$lib/constants/backend';
+	import MissingData from './MissingData.svelte';
 
 	const modelId = $page.url.searchParams.get('id');
 	const processId = $page.url.searchParams.get('process');
 	let offset = [0.0, 0.0, 0.0];
-	let offsetLoaded = false;
+	let loaded = false;
+
 	onMount(() => {
 		axios.get(`${BACKEND_URL}/get/model/table/data/${modelId}`).then((res) => {
 			if (res.status === 200) {
 				const [, , , offsetX, offsetY] = res.data;
 				offset = [offsetX, offsetY, 0.0];
-				offsetLoaded = true;
+				loaded = true;
 			}
 		});
 	});
 </script>
 
-{#if modelId && processId && offsetLoaded}
+{#if modelId && processId && loaded}
 	<Grid padding>
 		<Row>
 			<Column>
 				<Debug {modelId} {processId} {offset} />
+			</Column>
+			<Column>
+				<MissingData {modelId} {processId} />
 			</Column>
 		</Row>
 	</Grid>
