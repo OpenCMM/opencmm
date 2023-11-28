@@ -13,3 +13,4 @@ mtconnect:
 sensor:
   interval: 10 # ms
   threshold: 1000
+  beam_diameter: 120.0 # μm

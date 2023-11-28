@@ -38,6 +38,7 @@ def sensor_timestamp_to_coord(
     xy: tuple,
     direction_vector: tuple,
     feedrate: float,
+    beam_diameter: float,  # in μm
 ):
     """
     Estimate the coordinate of the edge from sensor timestamp
@@ -45,7 +46,8 @@ def sensor_timestamp_to_coord(
     timestamp_diff = sensor_timestamp - start_timestamp
     distance = feedrate * timestamp_diff.total_seconds()
     direction_vector = np.array(direction_vector)
-    coord = np.array(xy) + distance * direction_vector
+    distance_with_beam_diameter = distance + beam_diameter / 1000  # convert to mm
+    coord = np.array(xy) + distance_with_beam_diameter * direction_vector
     # round to 3 decimal places
     coord = np.round(coord, 3)
     return tuple(coord)
@@ -59,8 +61,6 @@ def update_data_after_measurement(
     """
     Estimate edges from mtconnect data and sensor data
     """
-    conf = get_config()
-    mtconnect_latency = conf["mtconnect"]["latency"]
     client = mqtt.Client()
     client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
 
@@ -79,9 +79,7 @@ def update_data_after_measurement(
     client.on_message = on_message
     client.connect(MQTT_BROKER_URL, 1883, 60)
 
-    update_list = compute_edge_results(
-        mysql_config, model_id, process_id, mtconnect_latency
-    )
+    update_list = compute_edge_results(mysql_config, model_id, process_id)
     edge_count = len(update_list)
     if edge_count == 0:
         status.update_process_status(
@@ -112,9 +110,10 @@ def update_data_after_measurement(
         disconnect_and_publish_log(str(e))
 
 
-def compute_edge_results(
-    mysql_config: dict, model_id: int, process_id: int, mtconnect_latency: int
-):
+def compute_edge_results(mysql_config: dict, model_id: int, process_id: int):
+    conf = get_config()
+    mtconnect_latency = conf["mtconnect"]["latency"]
+    beam_diameter = conf["sensor"]["beam_diameter"]
     model_row = get_model_data(model_id)
     filename = model_row[1]
     # offset = (model_row[3], model_row[4], model_row[5])
@@ -158,7 +157,12 @@ def compute_edge_results(
                 distance = np.linalg.norm(direction_vector)
                 direction_vector = tuple(direction_vector / distance)
                 edge_coord = sensor_timestamp_to_coord(
-                    start_timestamp, sensor_timestamp, start, direction_vector, feedrate
+                    start_timestamp,
+                    sensor_timestamp,
+                    start,
+                    direction_vector,
+                    feedrate,
+                    beam_diameter,
                 )
                 edge_id = get_edge_id_from_line_number(mysql_config, model_id, line)
                 update_list.append(
@@ -181,13 +185,9 @@ def recompute(mysql_config: dict, process_id: int):
     arc.delete_measured_arc_info(mysql_config, process_id)
     pair.delete_measured_length(mysql_config, process_id)
 
-    conf = get_config()
-    mtconnect_latency = conf["mtconnect"]["latency"]
     process_data = status.get_process_status(mysql_config, process_id)
     model_id = process_data[1]
-    update_list = compute_edge_results(
-        mysql_config, model_id, process_id, mtconnect_latency
-    )
+    update_list = compute_edge_results(mysql_config, model_id, process_id)
 
     edge_count = len(update_list)
     if edge_count == 0:
