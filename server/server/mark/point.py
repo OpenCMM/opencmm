@@ -116,3 +116,33 @@ def ray_cast(stl_file_path: str, ray_origin: tuple):
     # Check if the ray intersects the mesh
     index = mesh.ray.intersects_first(ray_origins, ray_directions)[0]
     return index != -1
+
+
+def get_visible_lines(stl_file_path: str, decimal_places: int = 3):
+    mesh = trimesh.load(stl_file_path)
+
+    # Get the normals of the facets
+    facet_normals = mesh.face_normals
+
+    # Find the indices of facets facing "up" (positive z-direction)
+    upward_facing_indices = np.where(facet_normals[:, 2] > 0)[0]
+
+    lines = []
+    for idx in upward_facing_indices:
+        vertices = mesh.vertices[mesh.faces[idx]]
+        # add each line in the triangle
+        lines.append([vertices[0].tolist(), vertices[1].tolist()])
+        lines.append([vertices[1].tolist(), vertices[2].tolist()])
+        lines.append([vertices[2].tolist(), vertices[0].tolist()])
+
+    # sort lines by x, y
+    for line in lines:
+        if line[0][0] > line[1][0]:
+            line[0], line[1] = line[1], line[0]
+        elif line[0][0] == line[1][0]:
+            if line[0][1] > line[1][1]:
+                line[0], line[1] = line[1], line[0]
+
+    lines = np.array(lines)
+    unique_lines = np.unique(lines, axis=0)
+    return round_shape_values(unique_lines, decimal_places)
