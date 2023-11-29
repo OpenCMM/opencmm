@@ -88,10 +88,17 @@ def get_sides(mysql_config: dict, model_id: int):
 def pairs_to_lines_and_steps(pairs: list):
     lines = []
     steps = []
+
+    def format_line(line):
+        # delete z value
+        line = line[:, :2]
+        # order by x, y value
+        return np.sort(line, axis=0)
+
     for pair in pairs:
-        line1 = pair[0]
-        line2 = pair[1]
-        if line1[0][0] == line2[0][0] and line1[1][0] == line2[1][0] or line1[0][0] == line2[1][0] and line1[1][0] == line2[0][0]:
+        line1 = format_line(pair[0])
+        line2 = format_line(pair[1])
+        if np.array_equal(line1, line2):
             steps.append(pair)
         else:
             lines.append(pair)

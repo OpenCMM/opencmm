@@ -28,14 +28,20 @@ def test_get_lines():
     for line in lines:
         assert line.shape == (2, 3)
 
+
 def test_get_pairs():
     lines, _arcs = get_shapes("tests/fixtures/stl/step.STL")
     x, y, other = get_parallel_lines(lines)
     pairs = get_pairs(x, 0)
+    lines, steps = pairs_to_lines_and_steps(pairs)
+    assert len(lines) == 2
+    assert len(steps) == 0
+
     pairs = get_pairs(y, 1)
     lines, steps = pairs_to_lines_and_steps(pairs)
     assert len(lines) == 5
     assert len(steps) == 1
+
 
 @pytest.mark.skip(reason="not implemented")
 def test_get_parallel_lines():
