@@ -85,12 +85,29 @@ def get_sides(mysql_config: dict, model_id: int):
     return sides
 
 
+def pairs_to_lines_and_steps(pairs: list):
+    lines = []
+    steps = []
+    for pair in pairs:
+        line1 = pair[0]
+        line2 = pair[1]
+        if line1[0][0] == line2[0][0] and line1[1][0] == line2[1][0] or line1[0][0] == line2[1][0] and line1[1][0] == line2[0][0]:
+            steps.append(pair)
+        else:
+            lines.append(pair)
+    return lines, steps
+
+
 def import_parallel_lines(model_id, lines: np.ndarray, mysql_config: dict):
     x, y, other = get_parallel_lines(lines)
     pairs = get_pairs(x, 0)
-    import_sides(model_id, pairs, "line", mysql_config)
+    lines, steps = pairs_to_lines_and_steps(pairs)
+    import_sides(model_id, lines, "line", mysql_config)
+    import_sides(model_id, steps, "step", mysql_config)
     pairs = get_pairs(y, 1)
-    import_sides(model_id, pairs, "line", mysql_config)
+    lines, steps = pairs_to_lines_and_steps(pairs)
+    import_sides(model_id, lines, "line", mysql_config)
+    import_sides(model_id, steps, "step", mysql_config)
 
 
 def import_edges(edge_list: list, mysql_config: dict):
