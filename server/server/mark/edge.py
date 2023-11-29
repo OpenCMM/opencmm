@@ -144,6 +144,7 @@ def get_edge_path(
                         to_gcode_row(x, py1, measure_feedrate),
                         x,
                         y,
+                        z,
                         edge_id,
                     ]
                 )
@@ -160,6 +161,7 @@ def get_edge_path(
                         to_gcode_row(px1, y, measure_feedrate),
                         x,
                         y,
+                        z,
                         edge_id,
                     ]
                 )
@@ -186,10 +188,29 @@ def get_edge_path(
                     to_gcode_row(second[0], second[1], measure_feedrate),
                     x,
                     y,
+                    z,
                     edge_id,
                 ]
             )
-    return sorted(path, key=lambda point: (point[2], point[3]))
+    optimal_path = sorted(path, key=lambda point: (point[2], point[3]))
+
+    # delete edges with the same x, y value and keep the one with the highest z value
+    path = []
+    prev_xy = None
+    prev_z = None
+    for row in optimal_path:
+        _xy = (row[2], row[3])
+        if _xy == prev_xy:
+            if prev_z > row[4]:
+                continue
+            else:
+                path.pop()
+
+        prev_xy = _xy
+        prev_z = row[4]
+        path.append(row)
+
+    return path
 
 
 def generate_gcode(path, program_number: str):
