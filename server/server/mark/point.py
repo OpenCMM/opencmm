@@ -13,6 +13,26 @@ def get_highest_z(vertices):
     return highest_point[2][2]
 
 
+def get_unique_z_values_of_visiable_vertices(stl_file_path: str):
+    mesh = trimesh.load(stl_file_path)
+
+    # Get the normals of the facets
+    facet_normals = mesh.face_normals
+
+    # Find the indices of facets facing "up" (positive z-direction)
+    upward_facing_indices = np.where(facet_normals[:, 2] > 0)[0]
+
+    # Get the unique vertices associated with upward-facing facets
+    visible_vertices = np.unique(mesh.faces[upward_facing_indices])
+
+    # Extract the coordinates of the visible vertices
+    visible_vertex_coordinates = mesh.vertices[visible_vertices]
+
+    # get unique z values
+    unique_z = np.unique(visible_vertex_coordinates[:, 2])
+    return unique_z
+
+
 def get_shapes(stl_file_path: str, decimal_places: int = 3):
     """
     Extract lines parallel to the ground from an STL file \n
@@ -36,7 +56,7 @@ def get_shapes(stl_file_path: str, decimal_places: int = 3):
     cuboid = mesh.Mesh.from_file(stl_file_path)
     # get vertices
     vertices = cuboid.vectors
-    z = get_highest_z(vertices)
+    unique_z_values = get_unique_z_values_of_visiable_vertices(stl_file_path)
 
     # Extract lines and arcs parallel to the ground
     ground_parallel_shapes = []
@@ -51,13 +71,14 @@ def get_shapes(stl_file_path: str, decimal_places: int = 3):
             z_coords = vertices[:, 2]
 
             # Filter vertices based on z-coordinate
-            relevant_indices = np.where(np.isclose(z_coords, z, atol=1e-6))
-            relevant_vertices = vertices[relevant_indices]
+            for z in unique_z_values:
+                relevant_indices = np.where(np.isclose(z_coords, z, atol=1e-6))
+                relevant_vertices = vertices[relevant_indices]
 
-            # Create shapes between adjacent relevant vertices
-            for i in range(len(relevant_vertices) - 1):
-                line = relevant_vertices[i : i + 2]
-                ground_parallel_shapes.append(line)
+                # Create shapes between adjacent relevant vertices
+                for i in range(len(relevant_vertices) - 1):
+                    line = relevant_vertices[i : i + 2]
+                    ground_parallel_shapes.append(line)
 
     previous_length = 0
     for i in range(len(ground_parallel_shapes)):

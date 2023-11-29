@@ -20,10 +20,15 @@ def test_ray_cast():
     assert not ray_cast("tests/fixtures/stl/sample.stl", (0, 100, 20))
     assert not ray_cast("tests/fixtures/stl/sample.stl", (-10, 30, 20))
 
+
 def test_get_shapes():
     lines, arcs = get_shapes("tests/fixtures/stl/sample.stl")
     assert len(lines) == 8
     assert len(arcs) == 5
+
+    lines, arcs = get_shapes("tests/fixtures/stl/step.STL")
+    assert len(lines) == 8
+    assert len(arcs) == 0
 
 
 def test_get_visible_lines():
