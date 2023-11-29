@@ -3,6 +3,8 @@ from server.mark.point import (
     ray_cast,
     get_shapes,
     get_visible_lines,
+    get_coplanar_facets,
+    get_visible_facets,
 )
 from stl import mesh
 
@@ -34,3 +36,9 @@ def test_get_shapes():
 def test_get_visible_lines():
     lines = get_visible_lines("tests/fixtures/stl/step.STL")
     assert len(lines) == 14
+
+
+def test_get_coplanar_facets():
+    facets = get_visible_facets("tests/fixtures/stl/step.STL")
+    coplanar_facets = get_coplanar_facets(facets)
+    assert len(coplanar_facets) == 3
