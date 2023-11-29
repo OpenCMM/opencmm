@@ -3,7 +3,7 @@ from server.mark.point import (
     get_visible_facets,
     get_lines_on_coplanar_facets,
 )
-from server.mark import line, edge, arc, pair
+from server.mark import line, edge, arc, pair, step
 from server.config import MODEL_PATH, GCODE_PATH
 from server import machine
 from server.model import (
@@ -41,6 +41,7 @@ def process_new_model(stl_filename: str, model_id: int, mysql_config: dict):
     lines = get_lines_on_coplanar_facets(facets)
     lines = flatten_extend(lines)
     line.import_lines_from_paired_lines_on_facets(model_id, lines, mysql_config)
+    step.import_steps(model_id, mysql_config)
 
 
 def process_stl(
