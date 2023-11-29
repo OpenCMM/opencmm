@@ -4,6 +4,7 @@ from server.mark.point import (
     get_shapes,
     get_visible_lines,
     get_coplanar_facets,
+    get_lines_on_coplanar_facets,
     get_visible_facets,
 )
 from stl import mesh
@@ -42,3 +43,13 @@ def test_get_coplanar_facets():
     facets = get_visible_facets("tests/fixtures/stl/step.STL")
     coplanar_facets = get_coplanar_facets(facets)
     assert len(coplanar_facets) == 3
+
+
+def test_get_lines_on_coplanar_facets():
+    facets = get_visible_facets("tests/fixtures/stl/step.STL")
+    lines = get_lines_on_coplanar_facets(facets)
+    assert len(lines) == 3
+    for facet_lines in lines:
+        assert len(facet_lines) == 2
+        for pair in facet_lines:
+            assert len(pair) == 2

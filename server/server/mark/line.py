@@ -191,6 +191,14 @@ def import_lines(model_id: int, lines: np.ndarray, mysql_config: dict):
     import_edges_from_sides(sides, mysql_config)
 
 
+def import_lines_from_paired_lines_on_facets(
+    model_id: int, lines: list, mysql_config: dict
+):
+    import_sides(model_id, lines, "line", mysql_config)
+    sides = get_sides(mysql_config, model_id)
+    import_edges_from_sides(sides, mysql_config)
+
+
 def import_pair(model_id: int, pair_type: str, mysql_config: dict) -> int:
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()

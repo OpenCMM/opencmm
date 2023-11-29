@@ -1,5 +1,7 @@
 from server.mark.point import (
     get_shapes,
+    get_visible_facets,
+    get_lines_on_coplanar_facets,
 )
 from server.mark import line, edge, arc, pair
 from server.config import MODEL_PATH, GCODE_PATH
@@ -25,6 +27,20 @@ def process_new_3dmodel(stl_filename: str, model_id: int, mysql_config: dict):
     lines, arcs = get_shapes(f"{MODEL_PATH}/{stl_filename}")
     line.import_lines(model_id, lines, mysql_config)
     arc.import_arcs(model_id, arcs, mysql_config)
+
+
+def flatten_extend(matrix):
+    flat_list = []
+    for row in matrix:
+        flat_list.extend(row)
+    return flat_list
+
+
+def process_new_model(stl_filename: str, model_id: int, mysql_config: dict):
+    facets = get_visible_facets(f"{MODEL_PATH}/{stl_filename}")
+    lines = get_lines_on_coplanar_facets(facets)
+    lines = flatten_extend(lines)
+    line.import_lines_from_paired_lines_on_facets(model_id, lines, mysql_config)
 
 
 def process_stl(

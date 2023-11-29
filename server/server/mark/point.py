@@ -210,6 +210,56 @@ def get_coplanar_facets(facets):
     return coplanar_facets
 
 
+def get_facet_corner(facet, duplicate_points):
+    all = np.concatenate((facet, duplicate_points), axis=0)
+    _unique, counts = np.unique(all, axis=0, return_counts=True)
+    return _unique[np.where(counts == 1)][0]
+
+
+def get_lines_on_coplanar_facets(facets):
+    adjacent_facets = []
+    for i, j in combinations(range(len(facets)), 2):
+        # if two facets share two vertices, they are adjacent
+        if are_adjacent_facets(facets[i], facets[j]):
+            adjacent_facets.append([facets[i], facets[j]])
+
+    lines = []
+    # check if adjacent facets are coplanar, if yes, merge them
+    for i in range(len(adjacent_facets)):
+        # get two adjacent facets
+        facet1 = adjacent_facets[i][0]
+        facet2 = adjacent_facets[i][1]
+        if are_facets_on_same_plane(facet1, facet2):
+            unique_points, counts = np.unique(
+                np.concatenate((facet1, facet2), axis=0), axis=0, return_counts=True
+            )
+            # duplicate points are the points that are shared by two facets
+            duplicate_points = unique_points[counts > 1]
+            facet1_corner = get_facet_corner(facet1, duplicate_points)
+            facet2_corner = get_facet_corner(facet2, duplicate_points)
+
+            facet_lines = []
+            facet_lines.append(
+                np.array(
+                    [
+                        np.array([facet1_corner, duplicate_points[0]]),
+                        np.array([facet2_corner, duplicate_points[1]]),
+                    ]
+                )
+            )
+            facet_lines.append(
+                np.array(
+                    [
+                        [facet1_corner, duplicate_points[1]],
+                        [facet2_corner, duplicate_points[0]],
+                    ]
+                )
+            )
+            lines.append(facet_lines)
+
+    return lines
+
+
 def get_visible_lines(stl_file_path: str, decimal_places: int = 3):
     mesh = trimesh.load(stl_file_path)
 
