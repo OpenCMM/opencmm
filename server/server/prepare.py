@@ -3,17 +3,12 @@ from server.mark.point import (
     get_visible_facets,
     get_lines_on_coplanar_facets,
 )
-from server.mark import line, edge, arc, pair, step
+from server.mark import line, edge, arc, pair, step, gcode
 from server.config import MODEL_PATH, GCODE_PATH
 from server import machine
 from server.model import (
     update_offset,
 )
-
-
-def model_id_to_program_number(model_id: int):
-    return str(model_id + 1000)
-    # return str(model_id).zfill(4)
 
 
 def program_number_to_model_id(program_number: str):
@@ -64,22 +59,18 @@ def process_stl(
     )
     update_offset(model_id, offset)
 
-    # save gcode
-    program_number = model_id_to_program_number(model_id)
+    # add line numbers
     edge.add_line_number_from_path(mysql_config, path)
-    gcode = edge.generate_gcode(path, program_number)
-    gcode_filename = get_gcode_filename(stl_filename)
+
+    # save gcode
+    gcode_filename = gcode.get_gcode_filename(stl_filename)
     gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
-    edge.save_gcode(gcode, gcode_file_path)
+    gcode.save_gcode(model_id, path, stl_filename)
 
     # send gcode to cnc machine
     if send_gcode:
         machine_info = machine.get_machines(mysql_config)[0]
         machine.send_file_with_smbclient(machine_info, gcode_file_path)
-
-
-def get_gcode_filename(model_filename: str):
-    return f"{model_filename}.gcode"
 
 
 def remove_data_with_model_id(model_id: int, mysql_config: dict):

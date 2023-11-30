@@ -14,7 +14,7 @@ from server.mark.edge import (
     get_edge_id_from_line_number,
     delete_edge_results,
 )
-from server.prepare import get_gcode_filename
+from server.mark.gcode import get_gcode_filename
 from .sensor import get_sensor_data
 from server.model import get_model_data
 import numpy as np

@@ -7,7 +7,7 @@ import random
 from server.model import add_new_3dmodel
 from server.listener import status
 from datetime import datetime, timedelta
-from server.prepare import get_gcode_filename
+from server.mark.gcode import get_gcode_filename
 from fastapi.testclient import TestClient
 from server.main import app
 

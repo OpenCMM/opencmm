@@ -11,8 +11,6 @@ from server.prepare import (
     process_new_3dmodel,
     process_new_model,
     process_stl,
-    get_gcode_filename,
-    model_id_to_program_number,
     program_number_to_model_id,
 )
 from pydantic import BaseModel
@@ -36,6 +34,7 @@ from server.model import (
     add_new_3dmodel,
     get_model_data,
 )
+from server.mark.gcode import model_id_to_program_number, get_gcode_filename
 from server import machine
 import asyncio
 

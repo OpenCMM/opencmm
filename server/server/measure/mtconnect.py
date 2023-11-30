@@ -1,6 +1,6 @@
 import mysql.connector
 from server.model import get_model_data
-from server.prepare import get_gcode_filename
+from server.mark.gcode import get_gcode_filename
 from server.config import GCODE_PATH
 from server.measure.gcode import (
     load_gcode,
