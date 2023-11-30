@@ -136,8 +136,7 @@ def ray_cast(stl_file_path: str, ray_origin: tuple):
     ray_directions = np.array([[0, 0, -1]])
 
     # Check if the ray intersects the mesh
-    index = mesh.ray.intersects_first(ray_origins, ray_directions)[0]
-    return index != -1
+    return mesh.ray.intersects_any(ray_origins, ray_directions)[0]
 
 
 def get_visible_facets(stl_file_path: str):

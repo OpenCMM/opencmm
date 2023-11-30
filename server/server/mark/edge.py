@@ -4,6 +4,7 @@ from .line import get_side
 from .arc import get_arc
 import math
 from .point import ray_cast
+from .gcode import to_gcode_row
 
 
 def get_direction(x0, y0, x1, y1):
@@ -74,13 +75,6 @@ def get_edges_by_side_id(side_id: int, mysql_config: dict, process_id: int):
     cursor.close()
     cnx.close()
     return edges
-
-
-def to_gcode_row(x, y, feedrate):
-    # round to 3 decimal places
-    x = round(x, 3)
-    y = round(y, 3)
-    return f"G1 X{x} Y{y} F{feedrate}"
 
 
 def add_line_number_from_path(mysql_config: dict, path: list):
