@@ -59,13 +59,28 @@ def process_stl(
     )
     update_offset(model_id, offset)
 
-    # add line numbers
     edge.add_line_number_from_path(mysql_config, path)
+
+    path = gcode.format_edge_path(path)
+    if step.get_steps(mysql_config, model_id):
+        step_path, trace_lines = step.create_step_path(
+            mysql_config,
+            model_id,
+            stl_filename,
+            move_feedrate,
+            offset,
+        )
+
+        # wait for 1 second in order to update the sensor config
+        path.append("G4 P1000")
+        init_line = 4 + len(path) + 1
+        step.import_trace_lines(mysql_config, trace_lines, init_line)
+        path += step_path
 
     # save gcode
     gcode_filename = gcode.get_gcode_filename(stl_filename)
     gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
-    gcode.save_gcode(model_id, path, stl_filename)
+    gcode.save_gcode(model_id, path, gcode_file_path)
 
     # send gcode to cnc machine
     if send_gcode:

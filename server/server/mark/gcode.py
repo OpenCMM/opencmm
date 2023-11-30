@@ -11,11 +11,18 @@ def model_id_to_program_number(model_id: int):
     # return str(model_id).zfill(4)
 
 
+def format_edge_path(edge_path: list):
+    path = []
+    for row in edge_path:
+        path.append(row[0])
+        path.append(row[1])
+    return path
+
+
 def generate_gcode(path, program_number: str):
     gcode = ["%", f"O{program_number}", "G90 G54"]
     for row in path:
-        gcode.append(row[0])
-        gcode.append(row[1])
+        gcode.append(row)
     return gcode + ["M30", "%"]
 
 

@@ -184,3 +184,20 @@ def create_step_path(
             )
 
     return path, trace_lines
+
+
+def import_trace_lines(mysql_config: dict, trace_lines: list, init_line: int):
+    # add line number
+    for idx, trace_line in enumerate(trace_lines):
+        trace_line.append(init_line + idx * 2)
+
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
+    cursor = cnx.cursor()
+    query = (
+        "INSERT INTO trace_line (trace_id, x0, y0, x1, y1, z, line) "
+        "VALUES (%s, %s, %s, %s, %s, %s, %s)"
+    )
+    cursor.executemany(query, trace_lines)
+    cnx.commit()
+    cursor.close()
+    cnx.close()
