@@ -84,7 +84,7 @@ def add_line_number_from_path(mysql_config: dict, path: list):
     update_list = []
     initial_line_number = 4
     for idx, row in enumerate(path):
-        edge_id = row[4]
+        edge_id = row[5]
         update_list.append((initial_line_number + idx * 2, edge_id))
     query = "UPDATE edge SET line = %s WHERE id = %s"
     cursor.executemany(query, update_list)
