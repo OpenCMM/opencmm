@@ -36,7 +36,7 @@ def process_new_model(stl_filename: str, model_id: int, mysql_config: dict):
     lines = get_lines_on_coplanar_facets(facets)
     lines = flatten_extend(lines)
     line.import_lines_from_paired_lines_on_facets(model_id, lines, mysql_config)
-    step.import_steps(model_id, mysql_config)
+    step.import_steps(mysql_config, model_id)
 
 
 def process_stl(
