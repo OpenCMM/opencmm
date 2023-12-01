@@ -166,12 +166,12 @@ def test_get_model_id_from_program_name():
     program_name = "1003"
     response = client.get(f"/get_model_id/from/program_name/{program_name}")
     assert response.status_code == 200
-    assert response.json() == {"model_id": 3, "tracing_start_line": None}
+    assert response.json() == {"model_id": 3}
 
     program_name = "1004"
     response = client.get(f"/get_model_id/from/program_name/{program_name}")
     assert response.status_code == 200
-    assert response.json() == {"model_id": 4, "tracing_start_line": None}
+    assert response.json() == {"model_id": 4}
 
     program_name = "34001 MIZO"
     response = client.get(f"/get_model_id/from/program_name/{program_name}")
@@ -181,4 +181,4 @@ def test_get_model_id_from_program_name():
     program_name = "1005"
     response = client.get(f"/get_model_id/from/program_name/{program_name}")
     assert response.status_code == 200
-    assert response.json() == {"model_id": 5, "tracing_start_line": 45}
+    assert response.json() == {"model_id": 5}

@@ -243,20 +243,22 @@ async def download_gcode(model_id: int):
 async def start_measurement(
     _conf: MeasurementConfig, background_tasks: BackgroundTasks
 ):
-    running_process = status.get_running_process(_conf.three_d_model_id, MYSQL_CONFIG)
+    model_id = _conf.three_d_model_id
+    running_process = status.get_running_process(model_id, MYSQL_CONFIG)
     if running_process is not None:
         raise HTTPException(
             status_code=400,
             detail="Measurement already running",
         )
 
-    process_id = status.start_measuring(_conf.three_d_model_id, MYSQL_CONFIG, "running")
+    tracing_start_line = get_first_line_number_for_tracing(MYSQL_CONFIG, model_id)
+    process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
     background_tasks.add_task(
         listener_start,
         MYSQL_CONFIG,
         process_id,
     )
-    return {"status": "ok"}
+    return {"status": "ok", "tracing_start_line": tracing_start_line}
 
 
 @app.post("/start/measurement/with/program_name")
@@ -277,13 +279,18 @@ async def start_measurement_with_program_name(
             detail="Measurement already running",
         )
 
+    tracing_start_line = get_first_line_number_for_tracing(MYSQL_CONFIG, model_id)
     process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
     background_tasks.add_task(
         listener_start,
         MYSQL_CONFIG,
         process_id,
     )
-    return {"status": "ok", "model_id": model_id}
+    return {
+        "status": "ok",
+        "model_id": model_id,
+        "tracing_start_line": tracing_start_line,
+    }
 
 
 @app.post("/estimate/measurement")
@@ -326,8 +333,7 @@ async def get_model_id_from_program_name(program_name: str):
         return {"model_id": None}
     if get_model_data(model_id) is None:
         return {"model_id": None}
-    tracing_start_line = get_first_line_number_for_tracing(MYSQL_CONFIG, model_id)
-    return {"model_id": model_id, "tracing_start_line": tracing_start_line}
+    return {"model_id": model_id}
 
 
 @app.get("/get_sensor_status")
