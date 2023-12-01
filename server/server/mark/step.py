@@ -214,11 +214,12 @@ def get_trace_lines(mysql_config: dict, trace_id: int):
     return trace_lines
 
 
-def delete_trace_lines(mysql_config: dict, trace_id: int):
+def delete_trace_lines(mysql_config: dict, trace_id_list: list):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     query = "DELETE FROM trace_line WHERE trace_id = %s"
-    cursor.execute(query, (trace_id,))
-    cnx.commit()
+    for trace_id in trace_id_list:
+        cursor.execute(query, (trace_id,))
+        cnx.commit()
     cursor.close()
     cnx.close()

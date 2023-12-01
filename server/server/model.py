@@ -202,7 +202,7 @@ def delete_model(model_id: int):
     """
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
     cursor = cnx.cursor()
-    tables_with_model_id = ["arc", "side", "edge", "pair", "process", "model"]
+    tables_with_model_id = ["arc", "side", "edge", "pair", "process", "trace", "model"]
     for table in tables_with_model_id:
         delete_row_with_model_id(table, model_id, cursor, cnx)
     cursor.close()

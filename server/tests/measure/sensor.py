@@ -10,7 +10,7 @@ class MockSensor:
 
     def get_distance(self, xyz: tuple):
         ray_origins = np.array([xyz])
-        location = self.mesh.intersects_location(ray_origins, self.ray_directions)[0][0]
+        location = self.mesh.ray.intersects_location(ray_origins, self.ray_directions)[0][0]
         if location is None:
             return None
         distance = np.linalg.norm(np.array(xyz) - location)
