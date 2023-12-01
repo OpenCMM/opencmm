@@ -4,7 +4,7 @@ import trimesh
 
 class MockSensor:
     def __init__(self, stl_filepath: str, max_sensor_output: int = 18200):
-        self.mesh = trimesh.trimesh.load_mesh(stl_filepath)
+        self.mesh = trimesh.load_mesh(stl_filepath)
         self.ray_directions = np.array([[0, 0, -1]])
         self.max_sensor_output = max_sensor_output
 

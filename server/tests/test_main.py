@@ -133,7 +133,7 @@ def test_upload_with_new_model_with_step():
     with open(path, "rb") as f:
         response = client.post("/upload/new/model", files={"file": f})
         assert response.status_code == 200
-        assert response.json() == {"status": "ok", "model_id": 4}
+        assert response.json() == {"status": "ok", "model_id": 5}
 
 
 def test_setup_data_with_step_and_slope():

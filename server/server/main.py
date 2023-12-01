@@ -36,6 +36,7 @@ from server.model import (
 )
 from server.mark.gcode import model_id_to_program_number, get_gcode_filename
 from server import machine
+from server.mark.trace import get_first_line_number_for_tracing
 import asyncio
 
 
@@ -325,7 +326,8 @@ async def get_model_id_from_program_name(program_name: str):
         return {"model_id": None}
     if get_model_data(model_id) is None:
         return {"model_id": None}
-    return {"model_id": model_id}
+    tracing_start_line = get_first_line_number_for_tracing(MYSQL_CONFIG, model_id)
+    return {"model_id": model_id, "tracing_start_line": tracing_start_line}
 
 
 @app.get("/get_sensor_status")

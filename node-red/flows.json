@@ -427,6 +427,11 @@
                 "t": "delete",
                 "p": "model_id",
                 "pt": "flow"
+            },
+            {
+                "t": "delete",
+                "p": "tracing_start_line",
+                "pt": "flow"
             }
         ],
         "action": "",
@@ -555,7 +560,8 @@
         "wires": [
             [],
             [
-                "d5303a748a32e299"
+                "d5303a748a32e299",
+                "b6e3ca71e9bc1e52"
             ]
         ]
     },
@@ -824,21 +830,22 @@
         "id": "649eed872bca7e6f",
         "type": "function",
         "z": "344499584571a0ed",
-        "name": "Get execution & program",
-        "func": "const executionArray = msg.payload.MTConnectStreams.Streams.DeviceStream[0].ComponentStream[1].Events.Execution;\nconst programArray = msg.payload.MTConnectStreams.Streams.DeviceStream[0].ComponentStream[1].Events.Program;\nfor (const execution of executionArray) {\n    if (execution['dataItemId'] === 'execution1') {\n        msg.payload.execution = execution['value']\n    }\n}\n\nfor (const program of programArray) {\n    if (program['dataItemId'] === 'program1') {\n        msg.payload.program = program['value']\n    }\n}\n\nreturn msg;",
+        "name": "Process data",
+        "func": "const executionArray = msg.payload.MTConnectStreams.Streams.DeviceStream[0].ComponentStream[1].Events.Execution;\nconst programArray = msg.payload.MTConnectStreams.Streams.DeviceStream[0].ComponentStream[1].Events.Program;\nconst lineArray = msg.payload.MTConnectStreams.Streams.DeviceStream[0].ComponentStream[9].Events.Line;\n\nfor (const execution of executionArray) {\n    if (execution['dataItemId'] === 'execution1') {\n        msg.payload.execution = execution['value']\n    }\n}\n\nfor (const program of programArray) {\n    if (program['dataItemId'] === 'program1') {\n        msg.payload.program = program['value']\n    }\n}\n\nfor (const line of lineArray) {\n    if (line['dataItemId'] === 'line1') {\n        msg.payload.line = line['value']\n    }\n}\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 330,
+        "x": 290,
         "y": 140,
         "wires": [
             [
                 "6b4720c3944ed3cd",
                 "af62189e27f45025",
-                "a0665810dbce66ee"
+                "a0665810dbce66ee",
+                "f82842e13407f2a3"
             ]
         ]
     },
@@ -872,7 +879,8 @@
         "wires": [
             [
                 "ab9544469afad10a",
-                "520584bc39f1c4f1"
+                "520584bc39f1c4f1",
+                "90805246251e69fa"
             ]
         ]
     },
@@ -1914,5 +1922,174 @@
                 "04f5d350e9f0a665"
             ]
         ]
+    },
+    {
+        "id": "b6e3ca71e9bc1e52",
+        "type": "rbe",
+        "z": "344499584571a0ed",
+        "name": "Block if line is the same",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload.line",
+        "topi": "topic",
+        "x": 970,
+        "y": 220,
+        "wires": [
+            [
+                "8ae314c26776d7f2"
+            ]
+        ]
+    },
+    {
+        "id": "f82842e13407f2a3",
+        "type": "ui_text",
+        "z": "344499584571a0ed",
+        "group": "5d1c5e22bf3e332a",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Line",
+        "format": "{{msg.payload.line}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 570,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "90805246251e69fa",
+        "type": "switch",
+        "z": "344499584571a0ed",
+        "name": "",
+        "property": "payload.tracing_start_line",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "nnull"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 1810,
+        "y": 540,
+        "wires": [
+            [
+                "039b5020072c77c8"
+            ]
+        ]
+    },
+    {
+        "id": "039b5020072c77c8",
+        "type": "change",
+        "z": "344499584571a0ed",
+        "name": "Update flow.tracing_start_line",
+        "rules": [
+            {
+                "t": "set",
+                "p": "tracing_start_line",
+                "pt": "flow",
+                "to": "payload.tracing_start_line",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 2030,
+        "y": 540,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8ae314c26776d7f2",
+        "type": "switch",
+        "z": "344499584571a0ed",
+        "name": "Is tracing",
+        "property": "payload.line",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "gte",
+                "v": "tracing_start_line",
+                "vt": "flow"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 1160,
+        "y": 220,
+        "wires": [
+            [
+                "81769cb1b24fa9a4"
+            ]
+        ]
+    },
+    {
+        "id": "e2fb257103c86036",
+        "type": "mqtt out",
+        "z": "344499584571a0ed",
+        "name": "",
+        "topic": "sensor/control",
+        "qos": "0",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8e7d86e88ee54c5e",
+        "x": 1580,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "81769cb1b24fa9a4",
+        "type": "change",
+        "z": "344499584571a0ed",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{ \"command\": \"config\", \"interval\": 200, \"threshold\": 1 }",
+                "tot": "json"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1360,
+        "y": 280,
+        "wires": [
+            [
+                "e2fb257103c86036"
+            ]
+        ]
+    },
+    {
+        "id": "4aec6aea390da1a2",
+        "type": "comment",
+        "z": "344499584571a0ed",
+        "name": "Update sensor config",
+        "info": "",
+        "x": 1420,
+        "y": 240,
+        "wires": []
     }
 ]
