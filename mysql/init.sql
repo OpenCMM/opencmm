@@ -135,6 +135,17 @@ CREATE TABLE IF NOT EXISTS `trace_line` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
 
 
+CREATE TABLE IF NOT EXISTS `trace_line_result` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `trace_line_id` int(11) unsigned NOT NULL,
+  `process_id` int(11) unsigned NOT NULL,
+  `distance` FLOAT NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`trace_line_id`) REFERENCES `trace_line` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  FOREIGN KEY (`process_id`) REFERENCES `process` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
+
+
 CREATE TABLE IF NOT EXISTS `trace_result` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `trace_id` int(11) unsigned NOT NULL,

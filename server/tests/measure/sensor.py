@@ -3,10 +3,10 @@ import trimesh
 
 
 class MockSensor:
-    def __init__(self, stl_filepath: str, max_sensor_output: int = 18200):
+    def __init__(self, stl_filepath: str, middle_sensor_output: int = 9100):
         self.mesh = trimesh.load_mesh(stl_filepath)
         self.ray_directions = np.array([[0, 0, -1]])
-        self.max_sensor_output = max_sensor_output
+        self.middle_sensor_output = middle_sensor_output
 
     def get_distance(self, xyz: tuple):
         ray_origins = np.array([xyz])
@@ -22,10 +22,12 @@ class MockSensor:
         distance = self.get_distance(xyz)
         if distance is None:
             return None
-        # if distance is between 65 ~ 135 mm,
+        # sensor ouputs self.max_sensor_output / 2 when distance is 100
+        # if distance is not between 65 ~ 135 mm,
         # sensor output self.max_sensor_output * 1.05
         if 65 <= distance <= 135:
-            return self.max_sensor_output * 1.05
-
-        # if sensor ouputs self.max_sensor_output / 2 when distance is 100
-        return self.max_sensor_output / 2 * (100 / distance)
+            return self.middle_sensor_output + (distance - 100) * (
+                self.middle_sensor_output / 35
+            )
+        else:
+            return self.middle_sensor_output * 2 * 1.05

@@ -28,8 +28,9 @@ from .mtconnect import get_mtconnect_data
 from server.mark import arc, pair
 from server.mark.trace import (
     get_first_line_number_for_tracing,
-    get_trace_id_from_line_number,
+    get_trace_line_id_from_line_number,
 )
+from server.mark.step import import_step_results
 import logging
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
@@ -83,8 +84,10 @@ def update_data_after_measurement(
     client.on_message = on_message
     client.connect(MQTT_BROKER_URL, 1883, 60)
 
-    update_list = compute_edge_results(mysql_config, model_id, process_id)
-    edge_count = len(update_list)
+    edge_update_list, step_update_list = compute_edge_results(
+        mysql_config, model_id, process_id
+    )
+    edge_count = len(edge_update_list)
     if edge_count == 0:
         status.update_process_status(
             mysql_config,
@@ -94,7 +97,9 @@ def update_data_after_measurement(
         )
         disconnect_and_publish_log("No edge found")
         return
-    import_edge_results(update_list, mysql_config)
+    import_edge_results(edge_update_list, mysql_config)
+    if step_update_list:
+        import_step_results(mysql_config, step_update_list)
 
     _msg = f"{edge_count} edges found"
     logger.info(_msg)
@@ -132,8 +137,8 @@ def compute_edge_results(mysql_config: dict, model_id: int, process_id: int):
     first_line_for_tracing = get_first_line_number_for_tracing(mysql_config, model_id)
 
     current_line = 0
-    update_list = []
-    trace_data = []
+    edge_update_list = []
+    step_update_list = []
     for row in np_mtconnect_data:
         xy = (row[3], row[4])
         line = int(row[6])
@@ -145,7 +150,7 @@ def compute_edge_results(mysql_config: dict, model_id: int, process_id: int):
         if line == current_line:
             continue
 
-        if line < first_line_for_tracing - 2:
+        if not first_line_for_tracing or line < first_line_for_tracing - 2:
             if line % 2 != 0:
                 # Not measuring
                 continue
@@ -175,7 +180,7 @@ def compute_edge_results(mysql_config: dict, model_id: int, process_id: int):
                         beam_diameter,
                     )
                     edge_id = get_edge_id_from_line_number(mysql_config, model_id, line)
-                    update_list.append(
+                    edge_update_list.append(
                         (edge_id, process_id, edge_coord[0], edge_coord[1], z)
                     )
                     # ignore the rest of the sensor data
@@ -210,12 +215,14 @@ def compute_edge_results(mysql_config: dict, model_id: int, process_id: int):
             if count == 0:
                 continue
             average_sensor_output = total_sensor_output / count
-            trace_id = get_trace_id_from_line_number(mysql_config, line)
-            trace_data.append([trace_id, average_sensor_output])
+            trace_line_id = get_trace_line_id_from_line_number(
+                mysql_config, model_id, line
+            )
+            step_update_list.append([trace_line_id, process_id, average_sensor_output])
 
         current_line = line
 
-    return update_list
+    return edge_update_list, step_update_list
 
 
 def recompute(mysql_config: dict, process_id: int):
@@ -226,9 +233,11 @@ def recompute(mysql_config: dict, process_id: int):
 
     process_data = status.get_process_status(mysql_config, process_id)
     model_id = process_data[1]
-    update_list = compute_edge_results(mysql_config, model_id, process_id)
+    edge_update_list, step_update_list = compute_edge_results(
+        mysql_config, model_id, process_id
+    )
 
-    edge_count = len(update_list)
+    edge_count = len(edge_update_list)
     if edge_count == 0:
         status.update_process_status(
             mysql_config,
@@ -237,7 +246,9 @@ def recompute(mysql_config: dict, process_id: int):
             "No edge found",
         )
         return
-    import_edge_results(update_list, mysql_config)
+    import_edge_results(edge_update_list, mysql_config)
+    if step_update_list:
+        import_step_results(mysql_config, step_update_list)
 
     _msg = f"{edge_count} edges found"
     logger.info(_msg)

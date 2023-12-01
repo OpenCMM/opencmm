@@ -223,3 +223,16 @@ def delete_trace_lines(mysql_config: dict, trace_id_list: list):
         cnx.commit()
     cursor.close()
     cnx.close()
+
+
+def import_step_results(mysql_config: dict, step_update_list: list):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
+    cursor = cnx.cursor()
+    query = (
+        "INSERT INTO trace_line_result "
+        "(trace_line_id, process_id, distance) VALUES (%s, %s, %s)"
+    )
+    cursor.executemany(query, step_update_list)
+    cnx.commit()
+    cursor.close()
+    cnx.close()

@@ -20,15 +20,25 @@ def get_first_line_number_for_tracing(mysql_config: dict, model_id: int):
     return line
 
 
-def get_trace_id_from_line_number(mysql_config: dict, line: int):
+def get_trace_line_id_from_line_number(mysql_config: dict, model_id: int, line: int):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
-    query = "SELECT trace_id FROM trace_line WHERE line = %s"
-    cursor.execute(query, (line,))
-    result = cursor.fetchone()
+    query = (
+        "SELECT trace_line.id FROM `trace` INNER JOIN trace_line ON "
+        "trace.id = trace_line.trace_id "
+        "WHERE trace.model_id = %s AND trace_line.line = %s "
+        "LIMIT 1"
+    )
+    cursor.execute(
+        query,
+        (
+            model_id,
+            line,
+        ),
+    )
+    trace_line_id = cursor.fetchone()
     cursor.close()
     cnx.close()
-    if result is None:
+    if trace_line_id is None:
         return None
-    trace_id = result[0]
-    return trace_id
+    return trace_line_id[0]
