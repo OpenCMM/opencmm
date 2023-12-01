@@ -26,6 +26,10 @@ from .gcode import (
 )
 from .mtconnect import get_mtconnect_data
 from server.mark import arc, pair
+from server.mark.trace import (
+    get_first_line_number_for_tracing,
+    get_trace_id_from_line_number,
+)
 import logging
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
@@ -125,57 +129,92 @@ def compute_edge_results(mysql_config: dict, model_id: int, process_id: int):
     z = np_mtconnect_data[0][5]
     sensor_data = get_sensor_data(process_id, mysql_config)
     np_sensor_data = np.array(sensor_data)
+    first_line_for_tracing = get_first_line_number_for_tracing(mysql_config, model_id)
 
     current_line = 0
     update_list = []
+    trace_data = []
     for row in np_mtconnect_data:
         xy = (row[3], row[4])
         line = int(row[6])
-        line = get_true_line_number(xy, line, gcode)
+        line = get_true_line_number(xy, line, gcode, first_line_for_tracing)
         if not line:
             # Not on line
-            continue
-        if line % 2 != 0:
-            # Not measuring
             continue
 
         if line == current_line:
             continue
 
-        _timestamp = row[2] - timedelta(milliseconds=mtconnect_latency)
-        # feedrate = row[7] # feedrate from MTConnect is not accurate
-        (start, end, feedrate) = get_start_end_points_from_line_number(gcode, line)
-        # get timestamp at start and end
-        start_timestamp = get_timestamp_at_point(xy, start, feedrate, _timestamp, True)
-        end_timestamp = get_timestamp_at_point(xy, end, feedrate, _timestamp, False)
+        if line < first_line_for_tracing - 2:
+            if line % 2 != 0:
+                # Not measuring
+                continue
 
-        # get sensor data that is between start and end timestamp
-        for sensor_row in np_sensor_data:
-            sensor_timestamp = sensor_row[2]
-            if start_timestamp <= sensor_timestamp <= end_timestamp:
-                direction_vector = np.array([end[0] - start[0], end[1] - start[1]])
-                distance = np.linalg.norm(direction_vector)
-                direction_vector = tuple(direction_vector / distance)
-                edge_coord = sensor_timestamp_to_coord(
-                    start_timestamp,
-                    sensor_timestamp,
-                    start,
-                    direction_vector,
-                    feedrate,
-                    beam_diameter,
-                )
-                edge_id = get_edge_id_from_line_number(mysql_config, model_id, line)
-                update_list.append(
-                    (edge_id, process_id, edge_coord[0], edge_coord[1], z)
-                )
-                # ignore the rest of the sensor data
-                # multiple edges can be measured due to the following reasons:
-                # - noise (can be reduced by increasing the sensor threshold)
-                # - sensor restart
-                # - timestamp is not accurate
-                break
+            _timestamp = row[2] - timedelta(milliseconds=mtconnect_latency)
+            # feedrate = row[7] # feedrate from MTConnect is not accurate
+            (start, end, feedrate) = get_start_end_points_from_line_number(gcode, line)
+            # get timestamp at start and end
+            start_timestamp = get_timestamp_at_point(
+                xy, start, feedrate, _timestamp, True
+            )
+            end_timestamp = get_timestamp_at_point(xy, end, feedrate, _timestamp, False)
+
+            # get sensor data that is between start and end timestamp
+            for sensor_row in np_sensor_data:
+                sensor_timestamp = sensor_row[2]
+                if start_timestamp <= sensor_timestamp <= end_timestamp:
+                    direction_vector = np.array([end[0] - start[0], end[1] - start[1]])
+                    distance = np.linalg.norm(direction_vector)
+                    direction_vector = tuple(direction_vector / distance)
+                    edge_coord = sensor_timestamp_to_coord(
+                        start_timestamp,
+                        sensor_timestamp,
+                        start,
+                        direction_vector,
+                        feedrate,
+                        beam_diameter,
+                    )
+                    edge_id = get_edge_id_from_line_number(mysql_config, model_id, line)
+                    update_list.append(
+                        (edge_id, process_id, edge_coord[0], edge_coord[1], z)
+                    )
+                    # ignore the rest of the sensor data
+                    # multiple edges can be measured due to the following reasons:
+                    # - noise (can be reduced by increasing the sensor threshold)
+                    # - sensor restart
+                    # - timestamp is not accurate
+                    break
+
+        else:
+            # tracing
+            if line % 2 == 0:
+                # Not measuring
+                continue
+
+            _timestamp = row[2] - timedelta(milliseconds=mtconnect_latency)
+            (start, end, feedrate) = get_start_end_points_from_line_number(gcode, line)
+            # get timestamp at start and end
+            start_timestamp = get_timestamp_at_point(
+                xy, start, feedrate, _timestamp, True
+            )
+            end_timestamp = get_timestamp_at_point(xy, end, feedrate, _timestamp, False)
+
+            count = 0
+            total_sensor_output = 0
+            # get sensor data that is between start and end timestamp
+            for sensor_row in np_sensor_data:
+                sensor_timestamp = sensor_row[2]
+                if start_timestamp <= sensor_timestamp <= end_timestamp:
+                    total_sensor_output += sensor_row[3]
+                    count += 1
+            if count == 0:
+                continue
+            average_sensor_output = total_sensor_output / count
+            trace_id = get_trace_id_from_line_number(mysql_config, line)
+            trace_data.append([trace_id, average_sensor_output])
 
         current_line = line
+
     return update_list
 
 

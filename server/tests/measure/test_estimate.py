@@ -157,9 +157,10 @@ def create_mock_data(filename: str, process_id: int):
     timestamp = datetime.now()
     for i in range(len(gcode)):
         line = i + 3
-        if gcode[i][:2] == "G4":
+        if gcode[i][0] == "G4":
             # start to measure steps or slopes
             is_tracing = True
+            continue
 
         (x, y, feedrate_per_min) = row_to_xyz_feedrate(gcode[i])
         distance = get_distance_between_two_points(start_coord, (x, y))

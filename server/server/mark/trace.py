@@ -18,3 +18,17 @@ def get_first_line_number_for_tracing(mysql_config: dict, model_id: int):
         return None
     line = result[0]
     return line
+
+
+def get_trace_id_from_line_number(mysql_config: dict, line: int):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
+    cursor = cnx.cursor()
+    query = "SELECT trace_id FROM trace_line WHERE line = %s"
+    cursor.execute(query, (line,))
+    result = cursor.fetchone()
+    cursor.close()
+    cnx.close()
+    if result is None:
+        return None
+    trace_id = result[0]
+    return trace_id
