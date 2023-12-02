@@ -100,7 +100,7 @@ def create_mock_perfect_data(filename: str, process_id: int):
         init_coord = start_coord
         (x, y, feedrate_per_min) = row_to_xyz_feedrate(gcode[i])
         distance = get_distance_between_two_points(start_coord, (x, y))
-        feedrate = round(feedrate_per_min / 60.0, 3)
+        feedrate = feedrate_per_min / 60.0
         direction = get_direction(start_coord, (x, y))
         timestamp += timedelta(seconds=sample_interval)
         for j in range(int(distance / (feedrate * sample_interval))):
@@ -547,3 +547,11 @@ def test_update_data_after_measurement_step():
     update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)
     process_result = status.get_process_status(MYSQL_CONFIG, process_id)
     assert process_result[2] == "done"
+
+    response = client.get(f"/result/steps?model_id={model_id}&process_id={process_id}")
+    assert response.status_code == 200
+    steps = response.json()["steps"]
+    height = steps[0][1]
+    estimated_height = steps[0][2]
+    assert height == 3.0
+    assert estimated_height == 3.0

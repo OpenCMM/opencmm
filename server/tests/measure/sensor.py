@@ -24,10 +24,10 @@ class MockSensor:
             return None
         # sensor ouputs self.max_sensor_output / 2 when distance is 100
         # if distance is not between 65 ~ 135 mm,
-        # sensor output self.max_sensor_output * 1.05
+        # sensor outputs 18900
         if 65 <= distance <= 135:
             return self.middle_sensor_output + (distance - 100) * (
                 self.middle_sensor_output / 35
             )
         else:
-            return self.middle_sensor_output * 2 * 1.05
+            return 18900
