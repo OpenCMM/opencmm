@@ -182,3 +182,31 @@ def test_get_model_id_from_program_name():
     response = client.get(f"/get_model_id/from/program_name/{program_name}")
     assert response.status_code == 200
     assert response.json() == {"model_id": 5}
+
+
+def test_delete_model_data():
+    path = "tests/fixtures/stl/test-Part.stl"
+    model_id = 6
+
+    with open(path, "rb") as f:
+        response = client.post("/upload/3dmodel", files={"file": f})
+        assert response.status_code == 200
+        assert response.json() == {"status": "ok", "model_id": model_id}
+
+    job_info = {
+        "three_d_model_id": 6,
+        "measure_length": 2.5,
+        "measure_feedrate": 100.0,
+        "move_feedrate": 1000.0,
+        "x_offset": 0.0,
+        "y_offset": 0.0,
+        "z_offset": 0.0,
+        "send_gcode": False,
+    }
+    response = client.post("/setup/data", json=job_info)
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+    response = client.post(f"/delete/model?model_id={model_id}")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}

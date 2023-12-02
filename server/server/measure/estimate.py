@@ -43,15 +43,22 @@ def sensor_timestamp_to_coord(
     xy: tuple,
     direction_vector: tuple,
     feedrate: float,
-    beam_diameter: float,  # in μm
 ):
     """
     Estimate the coordinate of the edge from sensor timestamp
     """
+    conf = get_config()
+    beam_diameter = conf["sensor"]["beam_diameter"]  # in μm
+    sensor_response_time = conf["sensor"]["response_time"]  # in ms
+    # factor in sensor response time
+    sensor_timestamp = sensor_timestamp - timedelta(milliseconds=sensor_response_time)
     timestamp_diff = sensor_timestamp - start_timestamp
     distance = feedrate * timestamp_diff.total_seconds()
     direction_vector = np.array(direction_vector)
-    distance_with_beam_diameter = distance + beam_diameter / 1000  # convert to mm
+    beam_diameter = beam_diameter / 1000  # convert to mm
+    distance_with_beam_diameter = (
+        distance + beam_diameter / 2
+    )  # add half of beam radius
     coord = np.array(xy) + distance_with_beam_diameter * direction_vector
     # round to 3 decimal places
     coord = np.round(coord, 3)
@@ -122,7 +129,6 @@ def update_data_after_measurement(
 def compute_edge_results(mysql_config: dict, model_id: int, process_id: int):
     conf = get_config()
     mtconnect_latency = conf["mtconnect"]["latency"]
-    beam_diameter = conf["sensor"]["beam_diameter"]
     model_row = get_model_data(model_id)
     filename = model_row[1]
     # offset = (model_row[3], model_row[4], model_row[5])
@@ -150,6 +156,7 @@ def compute_edge_results(mysql_config: dict, model_id: int, process_id: int):
         if line == current_line:
             continue
 
+        # Edge detection
         if not first_line_for_tracing or line < first_line_for_tracing - 2:
             if line % 2 != 0:
                 # Not measuring
@@ -177,7 +184,6 @@ def compute_edge_results(mysql_config: dict, model_id: int, process_id: int):
                         start,
                         direction_vector,
                         feedrate,
-                        beam_diameter,
                     )
                     edge_id = get_edge_id_from_line_number(mysql_config, model_id, line)
                     edge_update_list.append(
@@ -190,8 +196,8 @@ def compute_edge_results(mysql_config: dict, model_id: int, process_id: int):
                     # - timestamp is not accurate
                     break
 
+        # tracing
         else:
-            # tracing
             if line % 2 == 0:
                 # Not measuring
                 continue
