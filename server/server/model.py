@@ -18,6 +18,13 @@ def add_new_3dmodel(filename: str) -> int:
     return cursor.lastrowid
 
 
+def delete_model_files(model_id: int):
+    filename = model_id_to_filename(model_id)
+    if model_exists(filename):
+        delete_model(filename_to_model_id(filename))
+        remove_if_gcode_exists(filename)
+
+
 def list_3dmodel():
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
     cursor = cnx.cursor()
