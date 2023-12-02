@@ -202,11 +202,56 @@ def delete_model(model_id: int):
     """
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
     cursor = cnx.cursor()
+    delete_results_with_model_id(model_id, cursor, cnx)
+    delete_sensor_data(model_id, cursor, cnx)
+    delete_mtconnect_data(model_id, cursor, cnx)
     tables_with_model_id = ["arc", "side", "edge", "pair", "process", "trace", "model"]
     for table in tables_with_model_id:
         delete_row_with_model_id(table, model_id, cursor, cnx)
     cursor.close()
     cnx.close()
+
+
+def delete_sensor_data(model_id: int, cursor, cnx):
+    """
+    Delete sensor data
+    """
+    query = (
+        "DELETE FROM sensor WHERE process_id "
+        "IN (SELECT id FROM process WHERE model_id = %s)"
+    )
+    cursor.execute(query, (model_id,))
+    cnx.commit()
+    return cursor.rowcount
+
+
+def delete_mtconnect_data(model_id: int, cursor, cnx):
+    """
+    Delete mtconnect data
+    """
+    query = (
+        "DELETE FROM mtconnect WHERE process_id "
+        "IN (SELECT id FROM process WHERE model_id = %s)"
+    )
+    cursor.execute(query, (model_id,))
+    cnx.commit()
+    return cursor.rowcount
+
+
+def delete_results_with_model_id(model_id: int, cursor, cnx):
+    """
+    Delete results with model id
+    """
+    tables_with_model_id = ["arc", "edge", "pair"]
+    for table in tables_with_model_id:
+        table_name = table + "_result"
+        row_id = table + "_id"
+        query = (
+            f"DELETE FROM {table_name} WHERE {row_id} IN ("
+            f"SELECT id FROM {table} WHERE model_id = %s )"
+        )
+        cursor.execute(query, (model_id,))
+        cnx.commit()
 
 
 def delete_row_with_model_id(table_name: str, model_id: int, cursor, cnx):
