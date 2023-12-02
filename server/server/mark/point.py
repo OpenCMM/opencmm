@@ -1,6 +1,7 @@
 from stl import mesh
 import numpy as np
 import trimesh
+from itertools import combinations
 
 
 def point_id(point: np.ndarray):
@@ -11,6 +12,26 @@ def get_highest_z(vertices):
     # get highest point
     highest_point = np.max(vertices, axis=0)
     return highest_point[2][2]
+
+
+def get_unique_z_values_of_visiable_vertices(stl_file_path: str):
+    mesh = trimesh.load(stl_file_path)
+
+    # Get the normals of the facets
+    facet_normals = mesh.face_normals
+
+    # Find the indices of facets facing "up" (positive z-direction)
+    upward_facing_indices = np.where(facet_normals[:, 2] > 0)[0]
+
+    # Get the unique vertices associated with upward-facing facets
+    visible_vertices = np.unique(mesh.faces[upward_facing_indices])
+
+    # Extract the coordinates of the visible vertices
+    visible_vertex_coordinates = mesh.vertices[visible_vertices]
+
+    # get unique z values
+    unique_z = np.unique(visible_vertex_coordinates[:, 2])
+    return unique_z
 
 
 def get_shapes(stl_file_path: str, decimal_places: int = 3):
@@ -36,7 +57,7 @@ def get_shapes(stl_file_path: str, decimal_places: int = 3):
     cuboid = mesh.Mesh.from_file(stl_file_path)
     # get vertices
     vertices = cuboid.vectors
-    z = get_highest_z(vertices)
+    unique_z_values = get_unique_z_values_of_visiable_vertices(stl_file_path)
 
     # Extract lines and arcs parallel to the ground
     ground_parallel_shapes = []
@@ -51,13 +72,14 @@ def get_shapes(stl_file_path: str, decimal_places: int = 3):
             z_coords = vertices[:, 2]
 
             # Filter vertices based on z-coordinate
-            relevant_indices = np.where(np.isclose(z_coords, z, atol=1e-6))
-            relevant_vertices = vertices[relevant_indices]
+            for z in unique_z_values:
+                relevant_indices = np.where(np.isclose(z_coords, z, atol=1e-6))
+                relevant_vertices = vertices[relevant_indices]
 
-            # Create shapes between adjacent relevant vertices
-            for i in range(len(relevant_vertices) - 1):
-                line = relevant_vertices[i : i + 2]
-                ground_parallel_shapes.append(line)
+                # Create shapes between adjacent relevant vertices
+                for i in range(len(relevant_vertices) - 1):
+                    line = relevant_vertices[i : i + 2]
+                    ground_parallel_shapes.append(line)
 
     previous_length = 0
     for i in range(len(ground_parallel_shapes)):
@@ -114,5 +136,154 @@ def ray_cast(stl_file_path: str, ray_origin: tuple):
     ray_directions = np.array([[0, 0, -1]])
 
     # Check if the ray intersects the mesh
-    index = mesh.ray.intersects_first(ray_origins, ray_directions)[0]
-    return index != -1
+    return mesh.ray.intersects_any(ray_origins, ray_directions)[0]
+
+
+def get_visible_facets(stl_file_path: str):
+    # Load the STL file
+    mesh = trimesh.load(stl_file_path)
+
+    # Get the normals of the facets
+    facet_normals = mesh.face_normals
+
+    # Find the indices of facets facing "up" (positive z-direction)
+    upward_facing_indices = np.where(facet_normals[:, 2] > 0)[0]
+
+    return mesh.vertices[mesh.faces[upward_facing_indices]]
+
+
+def are_adjacent_facets(facet1, facet2):
+    # Extract vertices from each facet
+    facet1_vertices = facet1.reshape(-1, 3)
+    facet2_vertices = facet2.reshape(-1, 3)
+
+    # Initialize counter
+    shared_vertices = 0
+
+    # Compare vertices
+    for vertex1 in facet1_vertices:
+        for vertex2 in facet2_vertices:
+            if np.array_equal(vertex1, vertex2):
+                shared_vertices += 1
+
+    # Check adjacency
+    if shared_vertices == 2:
+        return True
+    else:
+        return False
+
+
+def are_facets_on_same_plane(facet1, facet2, tolerance=1e-6):
+    normal1 = np.cross(facet1[1] - facet1[0], facet1[2] - facet1[0])
+    normal2 = np.cross(facet2[1] - facet2[0], facet2[2] - facet2[0])
+
+    # Check if the cross products (normal vectors) are parallel
+    return np.all(
+        np.isclose(
+            normal1 / np.linalg.norm(normal1),
+            normal2 / np.linalg.norm(normal2),
+            atol=tolerance,
+        )
+    )
+
+
+def get_coplanar_facets(facets):
+    adjacent_facets = []
+    for i, j in combinations(range(len(facets)), 2):
+        # if two facets share two vertices, they are adjacent
+        if are_adjacent_facets(facets[i], facets[j]):
+            adjacent_facets.append([facets[i], facets[j]])
+
+    coplanar_facets = []
+    # check if adjacent facets are coplanar, if yes, merge them
+    for i in range(len(adjacent_facets)):
+        # get two adjacent facets
+        facet1 = adjacent_facets[i][0]
+        facet2 = adjacent_facets[i][1]
+        if are_facets_on_same_plane(facet1, facet2):
+            # merge the two facets
+            adjacent_facets[i] = np.unique(
+                np.concatenate((facet1, facet2), axis=0), axis=0
+            )
+            coplanar_facets.append(adjacent_facets[i])
+    return coplanar_facets
+
+
+def get_facet_corner(facet, duplicate_points):
+    all = np.concatenate((facet, duplicate_points), axis=0)
+    _unique, counts = np.unique(all, axis=0, return_counts=True)
+    return _unique[np.where(counts == 1)][0]
+
+
+def get_lines_on_coplanar_facets(facets):
+    adjacent_facets = []
+    for i, j in combinations(range(len(facets)), 2):
+        # if two facets share two vertices, they are adjacent
+        if are_adjacent_facets(facets[i], facets[j]):
+            adjacent_facets.append([facets[i], facets[j]])
+
+    lines = []
+    # check if adjacent facets are coplanar, if yes, merge them
+    for i in range(len(adjacent_facets)):
+        # get two adjacent facets
+        facet1 = adjacent_facets[i][0]
+        facet2 = adjacent_facets[i][1]
+        if are_facets_on_same_plane(facet1, facet2):
+            unique_points, counts = np.unique(
+                np.concatenate((facet1, facet2), axis=0), axis=0, return_counts=True
+            )
+            # duplicate points are the points that are shared by two facets
+            duplicate_points = unique_points[counts > 1]
+            facet1_corner = get_facet_corner(facet1, duplicate_points)
+            facet2_corner = get_facet_corner(facet2, duplicate_points)
+
+            facet_lines = []
+            facet_lines.append(
+                np.array(
+                    [
+                        np.array([facet1_corner, duplicate_points[0]]),
+                        np.array([facet2_corner, duplicate_points[1]]),
+                    ]
+                )
+            )
+            facet_lines.append(
+                np.array(
+                    [
+                        [facet1_corner, duplicate_points[1]],
+                        [facet2_corner, duplicate_points[0]],
+                    ]
+                )
+            )
+            lines.append(facet_lines)
+
+    return lines
+
+
+def get_visible_lines(stl_file_path: str, decimal_places: int = 3):
+    mesh = trimesh.load(stl_file_path)
+
+    # Get the normals of the facets
+    facet_normals = mesh.face_normals
+
+    # Find the indices of facets facing "up" (positive z-direction)
+    upward_facing_indices = np.where(facet_normals[:, 2] > 0)[0]
+
+    lines = []
+    for idx in upward_facing_indices:
+        vertices = mesh.vertices[mesh.faces[idx]]
+        # add each line in the triangle
+        lines.append([vertices[0].tolist(), vertices[1].tolist()])
+        lines.append([vertices[1].tolist(), vertices[2].tolist()])
+        lines.append([vertices[2].tolist(), vertices[0].tolist()])
+
+    # sort lines by x, y
+    for line in lines:
+        if line[0][0] > line[1][0]:
+            line[0], line[1] = line[1], line[0]
+        elif line[0][0] == line[1][0]:
+            if line[0][1] > line[1][1]:
+                line[0], line[1] = line[1], line[0]
+
+    lines = np.array(lines)
+    unique_lines = np.unique(lines, axis=0)
+    return round_shape_values(unique_lines, decimal_places)

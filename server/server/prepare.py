@@ -1,17 +1,14 @@
 from server.mark.point import (
     get_shapes,
+    get_visible_facets,
+    get_lines_on_coplanar_facets,
 )
-from server.mark import line, edge, arc, pair
+from server.mark import line, edge, arc, pair, step, gcode
 from server.config import MODEL_PATH, GCODE_PATH
 from server import machine
 from server.model import (
     update_offset,
 )
-
-
-def model_id_to_program_number(model_id: int):
-    return str(model_id + 1000)
-    # return str(model_id).zfill(4)
 
 
 def program_number_to_model_id(program_number: str):
@@ -25,6 +22,21 @@ def process_new_3dmodel(stl_filename: str, model_id: int, mysql_config: dict):
     lines, arcs = get_shapes(f"{MODEL_PATH}/{stl_filename}")
     line.import_lines(model_id, lines, mysql_config)
     arc.import_arcs(model_id, arcs, mysql_config)
+
+
+def flatten_extend(matrix):
+    flat_list = []
+    for row in matrix:
+        flat_list.extend(row)
+    return flat_list
+
+
+def process_new_model(stl_filename: str, model_id: int, mysql_config: dict):
+    facets = get_visible_facets(f"{MODEL_PATH}/{stl_filename}")
+    lines = get_lines_on_coplanar_facets(facets)
+    lines = flatten_extend(lines)
+    line.import_lines_from_paired_lines_on_facets(model_id, lines, mysql_config)
+    step.import_steps(mysql_config, model_id)
 
 
 def process_stl(
@@ -47,22 +59,39 @@ def process_stl(
     )
     update_offset(model_id, offset)
 
-    # save gcode
-    program_number = model_id_to_program_number(model_id)
     edge.add_line_number_from_path(mysql_config, path)
-    gcode = edge.generate_gcode(path, program_number)
-    gcode_filename = get_gcode_filename(stl_filename)
+
+    path = gcode.format_edge_path(path)
+    steps = step.get_steps(mysql_config, model_id)
+    if steps:
+        step_path, trace_lines = step.create_step_path(
+            mysql_config,
+            model_id,
+            stl_filename,
+            move_feedrate,
+            offset,
+        )
+
+        # wait for 1 second in order to update the sensor config
+        path.append("G4 P1000")
+        init_line = 4 + len(path)
+        trace_id = steps[0][0]
+        if step.get_trace_lines(mysql_config, trace_id):
+            trace_id_list = [step[0] for step in steps]
+            step.delete_trace_lines(mysql_config, trace_id_list)
+
+        step.import_trace_lines(mysql_config, trace_lines, init_line)
+        path += step_path
+
+    # save gcode
+    gcode_filename = gcode.get_gcode_filename(stl_filename)
     gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
-    edge.save_gcode(gcode, gcode_file_path)
+    gcode.save_gcode(model_id, path, gcode_file_path)
 
     # send gcode to cnc machine
     if send_gcode:
         machine_info = machine.get_machines(mysql_config)[0]
         machine.send_file_with_smbclient(machine_info, gcode_file_path)
-
-
-def get_gcode_filename(model_filename: str):
-    return f"{model_filename}.gcode"
 
 
 def remove_data_with_model_id(model_id: int, mysql_config: dict):

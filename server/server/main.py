@@ -9,9 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from websockets.exceptions import ConnectionClosedOK, ConnectionClosedError
 from server.prepare import (
     process_new_3dmodel,
+    process_new_model,
     process_stl,
-    get_gcode_filename,
-    model_id_to_program_number,
     program_number_to_model_id,
 )
 from pydantic import BaseModel
@@ -35,7 +34,9 @@ from server.model import (
     add_new_3dmodel,
     get_model_data,
 )
+from server.mark.gcode import model_id_to_program_number, get_gcode_filename
 from server import machine
+from server.mark.trace import get_first_line_number_for_tracing
 import asyncio
 
 
@@ -140,6 +141,21 @@ async def upload_3dmodel(file: UploadFile):
     return {"status": "ok", "model_id": _model_id}
 
 
+@app.post("/upload/new/model")
+async def upload_new_model(file: UploadFile):
+    """Upload new 3d model file"""
+    # save image
+    file_extension = file.filename.split(".")[-1]
+    if file_extension not in ["stl", "STL"]:
+        raise HTTPException(status_code=400, detail="File extension not supported")
+
+    _model_id = add_new_3dmodel(file.filename)
+    with open(f"{MODEL_PATH}/{file.filename}", "wb") as buffer:
+        buffer.write(await file.read())
+    process_new_model(file.filename, _model_id, MYSQL_CONFIG)
+    return {"status": "ok", "model_id": _model_id}
+
+
 @app.get("/list/3dmodels")
 async def list_3dmodels():
     """List uploaded 3d models"""
@@ -227,20 +243,22 @@ async def download_gcode(model_id: int):
 async def start_measurement(
     _conf: MeasurementConfig, background_tasks: BackgroundTasks
 ):
-    running_process = status.get_running_process(_conf.three_d_model_id, MYSQL_CONFIG)
+    model_id = _conf.three_d_model_id
+    running_process = status.get_running_process(model_id, MYSQL_CONFIG)
     if running_process is not None:
         raise HTTPException(
             status_code=400,
             detail="Measurement already running",
         )
 
-    process_id = status.start_measuring(_conf.three_d_model_id, MYSQL_CONFIG, "running")
+    tracing_start_line = get_first_line_number_for_tracing(MYSQL_CONFIG, model_id)
+    process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
     background_tasks.add_task(
         listener_start,
         MYSQL_CONFIG,
         process_id,
     )
-    return {"status": "ok"}
+    return {"status": "ok", "tracing_start_line": tracing_start_line}
 
 
 @app.post("/start/measurement/with/program_name")
@@ -261,13 +279,18 @@ async def start_measurement_with_program_name(
             detail="Measurement already running",
         )
 
+    tracing_start_line = get_first_line_number_for_tracing(MYSQL_CONFIG, model_id)
     process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
     background_tasks.add_task(
         listener_start,
         MYSQL_CONFIG,
         process_id,
     )
-    return {"status": "ok", "model_id": model_id}
+    return {
+        "status": "ok",
+        "model_id": model_id,
+        "tracing_start_line": tracing_start_line,
+    }
 
 
 @app.post("/estimate/measurement")
@@ -389,6 +412,12 @@ async def get_result_pair(model_id: int):
 async def get_result_arcs(model_id: int, process_id: int):
     arcs = result.fetch_arcs(model_id, process_id)
     return {"arcs": arcs}
+
+
+@app.get("/result/steps")
+async def get_result_steps(model_id: int, process_id: int):
+    steps = result.fetch_step_results(model_id, process_id)
+    return {"steps": steps}
 
 
 @app.get("/list/processes/{model_id}")

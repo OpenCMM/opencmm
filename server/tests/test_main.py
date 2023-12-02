@@ -127,6 +127,31 @@ def test_setup_data_with_arcs_with_offset():
     assert response.json() == {"status": "ok"}
 
 
+def test_upload_with_new_model_with_step():
+    path = "tests/fixtures/stl/step.STL"
+
+    with open(path, "rb") as f:
+        response = client.post("/upload/new/model", files={"file": f})
+        assert response.status_code == 200
+        assert response.json() == {"status": "ok", "model_id": 5}
+
+
+def test_setup_data_with_step_and_slope():
+    job_info = {
+        "three_d_model_id": 5,
+        "measure_length": 2.5,
+        "measure_feedrate": 100.0,
+        "move_feedrate": 1000.0,
+        "x_offset": 0.0,
+        "y_offset": 0.0,
+        "z_offset": 0.0,
+        "send_gcode": False,
+    }
+    response = client.post("/setup/data", json=job_info)
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+
 @pytest.mark.skip(reason="Not implemented")
 def test_websocket():
     status = {
@@ -152,3 +177,8 @@ def test_get_model_id_from_program_name():
     response = client.get(f"/get_model_id/from/program_name/{program_name}")
     assert response.status_code == 200
     assert response.json() == {"model_id": None}
+
+    program_name = "1005"
+    response = client.get(f"/get_model_id/from/program_name/{program_name}")
+    assert response.status_code == 200
+    assert response.json() == {"model_id": 5}

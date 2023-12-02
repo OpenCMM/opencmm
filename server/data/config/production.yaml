@@ -14,3 +14,7 @@ sensor:
   interval: 10 # ms
   threshold: 1000
   beam_diameter: 120 # μm
+  middle_output: 9100
+trace:
+  feedrate: 300 # mm/min
+  margin: 2.5

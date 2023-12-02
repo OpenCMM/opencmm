@@ -26,11 +26,18 @@ def get_start_end_points_from_line_number(gcode: list, line: int):
         raise LineNumberTooSmall(f"Line number {line} is too small")
     line -= 3
     row = gcode[line]
+    if row[0] == "G4":
+        # start point is the same as the end point of the previous line
+        (x, y, first_feedrate) = row_to_xyz_feedrate(gcode[line - 1])
+        return ((x, y), (x, y), 0.0)
+
     (x, y, first_feedrate) = row_to_xyz_feedrate(row)
     feedrate = first_feedrate / 60  # mm/s
     if line == 0:
         return ((0.0, 0.0), (x, y), feedrate)
     prev_row = gcode[line - 1]
+    if prev_row[0] == "G4":
+        prev_row = gcode[line - 2]
     (_x, _y, _feedrate) = row_to_xyz_feedrate(prev_row)
     return ((_x, _y), (x, y), feedrate)
 
@@ -68,7 +75,9 @@ def is_point_on_line(p: tuple, p1: tuple, p2: tuple):
     )
 
 
-def get_true_line_number(xy: tuple, line: int, gcode: list) -> int:
+def get_true_line_number(
+    xy: tuple, line: int, gcode: list, first_line_for_tracing: int = None
+) -> int:
     """
     Use xy coordinates as a ground truth to find the line number
     Check if the xy coordinates are within the line
@@ -84,19 +93,16 @@ def get_true_line_number(xy: tuple, line: int, gcode: list) -> int:
             return last_line
         return None
 
+    if first_line_for_tracing:
+        assert gcode[first_line_for_tracing - 5][0] == "G4", "G4 is missing"
+
     try:
-        (start, end, _feedrate) = get_start_end_points_from_line_number(gcode, line)
-        if is_point_on_line(xy, start, end):
-            return line
-
-        # check the previous line
-        (start, end, _feedrate) = get_start_end_points_from_line_number(gcode, line - 1)
-        if is_point_on_line(xy, start, end):
-            return line - 1
-
-        (start, end, _feedrate) = get_start_end_points_from_line_number(gcode, line - 2)
-        if is_point_on_line(xy, start, end):
-            return line - 2
+        for i in range(3):
+            (start, end, _feedrate) = get_start_end_points_from_line_number(
+                gcode, line - i
+            )
+            if is_point_on_line(xy, start, end):
+                return line - i
     except LineNumberTooSmall:
         return None
 

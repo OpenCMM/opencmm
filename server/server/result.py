@@ -1,5 +1,5 @@
 import mysql.connector
-from server.config import MYSQL_CONFIG
+from server.config import MYSQL_CONFIG, get_config
 import numpy as np
 
 
@@ -174,3 +174,45 @@ def fetch_arcs(model_id: int, process_id: int):
     cursor.close()
     cnx.close()
     return arcs
+
+
+def fetch_step_results(model_id: int, process_id: int):
+    conf = get_config()
+    sensor_middle_output = conf["sensor"]["middle_output"]
+    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+    cursor = cnx.cursor()
+
+    steps = []
+    query = """
+		SELECT trace.id, trace.start, trace.end,
+        trace.result, trace_line.id,
+        trace_line_result.id, trace_line_result.distance
+        FROM trace_line INNER JOIN trace ON 
+        trace_line.trace_id = trace.id 
+        LEFT JOIN trace_line_result ON
+        trace_line.id = trace_line_result.trace_line_id
+        AND trace_line_result.process_id = %s
+        WHERE trace.type = 'step' AND trace.model_id = %s
+	"""
+    cursor.execute(
+        query,
+        (
+            process_id,
+            model_id,
+        ),
+    )
+    traces = cursor.fetchall()
+    current_trace_id = None
+    previous_distance = None
+    for trace in traces:
+        if current_trace_id != trace[0]:
+            previous_distance = trace[6]
+            current_trace_id = trace[0]
+        else:
+            output_diff = abs(trace[6] - previous_distance)
+            diff = 35 / sensor_middle_output * output_diff
+            steps.append((trace[0], trace[3], diff))
+
+    cursor.close()
+    cnx.close()
+    return steps

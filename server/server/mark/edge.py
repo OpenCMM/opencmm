@@ -4,6 +4,7 @@ from .line import get_side
 from .arc import get_arc
 import math
 from .point import ray_cast
+from .gcode import to_gcode_row
 
 
 def get_direction(x0, y0, x1, y1):
@@ -76,13 +77,6 @@ def get_edges_by_side_id(side_id: int, mysql_config: dict, process_id: int):
     return edges
 
 
-def to_gcode_row(x, y, feedrate):
-    # round to 3 decimal places
-    x = round(x, 3)
-    y = round(y, 3)
-    return f"G1 X{x} Y{y} F{feedrate}"
-
-
 def add_line_number_from_path(mysql_config: dict, path: list):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
@@ -90,7 +84,7 @@ def add_line_number_from_path(mysql_config: dict, path: list):
     update_list = []
     initial_line_number = 4
     for idx, row in enumerate(path):
-        edge_id = row[4]
+        edge_id = row[5]
         update_list.append((initial_line_number + idx * 2, edge_id))
     query = "UPDATE edge SET line = %s WHERE id = %s"
     cursor.executemany(query, update_list)
@@ -144,6 +138,7 @@ def get_edge_path(
                         to_gcode_row(x, py1, measure_feedrate),
                         x,
                         y,
+                        z,
                         edge_id,
                     ]
                 )
@@ -160,6 +155,7 @@ def get_edge_path(
                         to_gcode_row(px1, y, measure_feedrate),
                         x,
                         y,
+                        z,
                         edge_id,
                     ]
                 )
@@ -186,10 +182,29 @@ def get_edge_path(
                     to_gcode_row(second[0], second[1], measure_feedrate),
                     x,
                     y,
+                    z,
                     edge_id,
                 ]
             )
-    return sorted(path, key=lambda point: (point[2], point[3]))
+    optimal_path = sorted(path, key=lambda point: (point[2], point[3]))
+
+    # delete edges with the same x, y value and keep the one with the highest z value
+    path = []
+    prev_xy = None
+    prev_z = None
+    for row in optimal_path:
+        _xy = (row[2], row[3])
+        if _xy == prev_xy:
+            if prev_z > row[4]:
+                continue
+            else:
+                path.pop()
+
+        prev_xy = _xy
+        prev_z = row[4]
+        path.append(row)
+
+    return path
 
 
 def generate_gcode(path, program_number: str):

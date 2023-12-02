@@ -1,15 +1,16 @@
 from server.measure.gcode import load_gcode, row_to_xyz_feedrate
 from server.listener.mt import reader
 from server.measure.estimate import update_data_after_measurement
-from server.config import GCODE_PATH, MYSQL_CONFIG, get_config
+from server.config import GCODE_PATH, MODEL_PATH, MYSQL_CONFIG, get_config
 import mysql.connector
 import random
 from server.model import add_new_3dmodel
 from server.listener import status
 from datetime import datetime, timedelta
-from server.prepare import get_gcode_filename
+from server.mark.gcode import get_gcode_filename
 from fastapi.testclient import TestClient
 from server.main import app
+from .sensor import MockSensor
 
 client = TestClient(app)
 z = 10.0
@@ -99,7 +100,7 @@ def create_mock_perfect_data(filename: str, process_id: int):
         init_coord = start_coord
         (x, y, feedrate_per_min) = row_to_xyz_feedrate(gcode[i])
         distance = get_distance_between_two_points(start_coord, (x, y))
-        feedrate = round(feedrate_per_min / 60.0, 3)
+        feedrate = feedrate_per_min / 60.0
         direction = get_direction(start_coord, (x, y))
         timestamp += timedelta(seconds=sample_interval)
         for j in range(int(distance / (feedrate * sample_interval))):
@@ -151,9 +152,16 @@ def create_mock_data(filename: str, process_id: int):
     gcode_filename = get_gcode_filename(filename)
     gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
     gcode = load_gcode(gcode_file_path)
-    line = 3
+    mock_sensor = MockSensor(f"{MODEL_PATH}/{filename}")
+    is_tracing = False
     timestamp = datetime.now()
     for i in range(len(gcode)):
+        line = i + 3
+        if gcode[i][0] == "G4":
+            # start to measure steps or slopes
+            is_tracing = True
+            continue
+
         (x, y, feedrate_per_min) = row_to_xyz_feedrate(gcode[i])
         distance = get_distance_between_two_points(start_coord, (x, y))
         feedrate = round(feedrate_per_min / 60.0, 3)
@@ -169,14 +177,20 @@ def create_mock_data(filename: str, process_id: int):
             mtconnect_mock_data.append(_current_row)
             timestamp += timedelta(seconds=sample_interval)
             start_coord = (_x, _y)
+
+            if is_tracing and line % 2 == 1:
+                _sensor_timestamp = timestamp - timedelta(seconds=sample_interval)
+                sensor_output = mock_sensor.get_sensor_output((_x, _y, 100.0))
+                sensor_mock_data.append((process_id, _sensor_timestamp, sensor_output))
+
         last_timestamp = timestamp
-        if line % 2 == 0:
+
+        if line % 2 == 0 and not is_tracing:
             sensor_data_row = create_sensor_data_row(
                 first_timestamp, last_timestamp, process_id
             )
             sensor_mock_data.append(sensor_data_row)
 
-        line += 1
         start_coord = (x, y)
 
     reader.import_mtconnect_data(MYSQL_CONFIG, mtconnect_mock_data)
@@ -523,3 +537,21 @@ def test_update_data_after_measurement_missing_mtconnect_data_with_arc():
     update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)
     process_result = status.get_process_status(MYSQL_CONFIG, process_id)
     assert process_result[2] == "done"
+
+
+def test_update_data_after_measurement_step():
+    filename = "step.STL"
+    model_id = 5
+    process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
+    create_mock_data(filename, process_id)
+    update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)
+    process_result = status.get_process_status(MYSQL_CONFIG, process_id)
+    assert process_result[2] == "done"
+
+    response = client.get(f"/result/steps?model_id={model_id}&process_id={process_id}")
+    assert response.status_code == 200
+    steps = response.json()["steps"]
+    height = steps[0][1]
+    estimated_height = steps[0][2]
+    assert height == 3.0
+    assert estimated_height == 3.0

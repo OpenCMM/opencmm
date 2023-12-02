@@ -85,12 +85,36 @@ def get_sides(mysql_config: dict, model_id: int):
     return sides
 
 
+def pairs_to_lines_and_steps(pairs: list):
+    lines = []
+    steps = []
+
+    def format_line(line):
+        # delete z value
+        line = line[:, :2]
+        # order by x, y value
+        return np.sort(line, axis=0)
+
+    for pair in pairs:
+        line1 = format_line(pair[0])
+        line2 = format_line(pair[1])
+        if np.array_equal(line1, line2):
+            steps.append(pair)
+        else:
+            lines.append(pair)
+    return lines, steps
+
+
 def import_parallel_lines(model_id, lines: np.ndarray, mysql_config: dict):
     x, y, other = get_parallel_lines(lines)
     pairs = get_pairs(x, 0)
-    import_sides(model_id, pairs, "line", mysql_config)
+    lines, steps = pairs_to_lines_and_steps(pairs)
+    import_sides(model_id, lines, "line", mysql_config)
+    import_sides(model_id, steps, "step", mysql_config)
     pairs = get_pairs(y, 1)
-    import_sides(model_id, pairs, "line", mysql_config)
+    lines, steps = pairs_to_lines_and_steps(pairs)
+    import_sides(model_id, lines, "line", mysql_config)
+    import_sides(model_id, steps, "step", mysql_config)
 
 
 def import_edges(edge_list: list, mysql_config: dict):
@@ -163,6 +187,14 @@ def get_side(side_id: int, mysql_config: dict):
 
 def import_lines(model_id: int, lines: np.ndarray, mysql_config: dict):
     import_parallel_lines(model_id, lines, mysql_config)
+    sides = get_sides(mysql_config, model_id)
+    import_edges_from_sides(sides, mysql_config)
+
+
+def import_lines_from_paired_lines_on_facets(
+    model_id: int, lines: list, mysql_config: dict
+):
+    import_sides(model_id, lines, "line", mysql_config)
     sides = get_sides(mysql_config, model_id)
     import_edges_from_sides(sides, mysql_config)
 

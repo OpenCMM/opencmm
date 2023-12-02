@@ -108,6 +108,55 @@ CREATE TABLE IF NOT EXISTS `pair_result` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
 
 
+CREATE TABLE IF NOT EXISTS `trace` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `model_id` int(11) unsigned NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `start` int(11) unsigned NOT NULL,
+  `end` int(11) unsigned NOT NULL,
+  `result` FLOAT NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`model_id`) REFERENCES `model` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  FOREIGN KEY (`start`) REFERENCES `side` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  FOREIGN KEY (`end`) REFERENCES `side` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
+
+CREATE TABLE IF NOT EXISTS `trace_line` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `trace_id` int(11) unsigned NOT NULL,
+  `line` INT NOT NULL,
+  `x0` FLOAT NOT NULL,
+  `y0` FLOAT NOT NULL,
+  `x1` FLOAT NOT NULL,
+  `y1` FLOAT NOT NULL,
+  `z` FLOAT NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`trace_id`) REFERENCES `trace` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
+
+
+CREATE TABLE IF NOT EXISTS `trace_line_result` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `trace_line_id` int(11) unsigned NOT NULL,
+  `process_id` int(11) unsigned NOT NULL,
+  `distance` FLOAT NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`trace_line_id`) REFERENCES `trace_line` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  FOREIGN KEY (`process_id`) REFERENCES `process` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
+
+
+CREATE TABLE IF NOT EXISTS `trace_result` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `trace_id` int(11) unsigned NOT NULL,
+  `process_id` int(11) unsigned NOT NULL,
+  `result` FLOAT NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`trace_id`) REFERENCES `trace` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  FOREIGN KEY (`process_id`) REFERENCES `process` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
+
+
 CREATE TABLE IF NOT EXISTS `sensor` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `process_id` int(11) unsigned NOT NULL,
