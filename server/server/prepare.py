@@ -3,7 +3,7 @@ from server.mark.point import (
     get_visible_facets,
     get_lines_on_coplanar_facets,
 )
-from server.mark import line, edge, arc, pair, step, gcode
+from server.mark import line, edge, arc, pair, step, gcode, slope
 from server.config import MODEL_PATH, GCODE_PATH
 from server import machine
 from server.model import (
@@ -34,9 +34,10 @@ def flatten_extend(matrix):
 def process_new_model(stl_filename: str, model_id: int, mysql_config: dict):
     facets = get_visible_facets(f"{MODEL_PATH}/{stl_filename}")
     lines = get_lines_on_coplanar_facets(facets)
-    lines = flatten_extend(lines)
-    line.import_lines_from_paired_lines_on_facets(model_id, lines, mysql_config)
+    line_pairs = flatten_extend(lines)
+    line.import_lines_from_paired_lines_on_facets(model_id, line_pairs, mysql_config)
     step.import_steps(mysql_config, model_id)
+    slope.import_slopes(mysql_config, model_id, lines)
 
 
 def process_stl(

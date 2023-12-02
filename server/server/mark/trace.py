@@ -42,3 +42,17 @@ def get_trace_line_id_from_line_number(mysql_config: dict, model_id: int, line: 
     if trace_line_id is None:
         return None
     return trace_line_id[0]
+
+
+def import_traces(mysql_config: dict, traces: list):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
+    cursor = cnx.cursor()
+    query = (
+        "INSERT INTO trace "
+        "(model_id, type, start, end, result) "
+        "VALUES (%s, %s, %s, %s, %s)"
+    )
+    cursor.executemany(query, traces)
+    cnx.commit()
+    cursor.close()
+    cnx.close()
