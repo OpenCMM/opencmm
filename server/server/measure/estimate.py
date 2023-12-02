@@ -51,7 +51,7 @@ def sensor_timestamp_to_coord(
     beam_diameter = conf["sensor"]["beam_diameter"]  # in μm
     sensor_response_time = conf["sensor"]["response_time"]  # in ms
     # factor in sensor response time
-    sensor_timestamp = sensor_timestamp - timedelta(milliseconds=sensor_response_time)
+    sensor_timestamp -= timedelta(milliseconds=sensor_response_time)
     timestamp_diff = sensor_timestamp - start_timestamp
     distance = feedrate * timestamp_diff.total_seconds()
     direction_vector = np.array(direction_vector)
