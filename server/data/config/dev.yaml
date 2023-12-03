@@ -1,6 +1,8 @@
 edge:
   arc:
     number: 4
+  line:
+    number: 2
 mqtt:
   host: 192.168.0.19
   password: opencmm
@@ -19,3 +21,5 @@ sensor:
 trace:
   feedrate: 300 # mm/min
   margin: 2.5
+  slope:
+    number: 3

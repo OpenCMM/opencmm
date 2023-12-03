@@ -1,6 +1,10 @@
 import numpy as np
 from server.mark.line import get_sides
 from .trace import import_traces
+import mysql.connector
+from server.config import get_config
+from server.mark.line import get_side
+from .trace import sort_sides
 
 
 def import_slopes(mysql_config: dict, model_id: int, lines: list):
@@ -65,3 +69,90 @@ def get_angle(start_point: np.ndarray, end_point: np.ndarray):
     if angle_degrees > 90:
         angle_degrees = 180 - angle_degrees
     return angle_degrees
+
+
+def get_slopes(mysql_config: dict, model_id: int):
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
+    cursor = cnx.cursor()
+    query = "SELECT * FROM trace WHERE model_id = %s AND type = 'slope'"
+    cursor.execute(query, (model_id,))
+    slopes = cursor.fetchall()
+    cursor.close()
+    cnx.close()
+    return slopes
+
+
+def create_slope_lines(start_side, end_side):
+    conf = get_config()
+    trace_margin = conf["trace"]["margin"]
+    measure_count = conf["trace"]["slope"]["number"]
+    slope_lines = []
+
+    start_side = sort_sides([start_side])
+    end_side = sort_sides([end_side])
+
+    start_point0 = np.array(start_side[0][2:5])
+    start_point1 = np.array(start_side[0][5:8])
+    end_point0 = np.array(end_side[0][2:5])
+    end_point1 = np.array(end_side[0][5:8])
+
+    point0_to_point1 = start_point1 - start_point0
+    point0_to_point1 /= np.linalg.norm(point0_to_point1)
+
+    vector_point0 = (end_point0 - start_point0) / (measure_count + 1)
+    vector_point1 = (end_point1 - start_point1) / (measure_count + 1)
+
+    for i in range(1, measure_count + 1):
+        point0 = start_point0 + vector_point0 * i + point0_to_point1 * trace_margin
+        point1 = start_point1 + vector_point1 * i - point0_to_point1 * trace_margin
+
+        # round to 3 decimal places
+        point0 = [round(x, 3) for x in point0]
+        point1 = [round(x, 3) for x in point1]
+        slope_lines.append([point0, point1])
+
+    return slope_lines
+
+
+def to_trace_line_row(trace_id: int, slope_line, offset: tuple):
+    line0 = slope_line[0]
+    line1 = slope_line[1]
+    # add offset
+    line0 = [line0[0] + offset[0], line0[1] + offset[1]]
+    line1 = [line1[0] + offset[0], line1[1] + offset[1]]
+    z = slope_line[0][2] + offset[2]
+    # trace_id, x0, y0, x1, y1, z
+    return [trace_id, *line0, *line1, z]
+
+
+def create_slope_path(
+    mysql_config: dict,
+    model_id: int,
+    move_feedrate: float,
+    xyz_offset: tuple = (0, 0, 0),
+):
+    conf = get_config()
+    trace_feedrate = conf["trace"]["feedrate"]
+
+    path = []
+    trace_lines = []
+    slopes = get_slopes(mysql_config, model_id)
+    for slope in slopes:
+        trace_id, model_id, trace_type, start, end, height = slope
+        start_side = get_side(start, mysql_config)
+        end_side = get_side(end, mysql_config)
+        slope_lines = create_slope_lines(start_side, end_side)
+        for slope_line in slope_lines:
+            trace_lines.append(to_trace_line_row(trace_id, slope_line, xyz_offset))
+            path.append(
+                "G1 X{} Y{} F{}".format(
+                    slope_line[0][0], slope_line[0][1], move_feedrate
+                )
+            )
+            path.append(
+                "G1 X{} Y{} F{}".format(
+                    slope_line[1][0], slope_line[1][1], trace_feedrate
+                )
+            )
+
+    return path, trace_lines
