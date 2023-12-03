@@ -30,7 +30,7 @@ from server.mark.trace import (
     get_first_line_number_for_tracing,
     get_trace_line_id_from_line_number,
 )
-from server.mark.step import import_step_results
+from server.mark.trace import import_trace_line_results
 import logging
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
@@ -84,7 +84,7 @@ class Result:
         coord = np.round(coord, 3)
         return tuple(coord)
 
-    def get_edge_results(self, mtconnect_row, line):
+    def get_edge_result(self, mtconnect_row, line):
         mtconnect_latency = self.conf["mtconnect"]["latency"]
         xy = (mtconnect_row[3], mtconnect_row[4])
         _timestamp = mtconnect_row[2] - timedelta(milliseconds=mtconnect_latency)
@@ -118,14 +118,39 @@ class Result:
                 # - timestamp is not accurate
                 return (edge_id, self.process_id, edge_coord[0], edge_coord[1], self.z)
 
-    def compute_edge_results(self):
+    def get_trace_line_result(self, mtconnect_row, line):
+        mtconnect_latency = self.conf["mtconnect"]["latency"]
+        xy = (mtconnect_row[3], mtconnect_row[4])
+        _timestamp = mtconnect_row[2] - timedelta(milliseconds=mtconnect_latency)
+        (start, end, feedrate) = get_start_end_points_from_line_number(self.gcode, line)
+        # get timestamp at start and end
+        start_timestamp = get_timestamp_at_point(xy, start, feedrate, _timestamp, True)
+        end_timestamp = get_timestamp_at_point(xy, end, feedrate, _timestamp, False)
+
+        count = 0
+        total_sensor_output = 0
+        # get sensor data that is between start and end timestamp
+        for sensor_row in self.np_sensor_data:
+            sensor_timestamp = sensor_row[2]
+            if start_timestamp <= sensor_timestamp <= end_timestamp:
+                total_sensor_output += sensor_row[3]
+                count += 1
+        if count == 0:
+            return
+        average_sensor_output = total_sensor_output / count
+        trace_line_id = get_trace_line_id_from_line_number(
+            self.mysql_config, self.model_id, line
+        )
+        return [trace_line_id, self.process_id, average_sensor_output]
+
+    def compute_updating_data(self):
         first_line_for_tracing = get_first_line_number_for_tracing(
             self.mysql_config, self.model_id
         )
 
         current_line = 0
         edge_update_list = []
-        step_update_list = []
+        trace_line_update_list = []
         for row in self.np_mtconnect_data:
             xy = (row[3], row[4])
             line = int(row[6])
@@ -143,7 +168,7 @@ class Result:
                     # Not measuring
                     continue
 
-                edge_result = self.get_edge_results(row, line)
+                edge_result = self.get_edge_result(row, line)
                 if edge_result:
                     edge_update_list.append(edge_result)
 
@@ -152,41 +177,13 @@ class Result:
                 if line % 2 == 0:
                     # Not measuring
                     continue
-
-                mtconnect_latency = self.conf["mtconnect"]["latency"]
-                _timestamp = row[2] - timedelta(milliseconds=mtconnect_latency)
-                (start, end, feedrate) = get_start_end_points_from_line_number(
-                    self.gcode, line
-                )
-                # get timestamp at start and end
-                start_timestamp = get_timestamp_at_point(
-                    xy, start, feedrate, _timestamp, True
-                )
-                end_timestamp = get_timestamp_at_point(
-                    xy, end, feedrate, _timestamp, False
-                )
-
-                count = 0
-                total_sensor_output = 0
-                # get sensor data that is between start and end timestamp
-                for sensor_row in self.np_sensor_data:
-                    sensor_timestamp = sensor_row[2]
-                    if start_timestamp <= sensor_timestamp <= end_timestamp:
-                        total_sensor_output += sensor_row[3]
-                        count += 1
-                if count == 0:
-                    continue
-                average_sensor_output = total_sensor_output / count
-                trace_line_id = get_trace_line_id_from_line_number(
-                    self.mysql_config, self.model_id, line
-                )
-                step_update_list.append(
-                    [trace_line_id, self.process_id, average_sensor_output]
-                )
+                trace_line_result = self.get_trace_line_result(row, line)
+                if trace_line_result:
+                    trace_line_update_list.append(trace_line_result)
 
             current_line = line
 
-        return edge_update_list, step_update_list
+        return edge_update_list, trace_line_update_list
 
 
 def update_data_after_measurement(
@@ -216,7 +213,7 @@ def update_data_after_measurement(
     client.connect(MQTT_BROKER_URL, 1883, 60)
 
     result = Result(mysql_config, model_id, process_id)
-    edge_update_list, step_update_list = result.compute_edge_results()
+    edge_update_list, trace_line_update_list = result.compute_updating_data()
     edge_count = len(edge_update_list)
     if edge_count == 0:
         status.update_process_status(
@@ -228,8 +225,8 @@ def update_data_after_measurement(
         disconnect_and_publish_log("No edge found")
         return
     import_edge_results(edge_update_list, mysql_config)
-    if step_update_list:
-        import_step_results(mysql_config, step_update_list)
+    if trace_line_update_list:
+        import_trace_line_results(mysql_config, trace_line_update_list)
 
     _msg = f"{edge_count} edges found"
     logger.info(_msg)
@@ -258,7 +255,7 @@ def recompute(mysql_config: dict, process_id: int):
     process_data = status.get_process_status(mysql_config, process_id)
     model_id = process_data[1]
     result = Result(mysql_config, model_id, process_id)
-    edge_update_list, step_update_list = result.compute_edge_results()
+    edge_update_list, trace_line_update_list = result.compute_updating_data()
 
     edge_count = len(edge_update_list)
     if edge_count == 0:
@@ -270,8 +267,8 @@ def recompute(mysql_config: dict, process_id: int):
         )
         return
     import_edge_results(edge_update_list, mysql_config)
-    if step_update_list:
-        import_step_results(mysql_config, step_update_list)
+    if trace_line_update_list:
+        import_trace_line_results(mysql_config, trace_line_update_list)
 
     _msg = f"{edge_count} edges found"
     logger.info(_msg)

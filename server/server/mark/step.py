@@ -167,27 +167,3 @@ def create_step_path(
             )
 
     return path, trace_lines
-
-
-def get_trace_lines(mysql_config: dict, trace_id: int):
-    cnx = mysql.connector.connect(**mysql_config, database="coord")
-    cursor = cnx.cursor()
-    query = "SELECT * FROM trace_line WHERE trace_id = %s"
-    cursor.execute(query, (trace_id,))
-    trace_lines = cursor.fetchall()
-    cursor.close()
-    cnx.close()
-    return trace_lines
-
-
-def import_step_results(mysql_config: dict, step_update_list: list):
-    cnx = mysql.connector.connect(**mysql_config, database="coord")
-    cursor = cnx.cursor()
-    query = (
-        "INSERT INTO trace_line_result "
-        "(trace_line_id, process_id, distance) VALUES (%s, %s, %s)"
-    )
-    cursor.executemany(query, step_update_list)
-    cnx.commit()
-    cursor.close()
-    cnx.close()
