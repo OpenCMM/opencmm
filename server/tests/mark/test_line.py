@@ -8,11 +8,6 @@ from server.mark.line import (
     import_lines,
     pairs_to_lines_and_steps,
 )
-from server.mark.edge import (
-    get_edge_path,
-    generate_gcode,
-    save_gcode,
-)
 from server.mark.arc import import_arcs
 from .config import MYSQL_CONFIG
 import pytest
@@ -69,14 +64,6 @@ def test_import_edges():
 def test_import_arcs():
     lines, arcs = get_shapes("tests/fixtures/stl/sample.stl")
     import_arcs(model_id, arcs, MYSQL_CONFIG)
-
-
-@pytest.mark.skip(reason="not implemented")
-def test_generate_gcode():
-    program_number = "1001"
-    path = get_edge_path(MYSQL_CONFIG, model_id)
-    gcode = generate_gcode(path, program_number)
-    save_gcode(gcode, "tests/fixtures/gcode/edge.gcode")
 
 
 @pytest.mark.skip(reason="not implemented")

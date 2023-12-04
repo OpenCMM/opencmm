@@ -4,6 +4,7 @@ from server.mark.point import (
     get_lines_on_coplanar_facets,
 )
 from server.mark import line, edge, arc, pair, step, gcode, slope, trace
+from server.mark.edge import EdgePath
 from server.config import MODEL_PATH, GCODE_PATH
 from server import machine
 from server.model import (
@@ -49,15 +50,13 @@ def process_stl(
     send_gcode: bool,
 ):
     (measure_length, measure_feedrate, move_feedrate) = measure_config
-    path = edge.get_edge_path(
+    edge_path = EdgePath(
         mysql_config,
         model_id,
         stl_filename,
-        measure_length,
-        measure_feedrate,
-        move_feedrate,
-        offset,
+        measure_config,
     )
+    path = edge_path.get_edge_path(offset)
     update_offset(model_id, offset)
 
     edge.add_line_number_from_path(mysql_config, path)
