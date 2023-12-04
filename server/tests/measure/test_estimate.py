@@ -18,6 +18,7 @@ z = 10.0
 conf = get_config()
 mtconnect_latency = conf["mtconnect"]["latency"]
 beam_diameter = conf["sensor"]["beam_diameter"]
+sensor_response_time = conf["sensor"]["response_time"]  # in ms
 
 
 def import_sensor_data(mysql_config: dict, _sensor_data_list: list):
@@ -129,12 +130,13 @@ def create_mock_perfect_data(filename: str, process_id: int):
             distance_to_target = get_distance_between_two_points(
                 start_coord, target_coord
             )
-            distance_to_target += beam_diameter / 1000
+            distance_to_target += (beam_diameter / 1000) / 2
             time_to_substract = distance_to_target / feedrate
             sensor_timestamp = timestamp - timedelta(seconds=time_to_substract)
             unix_timestamp = sensor_timestamp.timestamp()
             rounded_unix_timestamp = round(unix_timestamp, 3)
             sensor_timestamp = datetime.fromtimestamp(rounded_unix_timestamp)
+            sensor_timestamp += timedelta(milliseconds=sensor_response_time)
             sensor_mock_data.append((process_id, sensor_timestamp, sensor_output))
 
         line += 1
@@ -555,3 +557,11 @@ def test_update_data_after_measurement_step():
     estimated_height = steps[0][2]
     assert height == 3.0
     assert estimated_height == 3.0
+
+    response = client.get(f"/result/slopes?model_id={model_id}&process_id={process_id}")
+    assert response.status_code == 200
+    slopes = response.json()["slopes"]
+    angle = slopes[0][1]
+    estimated_angle = slopes[0][2]
+    assert angle == 45.0
+    assert estimated_angle == 45.0

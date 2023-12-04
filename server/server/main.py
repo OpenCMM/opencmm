@@ -33,6 +33,8 @@ from server.model import (
     model_id_to_filename,
     add_new_3dmodel,
     get_model_data,
+    delete_model,
+    delete_model_files,
 )
 from server.mark.gcode import model_id_to_program_number, get_gcode_filename
 from server import machine
@@ -154,6 +156,14 @@ async def upload_new_model(file: UploadFile):
         buffer.write(await file.read())
     process_new_model(file.filename, _model_id, MYSQL_CONFIG)
     return {"status": "ok", "model_id": _model_id}
+
+
+@app.post("/delete/model")
+async def delete_model_data(model_id: int):
+    """Delete model data"""
+    delete_model_files(model_id)
+    delete_model(model_id)
+    return {"status": "ok"}
 
 
 @app.get("/list/3dmodels")
@@ -418,6 +428,12 @@ async def get_result_arcs(model_id: int, process_id: int):
 async def get_result_steps(model_id: int, process_id: int):
     steps = result.fetch_step_results(model_id, process_id)
     return {"steps": steps}
+
+
+@app.get("/result/slopes")
+async def get_result_slopes(model_id: int, process_id: int):
+    slopes = result.fetch_slope_results(model_id, process_id)
+    return {"slopes": slopes}
 
 
 @app.get("/list/processes/{model_id}")

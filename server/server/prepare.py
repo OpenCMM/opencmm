@@ -3,7 +3,7 @@ from server.mark.point import (
     get_visible_facets,
     get_lines_on_coplanar_facets,
 )
-from server.mark import line, edge, arc, pair, step, gcode
+from server.mark import line, edge, arc, pair, step, gcode, slope, trace
 from server.config import MODEL_PATH, GCODE_PATH
 from server import machine
 from server.model import (
@@ -34,9 +34,10 @@ def flatten_extend(matrix):
 def process_new_model(stl_filename: str, model_id: int, mysql_config: dict):
     facets = get_visible_facets(f"{MODEL_PATH}/{stl_filename}")
     lines = get_lines_on_coplanar_facets(facets)
-    lines = flatten_extend(lines)
-    line.import_lines_from_paired_lines_on_facets(model_id, lines, mysql_config)
+    line_pairs = flatten_extend(lines)
+    line.import_lines_from_paired_lines_on_facets(model_id, line_pairs, mysql_config)
     step.import_steps(mysql_config, model_id)
+    slope.import_slopes(mysql_config, model_id, lines)
 
 
 def process_stl(
@@ -76,12 +77,32 @@ def process_stl(
         path.append("G4 P1000")
         init_line = 4 + len(path)
         trace_id = steps[0][0]
-        if step.get_trace_lines(mysql_config, trace_id):
+        if trace.get_trace_lines(mysql_config, trace_id):
             trace_id_list = [step[0] for step in steps]
-            step.delete_trace_lines(mysql_config, trace_id_list)
+            trace.delete_trace_lines(mysql_config, trace_id_list)
 
-        step.import_trace_lines(mysql_config, trace_lines, init_line)
+        trace.import_trace_lines(mysql_config, trace_lines, init_line)
         path += step_path
+
+    slopes = slope.get_slopes(mysql_config, model_id)
+    if slopes:
+        slope_path, trace_lines = slope.create_slope_path(
+            mysql_config,
+            model_id,
+            move_feedrate,
+            offset,
+        )
+
+        if not steps:
+            path.append("G4 P1000")
+        init_line = 4 + len(path)
+        trace_id = slopes[0][0]
+        if trace.get_trace_lines(mysql_config, trace_id):
+            trace_id_list = [slope[0] for slope in slopes]
+            trace.delete_trace_lines(mysql_config, trace_id_list)
+
+        trace.import_trace_lines(mysql_config, trace_lines, init_line)
+        path += slope_path
 
     # save gcode
     gcode_filename = gcode.get_gcode_filename(stl_filename)

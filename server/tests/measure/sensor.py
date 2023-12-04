@@ -10,11 +10,13 @@ class MockSensor:
 
     def get_distance(self, xyz: tuple):
         ray_origins = np.array([xyz])
-        location = self.mesh.ray.intersects_location(ray_origins, self.ray_directions)[
+        locations = self.mesh.ray.intersects_location(ray_origins, self.ray_directions)[
             0
-        ][0]
-        if location is None:
+        ]
+        if locations is None:
             return None
+        # location with the hiihest z value is the closest point
+        location = locations[np.argmax(locations[:, 2])]
         distance = np.linalg.norm(np.array(xyz) - location)
         return distance
 
@@ -26,7 +28,7 @@ class MockSensor:
         # if distance is not between 65 ~ 135 mm,
         # sensor outputs 18900
         if 65 <= distance <= 135:
-            return self.middle_sensor_output + (distance - 100) * (
+            return self.middle_sensor_output + (100 - distance) * (
                 self.middle_sensor_output / 35
             )
         else:

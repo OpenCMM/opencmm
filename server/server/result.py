@@ -1,6 +1,7 @@
 import mysql.connector
 from server.config import MYSQL_CONFIG, get_config
 import numpy as np
+from server.mark.slope import get_angle
 
 
 def fetch_edges(model_id: int):
@@ -176,6 +177,22 @@ def fetch_arcs(model_id: int, process_id: int):
     return arcs
 
 
+def group_by_trace_id(traces):
+    grouped_arr = {}
+
+    for row in traces:
+        first_value = row[0]
+
+        if first_value not in grouped_arr:
+            grouped_arr[first_value] = []
+
+        group = grouped_arr[first_value]
+        group.append(row)
+
+    # Convert the nested dictionary to a list of lists
+    return list(grouped_arr.values())
+
+
 def fetch_step_results(model_id: int, process_id: int):
     conf = get_config()
     sensor_middle_output = conf["sensor"]["middle_output"]
@@ -216,3 +233,56 @@ def fetch_step_results(model_id: int, process_id: int):
     cursor.close()
     cnx.close()
     return steps
+
+
+def fetch_slope_results(model_id: int, process_id: int):
+    conf = get_config()
+    sensor_middle_output = conf["sensor"]["middle_output"]
+    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+    cursor = cnx.cursor()
+
+    slopes = []
+    query = """
+		SELECT trace.id, trace.start, trace.end,
+        trace.result, trace_line.id,
+        trace_line.x0, trace_line.y0,
+        trace_line_result.id, trace_line_result.distance
+        FROM trace_line INNER JOIN trace ON 
+        trace_line.trace_id = trace.id 
+        LEFT JOIN trace_line_result ON
+        trace_line.id = trace_line_result.trace_line_id
+        AND trace_line_result.process_id = %s
+        WHERE trace.type = 'slope' AND trace.model_id = %s
+	"""
+    cursor.execute(
+        query,
+        (
+            process_id,
+            model_id,
+        ),
+    )
+    traces = cursor.fetchall()
+    traces = group_by_trace_id(traces)
+
+    for trace in traces:
+        angles = []
+        previous_point = None
+        angle = trace[0][3]
+        trace_id = trace[0][0]
+        assert len(trace) > 2
+        for row in trace:
+            z = 35 / sensor_middle_output * (row[8] - sensor_middle_output) + 100
+            current_point = np.array([row[5], row[6], z])
+            if previous_point is None:
+                previous_point = current_point
+            else:
+                estimated_angle = get_angle(previous_point, current_point)
+                angles.append(estimated_angle)
+                previous_point = current_point
+
+        average_angle = sum(angles) / len(angles)
+        slopes.append((trace_id, angle, average_angle))
+
+    cursor.close()
+    cnx.close()
+    return slopes
