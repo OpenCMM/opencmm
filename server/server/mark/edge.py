@@ -27,41 +27,6 @@ def get_edges(mysql_config: dict, model_id: int):
     return edges
 
 
-def get_arc_path(center, xyz, distance):
-    cx, cy, cz = center
-    x, y, z = xyz
-    # Calculate the direction vector from the center to point A
-    direction_vector = (x - cx, y - cy, z - cz)
-
-    # Calculate the magnitude of the direction vector
-    magnitude = math.sqrt(
-        direction_vector[0] ** 2 + direction_vector[1] ** 2 + direction_vector[2] ** 2
-    )
-
-    # Normalize the direction vector
-    normalized_direction = (
-        direction_vector[0] / magnitude,
-        direction_vector[1] / magnitude,
-        direction_vector[2] / magnitude,
-    )
-
-    # Calculate the coordinates of the two points at distance 'distance' from point A
-    outside_point = (
-        x + distance * normalized_direction[0],
-        y + distance * normalized_direction[1],
-        z + distance * normalized_direction[2],
-    )
-    inside_point = (
-        x - distance * normalized_direction[0],
-        y - distance * normalized_direction[1],
-        z - distance * normalized_direction[2],
-    )
-    # round to 3 decimal places
-    outside_point = [round(x, 3) for x in outside_point]
-    inside_point = [round(x, 3) for x in inside_point]
-    return outside_point, inside_point
-
-
 def get_edges_by_side_id(side_id: int, mysql_config: dict, process_id: int):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
@@ -168,6 +133,41 @@ class EdgePath:
                 z,
             ]
 
+    def get_arc_path(self, center, xyz, distance):
+        cx, cy, cz = center
+        x, y, z = xyz
+        # Calculate the direction vector from the center to point A
+        direction_vector = (x - cx, y - cy, z - cz)
+
+        # Calculate the magnitude of the direction vector
+        magnitude = math.sqrt(
+            direction_vector[0] ** 2
+            + direction_vector[1] ** 2
+            + direction_vector[2] ** 2
+        )
+
+        # Normalize the direction vector
+        normalized_direction = (
+            direction_vector[0] / magnitude,
+            direction_vector[1] / magnitude,
+            direction_vector[2] / magnitude,
+        )
+
+        outside_point = (
+            x + distance * normalized_direction[0],
+            y + distance * normalized_direction[1],
+            z + distance * normalized_direction[2],
+        )
+        inside_point = (
+            x - distance * normalized_direction[0],
+            y - distance * normalized_direction[1],
+            z - distance * normalized_direction[2],
+        )
+        # round to 3 decimal places
+        outside_point = [round(x, 3) for x in outside_point]
+        inside_point = [round(x, 3) for x in inside_point]
+        return outside_point, inside_point
+
     def get_arc_edge_path(
         self,
         arc_id: int,
@@ -182,7 +182,7 @@ class EdgePath:
             cy + xyz_offset[1],
             cz + xyz_offset[2],
         )
-        outside_point, inside_point = get_arc_path(
+        outside_point, inside_point = self.get_arc_path(
             (cx, cy, cz), (x, y, z), self.measure_length
         )
         hit = ray_cast(
@@ -241,7 +241,8 @@ class EdgePath:
                     (x, y, z),
                     xyz_offset,
                 )
-                path.append(line_edge_path.append(edge_id))
+                line_edge_path.append(edge_id)
+                path.append(line_edge_path)
             else:
                 assert side_id is None
                 arc_edge_path = self.get_arc_edge_path(
@@ -249,7 +250,8 @@ class EdgePath:
                     (x, y, z),
                     xyz_offset,
                 )
-                path.append(arc_edge_path.append(edge_id))
+                arc_edge_path.append(edge_id)
+                path.append(arc_edge_path)
         optimal_path = sorted(path, key=lambda point: (point[2], point[3]))
         return self.delete_overlap_edges(optimal_path)
 
