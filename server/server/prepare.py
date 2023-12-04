@@ -59,8 +59,6 @@ def process_stl(
     path = edge_path.get_edge_path(offset)
     update_offset(model_id, offset)
 
-    edge.add_line_number_from_path(mysql_config, path)
-
     path = gcode.format_edge_path(path)
     steps = step.get_steps(mysql_config, model_id)
     if steps:

@@ -87,9 +87,20 @@ def get_trace_lines(mysql_config: dict, trace_id: int):
     return trace_lines
 
 
+def delete_trace_line_results(mysql_config: dict, trace_id_list: list, cursor, cnx):
+    query = (
+        "DELETE FROM trace_line_result WHERE trace_line_id "
+        "IN (SELECT id FROM trace_line WHERE trace_id = %s)"
+    )
+    for trace_id in trace_id_list:
+        cursor.execute(query, (trace_id,))
+        cnx.commit()
+
+
 def delete_trace_lines(mysql_config: dict, trace_id_list: list):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
+    delete_trace_line_results(mysql_config, trace_id_list, cursor, cnx)
     query = "DELETE FROM trace_line WHERE trace_id = %s"
     for trace_id in trace_id_list:
         cursor.execute(query, (trace_id,))

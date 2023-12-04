@@ -42,33 +42,16 @@ def get_edges_by_side_id(side_id: int, mysql_config: dict, process_id: int):
     return edges
 
 
-def add_line_number_from_path(mysql_config: dict, path: list):
-    cnx = mysql.connector.connect(**mysql_config, database="coord")
-    cursor = cnx.cursor()
-    cursor = cnx.cursor()
-    update_list = []
-    initial_line_number = 4
-    for idx, row in enumerate(path):
-        edge_id = row[5]
-        update_list.append((initial_line_number + idx * 2, edge_id))
-    query = "UPDATE edge SET line = %s WHERE id = %s"
-    cursor.executemany(query, update_list)
-    cnx.commit()
-    cursor.close()
-    cnx.close()
-    return cursor.rowcount
-
-
 def get_edge_id_from_line_number(mysql_config: dict, model_id: int, line_number: int):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     query = "SELECT id FROM edge WHERE model_id = %s AND line = %s"
     cursor.execute(query, (model_id, line_number))
-    edge_id = cursor.fetchone()
+    edge_ids = cursor.fetchall()
     cursor.close()
     cnx.close()
-    if edge_id:
-        return edge_id[0]
+    if edge_ids:
+        return [row[0] for row in edge_ids]
 
 
 class EdgePath:
@@ -225,6 +208,34 @@ class EdgePath:
             path.append(row)
         return path
 
+    def add_line_number_from_path(self, optimal_path: list):
+        cnx = mysql.connector.connect(**self.mysql_config, database="coord")
+        cursor = cnx.cursor()
+        cursor = cnx.cursor()
+        update_list = []
+        prev_xy = None
+        prev_line_number = None
+        initial_line_number = 4
+        idx = 0
+        for row in optimal_path:
+            edge_id = row[5]
+            _xy = (row[2], row[3])
+            if _xy == prev_xy:
+                update_list.append((prev_line_number, edge_id))
+            else:
+                current_line_number = initial_line_number + idx * 2
+                update_list.append((current_line_number, edge_id))
+                prev_line_number = current_line_number
+                idx += 1
+                prev_xy = _xy
+
+        query = "UPDATE edge SET line = %s WHERE id = %s"
+        cursor.executemany(query, update_list)
+        cnx.commit()
+        cursor.close()
+        cnx.close()
+        return cursor.rowcount
+
     def get_edge_path(
         self,
         xyz_offset: tuple = (0, 0, 0),
@@ -253,6 +264,7 @@ class EdgePath:
                 arc_edge_path.append(edge_id)
                 path.append(arc_edge_path)
         optimal_path = sorted(path, key=lambda point: (point[2], point[3]))
+        self.add_line_number_from_path(optimal_path)
         return self.delete_overlap_edges(optimal_path)
 
 
