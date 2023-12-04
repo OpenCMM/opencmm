@@ -32,6 +32,7 @@ from server.mark.trace import (
 )
 from server.mark.trace import import_trace_line_results
 import logging
+from scipy.ndimage.filters import uniform_filter1d
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
 logger = logging.getLogger(__name__)
@@ -85,6 +86,10 @@ class Result:
         return tuple(coord)
 
     def get_edge_result(self, mtconnect_row, line):
+        """
+        Estimate the exact coordinate of the edge from mtconnect data and
+        sensor data using timestamp
+        """
         mtconnect_latency = self.conf["mtconnect"]["latency"]
         xy = (mtconnect_row[3], mtconnect_row[4])
         _timestamp = mtconnect_row[2] - timedelta(milliseconds=mtconnect_latency)
@@ -119,6 +124,9 @@ class Result:
                 return (edge_id, self.process_id, edge_coord[0], edge_coord[1], self.z)
 
     def get_trace_line_result(self, mtconnect_row, line):
+        """
+        Estimate the approximate distance between the workpiece and the sensor
+        """
         mtconnect_latency = self.conf["mtconnect"]["latency"]
         xy = (mtconnect_row[3], mtconnect_row[4])
         _timestamp = mtconnect_row[2] - timedelta(milliseconds=mtconnect_latency)
@@ -127,17 +135,20 @@ class Result:
         start_timestamp = get_timestamp_at_point(xy, start, feedrate, _timestamp, True)
         end_timestamp = get_timestamp_at_point(xy, end, feedrate, _timestamp, False)
 
-        count = 0
-        total_sensor_output = 0
+        distance_results = []
         # get sensor data that is between start and end timestamp
         for sensor_row in self.np_sensor_data:
             sensor_timestamp = sensor_row[2]
             if start_timestamp <= sensor_timestamp <= end_timestamp:
-                total_sensor_output += sensor_row[3]
-                count += 1
-        if count == 0:
+                distance_results.append(sensor_row[3])
+
+        # Apply moving average filter to remove fluctuations
+        filtered_distance_results = uniform_filter1d(distance_results, size=5)
+
+        average_sensor_output = np.mean(filtered_distance_results)
+
+        if len(filtered_distance_results) == 0:
             return
-        average_sensor_output = total_sensor_output / count
         trace_line_id = get_trace_line_id_from_line_number(
             self.mysql_config, self.model_id, line
         )

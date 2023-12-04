@@ -430,6 +430,12 @@ async def get_result_steps(model_id: int, process_id: int):
     return {"steps": steps}
 
 
+@app.get("/result/slopes")
+async def get_result_slopes(model_id: int, process_id: int):
+    slopes = result.fetch_slope_results(model_id, process_id)
+    return {"slopes": slopes}
+
+
 @app.get("/list/processes/{model_id}")
 async def get_process_list(model_id: int):
     processes = status.get_process_list(MYSQL_CONFIG, model_id)

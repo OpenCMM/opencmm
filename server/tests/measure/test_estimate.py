@@ -557,3 +557,11 @@ def test_update_data_after_measurement_step():
     estimated_height = steps[0][2]
     assert height == 3.0
     assert estimated_height == 3.0
+
+    response = client.get(f"/result/slopes?model_id={model_id}&process_id={process_id}")
+    assert response.status_code == 200
+    slopes = response.json()["slopes"]
+    angle = slopes[0][1]
+    estimated_angle = slopes[0][2]
+    assert angle == 45.0
+    assert estimated_angle == 45.0
