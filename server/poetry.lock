@@ -775,21 +775,6 @@ files = [
 ]
 
 [[package]]
-name = "numpy-stl"
-version = "3.0.1"
-description = "Library to make reading, writing and modifying both binary and ascii STL files easy."
-optional = false
-python-versions = ">3.6.0"
-files = [
-    {file = "numpy-stl-3.0.1.tar.gz", hash = "sha256:dd4da1a379d2632f168518be8dcd9cddd7edc6c3238094fd8d21476b3586a0bc"},
-    {file = "numpy_stl-3.0.1-py3-none-any.whl", hash = "sha256:cd2c4b0032756bb1488559d507825b0dd8d5c2ac4a68638c2145387b2f804691"},
-]
-
-[package.dependencies]
-numpy = "*"
-python-utils = ">=3.4.5"
-
-[[package]]
 name = "orjson"
 version = "3.9.9"
 description = "Fast, correct Python JSON library supporting dataclasses, datetimes, and numpy"
@@ -1200,25 +1185,6 @@ files = [
 
 [package.extras]
 dev = ["atomicwrites (==1.2.1)", "attrs (==19.2.0)", "coverage (==6.5.0)", "hatch", "invoke (==1.7.3)", "more-itertools (==4.3.0)", "pbr (==4.3.0)", "pluggy (==1.0.0)", "py (==1.11.0)", "pytest (==7.2.0)", "pytest-cov (==4.0.0)", "pytest-timeout (==2.1.0)", "pyyaml (==5.1)"]
-
-[[package]]
-name = "python-utils"
-version = "3.8.1"
-description = "Python Utils is a module with some convenient utilities not included with the standard Python install"
-optional = false
-python-versions = ">3.8.0"
-files = [
-    {file = "python-utils-3.8.1.tar.gz", hash = "sha256:ec3a672465efb6c673845a43afcfafaa23d2594c24324a40ec18a0c59478dc0b"},
-    {file = "python_utils-3.8.1-py2.py3-none-any.whl", hash = "sha256:efdf31c8154667d7dc0317547c8e6d3b506c5d4b6e360e0c89662306262fc0ab"},
-]
-
-[package.dependencies]
-typing-extensions = ">3.10.0.2"
-
-[package.extras]
-docs = ["mock", "python-utils", "sphinx"]
-loguru = ["loguru"]
-tests = ["flake8", "loguru", "pytest", "pytest-asyncio", "pytest-cov", "pytest-mypy", "sphinx", "types-setuptools"]
 
 [[package]]
 name = "pyyaml"
@@ -1823,4 +1789,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.13"
-content-hash = "a5ec233bce15f26354942252d5ddacca9939c85163f7b6435d1812735e0d0688"
+content-hash = "f570062dce01ca00ff83c3a6a14e1a09a833067dd959d3738eb2505e1986739b"

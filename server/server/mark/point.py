@@ -1,4 +1,3 @@
-from stl import mesh
 import numpy as np
 import trimesh
 from itertools import combinations
@@ -6,12 +5,6 @@ from itertools import combinations
 
 def point_id(point: np.ndarray):
     return ",".join(point.astype(str))
-
-
-def get_highest_z(vertices):
-    # get highest point
-    highest_point = np.max(vertices, axis=0)
-    return highest_point[2][2]
 
 
 def get_unique_z_values_of_visiable_vertices(stl_file_path: str):
@@ -54,9 +47,9 @@ def get_shapes(stl_file_path: str, decimal_places: int = 3):
     ground_parallel_arcs : list
         List of arcs parallel to the ground
     """
-    cuboid = mesh.Mesh.from_file(stl_file_path)
+    mesh = trimesh.load(stl_file_path)
     # get vertices
-    vertices = cuboid.vectors
+    vertices = mesh.faces
     unique_z_values = get_unique_z_values_of_visiable_vertices(stl_file_path)
 
     # Extract lines and arcs parallel to the ground
@@ -65,6 +58,7 @@ def get_shapes(stl_file_path: str, decimal_places: int = 3):
     ground_parallel_arcs = []
 
     for facet in vertices:
+        facet = mesh.vertices[facet]
         normal = np.cross(facet[1] - facet[0], facet[2] - facet[0])
         if np.isclose(normal[2], 0.0, atol=1e-6):
             # This facet is parallel to the ground
@@ -187,25 +181,16 @@ def are_facets_on_same_plane(facet1, facet2, tolerance=1e-6):
     )
 
 
-def get_coplanar_facets(facets):
-    adjacent_facets = []
-    for i, j in combinations(range(len(facets)), 2):
-        # if two facets share two vertices, they are adjacent
-        if are_adjacent_facets(facets[i], facets[j]):
-            adjacent_facets.append([facets[i], facets[j]])
+def group_by_coplanar_facets(facets):
+    coplanar_facets = [[facets[0]]]
+    for facet in facets[1:]:
+        for i, coplanar_facet in enumerate(coplanar_facets):
+            if are_facets_on_same_plane(facet, coplanar_facet[0]):
+                coplanar_facets[i].append(facet)
+                break
+            else:
+                coplanar_facets.append([facet])
 
-    coplanar_facets = []
-    # check if adjacent facets are coplanar, if yes, merge them
-    for i in range(len(adjacent_facets)):
-        # get two adjacent facets
-        facet1 = adjacent_facets[i][0]
-        facet2 = adjacent_facets[i][1]
-        if are_facets_on_same_plane(facet1, facet2):
-            # merge the two facets
-            adjacent_facets[i] = np.unique(
-                np.concatenate((facet1, facet2), axis=0), axis=0
-            )
-            coplanar_facets.append(adjacent_facets[i])
     return coplanar_facets
 
 

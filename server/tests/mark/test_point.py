@@ -1,21 +1,11 @@
 from server.mark.point import (
-    get_highest_z,
     ray_cast,
     get_shapes,
     get_visible_lines,
-    get_coplanar_facets,
     get_lines_on_coplanar_facets,
     get_visible_facets,
+    group_by_coplanar_facets,
 )
-from stl import mesh
-
-
-def test_get_highest_point():
-    cuboid = mesh.Mesh.from_file("tests/fixtures/stl/sample.stl")
-    # get vertices
-    vertices = cuboid.vectors
-    highest_z = get_highest_z(vertices)
-    assert highest_z == 10.0
 
 
 def test_ray_cast():
@@ -39,9 +29,9 @@ def test_get_visible_lines():
     assert len(lines) == 14
 
 
-def test_get_coplanar_facets():
+def test_group_by_coplanar_facets():
     facets = get_visible_facets("tests/fixtures/stl/step.STL")
-    coplanar_facets = get_coplanar_facets(facets)
+    coplanar_facets = group_by_coplanar_facets(facets)
     assert len(coplanar_facets) == 3
 
 
