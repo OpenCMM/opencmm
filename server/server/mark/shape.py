@@ -34,30 +34,49 @@ class Shape:
 
         return upward_facing_indices
 
-    def are_facets_on_same_plane(self, facet_idx1, facet_idx2, tolerance=1e-6):
+    def are_coplanar(self, facet_idx0, facet_idx1, tolerance=1e-6):
+        facet0 = self.mesh.vertices[self.mesh.faces[facet_idx0]]
         facet1 = self.mesh.vertices[self.mesh.faces[facet_idx1]]
-        facet2 = self.mesh.vertices[self.mesh.faces[facet_idx2]]
+        # Calculate the normal vector for each facet
+        normal0 = np.cross(facet0[1] - facet0[0], facet0[2] - facet0[0])
         normal1 = np.cross(facet1[1] - facet1[0], facet1[2] - facet1[0])
-        normal2 = np.cross(facet2[1] - facet2[0], facet2[2] - facet2[0])
 
-        # Check if the cross products (normal vectors) are parallel
-        return np.all(
+        # Check if the normal vectors are parallel
+        if np.all(
             np.isclose(
+                normal0 / np.linalg.norm(normal0),
                 normal1 / np.linalg.norm(normal1),
-                normal2 / np.linalg.norm(normal2),
                 atol=tolerance,
             )
-        )
+        ):
+            # if np.allclose(normal0, normal1):
+            # Check if the facets are coplanar
+            if np.all(np.abs(np.dot(facet1[0] - facet0[0], normal0)) < 1e-6):
+                # The facets are coplanar
+                return True
+            else:
+                # The facets are parallel but not coplanar
+                return False
+        else:
+            # The facets are not coplanar
+            return False
 
-    def group_by_coplanar_facets(self, facet_indices):
+    def group_by_coplanar_facets(self, facet_indices: np.ndarray):
+        """
+        Group facets that are coplanar \n
+        Return a list of lists of coplanar facets
+        """
         coplanar_facets = [[facet_indices[0]]]
         for facet_idx in facet_indices[1:]:
+            is_coplanar = False
             for i, coplanar_facet in enumerate(coplanar_facets):
-                if self.are_facets_on_same_plane(facet_idx, coplanar_facet[0]):
+                if self.are_coplanar(facet_idx, coplanar_facet[0]):
                     coplanar_facets[i].append(facet_idx)
+                    is_coplanar = True
                     break
-                else:
-                    coplanar_facets.append([facet_idx])
+            if not is_coplanar:
+                coplanar_facets.append([facet_idx])
+                is_coplanar = False
 
         return coplanar_facets
 
