@@ -23,9 +23,11 @@ def process_new_3dmodel(stl_filename: str, model_id: int, mysql_config: dict):
     shape = Shape(f"{MODEL_PATH}/{stl_filename}")
     lines, arcs = shape.get_shapes()
     if lines:
-        line.import_lines(model_id, lines[0], mysql_config)
+        for lines_on_coplanar_facets in lines:
+            line.import_lines(model_id, lines_on_coplanar_facets, mysql_config)
     if arcs:
-        arc.import_arcs(model_id, arcs[0], mysql_config)
+        for arcs_on_coplanar_facets in arcs:
+            arc.import_arcs(model_id, arcs_on_coplanar_facets, mysql_config)
 
 
 def flatten_extend(matrix):

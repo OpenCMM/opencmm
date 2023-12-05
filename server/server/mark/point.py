@@ -6,7 +6,7 @@ from itertools import combinations
 class Shape:
     def __init__(self, stl_file_path: str):
         self.mesh = trimesh.load(stl_file_path)
-    
+
     def get_visible_facets(self):
         # Get the normals of the facets
         facet_normals = self.mesh.face_normals
@@ -28,7 +28,6 @@ class Shape:
 
         return coplanar_facets
 
-
     def get_unique_z_values_of_visiable_vertices(self):
         visible_facets = self.get_visible_facets()
         # Get the unique vertices associated with upward-facing facets
@@ -49,8 +48,6 @@ class Shape:
         it is considered part of the previous arc. \n
         Note: This is not a robust algorithm.
         """
-        # get vertices
-        vertices = self.mesh.faces
         unique_z_values = self.get_unique_z_values_of_visiable_vertices()
 
         # Extract lines and arcs parallel to the ground
@@ -58,7 +55,7 @@ class Shape:
         lines = []
         arcs = []
 
-        for _facet in vertices:
+        for _facet in self.mesh.faces:
             facet = self.mesh.vertices[_facet]
             normal = np.cross(facet[1] - facet[0], facet[2] - facet[0])
             if np.isclose(normal[2], 0.0, atol=1e-6):
@@ -78,9 +75,7 @@ class Shape:
 
         previous_length = 0
         for i in range(len(shapes)):
-            line_length = np.linalg.norm(
-                shapes[i][0] - shapes[i][1]
-            )
+            line_length = np.linalg.norm(shapes[i][0] - shapes[i][1])
             if line_length > 1:
                 # line
                 lines.append(shapes[i])
@@ -88,18 +83,14 @@ class Shape:
                 # arc
                 # if close to previous length, add to previous arc
                 if np.isclose(line_length, previous_length, atol=1e-3):
-                    arcs[-1] = np.vstack(
-                        (arcs[-1], shapes[i][1])
-                    )
+                    arcs[-1] = np.vstack((arcs[-1], shapes[i][1]))
                 else:
                     arcs.append(shapes[i])
 
             previous_length = line_length
 
         # round to decimal places
-        lines = round_shape_values(
-            lines, decimal_places
-        )
+        lines = round_shape_values(lines, decimal_places)
         arcs = round_shape_values(arcs, decimal_places)
 
         return np.array(lines), arcs
