@@ -3,103 +3,103 @@ import trimesh
 from itertools import combinations
 
 
-def point_id(point: np.ndarray):
-    return ",".join(point.astype(str))
+class Shape:
+    def __init__(self, stl_file_path: str):
+        self.mesh = trimesh.load(stl_file_path)
 
+    def get_unique_z_values_of_visiable_vertices(self):
+        # Get the normals of the facets
+        facet_normals = self.mesh.face_normals
 
-def get_unique_z_values_of_visiable_vertices(stl_file_path: str):
-    mesh = trimesh.load(stl_file_path)
+        # Find the indices of facets facing "up" (positive z-direction)
+        upward_facing_indices = np.where(facet_normals[:, 2] > 0)[0]
 
-    # Get the normals of the facets
-    facet_normals = mesh.face_normals
+        # Get the unique vertices associated with upward-facing facets
+        visible_vertices = np.unique(self.mesh.faces[upward_facing_indices])
 
-    # Find the indices of facets facing "up" (positive z-direction)
-    upward_facing_indices = np.where(facet_normals[:, 2] > 0)[0]
+        # Extract the coordinates of the visible vertices
+        visible_vertex_coordinates = self.mesh.vertices[visible_vertices]
 
-    # Get the unique vertices associated with upward-facing facets
-    visible_vertices = np.unique(mesh.faces[upward_facing_indices])
+        # get unique z values
+        unique_z = np.unique(visible_vertex_coordinates[:, 2])
+        return unique_z
 
-    # Extract the coordinates of the visible vertices
-    visible_vertex_coordinates = mesh.vertices[visible_vertices]
+    def get_shapes(self, decimal_places: int = 3):
+        """
+        Extract lines parallel to the ground from an STL file \n
+        If the line length is less than 1, it is considered an arc. \n
+        if the line length for an arc is close to the previous arc length,
+        it is considered part of the previous arc. \n
+        Note: This is not a robust algorithm.
 
-    # get unique z values
-    unique_z = np.unique(visible_vertex_coordinates[:, 2])
-    return unique_z
+        Parameters
+        ----------
+        stl_file_path : str
+            Path to STL file
 
+        Returns
+        -------
+        ground_parallel_lines : np.ndarray
+            numpy array of lines parallel to the ground
+        ground_parallel_arcs : list
+            List of arcs parallel to the ground
+        """
+        # get vertices
+        vertices = self.mesh.faces
+        unique_z_values = self.get_unique_z_values_of_visiable_vertices()
 
-def get_shapes(stl_file_path: str, decimal_places: int = 3):
-    """
-    Extract lines parallel to the ground from an STL file \n
-    If the line length is less than 1, it is considered an arc. \n
-    if the line length for an arc is close to the previous arc length,
-    it is considered part of the previous arc. \n
-    Note: This is not a robust algorithm.
+        # Extract lines and arcs parallel to the ground
+        ground_parallel_shapes = []
+        ground_parallel_lines = []
+        ground_parallel_arcs = []
 
-    Parameters
-    ----------
-    stl_file_path : str
-        Path to STL file
+        for _facet in vertices:
+            facet = self.mesh.vertices[_facet]
+            normal = np.cross(facet[1] - facet[0], facet[2] - facet[0])
+            print(normal)
+            # print(self.mesh.face_normals[_facet])
+            if np.isclose(normal[2], 0.0, atol=1e-6):
+                # This facet is parallel to the ground
+                vertices = facet.reshape(-1, 3)
+                z_coords = vertices[:, 2]
 
-    Returns
-    -------
-    ground_parallel_lines : np.ndarray
-        numpy array of lines parallel to the ground
-    ground_parallel_arcs : list
-        List of arcs parallel to the ground
-    """
-    mesh = trimesh.load(stl_file_path)
-    # get vertices
-    vertices = mesh.faces
-    unique_z_values = get_unique_z_values_of_visiable_vertices(stl_file_path)
+                # Filter vertices based on z-coordinate
+                for z in unique_z_values:
+                    relevant_indices = np.where(np.isclose(z_coords, z, atol=1e-6))
+                    relevant_vertices = vertices[relevant_indices]
 
-    # Extract lines and arcs parallel to the ground
-    ground_parallel_shapes = []
-    ground_parallel_lines = []
-    ground_parallel_arcs = []
+                    # Create shapes between adjacent relevant vertices
+                    for i in range(len(relevant_vertices) - 1):
+                        line = relevant_vertices[i : i + 2]
+                        ground_parallel_shapes.append(line)
 
-    for facet in vertices:
-        facet = mesh.vertices[facet]
-        normal = np.cross(facet[1] - facet[0], facet[2] - facet[0])
-        if np.isclose(normal[2], 0.0, atol=1e-6):
-            # This facet is parallel to the ground
-            vertices = facet.reshape(-1, 3)
-            z_coords = vertices[:, 2]
-
-            # Filter vertices based on z-coordinate
-            for z in unique_z_values:
-                relevant_indices = np.where(np.isclose(z_coords, z, atol=1e-6))
-                relevant_vertices = vertices[relevant_indices]
-
-                # Create shapes between adjacent relevant vertices
-                for i in range(len(relevant_vertices) - 1):
-                    line = relevant_vertices[i : i + 2]
-                    ground_parallel_shapes.append(line)
-
-    previous_length = 0
-    for i in range(len(ground_parallel_shapes)):
-        line_length = np.linalg.norm(
-            ground_parallel_shapes[i][0] - ground_parallel_shapes[i][1]
-        )
-        if line_length > 1:
-            # line
-            ground_parallel_lines.append(ground_parallel_shapes[i])
-        else:
-            # arc
-            # if close to previous length, add to previous arc
-            if np.isclose(line_length, previous_length, atol=1e-3):
-                ground_parallel_arcs[-1] = np.vstack(
-                    (ground_parallel_arcs[-1], ground_parallel_shapes[i][1])
-                )
+        previous_length = 0
+        for i in range(len(ground_parallel_shapes)):
+            line_length = np.linalg.norm(
+                ground_parallel_shapes[i][0] - ground_parallel_shapes[i][1]
+            )
+            if line_length > 1:
+                # line
+                ground_parallel_lines.append(ground_parallel_shapes[i])
             else:
-                ground_parallel_arcs.append(ground_parallel_shapes[i])
+                # arc
+                # if close to previous length, add to previous arc
+                if np.isclose(line_length, previous_length, atol=1e-3):
+                    ground_parallel_arcs[-1] = np.vstack(
+                        (ground_parallel_arcs[-1], ground_parallel_shapes[i][1])
+                    )
+                else:
+                    ground_parallel_arcs.append(ground_parallel_shapes[i])
 
-        previous_length = line_length
+            previous_length = line_length
 
-    # round to decimal places
-    ground_parallel_lines = round_shape_values(ground_parallel_lines, decimal_places)
-    ground_parallel_arcs = round_shape_values(ground_parallel_arcs, decimal_places)
+        # round to decimal places
+        ground_parallel_lines = round_shape_values(
+            ground_parallel_lines, decimal_places
+        )
+        ground_parallel_arcs = round_shape_values(ground_parallel_arcs, decimal_places)
 
-    return np.array(ground_parallel_lines), ground_parallel_arcs
+        return np.array(ground_parallel_lines), ground_parallel_arcs
 
 
 def round_shape_values(shapes: np.ndarray, decimal_places: int = 3):

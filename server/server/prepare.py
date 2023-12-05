@@ -1,5 +1,5 @@
 from server.mark.point import (
-    get_shapes,
+    Shape,
     get_visible_facets,
     get_lines_on_coplanar_facets,
 )
@@ -20,7 +20,8 @@ def program_number_to_model_id(program_number: str):
 
 
 def process_new_3dmodel(stl_filename: str, model_id: int, mysql_config: dict):
-    lines, arcs = get_shapes(f"{MODEL_PATH}/{stl_filename}")
+    shape = Shape(f"{MODEL_PATH}/{stl_filename}")
+    lines, arcs = shape.get_shapes()
     line.import_lines(model_id, lines, mysql_config)
     arc.import_arcs(model_id, arcs, mysql_config)
 

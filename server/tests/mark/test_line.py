@@ -1,4 +1,4 @@
-from server.mark.point import get_shapes
+from server.mark.point import Shape
 from server.mark.line import (
     get_parallel_lines,
     get_pairs,
@@ -17,7 +17,8 @@ model_id_test_part = 1
 
 
 def test_get_lines():
-    lines, arcs = get_shapes("tests/fixtures/stl/sample.stl")
+    shape = Shape("tests/fixtures/stl/sample.stl")
+    lines, arcs = shape.get_shapes()
     assert len(lines) == 8
     assert len(arcs) == 5
     for line in lines:
@@ -25,7 +26,8 @@ def test_get_lines():
 
 
 def test_get_pairs():
-    lines, _arcs = get_shapes("tests/fixtures/stl/step.STL")
+    shape = Shape("tests/fixtures/stl/step.STL")
+    lines, arcs = shape.get_shapes()
     x, y, other = get_parallel_lines(lines)
     pairs = get_pairs(x, 0)
     lines, steps = pairs_to_lines_and_steps(pairs)
@@ -40,7 +42,8 @@ def test_get_pairs():
 
 @pytest.mark.skip(reason="not implemented")
 def test_get_parallel_lines():
-    lines, arcs = get_shapes("tests/fixtures/stl/sample.stl")
+    shape = Shape("tests/fixtures/stl/sample.stl")
+    lines, arcs = shape.get_shapes()
     x, y, other = get_parallel_lines(lines)
     assert len(x) == 4
     assert len(y) == 4
@@ -62,11 +65,13 @@ def test_import_edges():
 
 @pytest.mark.skip(reason="not implemented")
 def test_import_arcs():
-    lines, arcs = get_shapes("tests/fixtures/stl/sample.stl")
+    shape = Shape("tests/fixtures/stl/sample.stl")
+    lines, arcs = shape.get_shapes()
     import_arcs(model_id, arcs, MYSQL_CONFIG)
 
 
 @pytest.mark.skip(reason="not implemented")
 def test_import_lines():
-    lines, arcs = get_shapes("tests/fixtures/stl/test-Part.stl")
+    shape = Shape("tests/fixtures/stl/test-Part.stl")
+    lines, arcs = shape.get_shapes()
     import_lines(model_id, lines, MYSQL_CONFIG)
