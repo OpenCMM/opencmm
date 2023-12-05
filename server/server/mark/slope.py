@@ -37,25 +37,19 @@ def import_slopes(mysql_config: dict, model_id: int):
 
         # low to high
         if slope_pair[0][4] < slope_pair[1][4]:
-            slope_start = slope_pair[0]
-            slope_end = slope_pair[1]
+            slope_start = np.array(slope_pair[0][2:8])
+            slope_end = np.array(slope_pair[1][2:8])
         else:
             slope_start = slope_pair[1]
             slope_end = slope_pair[0]
 
-        slope_start0 = np.array(slope_start[2:5])
-        slope_start1 = np.array(slope_start[5:8])
-        slope_end0 = np.array(slope_end[2:5])
-        slope_end1 = np.array(slope_end[5:8])
-        slope_start_middle_point = (slope_start0 + slope_start1) / 2
-        slope_end_middle_point = (slope_end0 + slope_end1) / 2
+        slope_start_middle_point = (slope_start[:3] + slope_start[3:]) / 2
+        slope_end_middle_point = (slope_end[:3] + slope_end[3:]) / 2
 
-        slope_start_data = slope_start.flatten()
-        slope_end_data = slope_end.flatten()
         for side in np_sides:
-            if (side[2:8] == slope_start_data).all():
+            if (side[2:8] == slope_start).all():
                 start_side_id = side[0]
-            if (side[2:8] == slope_end_data).all():
+            if (side[2:8] == slope_end).all():
                 end_side_id = side[0]
 
         angle = get_angle(slope_start_middle_point, slope_end_middle_point)
