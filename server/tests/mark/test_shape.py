@@ -39,9 +39,9 @@ def test_group_by_coplanar_facets_with_step_slope():
     assert len(facet_groups[2]) == 2
 
 
-def test_get_shapes():
+def test_lines_and_arcs():
     shape = Shape("tests/fixtures/stl/sample.stl")
-    lines, arcs = shape.get_shapes()
+    lines, arcs = shape.get_lines_and_arcs()
 
     assert len(lines) == 1
     assert len(arcs) == 1
@@ -50,9 +50,9 @@ def test_get_shapes():
     assert len(arcs[0]) == 5
 
 
-def test_get_shapes_with_step_slope():
+def test_get_lines_and_arcs_with_step_slope():
     shape = Shape("tests/fixtures/stl/step.STL")
-    lines, arcs = shape.get_shapes()
+    lines, arcs = shape.get_lines_and_arcs()
 
     assert len(lines) == 3
     assert len(arcs) == 0

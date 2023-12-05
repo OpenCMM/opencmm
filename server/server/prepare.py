@@ -1,8 +1,8 @@
 from server.mark.point import (
-    Shape,
     get_visible_facets,
     get_lines_on_coplanar_facets,
 )
+from server.mark.shape import Shape
 from server.mark import line, edge, arc, pair, step, gcode, slope, trace
 from server.mark.edge import EdgePath
 from server.config import MODEL_PATH, GCODE_PATH
@@ -22,8 +22,10 @@ def program_number_to_model_id(program_number: str):
 def process_new_3dmodel(stl_filename: str, model_id: int, mysql_config: dict):
     shape = Shape(f"{MODEL_PATH}/{stl_filename}")
     lines, arcs = shape.get_shapes()
-    line.import_lines(model_id, lines, mysql_config)
-    arc.import_arcs(model_id, arcs, mysql_config)
+    if lines:
+        line.import_lines(model_id, lines[0], mysql_config)
+    if arcs:
+        arc.import_arcs(model_id, arcs[0], mysql_config)
 
 
 def flatten_extend(matrix):

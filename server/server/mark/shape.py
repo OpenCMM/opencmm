@@ -80,34 +80,8 @@ class Shape:
 
         return coplanar_facets
 
-    def get_shapes(self, decimal_places: int = 3, arc_threshold: int = 1):
-        """
-        Extract lines and arcs from an STL file \n
-        If the line length is less than 1, it is considered an arc. \n
-        if the line length for an arc is close to the previous arc length,
-        it is considered part of the previous arc. \n
-        Note: This is not a robust algorithm.
-        """
-        visible_facet_indices = self.get_visible_facets()
-        group_facets = self.group_by_coplanar_facets(visible_facet_indices)
-        adjacency = face_adjacency(self.mesh.faces)
-
-        shapes = []
-        for coplanar_facets in group_facets:
-            shapes_on_coplanar_facet = []
-            for pair in adjacency:
-                pair0_in_group = pair[0] in coplanar_facets
-                pair1_in_group = pair[1] in coplanar_facets
-                if pair0_in_group != pair1_in_group:
-                    common_edge_vertices = list(
-                        set(self.mesh.faces[pair[0]]) & set(self.mesh.faces[pair[1]])
-                    )
-                    shapes_on_coplanar_facet.append(common_edge_vertices)
-
-            # order by vertex index
-            shapes_on_coplanar_facet.sort(key=lambda x: (x[0], -x[1]))
-            shapes.append(shapes_on_coplanar_facet)
-
+    def get_lines_and_arcs(self, decimal_places: int = 3, arc_threshold: int = 1):
+        shapes = self.get_shapes()
         lines = []
         arcs = []
 
@@ -143,3 +117,33 @@ class Shape:
                 arcs.append(arc_group)
 
         return lines, arcs
+
+    def get_shapes(self):
+        """
+        Extract lines and arcs from an STL file \n
+        If the line length is less than 1, it is considered an arc. \n
+        if the line length for an arc is close to the previous arc length,
+        it is considered part of the previous arc. \n
+        Note: This is not a robust algorithm.
+        """
+        visible_facet_indices = self.get_visible_facets()
+        group_facets = self.group_by_coplanar_facets(visible_facet_indices)
+        adjacency = face_adjacency(self.mesh.faces)
+
+        shapes = []
+        for coplanar_facets in group_facets:
+            shapes_on_coplanar_facet = []
+            for pair in adjacency:
+                pair0_in_group = pair[0] in coplanar_facets
+                pair1_in_group = pair[1] in coplanar_facets
+                if pair0_in_group != pair1_in_group:
+                    common_edge_vertices = list(
+                        set(self.mesh.faces[pair[0]]) & set(self.mesh.faces[pair[1]])
+                    )
+                    shapes_on_coplanar_facet.append(common_edge_vertices)
+
+            # order by vertex index
+            shapes_on_coplanar_facet.sort(key=lambda x: (x[0], -x[1]))
+            shapes.append(shapes_on_coplanar_facet)
+
+        return shapes
