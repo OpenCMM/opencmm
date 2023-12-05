@@ -25,6 +25,8 @@ def process_new_3dmodel(stl_filename: str, model_id: int, mysql_config: dict):
     if lines:
         for lines_on_coplanar_facets in lines:
             line.import_lines(model_id, lines_on_coplanar_facets, mysql_config)
+        step.import_steps(mysql_config, model_id)
+        slope.import_slopes(mysql_config, model_id)
     if arcs:
         for arcs_on_coplanar_facets in arcs:
             arc.import_arcs(model_id, arcs_on_coplanar_facets, mysql_config)

@@ -131,7 +131,7 @@ def test_upload_with_new_model_with_step():
     path = "tests/fixtures/stl/step.STL"
 
     with open(path, "rb") as f:
-        response = client.post("/upload/new/model", files={"file": f})
+        response = client.post("/upload/3dmodel", files={"file": f})
         assert response.status_code == 200
         assert response.json() == {"status": "ok", "model_id": 5}
 

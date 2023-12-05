@@ -4,7 +4,7 @@ from mysql.connector.errors import IntegrityError
 from itertools import combinations
 
 
-def get_parallel_lines(lines: np.ndarray):
+def get_parallel_lines(lines):
     x_parallel_lines = []
     y_parallel_lines = []
     other_lines = []
