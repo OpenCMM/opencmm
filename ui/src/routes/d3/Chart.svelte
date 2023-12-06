@@ -37,18 +37,21 @@
 		const x = d3
 			.scaleLinear()
 			.domain(
-				d3.extent(edges, function (d) {
-					return d.x;
-				})
+				// d3.extent(edges, function (d) {
+				// 	return d.x;
+				// })
+				[-50, 150]
 			)
-			.range([0, width]);
+			.range([0, height]);
+			// .range([0, width]);
 
 		const y = d3
 			.scaleLinear()
 			.domain(
-				d3.extent(edges, function (d) {
-					return d.y;
-				})
+				// d3.extent(edges, function (d) {
+				// 	return d.y;
+				// })
+				[-150, 50]
 			)
 			.range([height, 0]);
 
