@@ -85,7 +85,7 @@ def closest_distance_between_point_and_line(point, line_start, line_end):
     return distance
 
 
-def is_point_on_line(p: tuple, p1: tuple, p2: tuple, threshold: float = 0.001):
+def is_point_on_line(p: tuple, p1: tuple, p2: tuple, threshold: float = 0.01):
     if are_points_equal(p1, p2):
         # The points are the same, so the line has zero length.
         return are_points_equal(p1, p)
