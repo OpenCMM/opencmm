@@ -140,10 +140,15 @@ class Shape:
                     common_edge_vertices = list(
                         set(self.mesh.faces[pair[0]]) & set(self.mesh.faces[pair[1]])
                     )
+                    if pair0_in_group:
+                        face_id = pair[1]
+                    else:
+                        face_id = pair[0]
+                    common_edge_vertices.append(face_id)
                     shapes_on_coplanar_facet.append(common_edge_vertices)
 
-            # order by vertex index
-            shapes_on_coplanar_facet.sort(key=lambda x: (x[0], -x[1]))
+            # order by face index
+            shapes_on_coplanar_facet.sort(key=lambda x: x[-1])
             shapes.append(shapes_on_coplanar_facet)
 
         return shapes
