@@ -19,7 +19,9 @@ sensor:
   middle_output: 9100
   response_time: 10.0 # ms
 trace:
-  feedrate: 300 # mm/min
+  min_measure_count: 5
+  max_feedrate: 2500 # mm/min
+  interval: 200 # ms
   margin: 2.5
   slope:
     number: 3

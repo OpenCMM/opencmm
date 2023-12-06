@@ -3,7 +3,7 @@ from server.mark.line import get_sides, get_side
 import mysql.connector
 from server.config import get_config, MODEL_PATH
 import trimesh
-from .trace import sort_sides
+from .trace import sort_sides, get_optimal_feedrate_for_tracing
 
 
 def import_steps(mysql_config: dict, model_id: int):
@@ -138,9 +138,6 @@ def create_step_path(
     move_feedrate: float,
     xyz_offset: tuple = (0, 0, 0),
 ):
-    conf = get_config()
-    trace_feedrate = conf["trace"]["feedrate"]
-
     mesh = trimesh.load_mesh(f"{MODEL_PATH}/{stl_filename}")
 
     path = []
@@ -154,6 +151,9 @@ def create_step_path(
 
         step_lines = create_step_lines(start_side)
         for step_line in step_lines:
+            start = (step_line[0][0], step_line[0][1])
+            end = (step_line[1][0], step_line[1][1])
+            trace_feedrate = get_optimal_feedrate_for_tracing(start, end)
             trace_lines.append(
                 to_trace_line_row(trace_id, mesh, step_line, z_pair, xyz_offset)
             )
