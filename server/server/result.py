@@ -62,9 +62,9 @@ def fetch_edge_result_combined(model_id: int, process_id: int):
     model_data = get_model_data(model_id)
     offset = model_data[3:6]
     for point in points:
-        point[1] += offset[0]
-        point[2] += offset[1]
-        point[3] += offset[2]
+        point[1] = round(offset[0] + point[1], 3)
+        point[2] = round(offset[1] + point[2], 3)
+        point[3] = round(offset[2] + point[3], 3)
     return points
 
 
