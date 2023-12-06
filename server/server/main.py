@@ -27,6 +27,7 @@ from server.config import MYSQL_CONFIG, MODEL_PATH, get_config, update_conf
 from server.model import (
     get_3dmodel_data,
     get_recent_3dmodel_data,
+    get_model_shapes,
     get_3dmodel_file_info,
     model_exists,
     list_3dmodel,
@@ -434,6 +435,12 @@ async def get_result_steps(model_id: int, process_id: int):
 async def get_result_slopes(model_id: int, process_id: int):
     slopes = result.fetch_slope_results(model_id, process_id)
     return {"slopes": slopes}
+
+
+@app.get("/model/shapes/{model_id}")
+async def get_model_shape_data(model_id: int):
+    lines, arcs = get_model_shapes(model_id)
+    return {"lines": lines, "arcs": arcs}
 
 
 @app.get("/list/processes/{model_id}")

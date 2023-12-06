@@ -274,3 +274,22 @@ def delete_row_with_model_id(table_name: str, model_id: int, cursor, cnx):
     cursor.execute(query, (model_id,))
     cnx.commit()
     return cursor.rowcount
+
+
+def get_model_shapes(model_id: int):
+    """
+    Get model shapes
+    """
+    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
+    cursor = cnx.cursor()
+    query = "SELECT x0, y0, x1, y1, pair_id FROM side WHERE model_id = %s"
+    cursor.execute(query, (model_id,))
+    lines = cursor.fetchall()
+
+    query = "SELECT radius, cx, cy FROM arc WHERE model_id = %s"
+    cursor.execute(query, (model_id,))
+    arcs = cursor.fetchall()
+
+    cursor.close()
+    cnx.close()
+    return lines, arcs

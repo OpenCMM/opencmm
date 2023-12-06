@@ -136,9 +136,6 @@
 					>
 				</Column>
 				<Column>
-					<Button href={`/debug?id=${modelId}&process=${processId}`}>MTConnect</Button>
-				</Column>
-				<Column>
 					<OverflowMenu>
 						<OverflowMenuItem href={`/debug?id=${modelId}&process=${processId}`} text="MTConnect" />
 						<OverflowMenuItem

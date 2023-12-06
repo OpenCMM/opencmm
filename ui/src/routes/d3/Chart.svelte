@@ -4,13 +4,15 @@
 
 	// visualize two list of xy coordinates with d3
 
+	export let lines = [];
+	export let arcs = [];
 	export let edges = [];
 	export let measuredEdges = [];
 
 	let svg;
 	let margin = { top: 20, right: 20, bottom: 30, left: 40 };
-	let width = 960 - margin.left - margin.right;
-	let height = 500 - margin.top - margin.bottom;
+	let width = 1280 - margin.left - margin.right;
+	let height = 800 - margin.top - margin.bottom;
 
 	onMount(() => {
 		svg = d3
@@ -24,6 +26,7 @@
 			.select('#chart-container')
 			.append('div')
 			.attr('class', 'tooltip')
+			.style('position', 'absolute')
 			.style('opacity', 1);
 
 		const g = svg
@@ -49,7 +52,6 @@
 			.range([height, 0]);
 
 		const xAxis = d3.axisBottom(x);
-
 		const yAxis = d3.axisLeft(y);
 
 		// Set up zoom behavior
@@ -64,6 +66,8 @@
 			g.select('.axis--x').call(xAxis.scale(zx));
 			g.select('.axis--y').call(yAxis.scale(zy));
 			dot.attr('transform', transform);
+			measuredDot.attr('transform', transform);
+			line.attr('transform', transform);
 			g.attr('transform', transform);
 		}
 
@@ -73,6 +77,28 @@
 			.call(xAxis);
 
 		g.append('g').attr('class', 'axis axis--y').call(yAxis);
+
+		const line = g
+			.selectAll('.line')
+			.data(lines)
+			.enter()
+			.append('line')
+			.attr('class', 'line')
+			.attr('x1', function (d) {
+				return x(d.x1);
+			})
+			.attr('y1', function (d) {
+				return y(d.y1);
+			})
+			.attr('x2', function (d) {
+				return x(d.x2);
+			})
+			.attr('y2', function (d) {
+				return y(d.y2);
+			})
+			.style('stroke', 'black')
+			.style('stroke-width', 2);
+		console.log(lines);
 
 		const dot = g
 			.selectAll('.dot')
@@ -94,15 +120,7 @@
 			.data(measuredEdges)
 			.enter()
 			.append('circle')
-			.attr('class', 'dot')
-			.attr('r', 2)
-			.attr('cx', function (d) {
-				return x(d.x);
-			})
-			.attr('cy', function (d) {
-				return y(d.y);
-			})
-			.style('fill', 'green');
+			.attr('class', 'dot');
 
 		dot.on('mouseover', function (event, d) {
 			d3.select(this).style('fill', 'blue');
