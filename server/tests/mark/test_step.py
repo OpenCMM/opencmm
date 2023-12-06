@@ -9,6 +9,7 @@ def test_import_steps():
     assert 1 == 1
 
 
+@pytest.mark.skip(reason="Only for local testing")
 def test_create_step_path():
     model_id = 5
     path, trace_lines = create_step_path(MYSQL_CONFIG, model_id, "step.STL", 1000)

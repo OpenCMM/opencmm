@@ -152,6 +152,7 @@
 		"delete": "削除",
 		"ok": "OK",
 		"arc": "円弧",
-		"line": "線"
+		"line": "線",
+		"deleteModel": "3Dモデルを削除"
 	}
 }

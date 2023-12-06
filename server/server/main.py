@@ -158,7 +158,7 @@ async def upload_new_model(file: UploadFile):
     return {"status": "ok", "model_id": _model_id}
 
 
-@app.post("/delete/model")
+@app.delete("/delete/model")
 async def delete_model_data(model_id: int):
     """Delete model data"""
     delete_model_files(model_id)

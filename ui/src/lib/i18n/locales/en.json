@@ -152,6 +152,7 @@
 		"delete": "Delete",
 		"ok": "OK",
 		"arc": "Arc",
-		"line": "Line"
+		"line": "Line",
+		"deleteModel": "Delete 3D model"
 	}
 }

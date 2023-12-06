@@ -569,20 +569,20 @@ def test_update_data_after_measurement_step():
 
 def test_delete_model_after_measurement():
     model_id = 3
-    response = client.post(f"/delete/model?model_id={model_id}")
+    response = client.delete(f"/delete/model?model_id={model_id}")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
 
 
 def test_delete_model_after_measurement_with_arc():
     model_id = 4
-    response = client.post(f"/delete/model?model_id={model_id}")
+    response = client.delete(f"/delete/model?model_id={model_id}")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
 
 
 def test_delete_model_after_measurement_with_step_slope():
     model_id = 5
-    response = client.post(f"/delete/model?model_id={model_id}")
+    response = client.delete(f"/delete/model?model_id={model_id}")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}

@@ -207,6 +207,6 @@ def test_delete_model_data():
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
 
-    response = client.post(f"/delete/model?model_id={model_id}")
+    response = client.delete(f"/delete/model?model_id={model_id}")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}

@@ -3,6 +3,7 @@
 	import { BACKEND_URL } from '$lib/constants/backend';
 	import CaretRight from 'carbon-icons-svelte/lib/CaretRight.svelte';
 	import CaretLeft from 'carbon-icons-svelte/lib/CaretLeft.svelte';
+	import { OverflowMenu, OverflowMenuItem } from 'carbon-components-svelte';
 	import Add from 'carbon-icons-svelte/lib/Add.svelte';
 	import {
 		Button,
@@ -60,6 +61,14 @@
 				const [, _filename, , offsetX, offsetY] = res.data;
 				offset = [offsetX, offsetY, 0.0];
 				offsetLoaded = true;
+			}
+		});
+	};
+
+	const deleteModel = async () => {
+		axios.delete(`${BACKEND_URL}/delete/model/?model_id=${modelId}`).then((res) => {
+			if (res.status === 200) {
+				window.location.href = '/';
 			}
 		});
 	};
@@ -132,6 +141,12 @@
 				</Column>
 				<Column>
 					<Button href={`/debug?id=${modelId}&process=${processId}`}>MTConnect</Button>
+				</Column>
+				<Column>
+					<OverflowMenu>
+						<OverflowMenuItem href={`/debug?id=${modelId}&process=${processId}`} text="MTConnect" />
+						<OverflowMenuItem danger text={$_('common.deleteModel')} on:click={deleteModel} />
+					</OverflowMenu>
 				</Column>
 				<Column>
 					<div id="page-button">
