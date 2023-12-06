@@ -11,7 +11,7 @@
 
 	let svg;
 	let margin = { top: 20, right: 20, bottom: 30, left: 40 };
-	let width = 1280 - margin.left - margin.right;
+	let width = 840 - margin.left - margin.right;
 	let height = 800 - margin.top - margin.bottom;
 	const edgeRadius = 4;
 
@@ -58,6 +58,25 @@
 		const xAxis = d3.axisBottom(x);
 		const yAxis = d3.axisLeft(y);
 
+		// Add grid lines
+		const yAxisGridLine = g.append('g')
+			.attr('class', 'grid')
+			.attr('opacity', 0.2)
+			.call(
+				d3.axisLeft(y)
+					.tickSize(-height)
+					.tickFormat('')
+			);
+
+		const xAxisGridLine = g.append('g')
+			.attr('class', 'grid')
+			.attr('opacity', 0.2)
+			.call(
+				d3.axisBottom(x)
+					.tickSize(height)
+					.tickFormat('')
+			);
+
 		// Set up zoom behavior
 		const zoom = d3.zoom().scaleExtent([0.5, 10]).on('zoom', handleZoom);
 
@@ -72,6 +91,8 @@
 			dot.attr('transform', transform);
 			measuredDot.attr('transform', transform);
 			line.attr('transform', transform);
+			yAxisGridLine.attr('transform', transform);
+			xAxisGridLine.attr('transform', transform);
 		}
 
 		g.append('g')
