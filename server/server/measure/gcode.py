@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import csv
+import numpy as np
 
 
 class LineNumberTooSmall(Exception):
@@ -58,21 +59,39 @@ def are_points_equal(p1: tuple, p2: tuple):
     return round(p1[0], 3) == round(p2[0], 3) and round(p1[1], 3) == round(p2[1], 3)
 
 
-def is_point_on_line(p: tuple, p1: tuple, p2: tuple):
+def closest_distance_between_point_and_line(point, line_start, line_end):
+    # Convert input to numpy arrays for vector operations
+    point = np.array(point)
+    line_start = np.array(line_start)
+    line_end = np.array(line_end)
+
+    # Vector representing the direction of the line
+    line_direction = line_end - line_start
+
+    # Vector from line start to the given point
+    point_to_line_start = point - line_start
+
+    # Calculate the cross product and its magnitude
+    cross_product_magnitude = np.linalg.norm(
+        np.cross(line_direction, point_to_line_start)
+    )
+
+    # Calculate the magnitude of the line direction vector
+    line_direction_magnitude = np.linalg.norm(line_direction)
+
+    # Calculate the closest distance
+    distance = cross_product_magnitude / line_direction_magnitude
+
+    return distance
+
+
+def is_point_on_line(p: tuple, p1: tuple, p2: tuple, threshold: float = 0.001):
     if are_points_equal(p1, p2):
         # The points are the same, so the line has zero length.
         return are_points_equal(p1, p)
 
-    # Check if the slope of the line formed by p1 and p2 is the same as the slope
-    # of the line formed by p1 and p.
-    slope1 = (p2[1] - p1[1]) / (p2[0] - p1[0]) if (p2[0] - p1[0]) != 0 else float("inf")
-    slope2 = (p[1] - p1[1]) / (p[0] - p1[0]) if (p[0] - p1[0]) != 0 else float("inf")
-
-    return (
-        round(slope1, 3) == round(slope2, 3)
-        and min(p1[0], p2[0]) <= p[0] <= max(p1[0], p2[0])
-        and min(p1[1], p2[1]) <= p[1] <= max(p1[1], p2[1])
-    )
+    distance = closest_distance_between_point_and_line(p, p1, p2)
+    return distance < threshold
 
 
 def get_true_line_number(
