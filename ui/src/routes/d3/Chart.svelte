@@ -14,6 +14,8 @@
 	let width = 840 - margin.left - margin.right;
 	let height = 800 - margin.top - margin.bottom;
 	const edgeRadius = 4;
+	const lineWidth = 2;
+	const gridWidth = 1;
 
 	onMount(() => {
 		svg = d3
@@ -43,7 +45,7 @@
 				[-50, 150]
 			)
 			.range([0, height]);
-			// .range([0, width]);
+		// .range([0, width]);
 
 		const y = d3
 			.scaleLinear()
@@ -59,26 +61,22 @@
 		const yAxis = d3.axisLeft(y);
 
 		// Add grid lines
-		const yAxisGridLine = g.append('g')
+		const yAxisGridLine = g
+			.append('g')
 			.attr('class', 'grid')
 			.attr('opacity', 0.2)
-			.call(
-				d3.axisLeft(y)
-					.tickSize(-height)
-					.tickFormat('')
-			);
+			.style('stroke-width', gridWidth)
+			.call(d3.axisLeft(y).tickSize(-height));
 
-		const xAxisGridLine = g.append('g')
+		const xAxisGridLine = g
+			.append('g')
 			.attr('class', 'grid')
 			.attr('opacity', 0.2)
-			.call(
-				d3.axisBottom(x)
-					.tickSize(height)
-					.tickFormat('')
-			);
+			.style('stroke-width', gridWidth)
+			.call(d3.axisBottom(x).tickSize(height));
 
 		// Set up zoom behavior
-		const zoom = d3.zoom().scaleExtent([0.5, 10]).on('zoom', handleZoom);
+		const zoom = d3.zoom().scaleExtent([0.5, 15]).on('zoom', handleZoom);
 
 		svg.call(zoom);
 
@@ -88,11 +86,11 @@
 			const zy = transform.rescaleY(y);
 			g.select('.axis--x').call(xAxis.scale(zx));
 			g.select('.axis--y').call(yAxis.scale(zy));
-			dot.attr('transform', transform);
-			measuredDot.attr('transform', transform);
-			line.attr('transform', transform);
-			yAxisGridLine.attr('transform', transform);
-			xAxisGridLine.attr('transform', transform);
+			dot.attr('transform', transform).attr('r', edgeRadius / transform.k);
+			measuredDot.attr('transform', transform).attr('r', edgeRadius / transform.k);
+			line.attr('transform', transform).style('stroke-width', lineWidth / transform.k);
+			yAxisGridLine.attr('transform', transform).style('stroke-width', gridWidth / transform.k);
+			xAxisGridLine.attr('transform', transform).style('stroke-width', gridWidth / transform.k);
 		}
 
 		g.append('g')
@@ -121,7 +119,7 @@
 				return y(d.y2);
 			})
 			.style('stroke', 'black')
-			.style('stroke-width', 2);
+			.style('stroke-width', lineWidth);
 
 		const dot = g
 			.selectAll('.dot')
