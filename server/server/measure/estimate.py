@@ -32,7 +32,7 @@ from server.mark.trace import (
 )
 from server.mark.trace import import_trace_line_results
 import logging
-from scipy.ndimage.filters import uniform_filter1d
+from scipy.ndimage import uniform_filter1d
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
 logger = logging.getLogger(__name__)
@@ -85,7 +85,7 @@ class Result:
         coord = np.round(coord, 3)
         return tuple(coord)
 
-    def get_edge_result(self, mtconnect_row, line):
+    def get_edge_results(self, mtconnect_row, line):
         """
         Estimate the exact coordinate of the edge from mtconnect data and
         sensor data using timestamp
@@ -113,7 +113,9 @@ class Result:
                     direction_vector,
                     feedrate,
                 )
-                edge_id = get_edge_id_from_line_number(
+                # when edges are overlapping, multiple edges can be measured
+                # for a single line
+                edge_ids = get_edge_id_from_line_number(
                     self.mysql_config, self.model_id, line
                 )
                 # ignore the rest of the sensor data
@@ -121,7 +123,18 @@ class Result:
                 # - noise (can be reduced by increasing the sensor threshold)
                 # - sensor restart
                 # - timestamp is not accurate
-                return (edge_id, self.process_id, edge_coord[0], edge_coord[1], self.z)
+                results = []
+                for edge_id in edge_ids:
+                    results.append(
+                        (
+                            edge_id,
+                            self.process_id,
+                            edge_coord[0],
+                            edge_coord[1],
+                            self.z,
+                        )
+                    )
+                return results
 
     def get_trace_line_result(self, mtconnect_row, line):
         """
@@ -179,9 +192,9 @@ class Result:
                     # Not measuring
                     continue
 
-                edge_result = self.get_edge_result(row, line)
-                if edge_result:
-                    edge_update_list.append(edge_result)
+                edge_results = self.get_edge_results(row, line)
+                if edge_results:
+                    edge_update_list += edge_results
 
             # tracing
             else:

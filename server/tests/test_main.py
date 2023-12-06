@@ -131,7 +131,7 @@ def test_upload_with_new_model_with_step():
     path = "tests/fixtures/stl/step.STL"
 
     with open(path, "rb") as f:
-        response = client.post("/upload/new/model", files={"file": f})
+        response = client.post("/upload/3dmodel", files={"file": f})
         assert response.status_code == 200
         assert response.json() == {"status": "ok", "model_id": 5}
 
@@ -207,6 +207,6 @@ def test_delete_model_data():
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
 
-    response = client.post(f"/delete/model?model_id={model_id}")
+    response = client.delete(f"/delete/model?model_id={model_id}")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}

@@ -52,7 +52,19 @@ def point_to_line_distance(edges_on_the_same_line: list, point: tuple):
     return distance
 
 
+def unique_tuples(list_of_tuples):
+    unique_tuples = []
+    seen = set()
+    for tuple in list_of_tuples:
+        if tuple not in seen:
+            unique_tuples.append(tuple)
+            seen.add(tuple)
+    return unique_tuples
+
+
 def validate_measured_edges(edges1, edges2):
+    edges1 = unique_tuples(edges1)
+    edges2 = unique_tuples(edges2)
     edge1_count = len(edges1)
     edge2_count = len(edges2)
     if edge1_count == 2 and edge2_count == 2:

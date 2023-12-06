@@ -7,43 +7,49 @@ from server.mark.line import get_side
 from .trace import sort_sides
 
 
-def import_slopes(mysql_config: dict, model_id: int, lines: list):
+def group_sides_by_pair_id(sides: list):
+    """
+    Each side has a pair_id. This function groups sides by pair_id.
+    """
+    sides_by_pair_id = {}
+    for side in sides:
+        pair_id = side[8]
+        if pair_id not in sides_by_pair_id:
+            sides_by_pair_id[pair_id] = []
+        sides_by_pair_id[pair_id].append(side)
+    return sides_by_pair_id.values()
+
+
+def import_slopes(mysql_config: dict, model_id: int):
     sides = get_sides(mysql_config, model_id)
     np_sides = np.array(sides)
     traces = []
 
-    for lines_on_facet in lines:
+    sides_by_pair_id = group_sides_by_pair_id(sides)
+    for pair_sides in sides_by_pair_id:
         slope_pair = None
-        for i, pair in enumerate(lines_on_facet):
-            # check only first line
-            first_line = pair[0]
-            # check if z values are the same
-            if first_line[0][2] != first_line[1][2]:
-                if i == 0:
-                    slope_pair = lines_on_facet[1]
-                else:
-                    slope_pair = lines_on_facet[0]
+        # check if z values are the same
+        if pair_sides[0][4] != pair_sides[1][4]:
+            slope_pair = pair_sides
 
         if slope_pair is None:
             continue
 
         # low to high
-        if slope_pair[0][0][2] < slope_pair[1][0][2]:
-            slope_start = slope_pair[0]
-            slope_end = slope_pair[1]
+        if slope_pair[0][4] < slope_pair[1][4]:
+            slope_start = np.array(slope_pair[0][2:8])
+            slope_end = np.array(slope_pair[1][2:8])
         else:
             slope_start = slope_pair[1]
             slope_end = slope_pair[0]
 
-        slope_start_middle_point = (slope_start[0] + slope_start[1]) / 2
-        slope_end_middle_point = (slope_end[0] + slope_end[1]) / 2
+        slope_start_middle_point = (slope_start[:3] + slope_start[3:]) / 2
+        slope_end_middle_point = (slope_end[:3] + slope_end[3:]) / 2
 
-        slope_start_data = slope_start.flatten()
-        slope_end_data = slope_end.flatten()
         for side in np_sides:
-            if (side[2:8] == slope_start_data).all():
+            if (side[2:8] == slope_start).all():
                 start_side_id = side[0]
-            if (side[2:8] == slope_end_data).all():
+            if (side[2:8] == slope_end).all():
                 end_side_id = side[0]
 
         angle = get_angle(slope_start_middle_point, slope_end_middle_point)

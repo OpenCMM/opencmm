@@ -119,11 +119,14 @@ def fetch_pairs(model_id: int):
     current_line = []
     for line in cursor:
         pair_id = line[0]
+        xyz = [line[1:4], line[4:7]]
+        # sort by x, y
+        xyz.sort(key=lambda x: (x[0], x[1]))
         if current_pair_id != pair_id:
-            current_line = [pair_id, line[1], line[2], line[3]]
+            current_line = [pair_id, *xyz[0]]
             current_pair_id = pair_id
         else:
-            current_line += [line[4], line[5], line[6]]
+            current_line += list(xyz[0])
             lines.append(current_line)
             current_line = []
 

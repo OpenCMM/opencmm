@@ -27,41 +27,6 @@ def get_edges(mysql_config: dict, model_id: int):
     return edges
 
 
-def get_arc_path(center, xyz, distance):
-    cx, cy, cz = center
-    x, y, z = xyz
-    # Calculate the direction vector from the center to point A
-    direction_vector = (x - cx, y - cy, z - cz)
-
-    # Calculate the magnitude of the direction vector
-    magnitude = math.sqrt(
-        direction_vector[0] ** 2 + direction_vector[1] ** 2 + direction_vector[2] ** 2
-    )
-
-    # Normalize the direction vector
-    normalized_direction = (
-        direction_vector[0] / magnitude,
-        direction_vector[1] / magnitude,
-        direction_vector[2] / magnitude,
-    )
-
-    # Calculate the coordinates of the two points at distance 'distance' from point A
-    outside_point = (
-        x + distance * normalized_direction[0],
-        y + distance * normalized_direction[1],
-        z + distance * normalized_direction[2],
-    )
-    inside_point = (
-        x - distance * normalized_direction[0],
-        y - distance * normalized_direction[1],
-        z - distance * normalized_direction[2],
-    )
-    # round to 3 decimal places
-    outside_point = [round(x, 3) for x in outside_point]
-    inside_point = [round(x, 3) for x in inside_point]
-    return outside_point, inside_point
-
-
 def get_edges_by_side_id(side_id: int, mysql_config: dict, process_id: int):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
@@ -77,148 +42,230 @@ def get_edges_by_side_id(side_id: int, mysql_config: dict, process_id: int):
     return edges
 
 
-def add_line_number_from_path(mysql_config: dict, path: list):
-    cnx = mysql.connector.connect(**mysql_config, database="coord")
-    cursor = cnx.cursor()
-    cursor = cnx.cursor()
-    update_list = []
-    initial_line_number = 4
-    for idx, row in enumerate(path):
-        edge_id = row[5]
-        update_list.append((initial_line_number + idx * 2, edge_id))
-    query = "UPDATE edge SET line = %s WHERE id = %s"
-    cursor.executemany(query, update_list)
-    cnx.commit()
-    cursor.close()
-    cnx.close()
-    return cursor.rowcount
-
-
 def get_edge_id_from_line_number(mysql_config: dict, model_id: int, line_number: int):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     query = "SELECT id FROM edge WHERE model_id = %s AND line = %s"
     cursor.execute(query, (model_id, line_number))
-    edge_id = cursor.fetchone()
+    edge_ids = cursor.fetchall()
     cursor.close()
     cnx.close()
-    if edge_id:
-        return edge_id[0]
+    if edge_ids:
+        return [row[0] for row in edge_ids]
 
 
-def get_edge_path(
-    mysql_config: dict,
-    model_id: int,
-    stl_filename: str,
-    length: float,
-    measure_feedrate: float,
-    move_feedrate: float,
-    xyz_offset: tuple = (0, 0, 0),
-):
-    path = []
-    edges = get_edges(mysql_config, model_id)
-    for edge in edges:
-        edge_id, model_id, side_id, arc_id, x, y, z, _line = edge
-        # add offset
-        (x, y, z) = (x + xyz_offset[0], y + xyz_offset[1], z + xyz_offset[2])
-        if arc_id is None:
-            side_id, model_id, x0, y0, z0, x1, y1, z1, pair_id = get_side(
-                side_id, mysql_config
-            )
-            direction = get_direction(x0, y0, x1, y1)
-            if direction == 0:
-                hit = ray_cast(
-                    f"{MODEL_PATH}/{stl_filename}",
-                    (x - xyz_offset[0], y + length - xyz_offset[1], 1000),
-                )
-                py0, py1 = (y - length, y + length) if hit else (y + length, y - length)
-                path.append(
-                    [
-                        to_gcode_row(x, py0, move_feedrate),
-                        to_gcode_row(x, py1, measure_feedrate),
-                        x,
-                        y,
-                        z,
-                        edge_id,
-                    ]
-                )
+class EdgePath:
+    def __init__(
+        self,
+        mysql_config: dict,
+        model_id: int,
+        stl_filename: str,
+        measure_config: tuple,
+    ):
+        self.mysql_config = mysql_config
+        self.model_id = model_id
+        self.stl_filename = stl_filename
+        self.measure_length = measure_config[0]
+        self.measure_feedrate = measure_config[1]
+        self.move_feedrate = measure_config[2]
 
-            elif direction == 1:
-                hit = ray_cast(
-                    f"{MODEL_PATH}/{stl_filename}",
-                    (x + length - xyz_offset[0], y - xyz_offset[1], 1000),
-                )
-                px0, px1 = (x - length, x + length) if hit else (x + length, x - length)
-                path.append(
-                    [
-                        to_gcode_row(px0, y, move_feedrate),
-                        to_gcode_row(px1, y, measure_feedrate),
-                        x,
-                        y,
-                        z,
-                        edge_id,
-                    ]
-                )
-        else:
-            assert side_id is None
-            arc_id, model_id, radius, cx, cy, cz = get_arc(arc_id, mysql_config)
-            # add offset to center
-            (cx, cy, cz) = (cx + xyz_offset[0], cy + xyz_offset[1], cz + xyz_offset[2])
-            outside_point, inside_point = get_arc_path((cx, cy, cz), (x, y, z), length)
+    def get_line_edge_path(
+        self,
+        side_id: int,
+        xyz: tuple,
+        xyz_offset: tuple,
+    ):
+        x, y, z = xyz
+        side_id, model_id, x0, y0, z0, x1, y1, z1, pair_id = get_side(
+            side_id, self.mysql_config
+        )
+        direction = get_direction(x0, y0, x1, y1)
+        if direction == 0:
             hit = ray_cast(
-                f"{MODEL_PATH}/{stl_filename}",
-                (
-                    outside_point[0] - xyz_offset[0],
-                    outside_point[1] - xyz_offset[1],
-                    1000,
-                ),
+                f"{MODEL_PATH}/{self.stl_filename}",
+                (x - xyz_offset[0], y + self.measure_length - xyz_offset[1], 1000),
             )
-            first, second = (
-                (inside_point, outside_point) if hit else (outside_point, inside_point)
+            py0, py1 = (
+                (y - self.measure_length, y + self.measure_length)
+                if hit
+                else (y + self.measure_length, y - self.measure_length)
             )
-            path.append(
-                [
-                    to_gcode_row(first[0], first[1], move_feedrate),
-                    to_gcode_row(second[0], second[1], measure_feedrate),
-                    x,
-                    y,
-                    z,
-                    edge_id,
-                ]
-            )
-    optimal_path = sorted(path, key=lambda point: (point[2], point[3]))
+            return [
+                to_gcode_row(x, py0, self.move_feedrate),
+                to_gcode_row(x, py1, self.measure_feedrate),
+                x,
+                y,
+                z,
+            ]
 
-    # delete edges with the same x, y value and keep the one with the highest z value
-    path = []
-    prev_xy = None
-    prev_z = None
-    for row in optimal_path:
-        _xy = (row[2], row[3])
-        if _xy == prev_xy:
-            if prev_z > row[4]:
-                continue
+        elif direction == 1:
+            hit = ray_cast(
+                f"{MODEL_PATH}/{self.stl_filename}",
+                (x + self.measure_length - xyz_offset[0], y - xyz_offset[1], 1000),
+            )
+            px0, px1 = (
+                (x - self.measure_length, x + self.measure_length)
+                if hit
+                else (x + self.measure_length, x - self.measure_length)
+            )
+            return [
+                to_gcode_row(px0, y, self.move_feedrate),
+                to_gcode_row(px1, y, self.measure_feedrate),
+                x,
+                y,
+                z,
+            ]
+
+    def get_arc_path(self, center, xyz, distance):
+        cx, cy, cz = center
+        x, y, z = xyz
+        # Calculate the direction vector from the center to point A
+        direction_vector = (x - cx, y - cy, z - cz)
+
+        # Calculate the magnitude of the direction vector
+        magnitude = math.sqrt(
+            direction_vector[0] ** 2
+            + direction_vector[1] ** 2
+            + direction_vector[2] ** 2
+        )
+
+        # Normalize the direction vector
+        normalized_direction = (
+            direction_vector[0] / magnitude,
+            direction_vector[1] / magnitude,
+            direction_vector[2] / magnitude,
+        )
+
+        outside_point = (
+            x + distance * normalized_direction[0],
+            y + distance * normalized_direction[1],
+            z + distance * normalized_direction[2],
+        )
+        inside_point = (
+            x - distance * normalized_direction[0],
+            y - distance * normalized_direction[1],
+            z - distance * normalized_direction[2],
+        )
+        # round to 3 decimal places
+        outside_point = [round(x, 3) for x in outside_point]
+        inside_point = [round(x, 3) for x in inside_point]
+        return outside_point, inside_point
+
+    def get_arc_edge_path(
+        self,
+        arc_id: int,
+        xyz: tuple,
+        xyz_offset: tuple,
+    ):
+        x, y, z = xyz
+        arc_id, model_id, radius, cx, cy, cz = get_arc(arc_id, self.mysql_config)
+        # add offset to center
+        (cx, cy, cz) = (
+            cx + xyz_offset[0],
+            cy + xyz_offset[1],
+            cz + xyz_offset[2],
+        )
+        outside_point, inside_point = self.get_arc_path(
+            (cx, cy, cz), (x, y, z), self.measure_length
+        )
+        hit = ray_cast(
+            f"{MODEL_PATH}/{self.stl_filename}",
+            (
+                outside_point[0] - xyz_offset[0],
+                outside_point[1] - xyz_offset[1],
+                1000,
+            ),
+        )
+        first, second = (
+            (inside_point, outside_point) if hit else (outside_point, inside_point)
+        )
+        return [
+            to_gcode_row(first[0], first[1], self.move_feedrate),
+            to_gcode_row(second[0], second[1], self.measure_feedrate),
+            x,
+            y,
+            z,
+        ]
+
+    def delete_overlap_edges(self, optimal_path: list):
+        """
+        Delete edges with the same x, y value and
+        keep the one with the highest z value
+        """
+        path = []
+        prev_xy = None
+        prev_z = None
+        for row in optimal_path:
+            _xy = (row[2], row[3])
+            if _xy == prev_xy:
+                if prev_z > row[4]:
+                    continue
+                else:
+                    path.pop()
+
+            prev_xy = _xy
+            prev_z = row[4]
+            path.append(row)
+        return path
+
+    def add_line_number_from_path(self, optimal_path: list):
+        cnx = mysql.connector.connect(**self.mysql_config, database="coord")
+        cursor = cnx.cursor()
+        cursor = cnx.cursor()
+        update_list = []
+        prev_xy = None
+        prev_line_number = None
+        initial_line_number = 4
+        idx = 0
+        for row in optimal_path:
+            edge_id = row[5]
+            _xy = (row[2], row[3])
+            if _xy == prev_xy:
+                update_list.append((prev_line_number, edge_id))
             else:
-                path.pop()
+                current_line_number = initial_line_number + idx * 2
+                update_list.append((current_line_number, edge_id))
+                prev_line_number = current_line_number
+                idx += 1
+                prev_xy = _xy
 
-        prev_xy = _xy
-        prev_z = row[4]
-        path.append(row)
+        query = "UPDATE edge SET line = %s WHERE id = %s"
+        cursor.executemany(query, update_list)
+        cnx.commit()
+        cursor.close()
+        cnx.close()
+        return cursor.rowcount
 
-    return path
-
-
-def generate_gcode(path, program_number: str):
-    gcode = ["%", f"O{program_number}", "G90 G54"]
-    for row in path:
-        gcode.append(row[0])
-        gcode.append(row[1])
-    return gcode + ["M30", "%"]
-
-
-def save_gcode(gcode, file_path: str):
-    with open(file_path, "w") as f:
-        for line in gcode:
-            f.write(line + "\n")
+    def get_edge_path(
+        self,
+        xyz_offset: tuple = (0, 0, 0),
+    ):
+        path = []
+        edges = get_edges(self.mysql_config, self.model_id)
+        for edge in edges:
+            edge_id, model_id, side_id, arc_id, x, y, z, _line = edge
+            # add offset
+            (x, y, z) = (x + xyz_offset[0], y + xyz_offset[1], z + xyz_offset[2])
+            if arc_id is None:
+                line_edge_path = self.get_line_edge_path(
+                    side_id,
+                    (x, y, z),
+                    xyz_offset,
+                )
+                line_edge_path.append(edge_id)
+                path.append(line_edge_path)
+            else:
+                assert side_id is None
+                arc_edge_path = self.get_arc_edge_path(
+                    arc_id,
+                    (x, y, z),
+                    xyz_offset,
+                )
+                arc_edge_path.append(edge_id)
+                path.append(arc_edge_path)
+        optimal_path = sorted(path, key=lambda point: (point[2], point[3]))
+        self.add_line_number_from_path(optimal_path)
+        return self.delete_overlap_edges(optimal_path)
 
 
 def delete_edges_with_model_id(model_id: int, mysql_config: dict):

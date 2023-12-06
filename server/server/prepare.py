@@ -1,9 +1,10 @@
 from server.mark.point import (
-    get_shapes,
     get_visible_facets,
     get_lines_on_coplanar_facets,
 )
+from server.mark.shape import Shape
 from server.mark import line, edge, arc, pair, step, gcode, slope, trace
+from server.mark.edge import EdgePath
 from server.config import MODEL_PATH, GCODE_PATH
 from server import machine
 from server.model import (
@@ -19,9 +20,16 @@ def program_number_to_model_id(program_number: str):
 
 
 def process_new_3dmodel(stl_filename: str, model_id: int, mysql_config: dict):
-    lines, arcs = get_shapes(f"{MODEL_PATH}/{stl_filename}")
-    line.import_lines(model_id, lines, mysql_config)
-    arc.import_arcs(model_id, arcs, mysql_config)
+    shape = Shape(f"{MODEL_PATH}/{stl_filename}")
+    lines, arcs = shape.get_lines_and_arcs()
+    if lines:
+        for lines_on_coplanar_facets in lines:
+            line.import_lines(model_id, lines_on_coplanar_facets, mysql_config)
+        step.import_steps(mysql_config, model_id)
+        slope.import_slopes(mysql_config, model_id)
+    if arcs:
+        for arcs_on_coplanar_facets in arcs:
+            arc.import_arcs(model_id, arcs_on_coplanar_facets, mysql_config)
 
 
 def flatten_extend(matrix):
@@ -49,18 +57,14 @@ def process_stl(
     send_gcode: bool,
 ):
     (measure_length, measure_feedrate, move_feedrate) = measure_config
-    path = edge.get_edge_path(
+    edge_path = EdgePath(
         mysql_config,
         model_id,
         stl_filename,
-        measure_length,
-        measure_feedrate,
-        move_feedrate,
-        offset,
+        measure_config,
     )
+    path = edge_path.get_edge_path(offset)
     update_offset(model_id, offset)
-
-    edge.add_line_number_from_path(mysql_config, path)
 
     path = gcode.format_edge_path(path)
     steps = step.get_steps(mysql_config, model_id)
