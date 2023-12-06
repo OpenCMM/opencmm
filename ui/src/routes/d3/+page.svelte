@@ -8,25 +8,28 @@
 	let shapeLoaded = false;
 	let edgeLoaded = false;
 	interface Edge {
+		id: number;
 		x: number;
 		y: number;
 	}
 
 	interface Line {
+		id: number;
 		x1: number;
 		y1: number;
 		x2: number;
 		y2: number;
 	}
 
-	interface Arc {
-		radius: number;
-		cx: number;
-		cy: number;
-	}
+	// interface Arc {
+	// 	id: number;
+	// 	radius: number;
+	// 	cx: number;
+	// 	cy: number;
+	// }
 
 	let lines: Line[] = [];
-	let arcs: Arc[] = [];
+	// let arcs: Arc[] = [];
 	let edges: Edge[] = [];
 	let measuredEdges: Edge[] = [];
 	const modelId = $page.url.searchParams.get('id');
@@ -38,19 +41,21 @@
 
 		for (const d of data['lines']) {
 			lines.push({
-				x1: d[0],
-				y1: d[1],
-				x2: d[2],
-				y2: d[3]
+				id: d[0],
+				x1: d[1],
+				y1: d[2],
+				x2: d[3],
+				y2: d[4]
 			});
 		}
-		for (const d of data['arcs']) {
-			arcs.push({
-				radius: d[0],
-				cx: d[1],
-				cy: d[2]
-			});
-		}
+		// for (const d of data['arcs']) {
+		// 	arcs.push({
+		// 		id: d[0],
+		// 		radius: d[1],
+		// 		cx: d[2],
+		// 		cy: d[3]
+		// 	});
+		// }
 		shapeLoaded = true;
 	};
 	const load_edge_data = async () => {
@@ -59,11 +64,13 @@
 		console.log(data);
 		for (const d of data['edges']) {
 			edges.push({
+				id: d[0],
 				x: d[1],
 				y: d[2]
 			});
 			if (d[4] !== null) {
 				measuredEdges.push({
+					id: d[0],
 					x: d[4],
 					y: d[5]
 				});
@@ -80,5 +87,5 @@
 {#if !shapeLoaded || !edgeLoaded}
 	<ProgressBar helperText="Loading..." />
 {:else}
-	<Chart {lines} {arcs} {edges} {measuredEdges} />
+	<Chart {lines} {edges} {measuredEdges} />
 {/if}

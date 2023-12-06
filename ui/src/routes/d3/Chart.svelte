@@ -5,7 +5,7 @@
 	// visualize two list of xy coordinates with d3
 
 	export let lines = [];
-	export let arcs = [];
+	// export let arcs = [];
 	export let edges = [];
 	export let measuredEdges = [];
 
@@ -116,11 +116,19 @@
 			.style('fill', 'red');
 
 		const measuredDot = g
-			.selectAll('.dot')
+			.selectAll('.measuredDot')
 			.data(measuredEdges)
 			.enter()
 			.append('circle')
-			.attr('class', 'dot');
+			.attr('class', 'measuredDot')
+			.attr('r', 2)
+			.attr('cx', function (d) {
+				return x(d.x);
+			})
+			.attr('cy', function (d) {
+				return y(d.y);
+			})
+			.style('fill', 'green');
 
 		dot.on('mouseover', function (event, d) {
 			d3.select(this).style('fill', 'blue');

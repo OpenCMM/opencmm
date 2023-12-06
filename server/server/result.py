@@ -1,6 +1,7 @@
 import mysql.connector
 from server.config import MYSQL_CONFIG, get_config
 import numpy as np
+from server.model import get_model_data
 from server.mark.slope import get_angle
 
 
@@ -54,8 +55,16 @@ def fetch_edge_result_combined(model_id: int, process_id: int):
         ),
     )
     points = cursor.fetchall()
+    points = [list(point) for point in points]
     cursor.close()
     cnx.close()
+
+    model_data = get_model_data(model_id)
+    offset = model_data[3:6]
+    for point in points:
+        point[1] += offset[0]
+        point[2] += offset[1]
+        point[3] += offset[2]
     return points
 
 

@@ -282,14 +282,30 @@ def get_model_shapes(model_id: int):
     """
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
     cursor = cnx.cursor()
-    query = "SELECT x0, y0, x1, y1, pair_id FROM side WHERE model_id = %s"
+    query = "SELECT id, x0, y0, x1, y1, pair_id FROM side WHERE model_id = %s"
     cursor.execute(query, (model_id,))
     lines = cursor.fetchall()
+    lines = [list(line) for line in lines]
 
-    query = "SELECT radius, cx, cy FROM arc WHERE model_id = %s"
+    query = "SELECT id, radius, cx, cy FROM arc WHERE model_id = %s"
     cursor.execute(query, (model_id,))
     arcs = cursor.fetchall()
+    arcs = [list(arc) for arc in arcs]
 
     cursor.close()
     cnx.close()
+
+    # add offset
+    model_data = get_model_data(model_id)
+    offset = model_data[3:5]
+    for line in lines:
+        line[1] += offset[0]
+        line[2] += offset[1]
+        line[3] += offset[0]
+        line[4] += offset[1]
+
+    for arc in arcs:
+        arc[2] += offset[0]
+        arc[3] += offset[1]
+
     return lines, arcs
