@@ -5,7 +5,7 @@ from server.mark.arc import (
     to_arc_info,
     get_edges_for_arc,
 )
-from .config import MYSQL_CONFIG
+from server.config import MYSQL_CONFIG
 import pytest
 
 

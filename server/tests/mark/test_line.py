@@ -9,7 +9,7 @@ from server.mark.line import (
     pairs_to_lines_and_steps,
 )
 from server.mark.arc import import_arcs
-from .config import MYSQL_CONFIG
+from server.config import MYSQL_CONFIG
 import pytest
 
 model_id = 1
