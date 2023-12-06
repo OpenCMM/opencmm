@@ -142,7 +142,7 @@ def create_mock_perfect_data(filename: str, process_id: int):
     import_sensor_data(MYSQL_CONFIG, sensor_mock_data)
 
 
-def create_mock_data(filename: str, process_id: int):
+def create_mock_data(filename: str, process_id: int, fluctuation: float = None):
     start_coord = (0.0, 0.0)
     mtconnect_mock_data = []
     sensor_mock_data = []
@@ -178,7 +178,12 @@ def create_mock_data(filename: str, process_id: int):
 
             if is_tracing and line % 2 == 1:
                 _sensor_timestamp = timestamp - timedelta(seconds=sample_interval)
-                sensor_output = mock_sensor.get_sensor_output((_x, _y, 100.0))
+                if fluctuation is not None:
+                    sensor_output = mock_sensor.get_fluctuating_sensor_output(
+                        (_x, _y, 100.0), fluctuation
+                    )
+                else:
+                    sensor_output = mock_sensor.get_sensor_output((_x, _y, 100.0))
                 sensor_mock_data.append((process_id, _sensor_timestamp, sensor_output))
 
         last_timestamp = timestamp

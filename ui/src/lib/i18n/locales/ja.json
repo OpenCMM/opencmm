@@ -106,6 +106,18 @@
 				"rradius": "測定半径",
 				"radiusDiff": "誤差",
 				"rcenter": "測定中心"
+			},
+			"step": {
+				"title": "段差",
+				"height": "高さ",
+				"rheight": "測定高さ",
+				"heightDiff": "誤差"
+			},
+			"slope": {
+				"title": "傾斜",
+				"angle": "角度",
+				"rangle": "測定角度",
+				"angleDiff": "誤差"
 			}
 		}
 	},
@@ -153,6 +165,8 @@
 		"ok": "OK",
 		"arc": "円弧",
 		"line": "線",
+		"step": "段差",
+		"slope": "傾斜",
 		"deleteModel": "3Dモデルを削除"
 	}
 }

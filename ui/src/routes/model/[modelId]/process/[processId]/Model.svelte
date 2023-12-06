@@ -16,13 +16,14 @@
 	import Calculator from 'carbon-icons-svelte/lib/Calculator.svelte';
 	import { Grid, Row, Column } from 'carbon-components-svelte';
 	import ChartStepper from 'carbon-icons-svelte/lib/ChartStepper.svelte';
-	import Table from 'carbon-icons-svelte/lib/Table.svelte';
 	import Arc from './Arc.svelte';
 	import Line from './Line.svelte';
+	import Step from './Step.svelte';
 	import ModelCheck from './ModelCheck.svelte';
 	import { redirectToFilePage } from '$lib/access/path';
 	import { _ } from 'svelte-i18n';
 	import axios from 'axios';
+	import Slope from './Slope.svelte';
 
 	export let modelId: string;
 	export let processId: string;
@@ -125,11 +126,6 @@
 					>
 				</Column>
 				<Column>
-					<Button icon={Table} href={`/model/processes?id=${modelId}`}>
-						{$_('home.process.title')}</Button
-					>
-				</Column>
-				<Column>
 					<Button icon={Add} href={`/file/setup?id=${modelId}`}>
 						{$_('home.file.3dmodel.createGcode')}</Button
 					>
@@ -145,6 +141,10 @@
 				<Column>
 					<OverflowMenu>
 						<OverflowMenuItem href={`/debug?id=${modelId}&process=${processId}`} text="MTConnect" />
+						<OverflowMenuItem
+							href={`/model/processes?id=${modelId}`}
+							text={$_('home.process.title')}
+						/>
 						<OverflowMenuItem danger text={$_('common.deleteModel')} on:click={deleteModel} />
 					</OverflowMenu>
 				</Column>
@@ -179,6 +179,8 @@
 					<ContentSwitcher bind:selectedIndex>
 						<Switch>{$_('common.arc')}</Switch>
 						<Switch>{$_('common.line')}</Switch>
+						<Switch>{$_('common.step')}</Switch>
+						<Switch>{$_('common.slope')}</Switch>
 					</ContentSwitcher>
 
 					<div id="data-tale">
@@ -186,6 +188,10 @@
 							<Arc {modelId} {processId} />
 						{:else if selectedIndex === 1}
 							<Line {modelId} {processId} />
+						{:else if selectedIndex === 2}
+							<Step {modelId} {processId} />
+						{:else if selectedIndex === 3}
+							<Slope {modelId} {processId} />
 						{/if}
 					</div>
 				</Column>

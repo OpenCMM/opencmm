@@ -217,6 +217,32 @@ def test_update_data_after_measurement_step():
     assert estimated_angle == 45.0
 
 
+def test_update_data_after_measurement_step_fluctuating_data():
+    filename = "step9.STL"
+    model_id = 8
+    process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
+    create_mock_data(filename, process_id, fluctuation=0.1)
+    update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)
+    process_result = status.get_process_status(MYSQL_CONFIG, process_id)
+    assert process_result[2] == "done"
+
+    response = client.get(f"/result/steps?model_id={model_id}&process_id={process_id}")
+    assert response.status_code == 200
+    steps = response.json()["steps"]
+    height = steps[0][1]
+    estimated_height = steps[0][2]
+    assert height == 3.0
+    print("estimated_height", estimated_height)
+
+    response = client.get(f"/result/slopes?model_id={model_id}&process_id={process_id}")
+    assert response.status_code == 200
+    slopes = response.json()["slopes"]
+    angle = slopes[0][1]
+    estimated_angle = slopes[0][2]
+    assert angle == 45.0
+    print("estimated_angle", estimated_angle)
+
+
 def test_delete_model_after_measurement():
     model_id = 3
     response = client.delete(f"/delete/model?model_id={model_id}")
