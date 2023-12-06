@@ -7,6 +7,7 @@ from server.measure.gcode import (
     get_true_line_number,
     get_start_end_points_from_line_number,
 )
+from server.mark.trace import get_trace_ids
 import numpy as np
 
 
@@ -36,7 +37,10 @@ def check_if_mtconnect_data_is_missing(
     mtconnect_data = get_mtconnect_data(process_id, mysql_config)
     np_mtconnect_data = np.array(mtconnect_data)
 
+    trace_ids = get_trace_ids(mysql_config, model_id)
     last_line = len(gcode) + 2
+    if trace_ids:
+        last_line -= 1
     # if data is not missing, line 4 ~ last_line should be in np_mtconnect_data
     # odd line numbers are okay to be missing
     init_line = 4
