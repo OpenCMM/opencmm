@@ -52,6 +52,21 @@
 
 		const yAxis = d3.axisLeft(y);
 
+		// Set up zoom behavior
+		const zoom = d3.zoom().scaleExtent([0.5, 10]).on('zoom', handleZoom);
+
+		svg.call(zoom);
+
+		function handleZoom(event) {
+			const transform = event.transform;
+			const zx = transform.rescaleX(x);
+			const zy = transform.rescaleY(y);
+			g.select('.axis--x').call(xAxis.scale(zx));
+			g.select('.axis--y').call(yAxis.scale(zy));
+			dot.attr('transform', transform);
+			g.attr('transform', transform);
+		}
+
 		g.append('g')
 			.attr('class', 'axis axis--x')
 			.attr('transform', 'translate(0,' + height + ')')
@@ -65,7 +80,7 @@
 			.enter()
 			.append('circle')
 			.attr('class', 'dot')
-			.attr('r', 3.5)
+			.attr('r', 2)
 			.attr('cx', function (d) {
 				return x(d.x);
 			})
@@ -80,7 +95,7 @@
 			.enter()
 			.append('circle')
 			.attr('class', 'dot')
-			.attr('r', 3.5)
+			.attr('r', 2)
 			.attr('cx', function (d) {
 				return x(d.x);
 			})
