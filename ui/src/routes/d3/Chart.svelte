@@ -13,6 +13,7 @@
 	let margin = { top: 20, right: 20, bottom: 30, left: 40 };
 	let width = 1280 - margin.left - margin.right;
 	let height = 800 - margin.top - margin.bottom;
+	const edgeRadius = 4;
 
 	onMount(() => {
 		svg = d3
@@ -68,7 +69,6 @@
 			dot.attr('transform', transform);
 			measuredDot.attr('transform', transform);
 			line.attr('transform', transform);
-			g.attr('transform', transform);
 		}
 
 		g.append('g')
@@ -98,7 +98,6 @@
 			})
 			.style('stroke', 'black')
 			.style('stroke-width', 2);
-		console.log(lines);
 
 		const dot = g
 			.selectAll('.dot')
@@ -106,7 +105,7 @@
 			.enter()
 			.append('circle')
 			.attr('class', 'dot')
-			.attr('r', 2)
+			.attr('r', edgeRadius)
 			.attr('cx', function (d) {
 				return x(d.x);
 			})
@@ -121,7 +120,7 @@
 			.enter()
 			.append('circle')
 			.attr('class', 'measuredDot')
-			.attr('r', 2)
+			.attr('r', edgeRadius)
 			.attr('cx', function (d) {
 				return x(d.x);
 			})

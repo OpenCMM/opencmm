@@ -37,7 +37,6 @@
 	const load_model_shape_data = async () => {
 		const res = await fetch(`${BACKEND_URL}/model/shapes/${modelId}`);
 		const data = await res.json();
-		console.log(data);
 
 		for (const d of data['lines']) {
 			lines.push({
@@ -61,7 +60,6 @@
 	const load_edge_data = async () => {
 		const res = await fetch(`${BACKEND_URL}/result/edges/result/combined/${modelId}/${processId}`);
 		const data = await res.json();
-		console.log(data);
 		for (const d of data['edges']) {
 			edges.push({
 				id: d[0],

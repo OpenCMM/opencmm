@@ -30,7 +30,6 @@
 			.then((res) => {
 				if (res.status === 200) {
 					missingData = res.data['lines'];
-					console.log(missingData);
 					loaded = true;
 				}
 			});
