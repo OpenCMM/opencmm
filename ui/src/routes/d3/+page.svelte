@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { ProgressBar } from 'carbon-components-svelte';
+	import { Grid, Column, ProgressBar, Row } from 'carbon-components-svelte';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { BACKEND_URL } from '$lib/constants/backend';
 	import Chart from './Chart.svelte';
+	import Edge from '../model/[modelId]/process/[processId]/Edge.svelte';
 
 	let shapeLoaded = false;
 	let edgeLoaded = false;
@@ -82,8 +83,17 @@
 	});
 </script>
 
-{#if !shapeLoaded || !edgeLoaded}
+{#if !shapeLoaded || !edgeLoaded || !modelId || !processId}
 	<ProgressBar helperText="Loading..." />
 {:else}
-	<Chart {lines} {edges} {measuredEdges} />
+	<Grid padding>
+		<Row>
+			<Column>
+				<Chart {lines} {edges} {measuredEdges} />
+			</Column>
+			<Column>
+				<Edge {modelId} {processId} />
+			</Column>
+		</Row>
+	</Grid>
 {/if}

@@ -14,6 +14,8 @@
 	let width = 840 - margin.left - margin.right;
 	let height = 800 - margin.top - margin.bottom;
 	const edgeRadius = 4;
+	const edgeColor = 'red';
+	const measuredEdgeColor = 'green';
 	const lineWidth = 2;
 	const gridWidth = 1;
 
@@ -134,7 +136,8 @@
 			.attr('cy', function (d) {
 				return y(d.y);
 			})
-			.style('fill', 'red');
+			.style('fill', edgeColor)
+			.style('opacity', 0.8);
 
 		const measuredDot = g
 			.selectAll('.measuredDot')
@@ -152,16 +155,16 @@
 			.style('fill', 'green');
 
 		dot.on('mouseover', function (event, d) {
-			d3.select(this).style('fill', 'blue');
+			d3.select(this).style('fill', '#fcba03');
 			tooltip.transition().duration(200).style('opacity', 0.9);
 			tooltip
-				.html(`Edge: (${d['x']}, ${d['y']})`)
+				.html(`(${d['x']}, ${d['y']})`)
 				.style('left', event.pageX + 'px')
 				.style('top', event.pageY - 28 + 'px');
 		});
 
 		dot.on('mouseout', function (event, d) {
-			d3.select(this).style('fill', 'red');
+			d3.select(this).style('fill', edgeColor);
 			tooltip.transition().duration(500).style('opacity', 0);
 		});
 
@@ -169,13 +172,13 @@
 			d3.select(this).style('fill', 'blue');
 			tooltip.transition().duration(200).style('opacity', 0.9);
 			tooltip
-				.html(`Measured Edge: (${d['x']}, ${d['y']})`)
+				.html(`(${d['x']}, ${d['y']})`)
 				.style('left', event.pageX + 'px')
 				.style('top', event.pageY - 28 + 'px');
 		});
 
 		measuredDot.on('mouseout', function (event, d) {
-			d3.select(this).style('fill', 'green');
+			d3.select(this).style('fill', measuredEdgeColor);
 			tooltip.transition().duration(500).style('opacity', 0);
 		});
 	});

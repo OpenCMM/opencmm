@@ -126,6 +126,9 @@
 					>
 				</Column>
 				<Column>
+					<Button href={`/d3?id=${modelId}&process=${processId}`}>2D</Button>
+				</Column>
+				<Column>
 					<Button icon={Add} href={`/file/setup?id=${modelId}`}>
 						{$_('home.file.3dmodel.createGcode')}</Button
 					>
