@@ -32,7 +32,7 @@ from server.mark.trace import (
 )
 from server.mark.trace import import_trace_line_results
 import logging
-from scipy.ndimage.filters import uniform_filter1d
+from scipy.ndimage import uniform_filter1d
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
 logger = logging.getLogger(__name__)

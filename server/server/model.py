@@ -1,6 +1,7 @@
 from server.config import MODEL_PATH, MYSQL_CONFIG
 import os
 import mysql.connector
+from server.mark.trace import delete_trace_line_data
 
 
 def add_new_3dmodel(filename: str) -> int:
@@ -210,9 +211,10 @@ def delete_model(model_id: int):
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
     cursor = cnx.cursor()
     delete_results_with_model_id(model_id, cursor, cnx)
+    delete_trace_line_data(MYSQL_CONFIG, model_id)
     delete_sensor_data(model_id, cursor, cnx)
     delete_mtconnect_data(model_id, cursor, cnx)
-    tables_with_model_id = ["arc", "side", "edge", "pair", "process", "trace", "model"]
+    tables_with_model_id = ["trace", "arc", "side", "edge", "pair", "process", "model"]
     for table in tables_with_model_id:
         delete_row_with_model_id(table, model_id, cursor, cnx)
     cursor.close()
