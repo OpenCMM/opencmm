@@ -1,4 +1,6 @@
 import mysql.connector
+import numpy as np
+from server.config import get_config
 
 
 def get_first_line_number_for_tracing(mysql_config: dict, model_id: int):
@@ -165,3 +167,22 @@ def import_trace_line_results(mysql_config: dict, step_update_list: list):
     cnx.commit()
     cursor.close()
     cnx.close()
+
+
+def get_optimal_feedrate_for_tracing(start: tuple, end: tuple):
+    """
+    Calculate the optimal feedrate for tracing from distance between start and end
+    """
+    conf = get_config()
+    min_measure_count = conf["trace"]["min_measure_count"]
+    measure_interval = conf["trace"]["interval"] / 1000  # convert to seconds
+    max_feedrate = conf["trace"]["max_feedrate"]
+    min_travel_time = min_measure_count * measure_interval  # seconds
+    start = np.array(start)
+    end = np.array(end)
+    distance = np.linalg.norm(end - start)
+    # calculate the feedrate
+    feedrate = int(distance / min_travel_time) * 60  # mm/min
+    if feedrate > max_feedrate:
+        feedrate = max_feedrate
+    return feedrate

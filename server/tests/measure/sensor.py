@@ -33,3 +33,17 @@ class MockSensor:
             )
         else:
             return 18900
+
+    def get_fluctuating_sensor_output(self, xyz: tuple, fluctuation: float = 0.1):
+        distance = self.get_distance(xyz)
+        if distance is None:
+            return None
+        # sensor ouputs self.max_sensor_output / 2 when distance is 100
+        # if distance is not between 65 ~ 135 mm,
+        # sensor outputs 18900
+        if 65 <= distance <= 135:
+            return self.middle_sensor_output + (100 - distance) * (
+                self.middle_sensor_output / 35
+            ) * (1 + fluctuation * np.random.randn())
+        else:
+            return 18900

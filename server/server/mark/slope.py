@@ -4,7 +4,7 @@ from .trace import import_traces
 import mysql.connector
 from server.config import get_config
 from server.mark.line import get_side
-from .trace import sort_sides
+from .trace import sort_sides, get_optimal_feedrate_for_tracing
 
 
 def group_sides_by_pair_id(sides: list):
@@ -137,9 +137,6 @@ def create_slope_path(
     move_feedrate: float,
     xyz_offset: tuple = (0, 0, 0),
 ):
-    conf = get_config()
-    trace_feedrate = conf["trace"]["feedrate"]
-
     path = []
     trace_lines = []
     slopes = get_slopes(mysql_config, model_id)
@@ -149,6 +146,9 @@ def create_slope_path(
         end_side = get_side(end, mysql_config)
         slope_lines = create_slope_lines(start_side, end_side)
         for slope_line in slope_lines:
+            start = (slope_line[0][0], slope_line[0][1])
+            end = (slope_line[1][0], slope_line[1][1])
+            trace_feedrate = get_optimal_feedrate_for_tracing(start, end)
             trace_lines.append(to_trace_line_row(trace_id, slope_line, xyz_offset))
             path.append(
                 "G1 X{} Y{} F{}".format(

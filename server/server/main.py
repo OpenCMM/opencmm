@@ -23,10 +23,12 @@ from server.listener import (
 )
 from server.measure import EstimateConfig, update_data_after_measurement, recompute
 from server.measure.mtconnect import check_if_mtconnect_data_is_missing
+from server.measure.gcode import get_gcode_line_path
 from server.config import MYSQL_CONFIG, MODEL_PATH, get_config, update_conf
 from server.model import (
     get_3dmodel_data,
     get_recent_3dmodel_data,
+    get_model_shapes,
     get_3dmodel_file_info,
     model_exists,
     list_3dmodel,
@@ -249,6 +251,16 @@ async def download_gcode(model_id: int):
     )
 
 
+@app.get("/gcode/lines/{model_id}")
+async def get_gcode_lines(model_id: int):
+    filename = model_id_to_filename(model_id)
+    gcode_filepath = f"data/gcode/{filename}.gcode"
+    if not os.path.exists(gcode_filepath):
+        raise HTTPException(status_code=400, detail="No gcode file generated")
+
+    return {"lines": get_gcode_line_path(gcode_filepath)}
+
+
 @app.post("/start/measurement")
 async def start_measurement(
     _conf: MeasurementConfig, background_tasks: BackgroundTasks
@@ -434,6 +446,12 @@ async def get_result_steps(model_id: int, process_id: int):
 async def get_result_slopes(model_id: int, process_id: int):
     slopes = result.fetch_slope_results(model_id, process_id)
     return {"slopes": slopes}
+
+
+@app.get("/model/shapes/{model_id}")
+async def get_model_shape_data(model_id: int):
+    lines, arcs = get_model_shapes(model_id)
+    return {"lines": lines, "arcs": arcs}
 
 
 @app.get("/list/processes/{model_id}")

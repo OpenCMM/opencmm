@@ -8,7 +8,23 @@ def test_is_point_on_line():
     xy = (0.0, 0.0)
     start = (-1.0, -1.0)
     end = (1.0, 1.0)
-    assert is_point_on_line(xy, start, end) is True
+    assert is_point_on_line(xy, start, end)
+
+
+def test_is_point_on_line_round():
+    xy = (27.529, -39.239)
+    start = (28.147, -38.679)
+    end = (24.443, -42.037)
+    assert is_point_on_line(xy, start, end)
+    assert not is_point_on_line(xy, start, end, 0.00000001)
+
+
+def test_is_point_on_line_round_err():
+    xy = (29.795, -12.838)
+    start = (29.877, -14.503)
+    end = (29.633, -9.509)
+    assert is_point_on_line(xy, start, end, 1)
+    assert not is_point_on_line(xy, start, end, 0.0000001)
 
 
 def test_get_true_line_number():

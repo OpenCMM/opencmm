@@ -106,6 +106,18 @@
 				"rradius": "Estimated radius",
 				"radiusDiff": "Difference",
 				"rcenter": "Estimated center"
+			},
+			"step": {
+				"title": "Step",
+				"height": "Height",
+				"rheight": "Estimated height",
+				"heightDiff": "Difference"
+			},
+			"slope": {
+				"title": "Slope",
+				"angle": "Angle",
+				"rangle": "Estimated angle",
+				"angleDiff": "Difference"
 			}
 		}
 	},
@@ -153,6 +165,8 @@
 		"ok": "OK",
 		"arc": "Arc",
 		"line": "Line",
+		"step": "Step",
+		"slope": "Slope",
 		"deleteModel": "Delete 3D model"
 	}
 }
