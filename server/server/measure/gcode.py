@@ -126,3 +126,18 @@ def get_true_line_number(
         return None
 
     return None
+
+
+def get_gcode_line_path(gcode_filepath: str):
+    gcode_rows = load_gcode(gcode_filepath)
+    gcode_line_path = []
+    line_number = 3
+    prev_xy = [0, 0]
+    for row in gcode_rows:
+        if row[0] != "G4":
+            (x, y, feedrate) = row_to_xyz_feedrate(row)
+            gcode_line_path.append([line_number, *prev_xy, x, y, feedrate])
+            prev_xy = [x, y]
+        line_number += 1
+
+    return gcode_line_path

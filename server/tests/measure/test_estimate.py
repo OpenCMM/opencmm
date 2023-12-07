@@ -218,8 +218,8 @@ def test_update_data_after_measurement_step():
 
 
 def test_update_data_after_measurement_step_fluctuating_data():
-    filename = "step9.STL"
-    model_id = 8
+    filename = "step.STL"
+    model_id = 5
     process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
     create_mock_data(filename, process_id, fluctuation=0.1)
     update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)

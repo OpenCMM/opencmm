@@ -7,6 +7,7 @@
 	import Edge from '../model/[modelId]/process/[processId]/Edge.svelte';
 
 	let shapeLoaded = false;
+	let gcodeLoaded = false;
 	let edgeLoaded = false;
 	interface Edge {
 		id: number;
@@ -29,7 +30,17 @@
 	// 	cy: number;
 	// }
 
+	interface GcodeLine {
+		id: number; // line number
+		x1: number;
+		y1: number;
+		x2: number;
+		y2: number;
+		feedrate: number;
+	}
+
 	let lines: Line[] = [];
+	let gcodeLines: GcodeLine[] = [];
 	// let arcs: Arc[] = [];
 	let edges: Edge[] = [];
 	let measuredEdges: Edge[] = [];
@@ -58,6 +69,24 @@
 		// }
 		shapeLoaded = true;
 	};
+
+	const load_gcode_line_data = async () => {
+		const res = await fetch(`${BACKEND_URL}/gcode/lines/${modelId}`);
+		const data = await res.json();
+
+		for (const d of data['lines']) {
+			gcodeLines.push({
+				id: d[0],
+				x1: d[1],
+				y1: d[2],
+				x2: d[3],
+				y2: d[4],
+				feedrate: d[5]
+			});
+		}
+		gcodeLoaded = true;
+	};
+
 	const load_edge_data = async () => {
 		const res = await fetch(`${BACKEND_URL}/result/edges/result/combined/${modelId}/${processId}`);
 		const data = await res.json();
@@ -79,17 +108,18 @@
 	};
 	onMount(() => {
 		load_edge_data();
+		load_gcode_line_data();
 		load_model_shape_data();
 	});
 </script>
 
-{#if !shapeLoaded || !edgeLoaded || !modelId || !processId}
+{#if !shapeLoaded || !gcodeLoaded || !edgeLoaded || !modelId || !processId}
 	<ProgressBar helperText="Loading..." />
 {:else}
 	<Grid padding>
 		<Row>
 			<Column>
-				<Chart {lines} {edges} {measuredEdges} />
+				<Chart {lines} {gcodeLines} {edges} {measuredEdges} />
 			</Column>
 			<Column>
 				<Edge {modelId} {processId} />

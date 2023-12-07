@@ -23,6 +23,7 @@ from server.listener import (
 )
 from server.measure import EstimateConfig, update_data_after_measurement, recompute
 from server.measure.mtconnect import check_if_mtconnect_data_is_missing
+from server.measure.gcode import get_gcode_line_path
 from server.config import MYSQL_CONFIG, MODEL_PATH, get_config, update_conf
 from server.model import (
     get_3dmodel_data,
@@ -248,6 +249,16 @@ async def download_gcode(model_id: int):
     return FileResponse(
         f"data/gcode/{filename}.gcode", media_type="blob", filename=f"{filename}.gcode"
     )
+
+
+@app.get("/gcode/lines/{model_id}")
+async def get_gcode_lines(model_id: int):
+    filename = model_id_to_filename(model_id)
+    gcode_filepath = f"data/gcode/{filename}.gcode"
+    if not os.path.exists(gcode_filepath):
+        raise HTTPException(status_code=400, detail="No gcode file generated")
+
+    return {"lines": get_gcode_line_path(gcode_filepath)}
 
 
 @app.post("/start/measurement")
