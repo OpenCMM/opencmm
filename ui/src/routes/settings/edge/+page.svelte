@@ -5,25 +5,19 @@
 	import { ToastNotification } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	let interval = 100;
-	let threshold = 1000;
-	let beamDiameter = 120.0;
-	let middleOutput = 9100.0;
-	let responseTime = 10.0;
+	let arcNumber = 4;
+	let lineNumber = 2;
 	let loaded = false;
 	let saveFailed = false;
 	let success = false;
 
 	onMount(() => {
 		// Load the settings here
-		axios.get(`${BACKEND_URL}/get/sensor_config`).then((response) => {
+		axios.get(`${BACKEND_URL}/get/edge_detection_config`).then((response) => {
 			if (response.status === 200) {
 				const data = response.data;
-				interval = data['interval'];
-				threshold = data['threshold'];
-				beamDiameter = data['beam_diameter'];
-				middleOutput = data['middle_output'];
-				responseTime = data['response_time'];
+				arcNumber = data['arc_number'];
+				lineNumber = data['line_number'];
 				loaded = true;
 			}
 		});
@@ -33,13 +27,10 @@
 		e.preventDefault();
 		try {
 			const data = {
-				interval,
-				threshold,
-				beam_diameter: beamDiameter,
-				middle_output: middleOutput,
-				response_time: responseTime
+				arc_number: arcNumber,
+				line_number: lineNumber
 			};
-			const res = await axios.post(`${BACKEND_URL}/update/sensor_config`, data, {
+			const res = await axios.post(`${BACKEND_URL}/update/edge_detection_config`, data, {
 				headers: {
 					'Content-Type': 'application/json'
 				}
@@ -61,34 +52,16 @@
 	<Form>
 		<FormGroup>
 			<TextInput
-				bind:value={interval}
-				id="interval"
+				bind:value={arcNumber}
+				id="arcNumber"
 				type="number"
-				labelText={$_('settings.sensor.interval')}
+				labelText={$_('settings.edge.arcNumber')}
 			/>
 			<TextInput
-				bind:value={threshold}
-				id="threshold"
+				bind:value={lineNumber}
+				id="lineNumber"
 				type="number"
-				labelText={$_('settings.sensor.threshold')}
-			/>
-			<TextInput
-				bind:value={beamDiameter}
-				id="beamDiameter"
-				type="number"
-				labelText={$_('settings.sensor.beamDiameter')}
-			/>
-			<TextInput
-				bind:value={middleOutput}
-				id="middleOutput"
-				type="number"
-				labelText={$_('settings.sensor.middleOutput')}
-			/>
-			<TextInput
-				bind:value={responseTime}
-				id="responseTime"
-				type="number"
-				labelText={$_('settings.sensor.responseTime')}
+				labelText={$_('settings.edge.lineNumber')}
 			/>
 		</FormGroup>
 		<Button on:click={saveSettings}>{$_('common.save')}</Button>

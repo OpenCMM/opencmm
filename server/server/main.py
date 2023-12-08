@@ -1,6 +1,11 @@
 from server.type.sensor import SensorConfig
 from server.type.mtconnect import MTConnectConfig
-from server.type.measurement import MeasurementConfig, MeasurementConfigWithProgram
+from server.type.measurement import (
+    EdgeDetectionConfig,
+    MeasurementConfig,
+    MeasurementConfigWithProgram,
+    TraceConfig,
+)
 import uvicorn
 import os
 from fastapi import FastAPI, UploadFile, HTTPException, BackgroundTasks, WebSocket
@@ -118,6 +123,9 @@ def get_sensor_config():
     return {
         "interval": conf["interval"],
         "threshold": conf["threshold"],
+        "beam_diameter": conf["beam_diameter"],
+        "middle_output": conf["middle_output"],
+        "response_time": conf["response_time"],
     }
 
 
@@ -126,6 +134,51 @@ def update_sensor_config(_conf: SensorConfig):
     conf = get_config()
     conf["sensor"]["interval"] = _conf.interval
     conf["sensor"]["threshold"] = _conf.threshold
+    conf["sensor"]["beam_diameter"] = _conf.beam_diameter
+    conf["sensor"]["middle_output"] = _conf.middle_output
+    conf["sensor"]["response_time"] = _conf.response_time
+    update_conf(conf)
+    return {"status": "ok"}
+
+
+@app.get("/get/edge_detection_config")
+def get_edge_detection_config():
+    conf = get_config()["edge"]
+    return {
+        "arc_number": conf["arc"]["number"],
+        "line_number": conf["line"]["number"],
+    }
+
+
+@app.post("/update/edge_detection_config")
+def update_edge_detection_config(_conf: EdgeDetectionConfig):
+    conf = get_config()
+    conf["edge"]["arc"]["number"] = _conf.arc_number
+    conf["edge"]["line"]["number"] = _conf.line_number
+    update_conf(conf)
+    return {"status": "ok"}
+
+
+@app.get("/get/trace_config")
+def get_trace_config():
+    conf = get_config()["trace"]
+    return {
+        "min_measure_count": conf["min_measure_count"],
+        "max_feedrate": conf["max_feedrate"],
+        "interval": conf["interval"],
+        "margin": conf["margin"],
+        "slope_number": conf["slope"]["number"],
+    }
+
+
+@app.post("/update/trace_config")
+def update_trace_config(_conf: TraceConfig):
+    conf = get_config()
+    conf["trace"]["min_measure_count"] = _conf.min_measure_count
+    conf["trace"]["max_feedrate"] = _conf.max_feedrate
+    conf["trace"]["interval"] = _conf.interval
+    conf["trace"]["margin"] = _conf.margin
+    conf["trace"]["slope"]["number"] = _conf.slope_number
     update_conf(conf)
     return {"status": "ok"}
 

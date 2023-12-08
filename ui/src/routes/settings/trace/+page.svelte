@@ -5,25 +5,25 @@
 	import { ToastNotification } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	let interval = 100;
-	let threshold = 1000;
-	let beamDiameter = 120.0;
-	let middleOutput = 9100.0;
-	let responseTime = 10.0;
+	let minMeasureCount = 5;
+	let maxFeedrate = 2500;
+	let interval = 200;
+	let margin = 2.5;
+	let slopeNumber = 3;
 	let loaded = false;
 	let saveFailed = false;
 	let success = false;
 
 	onMount(() => {
 		// Load the settings here
-		axios.get(`${BACKEND_URL}/get/sensor_config`).then((response) => {
+		axios.get(`${BACKEND_URL}/get/trace_config`).then((response) => {
 			if (response.status === 200) {
 				const data = response.data;
+				minMeasureCount = data['min_measure_count'];
+				maxFeedrate = data['max_feedrate'];
 				interval = data['interval'];
-				threshold = data['threshold'];
-				beamDiameter = data['beam_diameter'];
-				middleOutput = data['middle_output'];
-				responseTime = data['response_time'];
+				margin = data['margin'];
+				slopeNumber = data['slope_number'];
 				loaded = true;
 			}
 		});
@@ -33,13 +33,13 @@
 		e.preventDefault();
 		try {
 			const data = {
+				min_measure_count: minMeasureCount,
+				max_feedrate: maxFeedrate,
 				interval,
-				threshold,
-				beam_diameter: beamDiameter,
-				middle_output: middleOutput,
-				response_time: responseTime
+				margin,
+				slope_number: slopeNumber
 			};
-			const res = await axios.post(`${BACKEND_URL}/update/sensor_config`, data, {
+			const res = await axios.post(`${BACKEND_URL}/update/trace_config`, data, {
 				headers: {
 					'Content-Type': 'application/json'
 				}
@@ -61,34 +61,34 @@
 	<Form>
 		<FormGroup>
 			<TextInput
+				bind:value={minMeasureCount}
+				id="minMeasureCount"
+				type="number"
+				labelText={$_('settings.trace.minMeasureCount')}
+			/>
+			<TextInput
+				bind:value={maxFeedrate}
+				id="maxFeedrate"
+				type="number"
+				labelText={$_('settings.trace.maxFeedrate')}
+			/>
+			<TextInput
 				bind:value={interval}
 				id="interval"
 				type="number"
-				labelText={$_('settings.sensor.interval')}
+				labelText={$_('settings.trace.interval')}
 			/>
 			<TextInput
-				bind:value={threshold}
-				id="threshold"
+				bind:value={margin}
+				id="margin"
 				type="number"
-				labelText={$_('settings.sensor.threshold')}
+				labelText={$_('settings.trace.margin')}
 			/>
 			<TextInput
-				bind:value={beamDiameter}
-				id="beamDiameter"
+				bind:value={slopeNumber}
+				id="slopeNumber"
 				type="number"
-				labelText={$_('settings.sensor.beamDiameter')}
-			/>
-			<TextInput
-				bind:value={middleOutput}
-				id="middleOutput"
-				type="number"
-				labelText={$_('settings.sensor.middleOutput')}
-			/>
-			<TextInput
-				bind:value={responseTime}
-				id="responseTime"
-				type="number"
-				labelText={$_('settings.sensor.responseTime')}
+				labelText={$_('settings.trace.slopeNumber')}
 			/>
 		</FormGroup>
 		<Button on:click={saveSettings}>{$_('common.save')}</Button>
