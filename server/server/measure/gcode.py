@@ -91,7 +91,13 @@ def is_point_on_line(p: tuple, p1: tuple, p2: tuple, threshold: float = 0.01):
         return are_points_equal(p1, p)
 
     distance = closest_distance_between_point_and_line(p, p1, p2)
-    return distance < threshold
+    is_close = distance < threshold
+
+    return (
+        is_close
+        and min(p1[0], p2[0]) <= p[0] <= max(p1[0], p2[0])
+        and min(p1[1], p2[1]) <= p[1] <= max(p1[1], p2[1])
+    )
 
 
 def get_true_line_number(

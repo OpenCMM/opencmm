@@ -27,6 +27,26 @@ def test_is_point_on_line_round_err():
     assert not is_point_on_line(xy, start, end, 0.0000001)
 
 
+def test_is_point_on_line_debug():
+    xy = (33.333, -129.61)
+    start = (33.333, -132.5)
+    end = (33.333, -127.5)
+    assert is_point_on_line(xy, start, end)
+    # assert not is_point_on_line(xy, start, end, 0.0000001)
+
+    xy = (33.333, -129.61)
+    start = (33.333, -127.5)
+    end = (33.333, 2.5)
+    assert not is_point_on_line(xy, start, end)
+
+
+def test_get_true_line_number_debug():
+    gcode = load_gcode("data/gcode/sample.stl.gcode")
+    xy = (33.333, -129.61)
+    line = 29
+    assert get_true_line_number(xy, line, gcode, None) == 28
+
+
 def test_get_true_line_number():
     gcode = load_gcode("data/gcode/sample.stl.gcode")
     xy = (10.289, -56.699)
