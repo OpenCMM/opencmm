@@ -134,6 +134,41 @@ def get_true_line_number(
     return None
 
 
+def get_true_line_and_feedrate(
+    xy: tuple, line: int, gcode: list, first_line_for_tracing: int = None
+) -> int:
+    """
+    Use xy coordinates as a ground truth to find the line number
+    Check if the xy coordinates are within the line
+    """
+    lines = []
+    if line == 1:
+        # the very last line sometimes turns 1 before it supposed to
+        last_line = len(gcode) + 2
+        (start, end, feedrate) = get_start_end_points_from_line_number(gcode, last_line)
+        if are_points_equal(xy, end):
+            # already at the end of the line and cannot estimate when it arrived
+            return lines
+        if is_point_on_line(xy, start, end):
+            return [[last_line, feedrate, start, end]]
+        return lines
+
+    if first_line_for_tracing:
+        assert gcode[first_line_for_tracing - 5][0] == "G4", "G4 is missing"
+
+    try:
+        for i in range(3):
+            (start, end, feedrate) = get_start_end_points_from_line_number(
+                gcode, line - i
+            )
+            if is_point_on_line(xy, start, end):
+                lines.append([line - i, feedrate, start, end])
+    except LineNumberTooSmall:
+        return lines
+
+    return lines
+
+
 def get_gcode_line_path(gcode_filepath: str):
     gcode_rows = load_gcode(gcode_filepath)
     gcode_line_path = []
