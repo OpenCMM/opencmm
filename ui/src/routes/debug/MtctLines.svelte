@@ -3,7 +3,6 @@
 	import axios from 'axios';
 	import { DataTable, InlineLoading } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
-	import { _ } from 'svelte-i18n';
 
 	export let modelId: string;
 	export let processId: string;
@@ -13,13 +12,13 @@
 		{ key: 'id', value: 'ID' },
 		{ key: 'line', value: 'line' },
 		{ key: 'start', value: 'start' },
-		{ key: 'end', value: 'end' },
+		{ key: 'end', value: 'end' }
 	];
 	interface MtcnLine {
 		id: number;
 		line: number;
 		start: string;
-		end:  string;
+		end: string;
 	}
 	let lines: MtcnLine[] = [];
 

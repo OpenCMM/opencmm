@@ -507,6 +507,7 @@ async def get_timestamps_on_lines(model_id: int, process_id: int):
     lines = mtct_data_checker.estimate_timestamps_from_mtct_data()
     return {"lines": lines.tolist()}
 
+
 @app.get("/model/shapes/{model_id}")
 async def get_model_shape_data(model_id: int):
     lines, arcs = get_model_shapes(model_id)

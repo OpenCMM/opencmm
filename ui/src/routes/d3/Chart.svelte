@@ -205,7 +205,7 @@
 				.style('top', event.pageY - 28 + 'px');
 		});
 
-		dot.on('mouseout', function (event, d) {
+		dot.on('mouseout', function () {
 			d3.select(this).style('fill', edgeColor);
 			tooltip.transition().duration(500).style('opacity', 0);
 		});
@@ -219,7 +219,7 @@
 				.style('top', event.pageY - 28 + 'px');
 		});
 
-		measuredDot.on('mouseout', function (event, d) {
+		measuredDot.on('mouseout', function () {
 			d3.select(this).style('fill', measuredEdgeColor);
 			tooltip.transition().duration(500).style('opacity', 0);
 		});
