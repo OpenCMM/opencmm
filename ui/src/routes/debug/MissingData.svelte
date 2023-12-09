@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { BACKEND_URL } from '$lib/constants/backend';
-	import { displayCoordinates, displayLengthDifference, displayRadius } from '$lib/utils/display';
 	import axios from 'axios';
 	import { DataTable, InlineLoading } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';

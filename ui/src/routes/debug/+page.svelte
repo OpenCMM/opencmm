@@ -6,6 +6,7 @@
 	import axios from 'axios';
 	import { BACKEND_URL } from '$lib/constants/backend';
 	import MissingData from './MissingData.svelte';
+	import MtctLines from './MtctLines.svelte';
 
 	const modelId = $page.url.searchParams.get('id');
 	const processId = $page.url.searchParams.get('process');
@@ -31,6 +32,7 @@
 			</Column>
 			<Column>
 				<MissingData {modelId} {processId} />
+				<MtctLines {modelId} {processId} />
 			</Column>
 		</Row>
 	</Grid>

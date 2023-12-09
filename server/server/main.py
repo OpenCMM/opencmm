@@ -27,7 +27,7 @@ from server.listener import (
     hakaru,
 )
 from server.measure import EstimateConfig, update_data_after_measurement, recompute
-from server.measure.mtconnect import check_if_mtconnect_data_is_missing
+from server.measure.mtconnect import check_if_mtconnect_data_is_missing, MtctDataChecker
 from server.measure.gcode import get_gcode_line_path
 from server.config import MYSQL_CONFIG, MODEL_PATH, get_config, update_conf
 from server.model import (
@@ -500,6 +500,12 @@ async def get_result_slopes(model_id: int, process_id: int):
     slopes = result.fetch_slope_results(model_id, process_id)
     return {"slopes": slopes}
 
+
+@app.get("/result/mtconnect/lines")
+async def get_timestamps_on_lines(model_id: int, process_id: int):
+    mtct_data_checker = MtctDataChecker(MYSQL_CONFIG, model_id, process_id)
+    lines = mtct_data_checker.estimate_timestamps_from_mtct_data()
+    return {"lines": lines.tolist()}
 
 @app.get("/model/shapes/{model_id}")
 async def get_model_shape_data(model_id: int):
