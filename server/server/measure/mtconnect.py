@@ -86,10 +86,7 @@ class MtctDataChecker:
         self.gcode = load_gcode(gcode_file_path)
         mtconnect_data = get_mtconnect_data(self.process_id, self.mysql_config)
         self.np_mtconnect_data = np.array(mtconnect_data)
-        self.trace_ids = get_trace_ids(self.mysql_config, self.model_id)
         self.last_line = len(self.gcode) + 2
-        if self.trace_ids:
-            self.last_line -= 1
         self.init_line = 4
         self.lines = []
         self.first_line_for_tracing = get_first_line_number_for_tracing(
@@ -97,14 +94,26 @@ class MtctDataChecker:
         )
         self.config = get_config()
 
+    def find_idx_of_first_line_number(self, lines):
+        if lines[0][0] != self.last_line:
+            return 0
+        current_line = lines[0][0]
+        for i, line in enumerate(lines):
+            if line[0] < current_line:
+                return i
+            current_line = line[0]
+
     def add_missing_timestamps(self, lines):
         """
         Add missing timestamps to lines
         """
         new_lines = []
-        current_line = lines[0][0]
-        for i in range(len(lines)):
-            assert lines[i][0] >= current_line
+        first_line_number_idx = self.find_idx_of_first_line_number(lines)
+        current_line = lines[first_line_number_idx][0]
+        for i in range(first_line_number_idx, len(lines)):
+            if lines[i][0] < current_line:
+                # line should be in order
+                continue
 
             line_number = lines[i][0]
             if line_number == current_line:

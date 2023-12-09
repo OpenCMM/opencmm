@@ -143,14 +143,20 @@ def get_true_line_and_feedrate(
     """
     lines = []
     if line == 1:
-        # the very last line sometimes turns 1 before it supposed to
         last_line = len(gcode) + 2
-        (start, end, feedrate) = get_start_end_points_from_line_number(gcode, last_line)
-        if are_points_equal(xy, end):
-            # already at the end of the line and cannot estimate when it arrived
-            return lines
-        if is_point_on_line(xy, start, end):
-            return [[last_line, feedrate, start, end]]
+        for i in range(3):
+            # the very last line sometimes turns 1 before it supposed to
+            (start, end, feedrate) = get_start_end_points_from_line_number(
+                gcode, last_line - i
+            )
+            if i == 0 and are_points_equal(xy, end):
+                # already at the end of the line and cannot estimate when it arrived
+                if not first_line_for_tracing:
+                    # in edge detection mode, this is crucial
+                    return lines
+                # in tracing mode, the timestamp at the end of the line is not important
+            if is_point_on_line(xy, start, end):
+                lines.append([last_line - i, feedrate, start, end])
         return lines
 
     if first_line_for_tracing:

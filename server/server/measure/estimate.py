@@ -21,13 +21,10 @@ import numpy as np
 from .gcode import (
     load_gcode,
     get_start_end_points_from_line_number,
-    get_timestamp_at_point,
-    get_true_line_number,
 )
-from .mtconnect import get_mtconnect_data
+from .mtconnect import MtctDataChecker
 from server.mark import arc, pair
 from server.mark.trace import (
-    get_first_line_number_for_tracing,
     get_trace_line_id_from_line_number,
 )
 from server.mark.trace import import_trace_line_results
@@ -45,8 +42,8 @@ class Result:
         self.process_id = process_id
         self.conf = get_config()
 
-        mtconnect_data = get_mtconnect_data(process_id, mysql_config)
-        self.np_mtconnect_data = np.array(mtconnect_data)
+        self.mtct_data_checker = MtctDataChecker(mysql_config, model_id, process_id)
+        self.mtct_lines = self.mtct_data_checker.estimate_timestamps_from_mtct_data()
         sensor_data = get_sensor_data(process_id, mysql_config)
         self.np_sensor_data = np.array(sensor_data)
 
@@ -56,7 +53,8 @@ class Result:
         gcode_filename = get_gcode_filename(filename)
         gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
         self.gcode = load_gcode(gcode_file_path)
-        self.z = self.np_mtconnect_data[0][5]
+        self.z = self.mtct_data_checker.np_mtconnect_data[0][5]
+        self.first_line_for_tracing = self.mtct_data_checker.first_line_for_tracing
 
     def sensor_timestamp_to_coord(
         self,
@@ -85,19 +83,13 @@ class Result:
         coord = np.round(coord, 3)
         return tuple(coord)
 
-    def get_edge_results(self, mtconnect_row, line):
+    def get_edge_results(self, start_timestamp, end_timestamp, line):
         """
         Estimate the exact coordinate of the edge from mtconnect data and
         sensor data using timestamp
         """
-        mtconnect_latency = self.conf["mtconnect"]["latency"]
-        xy = (mtconnect_row[3], mtconnect_row[4])
-        _timestamp = mtconnect_row[2] - timedelta(milliseconds=mtconnect_latency)
         # feedrate = row[7] # feedrate from MTConnect is not accurate
         (start, end, feedrate) = get_start_end_points_from_line_number(self.gcode, line)
-        # get timestamp at start and end
-        start_timestamp = get_timestamp_at_point(xy, start, feedrate, _timestamp, True)
-        end_timestamp = get_timestamp_at_point(xy, end, feedrate, _timestamp, False)
 
         # get sensor data that is between start and end timestamp
         for sensor_row in self.np_sensor_data:
@@ -136,18 +128,10 @@ class Result:
                     )
                 return results
 
-    def get_trace_line_result(self, mtconnect_row, line):
+    def get_trace_line_result(self, start_timestamp, end_timestamp, line):
         """
         Estimate the approximate distance between the workpiece and the sensor
         """
-        mtconnect_latency = self.conf["mtconnect"]["latency"]
-        xy = (mtconnect_row[3], mtconnect_row[4])
-        _timestamp = mtconnect_row[2] - timedelta(milliseconds=mtconnect_latency)
-        (start, end, feedrate) = get_start_end_points_from_line_number(self.gcode, line)
-        # get timestamp at start and end
-        start_timestamp = get_timestamp_at_point(xy, start, feedrate, _timestamp, True)
-        end_timestamp = get_timestamp_at_point(xy, end, feedrate, _timestamp, False)
-
         distance_results = []
         # get sensor data that is between start and end timestamp
         for sensor_row in self.np_sensor_data:
@@ -168,44 +152,45 @@ class Result:
         return [trace_line_id, self.process_id, average_sensor_output]
 
     def compute_updating_data(self):
-        first_line_for_tracing = get_first_line_number_for_tracing(
-            self.mysql_config, self.model_id
-        )
-
         current_line = 0
         edge_update_list = []
         trace_line_update_list = []
-        for row in self.np_mtconnect_data:
-            xy = (row[3], row[4])
-            line = int(row[6])
-            line = get_true_line_number(xy, line, self.gcode, first_line_for_tracing)
-            if not line:
-                # Not on line
-                continue
-
-            if line == current_line:
+        for mtct_line in self.mtct_lines:
+            line_number, start_timestamp, end_timestamp = mtct_line
+            if line_number == current_line:
                 continue
 
             # Edge detection
-            if not first_line_for_tracing or line < first_line_for_tracing - 2:
-                if line % 2 != 0:
+            if (
+                not self.first_line_for_tracing
+                or line_number < self.first_line_for_tracing - 2
+            ):
+                if line_number % 2 != 0:
                     # Not measuring
                     continue
 
-                edge_results = self.get_edge_results(row, line)
+                edge_results = self.get_edge_results(
+                    start_timestamp, end_timestamp, line_number
+                )
                 if edge_results:
                     edge_update_list += edge_results
 
+            # waiting
+            elif line_number == self.first_line_for_tracing - 2:
+                continue
+
             # tracing
             else:
-                if line % 2 == 0:
+                if line_number % 2 == 0:
                     # Not measuring
                     continue
-                trace_line_result = self.get_trace_line_result(row, line)
+                trace_line_result = self.get_trace_line_result(
+                    start_timestamp, end_timestamp, line_number
+                )
                 if trace_line_result:
                     trace_line_update_list.append(trace_line_result)
 
-            current_line = line
+            current_line = line_number
 
         return edge_update_list, trace_line_update_list
 
