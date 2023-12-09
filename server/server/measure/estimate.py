@@ -26,6 +26,7 @@ from .mtconnect import MtctDataChecker
 from server.mark import arc, pair
 from server.mark.trace import (
     get_trace_line_id_from_line_number,
+    delete_trace_line_results,
 )
 from server.mark.trace import import_trace_line_results
 import logging
@@ -260,6 +261,7 @@ def recompute(mysql_config: dict, process_id: int):
     delete_edge_results(mysql_config, process_id)
     arc.delete_measured_arc_info(mysql_config, process_id)
     pair.delete_measured_length(mysql_config, process_id)
+    delete_trace_line_results(mysql_config, process_id)
 
     process_data = status.get_process_status(mysql_config, process_id)
     model_id = process_data[1]

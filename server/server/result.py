@@ -1,8 +1,9 @@
 import mysql.connector
-from server.config import MYSQL_CONFIG, get_config
+from server.config import MYSQL_CONFIG
 import numpy as np
 from server.model import get_model_data
 from server.mark.slope import get_angle
+from server.measure.sensor import sensor_output_diff_to_mm, sensor_output_to_mm
 
 
 def fetch_edges(model_id: int):
@@ -206,8 +207,6 @@ def group_by_trace_id(traces):
 
 
 def fetch_step_results(model_id: int, process_id: int):
-    conf = get_config()
-    sensor_middle_output = conf["sensor"]["middle_output"]
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
     cursor = cnx.cursor()
 
@@ -239,7 +238,7 @@ def fetch_step_results(model_id: int, process_id: int):
             current_trace_id = trace[0]
         else:
             output_diff = abs(trace[6] - previous_distance)
-            diff = 35 / sensor_middle_output * output_diff
+            diff = sensor_output_diff_to_mm(output_diff)
             steps.append((trace[0], trace[3], diff))
 
     cursor.close()
@@ -248,8 +247,6 @@ def fetch_step_results(model_id: int, process_id: int):
 
 
 def fetch_slope_results(model_id: int, process_id: int):
-    conf = get_config()
-    sensor_middle_output = conf["sensor"]["middle_output"]
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
     cursor = cnx.cursor()
 
@@ -283,7 +280,7 @@ def fetch_slope_results(model_id: int, process_id: int):
         trace_id = trace[0][0]
         assert len(trace) > 2
         for row in trace:
-            z = 35 / sensor_middle_output * (row[8] - sensor_middle_output) + 100
+            z = sensor_output_to_mm(row[8]) + 100
             current_point = np.array([row[5], row[6], z])
             if previous_point is None:
                 previous_point = current_point
