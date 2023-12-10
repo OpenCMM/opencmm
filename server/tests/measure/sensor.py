@@ -15,7 +15,7 @@ class MockSensor:
         ]
         if locations is None:
             return None
-        # location with the hiihest z value is the closest point
+        # location with the highest z value is the closest point
         location = locations[np.argmax(locations[:, 2])]
         distance = np.linalg.norm(np.array(xyz) - location)
         return distance

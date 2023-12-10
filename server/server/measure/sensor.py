@@ -1,7 +1,6 @@
 import mysql.connector
 from server.config import get_config
 
-
 def get_sensor_data(process_id: int, mysql_config: dict):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
@@ -27,7 +26,7 @@ def sensor_output_diff_to_mm(sensor_output_diff: float):
 
 def sensor_output_to_mm(sensor_output: float):
     """
-    Convert raw sensor output to mm
+    Convert raw sensor output to mm \n
     The distance between sensor and model is 100.0mm when this value is 0.0mm
     """
     conf = get_config()
