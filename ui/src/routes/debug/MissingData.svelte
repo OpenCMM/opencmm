@@ -3,7 +3,6 @@
 	import axios from 'axios';
 	import { DataTable, InlineLoading } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
-	import { _ } from 'svelte-i18n';
 
 	export let modelId: string;
 	export let processId: string;

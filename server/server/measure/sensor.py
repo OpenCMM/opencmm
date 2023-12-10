@@ -1,6 +1,7 @@
 import mysql.connector
 from server.config import get_config
 
+
 def get_sensor_data(process_id: int, mysql_config: dict):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()

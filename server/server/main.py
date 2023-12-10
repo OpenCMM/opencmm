@@ -514,6 +514,14 @@ async def get_model_shape_data(model_id: int):
     return {"lines": lines, "arcs": arcs}
 
 
+@app.get("/sensor/positions/{model_id}/{process_id}")
+async def get_sensor_positions(
+    model_id: int, process_id: int, mtct_latency: float = None
+):
+    sensor_positions = result.fetch_all_sensor_data(model_id, process_id, mtct_latency)
+    return {"sensor": sensor_positions}
+
+
 @app.get("/list/processes/{model_id}")
 async def get_process_list(model_id: int):
     processes = status.get_process_list(MYSQL_CONFIG, model_id)
