@@ -167,6 +167,19 @@ class MtctDataChecker:
         assert line_number >= 3
         return self.gcode[line_number - 3 :]
 
+    def add_start_end_coordinates(self, lines):
+        """
+        Add start and end coordinates to lines
+        """
+        new_lines = []
+        for line in lines:
+            line_number = line[0]
+            (start, end, feedrate) = get_start_end_points_from_line_number(
+                self.gcode, line_number
+            )
+            new_lines.append([*line, *start, *end, feedrate])
+        return new_lines
+
     def estimate_timestamps_from_mtct_data(self, mtconnect_latency: float = None):
         lines = []
         mtconnect_latency = mtconnect_latency or self.config["mtconnect"]["latency"]
@@ -202,4 +215,5 @@ class MtctDataChecker:
                         break
 
         missing_lines_added = self.add_missing_timestamps(lines)
-        return np.array(missing_lines_added)
+        lines_with_coordinates = self.add_start_end_coordinates(missing_lines_added)
+        return np.array(lines_with_coordinates)

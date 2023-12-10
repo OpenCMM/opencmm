@@ -33,3 +33,13 @@ def sensor_output_to_mm(sensor_output: float):
     conf = get_config()
     sensor_middle_output = conf["sensor"]["middle_output"]
     return sensor_output_diff_to_mm(sensor_output - sensor_middle_output)
+
+
+def mm_to_sensor_output(mm: float):
+    """
+    Convert mm to raw sensor output \n
+    The distance between sensor and model is 100.0mm when this value is 0.0mm
+    """
+    conf = get_config()
+    sensor_middle_output = conf["sensor"]["middle_output"]
+    return (mm * 798 / 3.02) * (sensor_middle_output / 9400) + sensor_middle_output

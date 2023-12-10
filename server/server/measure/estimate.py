@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from server.config import (
     GCODE_PATH,
     LISTENER_LOG_TOPIC,
+    MODEL_PATH,
     MQTT_BROKER_URL,
     MQTT_PASSWORD,
     MQTT_USERNAME,
@@ -15,7 +16,7 @@ from server.mark.edge import (
     delete_edge_results,
 )
 from server.mark.gcode import get_gcode_filename
-from .sensor import get_sensor_data
+from .sensor import get_sensor_data, sensor_output_to_mm
 from server.model import get_model_data
 import numpy as np
 from .gcode import (
@@ -31,6 +32,7 @@ from server.mark.trace import (
 from server.mark.trace import import_trace_line_results
 import logging
 from scipy.ndimage import uniform_filter1d
+import trimesh
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
 logger = logging.getLogger(__name__)
@@ -50,7 +52,9 @@ class Result:
 
         model_row = get_model_data(model_id)
         filename = model_row[1]
-        # offset = (model_row[3], model_row[4], model_row[5])
+        self.stl_filepath = f"{MODEL_PATH}/{filename}"
+        self.mesh = trimesh.load(self.stl_filepath)
+        self.offset = (model_row[3], model_row[4], model_row[5])
         gcode_filename = get_gcode_filename(filename)
         gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
         self.gcode = load_gcode(gcode_file_path)
@@ -84,6 +88,29 @@ class Result:
         coord = np.round(coord, 3)
         return tuple(coord)
 
+    def get_expected_z_value(self, xy: tuple):
+        ray_origins = np.array([[xy[0] - self.offset[0], xy[1] - self.offset[1], 100]])
+        ray_directions = np.array([[0, 0, -1]])
+        locations = self.mesh.ray.intersects_location(
+            ray_origins=ray_origins, ray_directions=ray_directions
+        )[0]
+        if len(locations) == 0:
+            return None
+        # location with the highest z value is the closest point
+        location = locations[np.argmax(locations[:, 2])]
+        return location[2] + self.offset[2]
+
+    def validate_sensor_output(self, sensor_output: float, start: tuple, end: tuple):
+        measured_z = sensor_output_to_mm(sensor_output)
+        edge_xy = (np.array(start) + np.array(end)) / 2
+        expected_z = self.get_expected_z_value(edge_xy)
+        # sensor outputs >18800 when there is no workpiece in the sensor range
+        if expected_z is None:
+            return sensor_output > 18800
+        if -35 <= expected_z <= 35:
+            return abs(measured_z - expected_z) < self.conf["sensor"]["tolerance"]
+        return sensor_output > 18800
+
     def get_edge_results(self, start_timestamp, end_timestamp, line):
         """
         Estimate the exact coordinate of the edge from mtconnect data and
@@ -95,7 +122,12 @@ class Result:
         # get sensor data that is between start and end timestamp
         for sensor_row in self.np_sensor_data:
             sensor_timestamp = sensor_row[2]
+            sensor_output = sensor_row[3]
+            if sensor_row[0] == 2:
+                pass
             if start_timestamp <= sensor_timestamp <= end_timestamp:
+                if not self.validate_sensor_output(sensor_output, start, end):
+                    continue
                 direction_vector = np.array([end[0] - start[0], end[1] - start[1]])
                 distance = np.linalg.norm(direction_vector)
                 direction_vector = tuple(direction_vector / distance)
@@ -157,7 +189,10 @@ class Result:
         edge_update_list = []
         trace_line_update_list = []
         for mtct_line in self.mtct_lines:
-            line_number, start_timestamp, end_timestamp = mtct_line
+            line_number = mtct_line[0]
+            start_timestamp = mtct_line[1]
+            end_timestamp = mtct_line[2]
+
             if line_number == current_line:
                 continue
 
