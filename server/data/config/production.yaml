@@ -9,8 +9,8 @@ mqtt:
   port: 1883
   username: opencmm
 mtconnect:
-  interval: 100 # ms
-  latency: 30 # ms
+  interval: 700 # ms
+  latency: 2600 # ms
   url: http://192.168.0.19:5000/current?path=//Components
 sensor:
   interval: 10 # ms

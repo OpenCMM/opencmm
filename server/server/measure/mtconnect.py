@@ -111,9 +111,8 @@ class MtctDataChecker:
         Add missing timestamps to lines
         """
         new_lines = []
-        first_line_number_idx = self.find_idx_of_first_line_number(lines)
-        current_line = lines[first_line_number_idx][0]
-        for i in range(first_line_number_idx, len(lines)):
+        current_line = lines[0][0]
+        for i in range(len(lines)):
             if lines[i][0] < current_line:
                 # line should be in order
                 continue
@@ -131,6 +130,36 @@ class MtctDataChecker:
             new_lines.append(lines[i])
             current_line = line_number
         return new_lines
+
+    def get_missing_lines(self, lines):
+        missing_lines = []
+        current_line = lines[0][0]
+        for i in range(len(lines)):
+            if lines[i][0] < current_line:
+                # line should be in order
+                continue
+
+            line_number = lines[i][0]
+
+            if line_number == current_line + 2:
+                # i-1 is missing
+                # add i-1
+                (start, end, feedrate) = get_start_end_points_from_line_number(
+                    self.gcode, current_line + 1
+                )
+                missing_lines.append(
+                    [
+                        current_line + 1,
+                        lines[i - 1][2],
+                        lines[i][1],
+                        *start,
+                        *end,
+                        feedrate,
+                    ]
+                )
+
+            current_line = line_number
+        return missing_lines
 
     def to_line_row(self, line_candidate, xy, timestamp):
         feedrate = line_candidate[1]
@@ -283,3 +312,23 @@ class MtctDataChecker:
         delays = self.get_delay(lines)
         delays = np.array(delays)
         return self.robust_mean(delays[:, 2])
+
+    def missing_line_travel_time_diff(self):
+        lines = self.estimate_timestamps_from_mtct_data(
+            add_missing=False, remove_duplicate=True
+        )
+        missing_lines = self.get_missing_lines(lines)
+        diff_list = []
+        for line in missing_lines:
+            start = line[3:5]
+            end = line[5:7]
+            if start == end:
+                continue
+            travel_time = self.get_travel_time(start, end, line[7] * 60)
+            actual_time = line[2] - line[1]
+            diff = actual_time - travel_time
+            diff_list.append(diff.total_seconds())
+
+        np_diff = np.array(diff_list)
+        avg_diff = self.robust_mean(np_diff)
+        return avg_diff
