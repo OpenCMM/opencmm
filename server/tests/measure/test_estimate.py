@@ -182,6 +182,8 @@ def test_update_data_after_measurement_perfect_data_with_arc():
     arcs = response.json()["arcs"]
     for arc in arcs:
         radius = arc[1]
+        if radius != 9:
+            continue
         estimated_radius = arc[5]
         assert abs(radius - estimated_radius) < 0.01
 

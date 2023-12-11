@@ -123,8 +123,6 @@ class Result:
         for sensor_row in self.np_sensor_data:
             sensor_timestamp = sensor_row[2]
             sensor_output = sensor_row[3]
-            if sensor_row[0] == 2:
-                pass
             if start_timestamp <= sensor_timestamp <= end_timestamp:
                 if not self.validate_sensor_output(sensor_output, start, end):
                     continue
