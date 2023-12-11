@@ -103,6 +103,9 @@ class MtctDataChecker:
                 return i
             current_line = line[0]
 
+    def remove_falsely_added_last_lines(self, lines):
+        return lines[self.find_idx_of_first_line_number(lines) :]
+
     def add_missing_timestamps(self, lines):
         """
         Add missing timestamps to lines
@@ -180,7 +183,26 @@ class MtctDataChecker:
             new_lines.append([*line, *start, *end, feedrate])
         return new_lines
 
-    def estimate_timestamps_from_mtct_data(self, mtconnect_latency: float = None):
+    def remove_duplicate_lines(self, lines):
+        """
+        Remove duplicate lines
+        """
+        new_lines = []
+        current_line = lines[0]
+        for line in lines[1:]:
+            if line[0] == current_line[0]:
+                continue
+            new_lines.append(current_line)
+            current_line = line
+        new_lines.append(current_line)
+        return new_lines
+
+    def estimate_timestamps_from_mtct_data(
+        self,
+        mtconnect_latency: float = None,
+        add_missing: bool = True,
+        remove_duplicate: bool = True,
+    ):
         lines = []
         mtconnect_latency = mtconnect_latency or self.config["mtconnect"]["latency"]
 
@@ -214,6 +236,50 @@ class MtctDataChecker:
                         lines.append(_line_row)
                         break
 
-        missing_lines_added = self.add_missing_timestamps(lines)
-        lines_with_coordinates = self.add_start_end_coordinates(missing_lines_added)
+        lines = self.remove_falsely_added_last_lines(lines)
+        if add_missing:
+            lines = self.add_missing_timestamps(lines)
+        lines_with_coordinates = self.add_start_end_coordinates(lines)
+        if remove_duplicate:
+            lines_with_coordinates = self.remove_duplicate_lines(lines_with_coordinates)
         return np.array(lines_with_coordinates)
+
+    def get_delay(self, lines):
+        prev_line_end = lines[0][2]
+        prev_line_number = lines[0][0]
+        delays = []
+        for i in range(1, len(lines)):
+            line = lines[i]
+            line_number = line[0]
+            if line_number - 1 == prev_line_number:
+                delay = line[1] - prev_line_end
+                delays.append([prev_line_number, line_number, delay.total_seconds()])
+
+            prev_line_number = line_number
+            prev_line_end = line[2]
+
+        return delays
+
+    def robust_mean(self, data):
+        """
+        Calculates the robust mean of a 1D numpy array
+        by filtering out significantly deviated elements.
+
+        Args:
+            data: A 1D numpy array.
+
+        Returns:
+            The robust mean of the data.
+        """
+        median = np.median(data)
+        mad = np.median(np.abs(data - median))
+        filtered_data = data[np.abs(data - median) <= 3 * mad]
+        return np.mean(filtered_data)
+
+    def get_average_delay_between_lines(self):
+        lines = self.estimate_timestamps_from_mtct_data(
+            add_missing=False, remove_duplicate=True
+        )
+        delays = self.get_delay(lines)
+        delays = np.array(delays)
+        return self.robust_mean(delays[:, 2])
