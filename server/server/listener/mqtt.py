@@ -16,6 +16,17 @@ class MqttListener:
         self.device = self.config["mtconnect"]["device"]
         self.topic = f"MTConnect/Current/{self.device}"
 
+    def remove_unavailable_data(self, mt_data_list: list):
+        # remove unavailable data
+        update_data_list = []
+        for mt_data in mt_data_list:
+            if None in mt_data:
+                continue
+            if "UNAVAILABLE" in mt_data:
+                continue
+            update_data_list.append(mt_data)
+        return update_data_list
+
     def import_mtconnect_data_from_mqtt_log(self, mqtt_log_path: str):
         update_list = []
         prev_timestamp = None
@@ -88,4 +99,5 @@ class MqttListener:
                 count += 1
 
         logger.info(f"count: {count}")
+        update_list = self.remove_unavailable_data(update_list)
         import_mtconnect_data(self.mysql_config, update_list)
