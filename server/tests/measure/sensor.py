@@ -1,5 +1,6 @@
 import numpy as np
 import trimesh
+from server.measure.sensor import mm_to_sensor_output
 
 
 class MockSensor:
@@ -28,9 +29,8 @@ class MockSensor:
         # if distance is not between 65 ~ 135 mm,
         # sensor outputs 18900
         if 65 <= distance <= 135:
-            return self.middle_sensor_output + (100 - distance) * (
-                self.middle_sensor_output / 35
-            )
+            z = 100 - distance
+            mm_to_sensor_output(z)
         else:
             return 18900
 
@@ -42,8 +42,8 @@ class MockSensor:
         # if distance is not between 65 ~ 135 mm,
         # sensor outputs 18900
         if 65 <= distance <= 135:
-            return self.middle_sensor_output + (100 - distance) * (
-                self.middle_sensor_output / 35
-            ) * (1 + fluctuation * np.random.randn())
+            z = 100 - distance
+            z = z * np.random.uniform(1 - fluctuation, 1 + fluctuation)
+            mm_to_sensor_output(z)
         else:
             return 18900

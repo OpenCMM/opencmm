@@ -119,7 +119,7 @@ def test_setup_data_with_arcs_with_offset():
         "move_feedrate": 600.0,
         "x_offset": 50.0,
         "y_offset": -65.0,
-        "z_offset": 0.0,
+        "z_offset": -10.0,
         "send_gcode": False,
     }
     response = client.post("/setup/data", json=job_info)

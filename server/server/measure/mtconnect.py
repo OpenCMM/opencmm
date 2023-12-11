@@ -306,6 +306,10 @@ class MtctDataChecker:
         return np.mean(filtered_data)
 
     def get_average_delay_between_lines(self):
+        """
+        Get average delay between lines, which is the time
+        took to move from one line to another
+        """
         lines = self.estimate_timestamps_from_mtct_data(
             add_missing=False, remove_duplicate=True
         )

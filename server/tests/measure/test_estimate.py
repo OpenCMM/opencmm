@@ -1,8 +1,9 @@
-from server.measure.estimate import update_data_after_measurement
+from server.measure.estimate import update_data_after_measurement, Result
 from server.config import MYSQL_CONFIG
 from server.listener import status
 from fastapi.testclient import TestClient
 from server.main import app
+import pytest
 from .mockdata import (
     create_mock_data,
     create_mock_missing_data,
@@ -13,6 +14,20 @@ from .mockdata import (
 
 client = TestClient(app)
 z = 10.0
+
+
+@pytest.mark.skip(reason="Only for local testing")
+def test_get_expected_z_value():
+    result = Result(MYSQL_CONFIG, 3, 2)
+    z = result.get_expected_z_value((0, 0))
+    assert z == 0.0
+
+
+@pytest.mark.skip(reason="Only for local testing")
+def test_validate_sensor_output():
+    result = Result(MYSQL_CONFIG, 1, 2)
+    assert result.validate_sensor_output(9400, (-2.5, 0), (2.5, 0))
+    assert not result.validate_sensor_output(18900, (-20.5, 0), (2.5, 0))
 
 
 def test_update_data_after_measurement():

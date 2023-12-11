@@ -5,6 +5,10 @@ from server.listener.status import (
     update_process_status,
     add_end_timestamp,
 )
+from fastapi.testclient import TestClient
+from server.main import app
+
+client = TestClient(app)
 
 
 def test_import_mtconnect_data_from_mqtt_log():
@@ -17,3 +21,25 @@ def test_import_mtconnect_data_from_mqtt_log():
         )
         add_end_timestamp(MYSQL_CONFIG, process_id)
         update_process_status(MYSQL_CONFIG, process_id, "done")
+
+        response = client.get(
+            (
+                "/result/mtconnect/avg/delay"
+                f"?model_id={model_id}&process_id={process_id}"
+            )
+        )
+        assert response.status_code == 200
+        result = response.json()
+        delay = result["delay"]
+        assert delay < 0.03
+
+        response = client.get(
+            (
+                "/result/mtconnect/missing/lines/travel/time/diff"
+                f"?model_id={model_id}&process_id={process_id}"
+            )
+        )
+        assert response.status_code == 200
+        result = response.json()
+        diff = result["diff"]
+        assert diff < 0.03
