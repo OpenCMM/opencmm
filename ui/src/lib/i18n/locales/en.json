@@ -159,11 +159,11 @@
 		},
 		"sensor": {
 			"label": "Sensor",
-			"interval": "Data fetch interval",
-			"threshold": "Threshold",
+			"interval": "Data fetch interval(ms)",
+			"threshold": "Minimum height difference(mm)",
 			"beamDiameter": "Beam diameter",
 			"middleOutput": "Middle output",
-			"responseTime": "Response time",
+			"responseTime": "Response time(ms)",
 			"tolerance": "tolerance"
 		}
 	},

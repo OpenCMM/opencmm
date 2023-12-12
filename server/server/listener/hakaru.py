@@ -15,6 +15,7 @@ from server.config import (
     RECEIVE_DATA_TOPIC,
 )
 import logging
+from server.measure.sensor import mm_to_sensor_output_diff
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
 logger = logging.getLogger(__name__)
@@ -115,7 +116,8 @@ def listen_sensor(
         client.subscribe(PROCESS_CONTROL_TOPIC)
 
         # send config to sensor
-        (interval, threshold) = streaming_config
+        (interval, threshold_in_mm) = streaming_config
+        threshold = int(mm_to_sensor_output_diff(threshold_in_mm))
         client.publish(CONTROL_SENSOR_TOPIC, send_config(interval, threshold))
         logger.info("sent config to sensor")
 

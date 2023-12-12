@@ -159,11 +159,11 @@
 		},
 		"sensor": {
 			"label": "センサー",
-			"interval": "データ取得間隔",
-			"threshold": "段差検知閾値",
+			"interval": "データ取得間隔(ms)",
+			"threshold": "段差検知閾値(mm)",
 			"beamDiameter": "ビーム径",
 			"middleOutput": "センサ中心値",
-			"responseTime": "応答速度",
+			"responseTime": "応答速度(ms)",
 			"tolerance": "データ誤差許容値"
 		}
 	},

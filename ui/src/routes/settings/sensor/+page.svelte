@@ -6,7 +6,7 @@
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	let interval = 700;
-	let threshold = 1000;
+	let threshold = 3.0;
 	let beamDiameter = 120.0;
 	let middleOutput = 9400.0;
 	let responseTime = 10.0;
@@ -68,6 +68,7 @@
 				bind:value={threshold}
 				id="threshold"
 				min={0}
+				step={0.01}
 				label={$_('settings.sensor.threshold')}
 			/>
 			<NumberInput
