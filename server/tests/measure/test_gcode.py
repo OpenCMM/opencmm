@@ -59,7 +59,7 @@ def test_get_true_line_number():
 
     job_info = {
         "three_d_model_id": model_id,
-        "range": 2.5,
+        "measurement_range": 2.5,
         "measure_feedrate": 100.0,
         "move_feedrate": 1000.0,
         "x_offset": 50.0,
@@ -106,7 +106,7 @@ def test_get_true_line_and_feedrate():
 
     job_info = {
         "three_d_model_id": model_id,
-        "range": 2.5,
+        "measurement_range": 2.5,
         "measure_feedrate": 100.0,
         "move_feedrate": 1000.0,
         "x_offset": 0.0,
