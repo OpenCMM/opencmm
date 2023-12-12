@@ -14,7 +14,7 @@
 		},
 		"setup": {
 			"title": "Gコード作成",
-			"measureLength": {
+			"measurementRange": {
 				"label": "測定箇所の長さ"
 			},
 			"loading": "Gコード作成中...",
@@ -144,10 +144,27 @@
 			"interval": "データ取得間隔",
 			"latency": "データ取得遅延時間"
 		},
+		"edge": {
+			"label": "形状測定",
+			"arcNumber": "円孤のデータ取得数",
+			"lineNumber": "線のデータ取得数"
+		},
+		"trace": {
+			"label": "高さ測定",
+			"minMeasureCount": "最小測定回数",
+			"maxFeedrate": "最大送り速度",
+			"interval": "データ取得間隔",
+			"margin": "余白",
+			"slopeNumber": "斜面のデータ取得数"
+		},
 		"sensor": {
 			"label": "センサー",
 			"interval": "データ取得間隔",
-			"threshold": "段差検知閾値"
+			"threshold": "段差検知閾値",
+			"beamDiameter": "ビーム径",
+			"middleOutput": "センサ中心値",
+			"responseTime": "応答速度",
+			"tolerance": "データ誤差許容値"
 		}
 	},
 	"page": {

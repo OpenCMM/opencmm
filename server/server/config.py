@@ -11,7 +11,9 @@ CI_MYSQL_CONFIG = dict(
 
 # MYSQL_URL = os.getenv("MYSQL_URL", "192.168.0.19")
 MYSQL_URL = os.getenv("MYSQL_URL", "192.168.122.76")
+# MYSQL_URL = os.getenv("MYSQL_URL", "yuchi-ubuntu.local")
 MYSQL_PORT = os.getenv("MYSQL_PORT", "3306")
+# MYSQL_PORT = os.getenv("MYSQL_PORT", "3307")
 
 MYSQL_CONFIG = dict(
     host=MYSQL_URL,
@@ -21,7 +23,8 @@ MYSQL_CONFIG = dict(
 )
 
 # MQTT_BROKER_URL = os.getenv("MQTT_BROKER_URL", "192.168.0.19")
-MQTT_BROKER_URL = os.getenv("MQTT_BROKER_URL", "192.168.10.104")
+MQTT_BROKER_URL = os.getenv("MQTT_BROKER_URL", "192.168.122.76")
+# MQTT_BROKER_URL = os.getenv("MQTT_BROKER_URL", "yuchi-ubuntu.local")
 CI_MQTT_BROKER_URL = "localhost"
 
 if os.environ.get("CI"):

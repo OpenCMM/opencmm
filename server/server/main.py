@@ -1,6 +1,11 @@
 from server.type.sensor import SensorConfig
 from server.type.mtconnect import MTConnectConfig
-from server.type.measurement import MeasurementConfig, MeasurementConfigWithProgram
+from server.type.measurement import (
+    EdgeDetectionConfig,
+    MeasurementConfig,
+    MeasurementConfigWithProgram,
+    TraceConfig,
+)
 import uvicorn
 import os
 from fastapi import FastAPI, UploadFile, HTTPException, BackgroundTasks, WebSocket
@@ -22,7 +27,7 @@ from server.listener import (
     hakaru,
 )
 from server.measure import EstimateConfig, update_data_after_measurement, recompute
-from server.measure.mtconnect import check_if_mtconnect_data_is_missing
+from server.measure.mtconnect import check_if_mtconnect_data_is_missing, MtctDataChecker
 from server.measure.gcode import get_gcode_line_path
 from server.config import MYSQL_CONFIG, MODEL_PATH, get_config, update_conf
 from server.model import (
@@ -35,7 +40,6 @@ from server.model import (
     model_id_to_filename,
     add_new_3dmodel,
     get_model_data,
-    delete_model,
     delete_model_files,
 )
 from server.mark.gcode import model_id_to_program_number, get_gcode_filename
@@ -46,7 +50,7 @@ import asyncio
 
 class JobInfo(BaseModel):
     three_d_model_id: int
-    measure_length: float
+    measurement_range: float
     measure_feedrate: float
     move_feedrate: float
     x_offset: Optional[float] = 0.0
@@ -118,6 +122,10 @@ def get_sensor_config():
     return {
         "interval": conf["interval"],
         "threshold": conf["threshold"],
+        "beam_diameter": conf["beam_diameter"],
+        "middle_output": conf["middle_output"],
+        "response_time": conf["response_time"],
+        "tolerance": conf["tolerance"],
     }
 
 
@@ -126,6 +134,52 @@ def update_sensor_config(_conf: SensorConfig):
     conf = get_config()
     conf["sensor"]["interval"] = _conf.interval
     conf["sensor"]["threshold"] = _conf.threshold
+    conf["sensor"]["beam_diameter"] = _conf.beam_diameter
+    conf["sensor"]["middle_output"] = _conf.middle_output
+    conf["sensor"]["response_time"] = _conf.response_time
+    conf["sensor"]["tolerance"] = _conf.tolerance
+    update_conf(conf)
+    return {"status": "ok"}
+
+
+@app.get("/get/edge_detection_config")
+def get_edge_detection_config():
+    conf = get_config()["edge"]
+    return {
+        "arc_number": conf["arc"]["number"],
+        "line_number": conf["line"]["number"],
+    }
+
+
+@app.post("/update/edge_detection_config")
+def update_edge_detection_config(_conf: EdgeDetectionConfig):
+    conf = get_config()
+    conf["edge"]["arc"]["number"] = _conf.arc_number
+    conf["edge"]["line"]["number"] = _conf.line_number
+    update_conf(conf)
+    return {"status": "ok"}
+
+
+@app.get("/get/trace_config")
+def get_trace_config():
+    conf = get_config()["trace"]
+    return {
+        "min_measure_count": conf["min_measure_count"],
+        "max_feedrate": conf["max_feedrate"],
+        "interval": conf["interval"],
+        "margin": conf["margin"],
+        "slope_number": conf["slope"]["number"],
+    }
+
+
+@app.post("/update/trace_config")
+def update_trace_config(_conf: TraceConfig):
+    conf = get_config()
+    conf["trace"]["min_measure_count"] = _conf.min_measure_count
+    conf["trace"]["max_feedrate"] = _conf.max_feedrate
+    conf["trace"]["interval"] = _conf.interval
+    conf["trace"]["margin"] = _conf.margin
+    conf["trace"]["slope"]["number"] = _conf.slope_number
     update_conf(conf)
     return {"status": "ok"}
 
@@ -164,7 +218,6 @@ async def upload_new_model(file: UploadFile):
 async def delete_model_data(model_id: int):
     """Delete model data"""
     delete_model_files(model_id)
-    delete_model(model_id)
     return {"status": "ok"}
 
 
@@ -214,11 +267,16 @@ async def setup_data(job_info: JobInfo):
     if not model_exists(filename):
         raise HTTPException(status_code=400, detail="No model uploaded")
     offset = (job_info.x_offset, job_info.y_offset, job_info.z_offset)
+    gcode_settings = (
+        job_info.measurement_range,
+        job_info.measure_feedrate,
+        job_info.move_feedrate,
+    )
     process_stl(
         MYSQL_CONFIG,
         job_info.three_d_model_id,
         filename,
-        (job_info.measure_length, job_info.measure_feedrate, job_info.move_feedrate),
+        gcode_settings,
         offset,
         job_info.send_gcode,
     )
@@ -448,10 +506,41 @@ async def get_result_slopes(model_id: int, process_id: int):
     return {"slopes": slopes}
 
 
+@app.get("/result/mtconnect/lines")
+async def get_timestamps_on_lines(model_id: int, process_id: int):
+    mtct_data_checker = MtctDataChecker(MYSQL_CONFIG, model_id, process_id)
+    lines = mtct_data_checker.estimate_timestamps_from_mtct_data()
+    return {"lines": lines.tolist()}
+
+
+@app.get("/result/mtconnect/avg/delay")
+async def get_mtct_delay_between_lines(model_id: int, process_id: int):
+    mtct_data_checker = MtctDataChecker(MYSQL_CONFIG, model_id, process_id)
+    avg, delays = mtct_data_checker.get_average_delay_between_lines()
+    return {"avg": avg, "delay": delays.tolist()}
+
+
+@app.get("/result/mtconnect/missing/lines/travel/time/diff")
+async def get_missing_lines_travel_time_diff(model_id: int, process_id: int):
+    mtct_data_checker = MtctDataChecker(MYSQL_CONFIG, model_id, process_id)
+    avg, np_diff = mtct_data_checker.missing_line_travel_time_diff()
+    if avg is None:
+        return {"avg": None, "diff": []}
+    return {"avg": avg, "diff": np_diff.tolist()}
+
+
 @app.get("/model/shapes/{model_id}")
 async def get_model_shape_data(model_id: int):
     lines, arcs = get_model_shapes(model_id)
     return {"lines": lines, "arcs": arcs}
+
+
+@app.get("/sensor/positions/{model_id}/{process_id}")
+async def get_sensor_positions(
+    model_id: int, process_id: int, mtct_latency: float = None
+):
+    sensor_positions = result.fetch_all_sensor_data(model_id, process_id, mtct_latency)
+    return {"sensor": sensor_positions}
 
 
 @app.get("/list/processes/{model_id}")

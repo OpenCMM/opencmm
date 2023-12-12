@@ -14,15 +14,15 @@
 		},
 		"setup": {
 			"title": "Create GCode",
-			"measureLength": {
-				"label": "measure length"
+			"measurementRange": {
+				"label": "Measurement range"
 			},
 			"loading": "Creating GCode...",
 			"measureFeedRate": {
-				"label": "feed rate when measuring"
+				"label": "Feed rate when measuring"
 			},
 			"moveFeedRate": {
-				"label": "feed rate when moving"
+				"label": "Feed rate when moving"
 			},
 			"offset": "offset",
 			"sendFile": "Send GCode to CNC machine",
@@ -144,10 +144,27 @@
 			"interval": "Data fetch interval",
 			"latency": "Latency"
 		},
+		"edge": {
+			"label": "Edge detection",
+			"arcNumber": "Sample number of arc",
+			"lineNumber": "Sample number of line"
+		},
+		"trace": {
+			"label": "Height measurement",
+			"minMeasureCount": "Minimum number of measurements",
+			"maxFeedrate": "Max feed rate",
+			"interval": "Data fetch interval",
+			"margin": "Margin",
+			"slopeNumber": "Sample number of slope"
+		},
 		"sensor": {
 			"label": "Sensor",
 			"interval": "Data fetch interval",
-			"threshold": "Threshold"
+			"threshold": "Threshold",
+			"beamDiameter": "Beam diameter",
+			"middleOutput": "Middle output",
+			"responseTime": "Response time",
+			"tolerance": "tolerance"
 		}
 	},
 	"page": {

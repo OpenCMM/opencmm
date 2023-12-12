@@ -141,6 +141,7 @@
 				<Column>
 					<OverflowMenu>
 						<OverflowMenuItem href={`/debug?id=${modelId}&process=${processId}`} text="MTConnect" />
+						<OverflowMenuItem href={`/mt?id=${modelId}&process=${processId}`} text="MTConnect 2D" />
 						<OverflowMenuItem
 							href={`/model/processes?id=${modelId}`}
 							text={$_('home.process.title')}

@@ -23,6 +23,7 @@ def delete_model_files(model_id: int):
     filename = model_id_to_filename(model_id)
     if model_exists(filename):
         delete_model(filename_to_model_id(filename))
+        os.remove(f"{MODEL_PATH}/{filename}")
         remove_if_gcode_exists(filename)
 
 
@@ -50,7 +51,7 @@ def list_3dmodel():
 
 
 def has_gcode(model_filename: str):
-    os.path.exists(f"data/gcode/{model_filename}.gcode")
+    return os.path.exists(f"data/gcode/{model_filename}.gcode")
 
 
 def remove_if_gcode_exists(model_filename: str):
@@ -149,10 +150,12 @@ def model_id_to_filename(_model_id: int):
     cursor = cnx.cursor()
     query = "SELECT filename FROM model WHERE id = %s"
     cursor.execute(query, (_model_id,))
-    filename = cursor.fetchone()[0]
+    filename = cursor.fetchone()
+    if filename is None:
+        return None
     cursor.close()
     cnx.close()
-    return filename
+    return filename[0]
 
 
 def filename_to_model_id(filename: str):
@@ -163,10 +166,12 @@ def filename_to_model_id(filename: str):
     cursor = cnx.cursor()
     query = "SELECT id FROM model WHERE filename = %s"
     cursor.execute(query, (filename,))
-    _model_id = cursor.fetchone()[0]
+    _model_id = cursor.fetchone()
+    if _model_id is None:
+        return None
     cursor.close()
     cnx.close()
-    return _model_id
+    return _model_id[0]
 
 
 def model_exists(filename: str):
@@ -190,14 +195,18 @@ def get_model_data(model_id: int):
     return model_data
 
 
-def update_offset(model_id: int, offset: tuple):
+def update_offset_gcode_settings(model_id: int, offset: tuple, gcode_settings: tuple):
     """
-    Update offset
+    Update offset and gcode settings
     """
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
     cursor = cnx.cursor()
-    query = "UPDATE model SET x_offset = %s, y_offset = %s, z_offset = %s WHERE id = %s"
-    cursor.execute(query, (*offset, model_id))
+    query = (
+        "UPDATE model SET x_offset = %s, y_offset = %s, z_offset = %s, "
+        "measurement_range = %s, measure_feedrate = %s, move_feedrate = %s "
+        "WHERE id = %s"
+    )
+    cursor.execute(query, (*offset, *gcode_settings, model_id))
     cnx.commit()
     cursor.close()
     cnx.close()

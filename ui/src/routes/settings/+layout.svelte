@@ -39,6 +39,18 @@
 				>
 					{$_('settings.sensor.label')}
 				</ClickableTile>
+				<ClickableTile
+					on:click={() => goto('/settings/edge')}
+					light={$page.url.pathname === '/settings/edge'}
+				>
+					{$_('settings.edge.label')}
+				</ClickableTile>
+				<ClickableTile
+					on:click={() => goto('/settings/trace')}
+					light={$page.url.pathname === '/settings/trace'}
+				>
+					{$_('settings.trace.label')}
+				</ClickableTile>
 			</Column>
 			<Column>
 				<slot />

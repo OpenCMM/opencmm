@@ -15,6 +15,9 @@ conf = get_config()
 mtconnect_latency = conf["mtconnect"]["latency"]
 beam_diameter = conf["sensor"]["beam_diameter"]
 sensor_response_time = conf["sensor"]["response_time"]  # in ms
+base_sensor_output = conf["sensor"]["middle_output"]
+trace_interval = conf["trace"]["interval"]
+mtconnect_adapter_interval = 0.8
 
 
 def import_sensor_data(mysql_config: dict, _sensor_data_list: list):
@@ -30,11 +33,6 @@ def import_sensor_data(mysql_config: dict, _sensor_data_list: list):
     mysql_conn.commit()
     mysql_cur.close()
     mysql_conn.close()
-
-
-def get_random_sensor_data():
-    sensor_output = random.randint(0, 19000)
-    return sensor_output
 
 
 def get_random_timestamp_between_two_timestamps(first_timestamp, last_timestamp):
@@ -53,17 +51,26 @@ def prepare_mock_data(filename: str):
 
 
 def create_sensor_data_row(_first_timestamp, _last_timestamp, _process_id):
-    sensor_output = get_random_sensor_data()
+    sensor_output = base_sensor_output
     sensor_timestamp = get_random_timestamp_between_two_timestamps(
         _first_timestamp, _last_timestamp
     )
     return (_process_id, sensor_timestamp, sensor_output)
 
 
-def get_xy_for_mtconnect(start_coord, feedrate, sample_interval, direction):
+def get_xy_for_sensor(start_coord, feedrate, interval, direction, idx):
     (x, y) = start_coord
-    _x = x + direction[0] * feedrate * sample_interval
-    _y = y + direction[1] * feedrate * sample_interval
+    _x = x + direction[0] * feedrate * interval * idx
+    _y = y + direction[1] * feedrate * interval * idx
+    _x = round(_x, 3)
+    _y = round(_y, 3)
+    return _x, _y
+
+
+def get_xy_for_mtconnect(start_coord, feedrate, mtconnect_adapter_interval, direction):
+    (x, y) = start_coord
+    _x = x + direction[0] * feedrate * mtconnect_adapter_interval
+    _y = y + direction[1] * feedrate * mtconnect_adapter_interval
     _x = round(_x, 3)
     _y = round(_y, 3)
     return _x, _y
@@ -87,7 +94,6 @@ def create_mock_perfect_data(filename: str, process_id: int):
     start_coord = (0.0, 0.0)
     mtconnect_mock_data = []
     sensor_mock_data = []
-    sample_interval = 0.5
     gcode_filename = get_gcode_filename(filename)
     gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
     gcode = load_gcode(gcode_file_path)
@@ -99,14 +105,14 @@ def create_mock_perfect_data(filename: str, process_id: int):
         distance = get_distance_between_two_points(start_coord, (x, y))
         feedrate = feedrate_per_min / 60.0
         direction = get_direction(start_coord, (x, y))
-        timestamp += timedelta(seconds=sample_interval)
-        for j in range(int(distance / (feedrate * sample_interval))):
-            timestamp += timedelta(seconds=sample_interval)
+        timestamp += timedelta(seconds=mtconnect_adapter_interval)
+        for j in range(int(distance / (feedrate * mtconnect_adapter_interval))):
+            timestamp += timedelta(seconds=mtconnect_adapter_interval)
             timestamp_with_latency = timestamp + timedelta(
                 milliseconds=mtconnect_latency
             )
             _x, _y = get_xy_for_mtconnect(
-                start_coord, feedrate, sample_interval, direction
+                start_coord, feedrate, mtconnect_adapter_interval, direction
             )
             _current_row = (
                 process_id,
@@ -121,7 +127,7 @@ def create_mock_perfect_data(filename: str, process_id: int):
                 mtconnect_mock_data.append(_current_row)
             start_coord = (_x, _y)
         if line % 2 == 0:
-            sensor_output = get_random_sensor_data()
+            sensor_output = base_sensor_output
             target_coord = ((x + init_coord[0]) / 2, (y + init_coord[1]) / 2)
             distance_to_target = get_distance_between_two_points(
                 start_coord, target_coord
@@ -146,7 +152,6 @@ def create_mock_data(filename: str, process_id: int, fluctuation: float = None):
     start_coord = (0.0, 0.0)
     mtconnect_mock_data = []
     sensor_mock_data = []
-    sample_interval = 0.5
     gcode_filename = get_gcode_filename(filename)
     gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
     gcode = load_gcode(gcode_file_path)
@@ -155,6 +160,8 @@ def create_mock_data(filename: str, process_id: int, fluctuation: float = None):
     timestamp = datetime.now()
     for i in range(len(gcode)):
         line = i + 3
+        if line == 53:
+            print("debug")
         if gcode[i][0] == "G4":
             # start to measure steps or slopes
             is_tracing = True
@@ -165,26 +172,26 @@ def create_mock_data(filename: str, process_id: int, fluctuation: float = None):
         feedrate = round(feedrate_per_min / 60.0, 3)
         direction = get_direction(start_coord, (x, y))
 
-        timestamp += timedelta(seconds=sample_interval)
         first_timestamp = timestamp
-        for j in range(1, int(distance / (feedrate * sample_interval))):
+        for j in range(int(distance / (feedrate * mtconnect_adapter_interval))):
             _x, _y = get_xy_for_mtconnect(
-                start_coord, feedrate, sample_interval, direction
+                start_coord, feedrate, mtconnect_adapter_interval, direction
             )
-            _current_row = (process_id, timestamp, _x, _y, z, line, feedrate)
+            timestamp_with_latency = timestamp + timedelta(
+                milliseconds=mtconnect_latency
+            )
+            _current_row = (
+                process_id,
+                timestamp_with_latency,
+                _x,
+                _y,
+                z,
+                line,
+                feedrate,
+            )
             mtconnect_mock_data.append(_current_row)
-            timestamp += timedelta(seconds=sample_interval)
+            timestamp += timedelta(seconds=mtconnect_adapter_interval)
             start_coord = (_x, _y)
-
-            if is_tracing and line % 2 == 1:
-                _sensor_timestamp = timestamp - timedelta(seconds=sample_interval)
-                if fluctuation is not None:
-                    sensor_output = mock_sensor.get_fluctuating_sensor_output(
-                        (_x, _y, 100.0), fluctuation
-                    )
-                else:
-                    sensor_output = mock_sensor.get_sensor_output((_x, _y, 100.0))
-                sensor_mock_data.append((process_id, _sensor_timestamp, sensor_output))
 
         last_timestamp = timestamp
 
@@ -193,6 +200,23 @@ def create_mock_data(filename: str, process_id: int, fluctuation: float = None):
                 first_timestamp, last_timestamp, process_id
             )
             sensor_mock_data.append(sensor_data_row)
+
+        if is_tracing and line % 2 == 1:
+            if fluctuation is not None:
+                sensor_output = mock_sensor.get_fluctuating_sensor_output(
+                    (x, y, 100.0), fluctuation
+                )
+            else:
+                sensor_output = mock_sensor.get_sensor_output((x, y, 100.0))
+
+            for j in range(int(distance / (feedrate * (trace_interval / 1000)))):
+                _sensor_timestamp = (
+                    first_timestamp
+                    + timedelta(milliseconds=trace_interval) * j
+                    + timedelta(milliseconds=sensor_response_time)
+                )
+
+                sensor_mock_data.append((process_id, _sensor_timestamp, sensor_output))
 
         start_coord = (x, y)
 
@@ -208,7 +232,6 @@ def create_mock_missing_data(filename: str, process_id: int):
     start_coord = (0.0, 0.0)
     mtconnect_mock_data = []
     sensor_mock_data = []
-    sample_interval = 0.5
     gcode_filename = get_gcode_filename(filename)
     gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
     gcode = load_gcode(gcode_file_path)
@@ -220,20 +243,23 @@ def create_mock_missing_data(filename: str, process_id: int):
         feedrate = round(feedrate_per_min / 60.0, 3)
         direction = get_direction(start_coord, (x, y))
 
-        timestamp += timedelta(seconds=sample_interval)
+        timestamp += timedelta(seconds=mtconnect_adapter_interval)
         first_timestamp = timestamp
-        for j in range(1, int(distance / (feedrate * sample_interval))):
+        for j in range(1, int(distance / (feedrate * mtconnect_adapter_interval))):
             # between 0.9 ~ 1.1
             random_number = random.random() * 0.2 + 0.9
             _x, _y = get_xy_for_mtconnect(
-                start_coord, feedrate, sample_interval * random_number, direction
+                start_coord,
+                feedrate,
+                mtconnect_adapter_interval * random_number,
+                direction,
             )
             _x = round(_x, 3)
             _y = round(_y, 3)
 
             _current_row = (process_id, timestamp, _x, _y, z, line, feedrate)
             mtconnect_mock_data.append(_current_row)
-            timestamp += timedelta(seconds=sample_interval)
+            timestamp += timedelta(seconds=mtconnect_adapter_interval)
             start_coord = (_x, _y)
         last_timestamp = timestamp
 
@@ -259,7 +285,6 @@ def create_mock_multiple_edges(filename: str, process_id: int):
     start_coord = (0.0, 0.0)
     mtconnect_mock_data = []
     sensor_mock_data = []
-    sample_interval = 0.5
     gcode_filename = get_gcode_filename(filename)
     gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
     gcode = load_gcode(gcode_file_path)
@@ -271,33 +296,36 @@ def create_mock_multiple_edges(filename: str, process_id: int):
         feedrate = round(feedrate_per_min / 60.0, 3)
         direction = get_direction(start_coord, (x, y))
 
-        timestamp += timedelta(seconds=sample_interval)
+        timestamp += timedelta(seconds=mtconnect_adapter_interval)
         first_timestamp = timestamp
-        for j in range(1, int(distance / (feedrate * sample_interval))):
+        for j in range(1, int(distance / (feedrate * mtconnect_adapter_interval))):
             # between 0.9 ~ 1.1
             random_number = random.random() * 0.2 + 0.9
             _x, _y = get_xy_for_mtconnect(
-                start_coord, feedrate, sample_interval * random_number, direction
+                start_coord,
+                feedrate,
+                mtconnect_adapter_interval * random_number,
+                direction,
             )
             _x = round(_x, 3)
             _y = round(_y, 3)
 
             _current_row = (process_id, timestamp, _x, _y, z, line, feedrate)
             mtconnect_mock_data.append(_current_row)
-            timestamp += timedelta(seconds=sample_interval)
+            timestamp += timedelta(seconds=mtconnect_adapter_interval)
             start_coord = (_x, _y)
         last_timestamp = timestamp
 
         sensor_random_number = random.random()
         if sensor_random_number > 0.1:
-            sensor_output = get_random_sensor_data()
+            sensor_output = base_sensor_output
             sensor_timestamp = get_random_timestamp_between_two_timestamps(
                 first_timestamp, last_timestamp
             )
             sensor_mock_data.append((process_id, sensor_timestamp, sensor_output))
 
             if sensor_random_number > 0.8:
-                sensor_output = get_random_sensor_data()
+                sensor_output = base_sensor_output
                 sensor_timestamp = get_random_timestamp_between_two_timestamps(
                     sensor_timestamp, last_timestamp
                 )
@@ -313,7 +341,6 @@ def create_mock_missing_mtconnect_data(filename: str, process_id: int):
     start_coord = (0.0, 0.0)
     mtconnect_mock_data = []
     sensor_mock_data = []
-    sample_interval = 0.5
     gcode_filename = get_gcode_filename(filename)
     gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
     gcode = load_gcode(gcode_file_path)
@@ -325,13 +352,16 @@ def create_mock_missing_mtconnect_data(filename: str, process_id: int):
         feedrate = round(feedrate_per_min / 60.0, 3)
         direction = get_direction(start_coord, (x, y))
 
-        timestamp += timedelta(seconds=sample_interval)
+        timestamp += timedelta(seconds=mtconnect_adapter_interval)
         first_timestamp = timestamp
-        for j in range(1, int(distance / (feedrate * sample_interval))):
+        for j in range(1, int(distance / (feedrate * mtconnect_adapter_interval))):
             # between 0.9 ~ 1.1
             random_number = random.random() * 0.2 + 0.9
             _x, _y = get_xy_for_mtconnect(
-                start_coord, feedrate, sample_interval * random_number, direction
+                start_coord,
+                feedrate,
+                mtconnect_adapter_interval * random_number,
+                direction,
             )
             _x = round(_x, 3)
             _y = round(_y, 3)
@@ -341,20 +371,20 @@ def create_mock_missing_mtconnect_data(filename: str, process_id: int):
             # intentionally missing data
             if line % 10 != 0:
                 mtconnect_mock_data.append(_current_row)
-            timestamp += timedelta(seconds=sample_interval)
+            timestamp += timedelta(seconds=mtconnect_adapter_interval)
             start_coord = (_x, _y)
         last_timestamp = timestamp
 
         sensor_random_number = random.random()
         if sensor_random_number > 0.1:
-            sensor_output = get_random_sensor_data()
+            sensor_output = base_sensor_output
             sensor_timestamp = get_random_timestamp_between_two_timestamps(
                 first_timestamp, last_timestamp
             )
             sensor_mock_data.append((process_id, sensor_timestamp, sensor_output))
 
             if sensor_random_number > 0.8:
-                sensor_output = get_random_sensor_data()
+                sensor_output = base_sensor_output
                 sensor_timestamp = get_random_timestamp_between_two_timestamps(
                     sensor_timestamp, last_timestamp
                 )

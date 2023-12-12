@@ -8,7 +8,7 @@ from server.mark.edge import EdgePath
 from server.config import MODEL_PATH, GCODE_PATH
 from server import machine
 from server.model import (
-    update_offset,
+    update_offset_gcode_settings,
 )
 
 
@@ -52,19 +52,19 @@ def process_stl(
     mysql_config: dict,
     model_id: int,
     stl_filename: str,
-    measure_config: tuple,
+    gcode_settings: tuple,
     offset: tuple,
     send_gcode: bool,
 ):
-    (measure_length, measure_feedrate, move_feedrate) = measure_config
+    (measurement_range, measure_feedrate, move_feedrate) = gcode_settings
     edge_path = EdgePath(
         mysql_config,
         model_id,
         stl_filename,
-        measure_config,
+        gcode_settings,
     )
     path = edge_path.get_edge_path(offset)
-    update_offset(model_id, offset)
+    update_offset_gcode_settings(model_id, offset, gcode_settings)
 
     path = gcode.format_edge_path(path)
     steps = step.get_steps(mysql_config, model_id)

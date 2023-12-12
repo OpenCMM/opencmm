@@ -1,5 +1,6 @@
 import numpy as np
 import trimesh
+from server.measure.sensor import mm_to_sensor_output
 
 
 class MockSensor:
@@ -13,9 +14,9 @@ class MockSensor:
         locations = self.mesh.ray.intersects_location(ray_origins, self.ray_directions)[
             0
         ]
-        if locations is None:
+        if locations is None or len(locations) == 0:
             return None
-        # location with the hiihest z value is the closest point
+        # location with the highest z value is the closest point
         location = locations[np.argmax(locations[:, 2])]
         distance = np.linalg.norm(np.array(xyz) - location)
         return distance
@@ -23,27 +24,26 @@ class MockSensor:
     def get_sensor_output(self, xyz: tuple):
         distance = self.get_distance(xyz)
         if distance is None:
-            return None
+            return 18900
         # sensor ouputs self.max_sensor_output / 2 when distance is 100
         # if distance is not between 65 ~ 135 mm,
         # sensor outputs 18900
         if 65 <= distance <= 135:
-            return self.middle_sensor_output + (100 - distance) * (
-                self.middle_sensor_output / 35
-            )
+            z = 100 - distance
+            return mm_to_sensor_output(z)
         else:
             return 18900
 
     def get_fluctuating_sensor_output(self, xyz: tuple, fluctuation: float = 0.1):
         distance = self.get_distance(xyz)
         if distance is None:
-            return None
+            return 18900
         # sensor ouputs self.max_sensor_output / 2 when distance is 100
         # if distance is not between 65 ~ 135 mm,
         # sensor outputs 18900
         if 65 <= distance <= 135:
-            return self.middle_sensor_output + (100 - distance) * (
-                self.middle_sensor_output / 35
-            ) * (1 + fluctuation * np.random.randn())
+            z = 100 - distance
+            z = z * np.random.uniform(1 - fluctuation, 1 + fluctuation)
+            return mm_to_sensor_output(z)
         else:
             return 18900

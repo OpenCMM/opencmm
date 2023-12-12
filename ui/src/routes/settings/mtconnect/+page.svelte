@@ -20,7 +20,6 @@
 				url = data['url'];
 				interval = data['interval'];
 				latency = data['latency'];
-				console.log(data);
 				loaded = true;
 			}
 		});

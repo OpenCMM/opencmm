@@ -65,7 +65,7 @@ class EdgePath:
         self.mysql_config = mysql_config
         self.model_id = model_id
         self.stl_filename = stl_filename
-        self.measure_length = measure_config[0]
+        self.range = measure_config[0]
         self.measure_feedrate = measure_config[1]
         self.move_feedrate = measure_config[2]
 
@@ -83,12 +83,12 @@ class EdgePath:
         if direction == 0:
             hit = ray_cast(
                 f"{MODEL_PATH}/{self.stl_filename}",
-                (x - xyz_offset[0], y + self.measure_length - xyz_offset[1], 1000),
+                (x - xyz_offset[0], y + self.range - xyz_offset[1], 1000),
             )
             py0, py1 = (
-                (y - self.measure_length, y + self.measure_length)
+                (y - self.range, y + self.range)
                 if hit
-                else (y + self.measure_length, y - self.measure_length)
+                else (y + self.range, y - self.range)
             )
             return [
                 to_gcode_row(x, py0, self.move_feedrate),
@@ -101,12 +101,12 @@ class EdgePath:
         elif direction == 1:
             hit = ray_cast(
                 f"{MODEL_PATH}/{self.stl_filename}",
-                (x + self.measure_length - xyz_offset[0], y - xyz_offset[1], 1000),
+                (x + self.range - xyz_offset[0], y - xyz_offset[1], 1000),
             )
             px0, px1 = (
-                (x - self.measure_length, x + self.measure_length)
+                (x - self.range, x + self.range)
                 if hit
-                else (x + self.measure_length, x - self.measure_length)
+                else (x + self.range, x - self.range)
             )
             return [
                 to_gcode_row(px0, y, self.move_feedrate),
@@ -166,7 +166,7 @@ class EdgePath:
             cz + xyz_offset[2],
         )
         outside_point, inside_point = self.get_arc_path(
-            (cx, cy, cz), (x, y, z), self.measure_length
+            (cx, cy, cz), (x, y, z), self.range
         )
         hit = ray_cast(
             f"{MODEL_PATH}/{self.stl_filename}",

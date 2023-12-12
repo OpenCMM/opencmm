@@ -91,7 +91,13 @@ def is_point_on_line(p: tuple, p1: tuple, p2: tuple, threshold: float = 0.01):
         return are_points_equal(p1, p)
 
     distance = closest_distance_between_point_and_line(p, p1, p2)
-    return distance < threshold
+    is_close = distance < threshold
+
+    return (
+        is_close
+        and min(p1[0], p2[0]) <= p[0] <= max(p1[0], p2[0])
+        and min(p1[1], p2[1]) <= p[1] <= max(p1[1], p2[1])
+    )
 
 
 def get_true_line_number(
@@ -126,6 +132,47 @@ def get_true_line_number(
         return None
 
     return None
+
+
+def get_true_line_and_feedrate(
+    xy: tuple, line: int, gcode: list, first_line_for_tracing: int = None
+) -> int:
+    """
+    Use xy coordinates as a ground truth to find the line number
+    Check if the xy coordinates are within the line
+    """
+    lines = []
+    if line == 1:
+        last_line = len(gcode) + 2
+        for i in range(3):
+            # the very last line sometimes turns 1 before it supposed to
+            (start, end, feedrate) = get_start_end_points_from_line_number(
+                gcode, last_line - i
+            )
+            if i == 0 and are_points_equal(xy, end):
+                # already at the end of the line and cannot estimate when it arrived
+                if not first_line_for_tracing:
+                    # in edge detection mode, this is crucial
+                    return lines
+                # in tracing mode, the timestamp at the end of the line is not important
+            if is_point_on_line(xy, start, end):
+                lines.append([last_line - i, feedrate, start, end])
+        return lines
+
+    if first_line_for_tracing:
+        assert gcode[first_line_for_tracing - 5][0] == "G4", "G4 is missing"
+
+    try:
+        for i in range(3):
+            (start, end, feedrate) = get_start_end_points_from_line_number(
+                gcode, line - i
+            )
+            if is_point_on_line(xy, start, end):
+                lines.append([line - i, feedrate, start, end])
+    except LineNumberTooSmall:
+        return lines
+
+    return lines
 
 
 def get_gcode_line_path(gcode_filepath: str):
