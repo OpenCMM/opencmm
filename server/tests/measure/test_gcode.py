@@ -55,9 +55,10 @@ def test_get_true_line_number():
     with open(path, "rb") as f:
         response = client.post("/upload/3dmodel", files={"file": f})
         assert response.status_code == 200
+        model_id = response.json()["model_id"]
 
     job_info = {
-        "three_d_model_id": 4,
+        "three_d_model_id": model_id,
         "measure_length": 2.5,
         "measure_feedrate": 100.0,
         "move_feedrate": 1000.0,
