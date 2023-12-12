@@ -5,7 +5,7 @@
 	import { BACKEND_URL } from '$lib/constants/backend';
 	import { page } from '$app/stores';
 	import { InlineLoading } from 'carbon-components-svelte';
-	import { Form, FormGroup, TextInput, Button, Checkbox } from 'carbon-components-svelte';
+	import { Form, FormGroup, NumberInput, Button, Checkbox } from 'carbon-components-svelte';
 	import { _ } from 'svelte-i18n';
 
 	const modelId = $page.url.searchParams.get('id');
@@ -65,31 +65,31 @@
 		<p id="form-title">{$_('home.setup.title')}</p>
 		<Form on:submit={handleSubmit}>
 			<FormGroup>
-				<TextInput
-					labelText={$_('home.setup.measurementRange.label')}
+				<NumberInput
+					label={$_('home.setup.measurementRange.label')}
 					id="measurementRange"
-					bind:value={measurementRange}
+					value={measurementRange}
 				/>
-				<TextInput
-					labelText={$_('home.setup.measureFeedRate.label')}
+				<NumberInput
+					label={$_('home.setup.measureFeedRate.label')}
 					id="measureFeedRate"
-					bind:value={measureFeedRate}
+					value={measureFeedRate}
 				/>
-				<TextInput
-					labelText={$_('home.setup.moveFeedRate.label')}
+				<NumberInput
+					label={$_('home.setup.moveFeedRate.label')}
 					id="moveFeedRate"
-					bind:value={moveFeedRate}
+					value={moveFeedRate}
 				/>
 			</FormGroup>
 			<p>{$_('home.setup.offset')}</p>
 			<FormGroup>
-				<TextInput labelText="x" id="xOffset" bind:value={xOffset} />
+				<NumberInput label="x" id="xOffset" value={xOffset} />
 			</FormGroup>
 			<FormGroup>
-				<TextInput labelText="y" id="yOffset" bind:value={yOffset} />
+				<NumberInput label="y" id="yOffset" value={yOffset} />
 			</FormGroup>
 			<FormGroup>
-				<TextInput labelText="z" id="zOffset" bind:value={zOffset} />
+				<NumberInput label="z" id="zOffset" value={zOffset} />
 			</FormGroup>
 			<FormGroup>
 				<Checkbox bind:checked={sendFile} labelText={$_('home.setup.sendFile')} />

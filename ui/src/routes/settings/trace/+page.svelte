@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { BACKEND_URL } from '$lib/constants/backend';
 	import axios from 'axios';
-	import { Form, FormGroup, TextInput, Button, Loading } from 'carbon-components-svelte';
+	import { Form, FormGroup, NumberInput, Button, Loading } from 'carbon-components-svelte';
 	import { ToastNotification } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
@@ -60,36 +60,25 @@
 {:else}
 	<Form>
 		<FormGroup>
-			<TextInput
-				bind:value={minMeasureCount}
+			<NumberInput
+				value={minMeasureCount}
 				id="minMeasureCount"
-				type="number"
-				labelText={$_('settings.trace.minMeasureCount')}
+				min={1}
+				label={$_('settings.trace.minMeasureCount')}
 			/>
-			<TextInput
-				bind:value={maxFeedrate}
+			<NumberInput
+				value={maxFeedrate}
 				id="maxFeedrate"
-				type="number"
-				labelText={$_('settings.trace.maxFeedrate')}
+				min={0}
+				label={$_('settings.trace.maxFeedrate')}
 			/>
-			<TextInput
-				bind:value={interval}
-				id="interval"
-				type="number"
-				labelText={$_('settings.trace.interval')}
-			/>
-			<TextInput
-				bind:value={margin}
-				id="margin"
-				type="number"
-				step="0.01"
-				labelText={$_('settings.trace.margin')}
-			/>
-			<TextInput
-				bind:value={slopeNumber}
+			<NumberInput value={interval} id="interval" min={0} label={$_('settings.trace.interval')} />
+			<NumberInput value={margin} id="margin" step={0.01} label={$_('settings.trace.margin')} />
+			<NumberInput
+				value={slopeNumber}
 				id="slopeNumber"
-				type="number"
-				labelText={$_('settings.trace.slopeNumber')}
+				min={2}
+				label={$_('settings.trace.slopeNumber')}
 			/>
 		</FormGroup>
 		<Button on:click={saveSettings}>{$_('common.save')}</Button>

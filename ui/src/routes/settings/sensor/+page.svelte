@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { BACKEND_URL } from '$lib/constants/backend';
 	import axios from 'axios';
-	import { Form, FormGroup, TextInput, Button, Loading } from 'carbon-components-svelte';
+	import { Form, FormGroup, Button, Loading, NumberInput } from 'carbon-components-svelte';
 	import { ToastNotification } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
@@ -63,42 +63,36 @@
 {:else}
 	<Form>
 		<FormGroup>
-			<TextInput
-				bind:value={interval}
-				id="interval"
-				type="number"
-				labelText={$_('settings.sensor.interval')}
-			/>
-			<TextInput
+			<NumberInput value={interval} id="interval" min={0} label={$_('settings.sensor.interval')} />
+			<NumberInput
 				bind:value={threshold}
 				id="threshold"
-				type="number"
-				labelText={$_('settings.sensor.threshold')}
+				min={0}
+				label={$_('settings.sensor.threshold')}
 			/>
-			<TextInput
-				bind:value={beamDiameter}
+			<NumberInput
+				value={beamDiameter}
 				id="beamDiameter"
-				type="number"
-				labelText={$_('settings.sensor.beamDiameter')}
+				min={0}
+				label={$_('settings.sensor.beamDiameter')}
 			/>
-			<TextInput
+			<NumberInput
 				bind:value={middleOutput}
 				id="middleOutput"
-				type="number"
-				labelText={$_('settings.sensor.middleOutput')}
+				label={$_('settings.sensor.middleOutput')}
 			/>
-			<TextInput
-				bind:value={responseTime}
+			<NumberInput
+				value={responseTime}
 				id="responseTime"
-				type="number"
-				labelText={$_('settings.sensor.responseTime')}
+				min={0}
+				label={$_('settings.sensor.responseTime')}
 			/>
-			<TextInput
-				bind:value={tolerance}
+			<NumberInput
+				value={tolerance}
 				id="tolerance"
-				type="number"
-				step="0.01"
-				labelText={$_('settings.sensor.tolerance')}
+				step={0.01}
+				min={0}
+				label={$_('settings.sensor.tolerance')}
 			/>
 		</FormGroup>
 		<Button on:click={saveSettings}>{$_('common.save')}</Button>

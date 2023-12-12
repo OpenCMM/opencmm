@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { BACKEND_URL } from '$lib/constants/backend';
 	import axios from 'axios';
-	import { Form, FormGroup, TextInput, Button, Loading } from 'carbon-components-svelte';
+	import { Form, FormGroup, NumberInput, Button, Loading } from 'carbon-components-svelte';
 	import { ToastNotification } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
@@ -51,17 +51,12 @@
 {:else}
 	<Form>
 		<FormGroup>
-			<TextInput
-				bind:value={arcNumber}
-				id="arcNumber"
-				type="number"
-				labelText={$_('settings.edge.arcNumber')}
-			/>
-			<TextInput
-				bind:value={lineNumber}
+			<NumberInput value={arcNumber} id="arcNumber" min={3} label={$_('settings.edge.arcNumber')} />
+			<NumberInput
+				value={lineNumber}
 				id="lineNumber"
-				type="number"
-				labelText={$_('settings.edge.lineNumber')}
+				min={2}
+				label={$_('settings.edge.lineNumber')}
 			/>
 		</FormGroup>
 		<Button on:click={saveSettings}>{$_('common.save')}</Button>
