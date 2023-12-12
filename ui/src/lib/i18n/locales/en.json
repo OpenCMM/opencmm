@@ -176,6 +176,7 @@
 		"gcode": "GCode",
 		"cancel": "Go back",
 		"save": "Save",
+		"apply": "Apply",
 		"saveSuccess": "Saved successfully",
 		"saveFailed": "Save failed",
 		"delete": "Delete",

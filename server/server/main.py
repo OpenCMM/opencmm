@@ -27,7 +27,11 @@ from server.listener import (
     hakaru,
 )
 from server.measure import EstimateConfig, update_data_after_measurement, recompute
-from server.measure.mtconnect import check_if_mtconnect_data_is_missing, MtctDataChecker
+from server.measure.mtconnect import (
+    check_if_mtconnect_data_is_missing,
+    MtctDataChecker,
+    update_mtct_latency,
+)
 from server.measure.gcode import get_gcode_line_path
 from server.config import MYSQL_CONFIG, MODEL_PATH, get_config, update_conf
 from server.model import (
@@ -539,8 +543,17 @@ async def get_model_shape_data(model_id: int):
 async def get_sensor_positions(
     model_id: int, process_id: int, mtct_latency: float = None
 ):
-    sensor_positions = result.fetch_all_sensor_data(model_id, process_id, mtct_latency)
-    return {"sensor": sensor_positions}
+    mtct_data_checker = MtctDataChecker(MYSQL_CONFIG, model_id, process_id)
+    sensor_positions, mtct_latency = mtct_data_checker.get_sensor_data_with_coordinates(
+        mtct_latency
+    )
+    return {"sensor": sensor_positions, "latency": mtct_latency}
+
+
+@app.post("/update/mtconnect/latency/{process_id}")
+async def update_mtconnect_latency(process_id: int, mtct_latency: float):
+    update_mtct_latency(MYSQL_CONFIG, process_id, mtct_latency)
+    return {"status": "ok"}
 
 
 @app.get("/list/processes/{model_id}")

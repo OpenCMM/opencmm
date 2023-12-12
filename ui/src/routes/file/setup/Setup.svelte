@@ -70,30 +70,30 @@
 					id="measurementRange"
 					min={0}
 					step={0.01}
-					value={measurementRange}
+					bind:value={measurementRange}
 				/>
 				<NumberInput
 					label={$_('home.setup.measureFeedRate.label')}
 					id="measureFeedRate"
 					min={0}
-					value={measureFeedRate}
+					bind:value={measureFeedRate}
 				/>
 				<NumberInput
 					label={$_('home.setup.moveFeedRate.label')}
 					id="moveFeedRate"
 					min={0}
-					value={moveFeedRate}
+					bind:value={moveFeedRate}
 				/>
 			</FormGroup>
 			<p>{$_('home.setup.offset')}</p>
 			<FormGroup>
-				<NumberInput label="x" id="xOffset" value={xOffset} step={0.01} />
+				<NumberInput label="x" id="xOffset" bind:value={xOffset} step={0.01} />
 			</FormGroup>
 			<FormGroup>
-				<NumberInput label="y" id="yOffset" value={yOffset} step={0.01} />
+				<NumberInput label="y" id="yOffset" bind:value={yOffset} step={0.01} />
 			</FormGroup>
 			<FormGroup>
-				<NumberInput label="z" id="zOffset" value={zOffset} step={0.01} />
+				<NumberInput label="z" id="zOffset" bind:value={zOffset} step={0.01} />
 			</FormGroup>
 			<FormGroup>
 				<Checkbox bind:checked={sendFile} labelText={$_('home.setup.sendFile')} />

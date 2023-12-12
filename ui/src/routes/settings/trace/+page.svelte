@@ -61,21 +61,31 @@
 	<Form>
 		<FormGroup>
 			<NumberInput
-				value={minMeasureCount}
+				bind:value={minMeasureCount}
 				id="minMeasureCount"
 				min={1}
 				label={$_('settings.trace.minMeasureCount')}
 			/>
 			<NumberInput
-				value={maxFeedrate}
+				bind:value={maxFeedrate}
 				id="maxFeedrate"
 				min={0}
 				label={$_('settings.trace.maxFeedrate')}
 			/>
-			<NumberInput value={interval} id="interval" min={0} label={$_('settings.trace.interval')} />
-			<NumberInput value={margin} id="margin" step={0.01} label={$_('settings.trace.margin')} />
 			<NumberInput
-				value={slopeNumber}
+				bind:value={interval}
+				id="interval"
+				min={0}
+				label={$_('settings.trace.interval')}
+			/>
+			<NumberInput
+				bind:value={margin}
+				id="margin"
+				step={0.01}
+				label={$_('settings.trace.margin')}
+			/>
+			<NumberInput
+				bind:value={slopeNumber}
 				id="slopeNumber"
 				min={2}
 				label={$_('settings.trace.slopeNumber')}

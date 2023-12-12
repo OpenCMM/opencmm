@@ -51,9 +51,14 @@
 {:else}
 	<Form>
 		<FormGroup>
-			<NumberInput value={arcNumber} id="arcNumber" min={3} label={$_('settings.edge.arcNumber')} />
 			<NumberInput
-				value={lineNumber}
+				bind:value={arcNumber}
+				id="arcNumber"
+				min={3}
+				label={$_('settings.edge.arcNumber')}
+			/>
+			<NumberInput
+				bind:value={lineNumber}
 				id="lineNumber"
 				min={2}
 				label={$_('settings.edge.lineNumber')}

@@ -2,6 +2,7 @@ import mysql.connector
 from server.model import get_model_data
 from server.mark.gcode import get_gcode_filename
 from server.config import GCODE_PATH, get_config
+from .sensor import get_sensor_data
 from server.measure.gcode import (
     load_gcode,
     get_true_line_number,
@@ -14,6 +15,7 @@ from datetime import timedelta
 from server.mark.trace import get_first_line_number_for_tracing
 from server.mark.trace import get_trace_ids
 import numpy as np
+from datetime import datetime
 
 
 def get_mtconnect_data(process_id: int, mysql_config: dict):
@@ -339,3 +341,135 @@ class MtctDataChecker:
         np_diff = np.array(diff_list)
         avg_diff = self.robust_mean(np_diff[:, 1])
         return avg_diff, np_diff
+
+    def get_mtct_latency_from_process(self):
+        """
+        Get mtconnect latency from process
+        """
+        cnx = mysql.connector.connect(**self.mysql_config, database="coord")
+        cursor = cnx.cursor()
+        query = "SELECT mtct_latency FROM process WHERE id = %s"
+        cursor.execute(query, (self.process_id,))
+        row = cursor.fetchone()
+        if not row:
+            return None
+        cursor.close()
+        cnx.close()
+        return row[0]
+
+    def get_direction_vector(self, start, end):
+        direction_vector = np.array([end[0] - start[0], end[1] - start[1]])
+        distance = np.linalg.norm(direction_vector)
+        return direction_vector / distance
+
+    def calc_coord_from_timestamp(self, lines, timestamp):
+        """
+        Calculate the coordinates from timestamp
+        """
+        for line in lines:
+            start_timestamp = line[1]
+            end_timestamp = line[2]
+            if start_timestamp <= timestamp <= end_timestamp:
+                start = (line[3], line[4])
+                end = (line[5], line[6])
+                if start == end:
+                    continue
+
+                direction_vector = self.get_direction_vector(start, end)
+                feedrate = line[7]
+                timestamp_diff = timestamp - start_timestamp
+                distance = feedrate * timestamp_diff.total_seconds()
+                coord = np.array(start) + distance * direction_vector
+                # round to 3 decimal places
+                coord = np.round(coord, 3)
+                return tuple(coord)
+
+    def sensor_timestamp_to_coord(
+        self,
+        start_timestamp: datetime,
+        sensor_timestamp: datetime,
+        start: tuple,
+        end: tuple,
+        feedrate: float,
+    ):
+        """
+        Estimate the coordinate of the edge from sensor timestamp
+
+        Args:
+            start_timestamp: Start timestamp of the line
+            sensor_timestamp: Sensor timestamp
+            start: Start coordinate of the line
+            end: End coordinate of the line
+            feedrate: Feedrate of the line
+
+        Returns:
+            Estimated coordinate of the sensor at the given timestamp
+        """
+        beam_diameter = self.config["sensor"]["beam_diameter"]  # in μm
+        sensor_response_time = self.config["sensor"]["response_time"]  # in ms
+        direction_vector = self.get_direction_vector(start, end)
+        # factor in sensor response time
+        sensor_timestamp -= timedelta(milliseconds=sensor_response_time)
+        timestamp_diff = sensor_timestamp - start_timestamp
+        distance = feedrate * timestamp_diff.total_seconds()
+        beam_diameter = beam_diameter / 1000  # convert to mm
+        distance_with_beam_diameter = (
+            distance + beam_diameter / 2
+        )  # add half of beam radius
+        coord = np.array(start) + distance_with_beam_diameter * direction_vector
+        # round to 3 decimal places
+        coord = np.round(coord, 3)
+        return tuple(coord)
+
+    def get_sensor_data_with_coordinates(self, mtct_latency: float = None):
+        """
+        Get sensor data with coordinates
+        """
+        if mtct_latency is None:
+            mtct_latency = self.get_mtct_latency_from_process()
+            if mtct_latency is None:
+                mtct_latency = self.config["mtconnect"]["latency"]
+
+        lines = self.estimate_timestamps_from_mtct_data(mtct_latency)
+        sensor_data = get_sensor_data(self.process_id, self.mysql_config)
+        sensor_data_with_coordinates = []
+        for row in sensor_data:
+            sensor_timestamp = row[2]
+            sensor_output = row[3]
+            for line in lines:
+                start_timestamp = line[1]
+                end_timestamp = line[2]
+                if start_timestamp <= sensor_timestamp <= end_timestamp:
+                    start = (line[3], line[4])
+                    end = (line[5], line[6])
+                    if start == end:
+                        continue
+
+                    feedrate = line[7]
+                    sensor_coord = self.sensor_timestamp_to_coord(
+                        start_timestamp,
+                        sensor_timestamp,
+                        start,
+                        end,
+                        feedrate,
+                    )
+                    line_number = line[0]
+                    sensor_data_with_coordinates.append(
+                        [line_number, *sensor_coord, sensor_timestamp, sensor_output]
+                    )
+                    break
+
+        return sensor_data_with_coordinates, mtct_latency
+
+
+def update_mtct_latency(mysql_config: dict, process_id: int, mtct_latency: float):
+    """
+    Update mtconnect latency of the process
+    """
+    cnx = mysql.connector.connect(**mysql_config, database="coord")
+    cursor = cnx.cursor()
+    query = "UPDATE process SET mtct_latency = %s WHERE id = %s"
+    cursor.execute(query, (mtct_latency, process_id))
+    cnx.commit()
+    cursor.close()
+    cnx.close()

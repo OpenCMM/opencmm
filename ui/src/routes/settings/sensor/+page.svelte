@@ -63,7 +63,12 @@
 {:else}
 	<Form>
 		<FormGroup>
-			<NumberInput value={interval} id="interval" min={0} label={$_('settings.sensor.interval')} />
+			<NumberInput
+				bind:value={interval}
+				id="interval"
+				min={0}
+				label={$_('settings.sensor.interval')}
+			/>
 			<NumberInput
 				bind:value={threshold}
 				id="threshold"
@@ -72,7 +77,7 @@
 				label={$_('settings.sensor.threshold')}
 			/>
 			<NumberInput
-				value={beamDiameter}
+				bind:value={beamDiameter}
 				id="beamDiameter"
 				min={0}
 				label={$_('settings.sensor.beamDiameter')}
@@ -83,13 +88,13 @@
 				label={$_('settings.sensor.middleOutput')}
 			/>
 			<NumberInput
-				value={responseTime}
+				bind:value={responseTime}
 				id="responseTime"
 				min={0}
 				label={$_('settings.sensor.responseTime')}
 			/>
 			<NumberInput
-				value={tolerance}
+				bind:value={tolerance}
 				id="tolerance"
 				step={0.01}
 				min={0}

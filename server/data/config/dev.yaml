@@ -10,7 +10,7 @@ mqtt:
   username: opencmm
 mtconnect:
   interval: 700 # ms
-  latency: 30 # ms
+  latency: 2500 # ms
   url: https://demo.metalogi.io/current?path=//Components
   device: MITSUBISHI1
 sensor:
