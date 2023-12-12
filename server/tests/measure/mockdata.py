@@ -16,6 +16,7 @@ mtconnect_latency = conf["mtconnect"]["latency"]
 beam_diameter = conf["sensor"]["beam_diameter"]
 sensor_response_time = conf["sensor"]["response_time"]  # in ms
 base_sensor_output = conf["sensor"]["middle_output"]
+trace_interval = conf["trace"]["interval"]
 mtconnect_adapter_interval = 0.8
 
 
@@ -55,6 +56,15 @@ def create_sensor_data_row(_first_timestamp, _last_timestamp, _process_id):
         _first_timestamp, _last_timestamp
     )
     return (_process_id, sensor_timestamp, sensor_output)
+
+
+def get_xy_for_sensor(start_coord, feedrate, interval, direction, idx):
+    (x, y) = start_coord
+    _x = x + direction[0] * feedrate * interval * idx
+    _y = y + direction[1] * feedrate * interval * idx
+    _x = round(_x, 3)
+    _y = round(_y, 3)
+    return _x, _y
 
 
 def get_xy_for_mtconnect(start_coord, feedrate, mtconnect_adapter_interval, direction):
@@ -150,6 +160,8 @@ def create_mock_data(filename: str, process_id: int, fluctuation: float = None):
     timestamp = datetime.now()
     for i in range(len(gcode)):
         line = i + 3
+        if line == 53:
+            print("debug")
         if gcode[i][0] == "G4":
             # start to measure steps or slopes
             is_tracing = True
@@ -160,28 +172,26 @@ def create_mock_data(filename: str, process_id: int, fluctuation: float = None):
         feedrate = round(feedrate_per_min / 60.0, 3)
         direction = get_direction(start_coord, (x, y))
 
-        timestamp += timedelta(seconds=mtconnect_adapter_interval)
         first_timestamp = timestamp
-        for j in range(1, int(distance / (feedrate * mtconnect_adapter_interval))):
+        for j in range(int(distance / (feedrate * mtconnect_adapter_interval))):
             _x, _y = get_xy_for_mtconnect(
                 start_coord, feedrate, mtconnect_adapter_interval, direction
             )
-            _current_row = (process_id, timestamp, _x, _y, z, line, feedrate)
+            timestamp_with_latency = timestamp + timedelta(
+                milliseconds=mtconnect_latency
+            )
+            _current_row = (
+                process_id,
+                timestamp_with_latency,
+                _x,
+                _y,
+                z,
+                line,
+                feedrate,
+            )
             mtconnect_mock_data.append(_current_row)
             timestamp += timedelta(seconds=mtconnect_adapter_interval)
             start_coord = (_x, _y)
-
-            if is_tracing and line % 2 == 1:
-                _sensor_timestamp = timestamp - timedelta(
-                    seconds=mtconnect_adapter_interval
-                )
-                if fluctuation is not None:
-                    sensor_output = mock_sensor.get_fluctuating_sensor_output(
-                        (_x, _y, 100.0), fluctuation
-                    )
-                else:
-                    sensor_output = mock_sensor.get_sensor_output((_x, _y, 100.0))
-                sensor_mock_data.append((process_id, _sensor_timestamp, sensor_output))
 
         last_timestamp = timestamp
 
@@ -190,6 +200,23 @@ def create_mock_data(filename: str, process_id: int, fluctuation: float = None):
                 first_timestamp, last_timestamp, process_id
             )
             sensor_mock_data.append(sensor_data_row)
+
+        if is_tracing and line % 2 == 1:
+            if fluctuation is not None:
+                sensor_output = mock_sensor.get_fluctuating_sensor_output(
+                    (x, y, 100.0), fluctuation
+                )
+            else:
+                sensor_output = mock_sensor.get_sensor_output((x, y, 100.0))
+
+            for j in range(int(distance / (feedrate * (trace_interval / 1000)))):
+                _sensor_timestamp = (
+                    first_timestamp
+                    + timedelta(milliseconds=trace_interval) * j
+                    + timedelta(milliseconds=sensor_response_time)
+                )
+
+                sensor_mock_data.append((process_id, _sensor_timestamp, sensor_output))
 
         start_coord = (x, y)
 

@@ -1,4 +1,13 @@
-from server.measure.gcode import is_point_on_line, get_true_line_number, load_gcode
+from server.measure.gcode import (
+    is_point_on_line,
+    get_true_line_number,
+    load_gcode,
+    get_true_line_and_feedrate,
+)
+from fastapi.testclient import TestClient
+from server.main import app
+
+client = TestClient(app)
 
 # from server.measure.mtconnect import get_mtconnect_data
 # from server.config import MYSQL_CONFIG
@@ -40,14 +49,27 @@ def test_is_point_on_line_debug():
     assert not is_point_on_line(xy, start, end)
 
 
-def test_get_true_line_number_debug():
-    gcode = load_gcode("data/gcode/sample.stl.gcode")
-    xy = (33.333, -129.61)
-    line = 29
-    assert get_true_line_number(xy, line, gcode, None) == 28
-
-
 def test_get_true_line_number():
+    path = "tests/fixtures/stl/sample.stl"
+
+    with open(path, "rb") as f:
+        response = client.post("/upload/3dmodel", files={"file": f})
+        assert response.status_code == 200
+
+    job_info = {
+        "three_d_model_id": 4,
+        "measure_length": 2.5,
+        "measure_feedrate": 100.0,
+        "move_feedrate": 1000.0,
+        "x_offset": 50.0,
+        "y_offset": -65.0,
+        "z_offset": -10.0,
+        "send_gcode": False,
+    }
+    response = client.post("/setup/data", json=job_info)
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
     gcode = load_gcode("data/gcode/sample.stl.gcode")
     xy = (10.289, -56.699)
     line = 4
@@ -64,6 +86,24 @@ def test_get_true_line_number():
     xy = (1.668, -43.333)
     line = 8
     assert get_true_line_number(xy, line, gcode) == 6
+
+
+def test_get_true_line_number_debug():
+    gcode = load_gcode("data/gcode/sample.stl.gcode")
+    xy = (33.333, -129.61)
+    line = 29
+    assert get_true_line_number(xy, line, gcode, None) == 28
+
+
+def test_get_true_line_and_feedrate():
+    gcode = load_gcode("data/gcode/step.STL.gcode")
+    xy = (48.476, -26.558)
+    line = 45
+    first_line_for_tracing = 45
+    line_candidates = get_true_line_and_feedrate(
+        xy, line, gcode, first_line_for_tracing
+    )
+    assert line_candidates is not None
 
 
 # def test_is_point_on_line_from_mtconnect_data():
