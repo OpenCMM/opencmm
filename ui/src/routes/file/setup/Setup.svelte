@@ -65,11 +65,7 @@
 		<p id="form-title">{$_('home.setup.title')}</p>
 		<Form on:submit={handleSubmit}>
 			<FormGroup>
-				<TextInput
-					labelText={$_('home.setup.range.label')}
-					id="range"
-					bind:value={range}
-				/>
+				<TextInput labelText={$_('home.setup.range.label')} id="range" bind:value={range} />
 				<TextInput
 					labelText={$_('home.setup.measureFeedRate.label')}
 					id="measureFeedRate"
