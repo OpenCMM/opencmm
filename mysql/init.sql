@@ -6,6 +6,9 @@ CREATE TABLE IF NOT EXISTS `model` (
   `x_offset` FLOAT NOT NULL DEFAULT 0,
   `y_offset` FLOAT NOT NULL DEFAULT 0,
   `z_offset` FLOAT NOT NULL DEFAULT 0,
+  'range' FLOAT,
+  'measure_feedrate' FLOAT,
+  'move_feedrate' FLOAT,
   PRIMARY KEY (`id`),
   UNIQUE KEY `filename` (`filename`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
@@ -18,6 +21,9 @@ CREATE TABLE IF NOT EXISTS `process` (
   `x_offset` FLOAT NOT NULL,
   `y_offset` FLOAT NOT NULL,
   `z_offset` FLOAT NOT NULL,
+  'range' FLOAT NOT NULL,
+  'measure_feedrate' FLOAT NOT NULL,
+  'move_feedrate' FLOAT NOT NULL,
   `start` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `end` TIMESTAMP,
   PRIMARY KEY (`id`),

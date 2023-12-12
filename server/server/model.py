@@ -195,14 +195,18 @@ def get_model_data(model_id: int):
     return model_data
 
 
-def update_offset(model_id: int, offset: tuple):
+def update_offset_gcode_settings(model_id: int, offset: tuple, gcode_settings: tuple):
     """
-    Update offset
+    Update offset and gcode settings
     """
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
     cursor = cnx.cursor()
-    query = "UPDATE model SET x_offset = %s, y_offset = %s, z_offset = %s WHERE id = %s"
-    cursor.execute(query, (*offset, model_id))
+    query = (
+        "UPDATE model SET x_offset = %s, y_offset = %s, z_offset = %s, "
+        "range = %s, measure_feedrate = %s, move_feedrate = %s "
+        "WHERE id = %s"
+    )
+    cursor.execute(query, (*offset, *gcode_settings, model_id))
     cnx.commit()
     cursor.close()
     cnx.close()

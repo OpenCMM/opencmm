@@ -267,11 +267,12 @@ async def setup_data(job_info: JobInfo):
     if not model_exists(filename):
         raise HTTPException(status_code=400, detail="No model uploaded")
     offset = (job_info.x_offset, job_info.y_offset, job_info.z_offset)
+    gcode_settings = (job_info.range, job_info.measure_feedrate, job_info.move_feedrate)
     process_stl(
         MYSQL_CONFIG,
         job_info.three_d_model_id,
         filename,
-        (job_info.range, job_info.measure_feedrate, job_info.move_feedrate),
+        gcode_settings,
         offset,
         job_info.send_gcode,
     )
