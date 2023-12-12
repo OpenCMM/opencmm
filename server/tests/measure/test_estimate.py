@@ -93,7 +93,7 @@ def test_update_data_after_measurement_with_arc_multiple_edges():
 def test_different_gcode_params():
     job_info = {
         "three_d_model_id": 3,
-        "measure_length": 2.5,
+        "range": 2.5,
         "measure_feedrate": 100.0,
         "move_feedrate": 2000.0,
         "x_offset": 0.0,
@@ -117,7 +117,7 @@ def test_different_gcode_params():
 def test_different_gcode_params_with_arc():
     job_info = {
         "three_d_model_id": 4,
-        "measure_length": 2.5,
+        "range": 2.5,
         "measure_feedrate": 100.0,
         "move_feedrate": 2000.0,
         "x_offset": 50.0,

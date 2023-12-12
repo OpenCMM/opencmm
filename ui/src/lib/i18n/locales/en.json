@@ -15,14 +15,14 @@
 		"setup": {
 			"title": "Create GCode",
 			"measureLength": {
-				"label": "measure length"
+				"label": "Measurement range"
 			},
 			"loading": "Creating GCode...",
 			"measureFeedRate": {
-				"label": "feed rate when measuring"
+				"label": "Feed rate when measuring"
 			},
 			"moveFeedRate": {
-				"label": "feed rate when moving"
+				"label": "Feed rate when moving"
 			},
 			"offset": "offset",
 			"sendFile": "Send GCode to CNC machine",

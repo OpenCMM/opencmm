@@ -59,7 +59,7 @@ def test_get_true_line_number():
 
     job_info = {
         "three_d_model_id": model_id,
-        "measure_length": 2.5,
+        "range": 2.5,
         "measure_feedrate": 100.0,
         "move_feedrate": 1000.0,
         "x_offset": 50.0,
@@ -97,6 +97,27 @@ def test_get_true_line_number_debug():
 
 
 def test_get_true_line_and_feedrate():
+    path = "tests/fixtures/stl/step.STL"
+
+    with open(path, "rb") as f:
+        response = client.post("/upload/3dmodel", files={"file": f})
+        assert response.status_code == 200
+        model_id = response.json()["model_id"]
+
+    job_info = {
+        "three_d_model_id": model_id,
+        "range": 2.5,
+        "measure_feedrate": 100.0,
+        "move_feedrate": 1000.0,
+        "x_offset": 0.0,
+        "y_offset": 0.0,
+        "z_offset": 0.0,
+        "send_gcode": False,
+    }
+    response = client.post("/setup/data", json=job_info)
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
     gcode = load_gcode("data/gcode/step.STL.gcode")
     xy = (48.476, -26.558)
     line = 45

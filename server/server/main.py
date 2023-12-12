@@ -50,7 +50,7 @@ import asyncio
 
 class JobInfo(BaseModel):
     three_d_model_id: int
-    measure_length: float
+    range: float
     measure_feedrate: float
     move_feedrate: float
     x_offset: Optional[float] = 0.0
@@ -271,7 +271,7 @@ async def setup_data(job_info: JobInfo):
         MYSQL_CONFIG,
         job_info.three_d_model_id,
         filename,
-        (job_info.measure_length, job_info.measure_feedrate, job_info.move_feedrate),
+        (job_info.range, job_info.measure_feedrate, job_info.move_feedrate),
         offset,
         job_info.send_gcode,
     )

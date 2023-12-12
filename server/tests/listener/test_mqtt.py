@@ -27,7 +27,7 @@ def test_import_mtconnect_data_from_mqtt_log():
 
     job_info = {
         "three_d_model_id": model_id,
-        "measure_length": 2.5,
+        "range": 2.5,
         "measure_feedrate": 100.0,
         "move_feedrate": 1000.0,
         "x_offset": 0.0,
@@ -88,7 +88,7 @@ def test_import_mtconnect_data_from_mqtt_process6():
 
     job_info = {
         "three_d_model_id": model_id,
-        "measure_length": 2.0,
+        "range": 2.0,
         "measure_feedrate": 100.0,
         "move_feedrate": 1000.0,
         "x_offset": 0.0,

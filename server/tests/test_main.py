@@ -50,7 +50,7 @@ def test_upload_duplicate_3dmodel_with_arcs():
 def test_setup_data_only_lines():
     job_info = {
         "three_d_model_id": 3,
-        "measure_length": 2.5,
+        "range": 2.5,
         "measure_feedrate": 100.0,
         "move_feedrate": 1000.0,
         "x_offset": 0.0,
@@ -66,7 +66,7 @@ def test_setup_data_only_lines():
 def test_setup_data_only_lines_again():
     job_info = {
         "three_d_model_id": 3,
-        "measure_length": 2.5,
+        "range": 2.5,
         "measure_feedrate": 100.0,
         "move_feedrate": 1000.0,
         "x_offset": 0.0,
@@ -82,7 +82,7 @@ def test_setup_data_only_lines_again():
 def test_setup_data_wtih_arcs():
     job_info = {
         "three_d_model_id": 4,
-        "measure_length": 2.5,
+        "range": 2.5,
         "measure_feedrate": 100.0,
         "move_feedrate": 1000.0,
         "x_offset": 0.0,
@@ -98,7 +98,7 @@ def test_setup_data_wtih_arcs():
 def test_setup_data_with_arcs_again():
     job_info = {
         "three_d_model_id": 4,
-        "measure_length": 2.5,
+        "range": 2.5,
         "measure_feedrate": 100.0,
         "move_feedrate": 1000.0,
         "x_offset": 0.0,
@@ -114,7 +114,7 @@ def test_setup_data_with_arcs_again():
 def test_setup_data_with_arcs_with_offset():
     job_info = {
         "three_d_model_id": 4,
-        "measure_length": 2.5,
+        "range": 2.5,
         "measure_feedrate": 100.0,
         "move_feedrate": 1000.0,
         "x_offset": 50.0,
@@ -139,7 +139,7 @@ def test_upload_with_new_model_with_step():
 def test_setup_data_with_step_and_slope():
     job_info = {
         "three_d_model_id": 5,
-        "measure_length": 2.5,
+        "range": 2.5,
         "measure_feedrate": 100.0,
         "move_feedrate": 1000.0,
         "x_offset": 0.0,
@@ -195,7 +195,7 @@ def test_delete_model_data():
 
     job_info = {
         "three_d_model_id": 6,
-        "measure_length": 2.5,
+        "range": 2.5,
         "measure_feedrate": 100.0,
         "move_feedrate": 1000.0,
         "x_offset": 0.0,
