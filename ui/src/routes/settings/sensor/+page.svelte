@@ -5,11 +5,12 @@
 	import { ToastNotification } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	let interval = 100;
+	let interval = 700;
 	let threshold = 1000;
 	let beamDiameter = 120.0;
-	let middleOutput = 9100.0;
+	let middleOutput = 9400.0;
 	let responseTime = 10.0;
+	let tolerance = 0.3;
 	let loaded = false;
 	let saveFailed = false;
 	let success = false;
@@ -24,6 +25,7 @@
 				beamDiameter = data['beam_diameter'];
 				middleOutput = data['middle_output'];
 				responseTime = data['response_time'];
+				tolerance = data['tolerance'];
 				loaded = true;
 			}
 		});
@@ -37,7 +39,8 @@
 				threshold,
 				beam_diameter: beamDiameter,
 				middle_output: middleOutput,
-				response_time: responseTime
+				response_time: responseTime,
+				tolerance
 			};
 			const res = await axios.post(`${BACKEND_URL}/update/sensor_config`, data, {
 				headers: {
@@ -89,6 +92,13 @@
 				id="responseTime"
 				type="number"
 				labelText={$_('settings.sensor.responseTime')}
+			/>
+			<TextInput
+				bind:value={tolerance}
+				id="tolerance"
+				type="number"
+				step="0.01"
+				labelText={$_('settings.sensor.tolerance')}
 			/>
 		</FormGroup>
 		<Button on:click={saveSettings}>{$_('common.save')}</Button>

@@ -125,6 +125,7 @@ def get_sensor_config():
         "beam_diameter": conf["beam_diameter"],
         "middle_output": conf["middle_output"],
         "response_time": conf["response_time"],
+        "tolerance": conf["tolerance"],
     }
 
 
@@ -136,6 +137,7 @@ def update_sensor_config(_conf: SensorConfig):
     conf["sensor"]["beam_diameter"] = _conf.beam_diameter
     conf["sensor"]["middle_output"] = _conf.middle_output
     conf["sensor"]["response_time"] = _conf.response_time
+    conf["sensor"]["tolerance"] = _conf.tolerance
     update_conf(conf)
     return {"status": "ok"}
 
@@ -517,6 +519,8 @@ async def get_mtct_delay_between_lines(model_id: int, process_id: int):
 async def get_missing_lines_travel_time_diff(model_id: int, process_id: int):
     mtct_data_checker = MtctDataChecker(MYSQL_CONFIG, model_id, process_id)
     avg, np_diff = mtct_data_checker.missing_line_travel_time_diff()
+    if avg is None:
+        return {"avg": None, "diff": []}
     return {"avg": avg, "diff": np_diff.tolist()}
 
 

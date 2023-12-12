@@ -163,7 +163,8 @@
 			"threshold": "Threshold",
 			"beamDiameter": "Beam diameter",
 			"middleOutput": "Middle output",
-			"responseTime": "Response time"
+			"responseTime": "Response time",
+			"tolerance": "tolerance"
 		}
 	},
 	"page": {

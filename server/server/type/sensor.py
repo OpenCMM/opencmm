@@ -7,3 +7,4 @@ class SensorConfig(BaseModel):
     beam_diameter: float
     middle_output: float
     response_time: float
+    tolerance: float

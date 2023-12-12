@@ -334,6 +334,8 @@ class MtctDataChecker:
             diff = actual_time - travel_time
             diff_list.append([line_number, diff.total_seconds()])
 
+        if not diff_list:
+            return None, None
         np_diff = np.array(diff_list)
         avg_diff = self.robust_mean(np_diff[:, 1])
         return avg_diff, np_diff

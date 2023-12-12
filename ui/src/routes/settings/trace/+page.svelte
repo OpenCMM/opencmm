@@ -82,6 +82,7 @@
 				bind:value={margin}
 				id="margin"
 				type="number"
+				step="0.01"
 				labelText={$_('settings.trace.margin')}
 			/>
 			<TextInput

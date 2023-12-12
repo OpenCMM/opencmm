@@ -150,10 +150,12 @@ def model_id_to_filename(_model_id: int):
     cursor = cnx.cursor()
     query = "SELECT filename FROM model WHERE id = %s"
     cursor.execute(query, (_model_id,))
-    filename = cursor.fetchone()[0]
+    filename = cursor.fetchone()
+    if filename is None:
+        return None
     cursor.close()
     cnx.close()
-    return filename
+    return filename[0]
 
 
 def filename_to_model_id(filename: str):
@@ -164,10 +166,12 @@ def filename_to_model_id(filename: str):
     cursor = cnx.cursor()
     query = "SELECT id FROM model WHERE filename = %s"
     cursor.execute(query, (filename,))
-    _model_id = cursor.fetchone()[0]
+    _model_id = cursor.fetchone()
+    if _model_id is None:
+        return None
     cursor.close()
     cnx.close()
-    return _model_id
+    return _model_id[0]
 
 
 def model_exists(filename: str):

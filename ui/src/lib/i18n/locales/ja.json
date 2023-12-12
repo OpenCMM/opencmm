@@ -163,7 +163,8 @@
 			"threshold": "段差検知閾値",
 			"beamDiameter": "ビーム径",
 			"middleOutput": "センサ中心値",
-			"responseTime": "応答速度"
+			"responseTime": "応答速度",
+			"tolerance": "データ誤差許容値"
 		}
 	},
 	"page": {
