@@ -56,7 +56,7 @@ def process_stl(
     offset: tuple,
     send_gcode: bool,
 ):
-    (range, measure_feedrate, move_feedrate) = gcode_settings
+    (measurement_range, measure_feedrate, move_feedrate) = gcode_settings
     edge_path = EdgePath(
         mysql_config,
         model_id,

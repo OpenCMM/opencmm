@@ -5,14 +5,14 @@ from server.model import get_model_data
 def start_measuring(model_id: int, mysql_config: dict, status: str):
     model_data = get_model_data(model_id)
     offset = (model_data[3], model_data[4], model_data[5])
-    range = model_data[6]
+    measurement_range = model_data[6]
     measure_feedrate = model_data[7]
     move_feedrate = model_data[8]
     mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
     mysql_cur = mysql_conn.cursor()
     query = (
         "INSERT INTO process(model_id, status, x_offset, y_offset, "
-        "z_offset, range, measure_feedrate, move_feedrate) "
+        "z_offset, measurement_range, measure_feedrate, move_feedrate) "
         "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
     )
     mysql_cur.execute(
@@ -21,7 +21,7 @@ def start_measuring(model_id: int, mysql_config: dict, status: str):
             model_id,
             status,
             *offset,
-            range,
+            measurement_range,
             measure_feedrate,
             move_feedrate,
         ),

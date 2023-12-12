@@ -14,7 +14,7 @@
 		},
 		"setup": {
 			"title": "Gコード作成",
-			"range": {
+			"measurementRange": {
 				"label": "測定箇所の長さ"
 			},
 			"loading": "Gコード作成中...",

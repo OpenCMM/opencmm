@@ -12,7 +12,7 @@
 	let xOffset = 0;
 	let yOffset = 0;
 	let zOffset = 0;
-	let range = 2.5;
+	let measurementRange = 2.5;
 	let measureFeedRate = 100.0;
 	let moveFeedRate = 1000.0;
 	let error: string | null = null;
@@ -25,7 +25,7 @@
 
 		const data = {
 			three_d_model_id: Number(modelId),
-			range: Number(range),
+			measurement_range: Number(measurementRange),
 			measure_feedrate: Number(measureFeedRate),
 			move_feedrate: Number(moveFeedRate),
 			x_offset: Number(xOffset),
@@ -65,7 +65,11 @@
 		<p id="form-title">{$_('home.setup.title')}</p>
 		<Form on:submit={handleSubmit}>
 			<FormGroup>
-				<TextInput labelText={$_('home.setup.range.label')} id="range" bind:value={range} />
+				<TextInput
+					labelText={$_('home.setup.measurementRange.label')}
+					id="measurementRange"
+					bind:value={measurementRange}
+				/>
 				<TextInput
 					labelText={$_('home.setup.measureFeedRate.label')}
 					id="measureFeedRate"

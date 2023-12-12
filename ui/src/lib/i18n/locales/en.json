@@ -14,7 +14,7 @@
 		},
 		"setup": {
 			"title": "Create GCode",
-			"measureLength": {
+			"measurementRange": {
 				"label": "Measurement range"
 			},
 			"loading": "Creating GCode...",

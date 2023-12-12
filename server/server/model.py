@@ -203,7 +203,7 @@ def update_offset_gcode_settings(model_id: int, offset: tuple, gcode_settings: t
     cursor = cnx.cursor()
     query = (
         "UPDATE model SET x_offset = %s, y_offset = %s, z_offset = %s, "
-        "range = %s, measure_feedrate = %s, move_feedrate = %s "
+        "measurement_range = %s, measure_feedrate = %s, move_feedrate = %s "
         "WHERE id = %s"
     )
     cursor.execute(query, (*offset, *gcode_settings, model_id))
