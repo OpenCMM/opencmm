@@ -7,6 +7,8 @@
 	import { BACKEND_URL } from '$lib/constants/backend';
 	import MissingData from './MissingData.svelte';
 	import MtctLines from './MtctLines.svelte';
+	import DelayBetweenLines from './DelayBetweenLines.svelte';
+	import MissingLineDiff from './MissingLineDiff.svelte';
 
 	const modelId = $page.url.searchParams.get('id');
 	const processId = $page.url.searchParams.get('process');
@@ -33,6 +35,8 @@
 			<Column>
 				<MissingData {modelId} {processId} />
 				<MtctLines {modelId} {processId} />
+				<DelayBetweenLines {modelId} {processId} />
+				<MissingLineDiff {modelId} {processId} />
 			</Column>
 		</Row>
 	</Grid>

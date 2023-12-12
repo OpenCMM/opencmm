@@ -315,7 +315,7 @@ class MtctDataChecker:
         )
         delays = self.get_delay(lines)
         delays = np.array(delays)
-        return self.robust_mean(delays[:, 2])
+        return self.robust_mean(delays[:, 2]), delays
 
     def missing_line_travel_time_diff(self):
         lines = self.estimate_timestamps_from_mtct_data(
@@ -324,6 +324,7 @@ class MtctDataChecker:
         missing_lines = self.get_missing_lines(lines)
         diff_list = []
         for line in missing_lines:
+            line_number = line[0]
             start = line[3:5]
             end = line[5:7]
             if start == end:
@@ -331,8 +332,8 @@ class MtctDataChecker:
             travel_time = self.get_travel_time(start, end, line[7] * 60)
             actual_time = line[2] - line[1]
             diff = actual_time - travel_time
-            diff_list.append(diff.total_seconds())
+            diff_list.append([line_number, diff.total_seconds()])
 
         np_diff = np.array(diff_list)
-        avg_diff = self.robust_mean(np_diff)
-        return avg_diff
+        avg_diff = self.robust_mean(np_diff[:, 1])
+        return avg_diff, np_diff

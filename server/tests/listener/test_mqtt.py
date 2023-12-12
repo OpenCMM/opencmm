@@ -30,7 +30,9 @@ def test_import_mtconnect_data_from_mqtt_log():
         )
         assert response.status_code == 200
         result = response.json()
-        delay = result["delay"]
+        delay = result["avg"]
+        print(f"process{i}", process_id)
+        print("delay:", delay)
         assert delay < 0.03
 
         response = client.get(
@@ -41,5 +43,6 @@ def test_import_mtconnect_data_from_mqtt_log():
         )
         assert response.status_code == 200
         result = response.json()
-        diff = result["diff"]
+        diff = result["avg"]
+        print("diff:", diff)
         assert diff < 0.03

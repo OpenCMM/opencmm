@@ -509,15 +509,15 @@ async def get_timestamps_on_lines(model_id: int, process_id: int):
 @app.get("/result/mtconnect/avg/delay")
 async def get_mtct_delay_between_lines(model_id: int, process_id: int):
     mtct_data_checker = MtctDataChecker(MYSQL_CONFIG, model_id, process_id)
-    avg_delay = mtct_data_checker.get_average_delay_between_lines()
-    return {"delay": avg_delay}
+    avg, delays = mtct_data_checker.get_average_delay_between_lines()
+    return {"avg": avg, "delay": delays.tolist()}
 
 
 @app.get("/result/mtconnect/missing/lines/travel/time/diff")
 async def get_missing_lines_travel_time_diff(model_id: int, process_id: int):
     mtct_data_checker = MtctDataChecker(MYSQL_CONFIG, model_id, process_id)
-    avg_diff = mtct_data_checker.missing_line_travel_time_diff()
-    return {"diff": avg_diff}
+    avg, np_diff = mtct_data_checker.missing_line_travel_time_diff()
+    return {"avg": avg, "diff": np_diff.tolist()}
 
 
 @app.get("/model/shapes/{model_id}")

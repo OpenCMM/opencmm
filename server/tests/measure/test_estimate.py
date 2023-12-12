@@ -122,7 +122,7 @@ def test_different_gcode_params_with_arc():
         "move_feedrate": 2000.0,
         "x_offset": 50.0,
         "y_offset": -65.0,
-        "z_offset": 0.0,
+        "z_offset": -10.0,
         "send_gcode": False,
     }
     response = client.post("/setup/data", json=job_info)
