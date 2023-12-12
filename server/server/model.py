@@ -23,6 +23,7 @@ def delete_model_files(model_id: int):
     filename = model_id_to_filename(model_id)
     if model_exists(filename):
         delete_model(filename_to_model_id(filename))
+        os.remove(f"{MODEL_PATH}/{filename}")
         remove_if_gcode_exists(filename)
 
 
@@ -50,7 +51,7 @@ def list_3dmodel():
 
 
 def has_gcode(model_filename: str):
-    os.path.exists(f"data/gcode/{model_filename}.gcode")
+    return os.path.exists(f"data/gcode/{model_filename}.gcode")
 
 
 def remove_if_gcode_exists(model_filename: str):

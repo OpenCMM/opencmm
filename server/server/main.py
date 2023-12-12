@@ -40,7 +40,6 @@ from server.model import (
     model_id_to_filename,
     add_new_3dmodel,
     get_model_data,
-    delete_model,
     delete_model_files,
 )
 from server.mark.gcode import model_id_to_program_number, get_gcode_filename
@@ -217,7 +216,6 @@ async def upload_new_model(file: UploadFile):
 async def delete_model_data(model_id: int):
     """Delete model data"""
     delete_model_files(model_id)
-    delete_model(model_id)
     return {"status": "ok"}
 
 
