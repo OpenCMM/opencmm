@@ -13,6 +13,7 @@ mtconnect:
   latency: 3000 # ms
   url: http://192.168.0.19:5000/current?path=//Components
   device: MITSUBISHI1
+  disable: true
 sensor:
   interval: 10 # ms
   threshold: 3.0
