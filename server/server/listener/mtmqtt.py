@@ -46,72 +46,23 @@ class MqttListener:
         with open(mqtt_log_path) as f:
             data = json.load(f)
             msgs = data[0]["messages"]
-            count = 0
-            idx = 0
             for msg in msgs:
                 topic = msg["topic"]
                 if topic != self.topic:
                     continue
                 try:
-                    payload = json.loads(msg["payload"])
+                    current_row = self.parse_mtct_data(msg["payload"])
+                    last_timestamp = current_row[1]
+                    if prev_timestamp != last_timestamp:
+                        update_list.append(current_row)
+                        prev_timestamp = last_timestamp
                 except json.decoder.JSONDecodeError:
                     continue
-                if "MTConnectStreams" not in payload:
-                    count += 1
+                except MtqqParseError:
                     continue
+                except Exception as e:
+                    logger.warning(e)
 
-                idx += 1
-                execution = None
-                execution_list = payload["MTConnectStreams"]["Streams"]["DeviceStream"][
-                    0
-                ]["ComponentStream"][1]["Events"]["Execution"]
-                for _execution in execution_list:
-                    if _execution["dataItemId"] == "execution1":
-                        execution = _execution
-                if execution is None:
-                    continue
-                line = payload["MTConnectStreams"]["Streams"]["DeviceStream"][0][
-                    "ComponentStream"
-                ][9]["Events"]["Line"][0]
-                feedrate = payload["MTConnectStreams"]["Streams"]["DeviceStream"][0][
-                    "ComponentStream"
-                ][9]["Samples"]["PathFeedrate"][1]
-                x = payload["MTConnectStreams"]["Streams"]["DeviceStream"][0][
-                    "ComponentStream"
-                ][3]["Samples"]["Position"][0]
-                y = payload["MTConnectStreams"]["Streams"]["DeviceStream"][0][
-                    "ComponentStream"
-                ][4]["Samples"]["Position"][0]
-                z = payload["MTConnectStreams"]["Streams"]["DeviceStream"][0][
-                    "ComponentStream"
-                ][5]["Samples"]["Position"][0]
-
-                all_timestamps = [
-                    x["timestamp"],
-                    y["timestamp"],
-                    z["timestamp"],
-                    # line["timestamp"],
-                ]
-                last_timestamp = max(all_timestamps)
-                # to datetime
-                last_timestamp = datetime.strptime(
-                    last_timestamp, "%Y-%m-%dT%H:%M:%S.%fZ"
-                )
-                current_row = [
-                    self.process_id,
-                    last_timestamp,
-                    x["value"],
-                    y["value"],
-                    z["value"],
-                    line["value"],
-                    feedrate["value"],
-                ]
-                if prev_timestamp != last_timestamp:
-                    update_list.append(current_row)
-                    prev_timestamp = last_timestamp
-                count += 1
-
-        logger.info(f"count: {count}")
         update_list = self.remove_unavailable_data(update_list)
         import_mtconnect_data(self.mysql_config, update_list)
 
@@ -157,7 +108,6 @@ class MqttListener:
         last_timestamp = max(all_timestamps)
         # to datetime
         last_timestamp = datetime.strptime(last_timestamp, "%Y-%m-%dT%H:%M:%S.%fZ")
-        line_timestamp = datetime.strptime(line["timestamp"], "%Y-%m-%dT%H:%M:%S.%fZ")
         current_row = (
             self.process_id,
             last_timestamp,
@@ -165,7 +115,6 @@ class MqttListener:
             y["value"],
             z["value"],
             line["value"],
-            line_timestamp,
             feedrate["value"],
         )
         return current_row
@@ -227,7 +176,7 @@ def listen_data_with_mqtt(
             if len(mt_data_list) == 0:
                 logger.warning("listen_data_with_mqtt(): No data to import")
             else:
-                import_mtconnect_data(mysql_config, mt_data_list, True)
+                import_mtconnect_data(mysql_config, mt_data_list)
             client.publish(
                 IMPORT_MTCONNECT_TOPIC, json.dumps({"process_id": process_id})
             )
