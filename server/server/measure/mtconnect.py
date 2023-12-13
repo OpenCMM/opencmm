@@ -95,6 +95,7 @@ class MtctDataChecker:
             self.mysql_config, self.model_id
         )
         self.config = get_config()
+        self.mtct_latency = self.get_mtct_latency()
 
     def find_idx_of_first_line_number(self, lines):
         if lines[0][0] != self.last_line:
@@ -235,7 +236,7 @@ class MtctDataChecker:
         remove_duplicate: bool = True,
     ):
         lines = []
-        mtconnect_latency = mtconnect_latency or self.config["mtconnect"]["latency"]
+        mtconnect_latency = mtconnect_latency or self.mtct_latency
 
         for row in self.np_mtconnect_data:
             xy = (row[3], row[4])
@@ -421,14 +422,18 @@ class MtctDataChecker:
         coord = np.round(coord, 3)
         return tuple(coord)
 
+    def get_mtct_latency(self):
+        mtct_latency_from_process = self.get_mtct_latency_from_process()
+        if mtct_latency_from_process:
+            return self.get_mtct_latency_from_process()
+        return self.config["mtconnect"]["latency"]
+
     def get_sensor_data_with_coordinates(self, mtct_latency: float = None):
         """
         Get sensor data with coordinates
         """
         if mtct_latency is None:
-            mtct_latency = self.get_mtct_latency_from_process()
-            if mtct_latency is None:
-                mtct_latency = self.config["mtconnect"]["latency"]
+            mtct_latency = self.mtct_latency
 
         lines = self.estimate_timestamps_from_mtct_data(mtct_latency)
         sensor_data = get_sensor_data(self.process_id, self.mysql_config)

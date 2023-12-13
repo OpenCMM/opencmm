@@ -10,7 +10,7 @@ mqtt:
   username: opencmm
 mtconnect:
   interval: 700 # ms
-  latency: 2500 # ms
+  latency: 3000 # ms
   url: https://demo.metalogi.io/current?path=//Components
   device: MITSUBISHI1
 sensor:
@@ -18,7 +18,7 @@ sensor:
   threshold: 3.0
   beam_diameter: 120.0 # μm
   middle_output: 9400
-  response_time: 12.0 # ms
+  response_time: 15.0 # ms
   tolerance: 0.3
 trace:
   min_measure_count: 5
