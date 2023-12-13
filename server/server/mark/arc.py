@@ -178,7 +178,7 @@ def add_measured_arc_info(model_id: int, mysql_config: dict, process_id: int):
             # cannot calculate arc with less than 3 edges
             continue
         try:
-            radius, center = get_arc_info(np.array(edges))
+            radius, center, _is_circle = get_arc_info(np.array(edges))
             query = (
                 "INSERT INTO arc_result (radius, cx, cy, cz, arc_id, process_id) "
                 "VALUES (%s, %s, %s, %s, %s, %s) "

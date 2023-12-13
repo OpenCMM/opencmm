@@ -160,8 +160,6 @@ def create_mock_data(filename: str, process_id: int, fluctuation: float = None):
     timestamp = datetime.now()
     for i in range(len(gcode)):
         line = i + 3
-        if line == 53:
-            print("debug")
         if gcode[i][0] == "G4":
             # start to measure steps or slopes
             is_tracing = True

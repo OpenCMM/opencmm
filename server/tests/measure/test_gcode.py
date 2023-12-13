@@ -89,13 +89,6 @@ def test_get_true_line_number():
     assert get_true_line_number(xy, line, gcode) == 6
 
 
-def test_get_true_line_number_debug():
-    gcode = load_gcode("data/gcode/sample.stl.gcode")
-    xy = (33.333, -129.61)
-    line = 29
-    assert get_true_line_number(xy, line, gcode, None) == 28
-
-
 def test_get_true_line_and_feedrate():
     path = "tests/fixtures/stl/step.STL"
 
