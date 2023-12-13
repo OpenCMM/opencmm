@@ -30,10 +30,14 @@ def get_edges_for_arc(
 
 
 def import_arcs(model_id: int, arcs: list, mysql_config: dict):
+    conf = get_config()
+    only_circle = conf["edge"]["arc"]["only_circle"]
+    sample_size = conf["edge"]["arc"]["number"]
     for arc_points in arcs:
-        arc_info = to_arc_info(model_id, arc_points)
+        arc_info = to_arc_info(model_id, arc_points, only_circle)
+        if arc_info is None:
+            continue
         arc_id = import_arc(arc_info, mysql_config)
-        sample_size = get_config()["edge"]["arc"]["number"]
         edges = get_edges_for_arc(model_id, arc_id, arc_points, sample_size)
         import_edges(edges, mysql_config)
 
@@ -66,8 +70,10 @@ def import_arc(arc_info: list, mysql_config: dict):
     return cursor.lastrowid
 
 
-def to_arc_info(model_id: int, arc_points: np.ndarray):
-    radius, center = get_arc_info(arc_points)
+def to_arc_info(model_id: int, arc_points: np.ndarray, only_circle: bool = False):
+    radius, center, is_circle = get_arc_info(arc_points)
+    if only_circle and not is_circle:
+        return None
     arc_info = [
         model_id,
         float(radius),
@@ -93,10 +99,12 @@ def get_arc_info(arc_points: np.ndarray):
         Radius of arc
     center : np.array
         Center of arc
+    is_circle : bool
+        True if arc is a circle
     """
     center_x, center_y, radius = fit_circle(arc_points[:, :2])
     center = np.array([center_x, center_y, arc_points[0, 2]])
-    return radius, center
+    return radius, center, is_circle(arc_points)
 
 
 def fit_circle(points):
@@ -208,3 +216,16 @@ def delete_arcs_with_model_id(model_id: int, mysql_config: dict):
     cnx.commit()
     cursor.close()
     cnx.close()
+
+
+def is_circle(points, tolerance=1.0):
+    """
+    Check if points are a circle within a tolerance
+
+    If they are a circle, distances between points should be within tolerance.
+    If not, they are an arc.
+    """
+    x = points[:, 0]
+    y = points[:, 1]
+    distances = np.sqrt((x - np.mean(x)) ** 2 + (y - np.mean(y)) ** 2)
+    return np.allclose(distances, distances[0], atol=tolerance)

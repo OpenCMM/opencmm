@@ -1,6 +1,7 @@
 edge:
   arc:
     number: 4
+    only_circle: true
   line:
     number: 2
 mqtt:
