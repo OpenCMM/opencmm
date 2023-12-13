@@ -56,6 +56,32 @@ def process_stl(
     offset: tuple,
     send_gcode: bool,
 ):
+    path = create_gcode_path(
+        mysql_config,
+        model_id,
+        stl_filename,
+        gcode_settings,
+        offset,
+    )
+    # save gcode
+    gcode_filename = gcode.get_gcode_filename(stl_filename)
+    gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
+    gcode.save_gcode(model_id, path, gcode_file_path)
+
+    # send gcode to cnc machine
+    if send_gcode:
+        machine_info = machine.get_machines(mysql_config)[0]
+        machine.send_file_with_smbclient(machine_info, gcode_file_path)
+
+
+def create_gcode_path(
+    mysql_config: dict,
+    model_id: int,
+    stl_filename: str,
+    gcode_settings: tuple,
+    offset: tuple,
+    update_data: bool = True,
+):
     (measurement_range, measure_feedrate, move_feedrate) = gcode_settings
     edge_path = EdgePath(
         mysql_config,
@@ -63,8 +89,9 @@ def process_stl(
         stl_filename,
         gcode_settings,
     )
-    path = edge_path.get_edge_path(offset)
-    update_offset_gcode_settings(model_id, offset, gcode_settings)
+    path = edge_path.get_edge_path(offset, update_data)
+    if update_data:
+        update_offset_gcode_settings(model_id, offset, gcode_settings)
 
     path = gcode.format_edge_path(path)
     steps = step.get_steps(mysql_config, model_id)
@@ -81,11 +108,12 @@ def process_stl(
         path.append("G4 P1000")
         init_line = 4 + len(path)
         trace_id = steps[0][0]
-        if trace.get_trace_lines(mysql_config, trace_id):
+        if trace.get_trace_lines(mysql_config, trace_id) and update_data:
             trace_id_list = [step[0] for step in steps]
             trace.delete_trace_lines(mysql_config, trace_id_list)
 
-        trace.import_trace_lines(mysql_config, trace_lines, init_line)
+        if update_data:
+            trace.import_trace_lines(mysql_config, trace_lines, init_line)
         path += step_path
 
     slopes = slope.get_slopes(mysql_config, model_id)
@@ -101,22 +129,15 @@ def process_stl(
             path.append("G4 P1000")
         init_line = 4 + len(path)
         trace_id = slopes[0][0]
-        if trace.get_trace_lines(mysql_config, trace_id):
+        if trace.get_trace_lines(mysql_config, trace_id) and update_data:
             trace_id_list = [slope[0] for slope in slopes]
             trace.delete_trace_lines(mysql_config, trace_id_list)
 
-        trace.import_trace_lines(mysql_config, trace_lines, init_line)
+        if update_data:
+            trace.import_trace_lines(mysql_config, trace_lines, init_line)
         path += slope_path
 
-    # save gcode
-    gcode_filename = gcode.get_gcode_filename(stl_filename)
-    gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
-    gcode.save_gcode(model_id, path, gcode_file_path)
-
-    # send gcode to cnc machine
-    if send_gcode:
-        machine_info = machine.get_machines(mysql_config)[0]
-        machine.send_file_with_smbclient(machine_info, gcode_file_path)
+    return path
 
 
 def remove_data_with_model_id(model_id: int, mysql_config: dict):

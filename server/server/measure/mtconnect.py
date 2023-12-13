@@ -14,6 +14,7 @@ from server.measure.gcode import (
 from datetime import timedelta
 from server.mark.trace import get_first_line_number_for_tracing
 from server.mark.trace import get_trace_ids
+from server.prepare import create_gcode_path
 import numpy as np
 from datetime import datetime
 
@@ -82,10 +83,7 @@ class MtctDataChecker:
         self.model_id = model_id
         self.process_id = process_id
         self.model_row = get_model_data(model_id)
-        filename = self.model_row[1]
-        gcode_filename = get_gcode_filename(filename)
-        gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
-        self.gcode = load_gcode(gcode_file_path)
+        self.load_gcode()
         mtconnect_data = get_mtconnect_data(self.process_id, self.mysql_config)
         self.np_mtconnect_data = np.array(mtconnect_data)
         self.last_line = len(self.gcode) + 2
@@ -96,6 +94,58 @@ class MtctDataChecker:
         )
         self.config = get_config()
         self.mtct_latency = self.get_mtct_latency()
+
+    def load_gcode(self):
+        current_gcode_settings = self.get_current_gcode_settings()
+        gcode_settings = self.get_gcode_settings()
+        stl_filename = self.model_row[1]
+        if current_gcode_settings == gcode_settings:
+            gcode_filename = get_gcode_filename(stl_filename)
+            gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
+            self.gcode = load_gcode(gcode_file_path)
+        else:
+            offset = (self.model_row[3], self.model_row[4], self.model_row[5])
+            gcode_with_str = create_gcode_path(
+                self.mysql_config,
+                self.model_id,
+                stl_filename,
+                gcode_settings,
+                offset,
+                False,
+            )
+            self.gcode = [row.split() for row in gcode_with_str]
+
+    def get_current_gcode_settings(self):
+        """
+        Get gcode settings from the process
+        """
+        cnx = mysql.connector.connect(**self.mysql_config, database="coord")
+        cursor = cnx.cursor()
+        query = (
+            "SELECT measurement_range, measure_feedrate, move_feedrate "
+            "FROM model WHERE id = %s"
+        )
+        cursor.execute(query, (self.model_id,))
+        row = cursor.fetchone()
+        cursor.close()
+        cnx.close()
+        return row
+
+    def get_gcode_settings(self):
+        """
+        Get gcode settings from the process
+        """
+        cnx = mysql.connector.connect(**self.mysql_config, database="coord")
+        cursor = cnx.cursor()
+        query = (
+            "SELECT measurement_range, measure_feedrate, move_feedrate "
+            "FROM process WHERE id = %s"
+        )
+        cursor.execute(query, (self.process_id,))
+        row = cursor.fetchone()
+        cursor.close()
+        cnx.close()
+        return row
 
     def find_idx_of_first_line_number(self, lines):
         if lines[0][0] != self.last_line:
