@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import { BACKEND_URL } from '$lib/constants/backend';
 	import axios from 'axios';
-	import { DataTable, Link, Loading } from 'carbon-components-svelte';
+	import { Content, DataTable, Link, Loading } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
 
@@ -37,25 +37,27 @@
 	});
 </script>
 
-{#if !loaded}
-	<Loading />
-{:else}
-	<div id="process-list">
-		<DataTable title={$_('home.process.title')} rows={processes} {headers}>
-			<svelte:fragment slot="cell" let:cell>
-				{#if cell.key === 'id'}
-					<Link href={`/model/${modelId}/process/${cell.value}`}>
+<Content>
+	{#if !loaded}
+		<Loading />
+	{:else}
+		<div id="process-list">
+			<DataTable title={$_('home.process.title')} rows={processes} {headers}>
+				<svelte:fragment slot="cell" let:cell>
+					{#if cell.key === 'id'}
+						<Link href={`/model/${modelId}/process/${cell.value}`}>
+							{cell.value}
+						</Link>
+					{:else if cell.key === 'datetime'}
+						{new Date(cell.value).toLocaleString()}
+					{:else}
 						{cell.value}
-					</Link>
-				{:else if cell.key === 'datetime'}
-					{new Date(cell.value).toLocaleString()}
-				{:else}
-					{cell.value}
-				{/if}
-			</svelte:fragment>
-		</DataTable>
-	</div>
-{/if}
+					{/if}
+				</svelte:fragment>
+			</DataTable>
+		</div>
+	{/if}
+</Content>
 
 <style>
 	#process-list {

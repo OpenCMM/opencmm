@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Debug from './Debug.svelte';
-	import { Grid, Row, Column, ProgressBar } from 'carbon-components-svelte';
-	import { page } from '$app/stores';
+	import { Grid, Row, Column, ProgressBar, Content } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import axios from 'axios';
 	import { BACKEND_URL } from '$lib/constants/backend';
@@ -10,8 +9,9 @@
 	import DelayBetweenLines from './DelayBetweenLines.svelte';
 	import MissingLineDiff from './MissingLineDiff.svelte';
 
-	const modelId = $page.url.searchParams.get('id');
-	const processId = $page.url.searchParams.get('process');
+	export let data;
+	const modelId = data.modelId;
+	const processId = data.processId;
 	let offset = [0.0, 0.0, 0.0];
 	let loaded = false;
 
@@ -26,20 +26,22 @@
 	});
 </script>
 
-{#if modelId && processId && loaded}
-	<Grid padding>
-		<Row>
-			<Column>
-				<Debug {modelId} {processId} {offset} />
-			</Column>
-			<Column>
-				<MissingData {modelId} {processId} />
-				<MtctLines {modelId} {processId} />
-				<DelayBetweenLines {modelId} {processId} />
-				<MissingLineDiff {modelId} {processId} />
-			</Column>
-		</Row>
-	</Grid>
-{:else}
-	<ProgressBar helperText="Loading..." />
-{/if}
+<Content>
+	{#if modelId && processId && loaded}
+		<Grid padding>
+			<Row>
+				<Column>
+					<Debug {modelId} {processId} {offset} />
+				</Column>
+				<Column>
+					<MissingData {modelId} {processId} />
+					<MtctLines {modelId} {processId} />
+					<DelayBetweenLines {modelId} {processId} />
+					<MissingLineDiff {modelId} {processId} />
+				</Column>
+			</Row>
+		</Grid>
+	{:else}
+		<ProgressBar helperText="Loading..." />
+	{/if}
+</Content>

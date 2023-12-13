@@ -16,7 +16,7 @@
 				console.log(res.data);
 				const processes = res.data['processes'];
 				const latestProcess = processes[processes.length - 1];
-				goto(`/model/${modelId}/process/${latestProcess[0]}`);
+				goto(`/model/${modelId}/process/${latestProcess[0]}/result`);
 			}
 		});
 	};

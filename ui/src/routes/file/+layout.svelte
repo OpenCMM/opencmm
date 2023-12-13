@@ -1,5 +1,11 @@
+<script>
+	import { Content } from 'carbon-components-svelte';
+</script>
+
 <div id="file-page">
-	<slot />
+	<Content>
+		<slot />
+	</Content>
 </div>
 
 <style>

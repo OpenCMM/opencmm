@@ -1,6 +1,5 @@
 <script>
 	import {
-		Content,
 		Header,
 		SkipToContent,
 		HeaderUtilities,
@@ -31,9 +30,7 @@
 		</HeaderUtilities>
 	</Header>
 	<main>
-		<Content>
-			<slot />
-		</Content>
+		<slot />
 	</main>
 </div>
 

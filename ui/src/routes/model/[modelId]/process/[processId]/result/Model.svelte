@@ -4,7 +4,6 @@
 	import CaretRight from 'carbon-icons-svelte/lib/CaretRight.svelte';
 	import CaretLeft from 'carbon-icons-svelte/lib/CaretLeft.svelte';
 	import { OverflowMenu, OverflowMenuItem } from 'carbon-components-svelte';
-	import Add from 'carbon-icons-svelte/lib/Add.svelte';
 	import {
 		Button,
 		ButtonSet,
@@ -15,7 +14,6 @@
 	} from 'carbon-components-svelte';
 	import Calculator from 'carbon-icons-svelte/lib/Calculator.svelte';
 	import { Grid, Row, Column } from 'carbon-components-svelte';
-	import ChartStepper from 'carbon-icons-svelte/lib/ChartStepper.svelte';
 	import Arc from './Arc.svelte';
 	import Line from './Line.svelte';
 	import Step from './Step.svelte';
@@ -59,7 +57,7 @@
 	const loadModelTableData = async () => {
 		axios.get(`${BACKEND_URL}/get/model/table/data/${modelId}`).then((res) => {
 			if (res.status === 200) {
-				const [, _filename, , offsetX, offsetY] = res.data;
+				const [, , , offsetX, offsetY] = res.data;
 				offset = [offsetX, offsetY, 0.0];
 				offsetLoaded = true;
 			}
@@ -121,31 +119,12 @@
 					</h1>
 				</Column>
 				<Column>
-					<Button icon={ChartStepper} href={`/gcode?id=${modelId}&process=${processId}`}>
-						{$_('common.gcode')}</Button
-					>
-				</Column>
-				<Column>
-					<Button href={`/d3?id=${modelId}&process=${processId}`}>2D</Button>
-				</Column>
-				<Column>
-					<Button icon={Add} href={`/file/setup?id=${modelId}`}>
-						{$_('home.file.3dmodel.createGcode')}</Button
-					>
-				</Column>
-				<Column>
 					<Button icon={Calculator} on:click={recomputeStart}>
 						{$_('home.recompute.button')}</Button
 					>
 				</Column>
 				<Column>
 					<OverflowMenu>
-						<OverflowMenuItem href={`/debug?id=${modelId}&process=${processId}`} text="MTConnect" />
-						<OverflowMenuItem href={`/mt?id=${modelId}&process=${processId}`} text="MTConnect 2D" />
-						<OverflowMenuItem
-							href={`/model/processes?id=${modelId}`}
-							text={$_('home.process.title')}
-						/>
 						<OverflowMenuItem danger text={$_('common.deleteModel')} on:click={deleteModel} />
 					</OverflowMenu>
 				</Column>

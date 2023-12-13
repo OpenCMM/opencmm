@@ -10,13 +10,15 @@
 		NumberInput,
 		ToastNotification
 	} from 'carbon-components-svelte';
-	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { BACKEND_URL } from '$lib/constants/backend';
 	import Chart from './Chart.svelte';
 	import { _ } from 'svelte-i18n';
 	import axios from 'axios';
 
+	export let data;
+	const modelId = data.modelId;
+	const processId = data.processId;
 	let shapeLoaded = false;
 	let gcodeLoaded = false;
 	let sensorLoaded = false;
@@ -64,8 +66,6 @@
 	// let arcs: Arc[] = [];
 	let sensor: Sensor[] = [];
 	let mtct: Mtct[] = [];
-	const modelId = $page.url.searchParams.get('id');
-	const processId = $page.url.searchParams.get('process');
 	const load_model_shape_data = async () => {
 		const res = await fetch(`${BACKEND_URL}/model/shapes/${modelId}`);
 		const data = await res.json();

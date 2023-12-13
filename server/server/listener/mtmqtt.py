@@ -157,6 +157,7 @@ class MqttListener:
         last_timestamp = max(all_timestamps)
         # to datetime
         last_timestamp = datetime.strptime(last_timestamp, "%Y-%m-%dT%H:%M:%S.%fZ")
+        line_timestamp = datetime.strptime(line["timestamp"], "%Y-%m-%dT%H:%M:%S.%fZ")
         current_row = (
             self.process_id,
             last_timestamp,
@@ -164,7 +165,7 @@ class MqttListener:
             y["value"],
             z["value"],
             line["value"],
-            line["timestamp"],
+            line_timestamp,
             feedrate["value"],
         )
         return current_row
