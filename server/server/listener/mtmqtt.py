@@ -164,6 +164,7 @@ class MqttListener:
             y["value"],
             z["value"],
             line["value"],
+            line["timestamp"],
             feedrate["value"],
         )
         return current_row
@@ -225,7 +226,7 @@ def listen_data_with_mqtt(
             if len(mt_data_list) == 0:
                 logger.warning("listen_data_with_mqtt(): No data to import")
             else:
-                import_mtconnect_data(mysql_config, mt_data_list)
+                import_mtconnect_data(mysql_config, mt_data_list, True)
             client.publish(
                 IMPORT_MTCONNECT_TOPIC, json.dumps({"process_id": process_id})
             )

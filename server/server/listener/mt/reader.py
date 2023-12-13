@@ -59,15 +59,25 @@ def stop_mtconnect_reader(
     client.loop_start()
 
 
-def import_mtconnect_data(mysql_config: dict, _mt_data_list: list):
+def import_mtconnect_data(
+    mysql_config: dict, _mt_data_list: list, has_line_timestamp: bool = False
+):
     # Perform a bulk insert
     mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
     mysql_cur = mysql_conn.cursor()
 
-    query = (
-        "INSERT INTO mtconnect(process_id, timestamp, "
-        "x, y, z, line, feedrate) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-    )
+    if has_line_timestamp:
+        query = (
+            "INSERT INTO mtconnect(process_id, timestamp, "
+            "x, y, z, line, line_timestamp, feedrate) VALUES "
+            "(%s, %s, %s, %s, %s, %s, %s, %s)"
+        )
+    else:
+        query = (
+            "INSERT INTO mtconnect(process_id, timestamp, "
+            "x, y, z, line, feedrate) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+        )
+
     mysql_cur.executemany(
         query,
         _mt_data_list,

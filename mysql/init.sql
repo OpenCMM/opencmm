@@ -172,6 +172,7 @@ CREATE TABLE IF NOT EXISTS `mtconnect` (
   `z` FLOAT NOT NULL,
   `line` varchar(255) NOT NULL, 
   `feedrate` FLOAT NOT NULL,
+  `line_timestamp` TIMESTAMP(3),
   PRIMARY KEY (`id`),
   FOREIGN KEY (`process_id`) REFERENCES `process` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;

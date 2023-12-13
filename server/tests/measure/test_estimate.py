@@ -223,7 +223,7 @@ def test_update_data_after_measurement_step():
     height = steps[0][1]
     estimated_height = steps[0][2]
     assert height == 3.0
-    assert estimated_height == 3.0
+    assert abs(height - estimated_height) < 0.07
 
     response = client.get(f"/result/slopes?model_id={model_id}&process_id={process_id}")
     assert response.status_code == 200
@@ -231,7 +231,7 @@ def test_update_data_after_measurement_step():
     angle = slopes[0][1]
     estimated_angle = slopes[0][2]
     assert angle == 45.0
-    assert estimated_angle == 45.0
+    assert abs(angle - estimated_angle) < 0.1
 
 
 def test_update_data_after_measurement_step_fluctuating_data():

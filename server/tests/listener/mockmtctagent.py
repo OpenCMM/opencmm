@@ -7,6 +7,7 @@ from server.config import (
     MQTT_BROKER_URL,
     get_config,
 )
+from time import sleep
 
 
 class MockMtctAgent:
@@ -21,7 +22,7 @@ class MockMtctAgent:
 
         client = mqtt.Client()
         client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
-        self.mqtt_client = client
+        self.client = client
 
         def on_connect(client, userdata, flags, rc):
             client.subscribe(self.topic)
@@ -34,6 +35,7 @@ class MockMtctAgent:
     def start(self):
         for msg in self.msgs:
             self.client.publish(self.topic, msg["payload"])
+            sleep(0.1)
 
         self.client.publish(PROCESS_CONTROL_TOPIC, "stop")
         self.client.unsubscribe(self.topic)
