@@ -1,5 +1,5 @@
 from server.config import MYSQL_CONFIG
-from server.listener.mqtt import MqttListener
+from server.listener.mtmqtt import MqttListener
 from server.listener.status import (
     start_measuring,
     update_process_status,
@@ -129,3 +129,12 @@ def test_import_mtconnect_data_from_mqtt_process6():
     diff = result["avg"]
     print("diff:", diff)
     assert diff < 0.03
+
+
+# def test_import_mtconnect_data_from_mqtt_process3():
+#     process_id = 4
+#     mqtt_listener = MqttListener(MYSQL_CONFIG, process_id)
+#     mqtt_listener.import_mtconnect_data_from_mqtt_log(
+#         "tests/fixtures/mqtt/process6.json"
+#     )
+#     update_process_status(MYSQL_CONFIG, process_id, "done")
