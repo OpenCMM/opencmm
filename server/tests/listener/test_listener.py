@@ -67,6 +67,7 @@ def test_listener_start():
     mtct_mock_agent_th.join()
     sensor_mock.join()
 
+
 # def test_mtct_mock_agent():
 #     mqtt_log_path = "tests/fixtures/mqtt/process6.json"
 
