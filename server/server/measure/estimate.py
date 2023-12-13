@@ -1,6 +1,5 @@
 import paho.mqtt.client as mqtt
 from server.listener import status
-from datetime import datetime, timedelta
 from server.config import (
     GCODE_PATH,
     LISTENER_LOG_TOPIC,
@@ -61,33 +60,6 @@ class Result:
         self.z = self.mtct_data_checker.np_mtconnect_data[0][5]
         self.first_line_for_tracing = self.mtct_data_checker.first_line_for_tracing
 
-    def sensor_timestamp_to_coord(
-        self,
-        start_timestamp: datetime,
-        sensor_timestamp: datetime,
-        xy: tuple,
-        direction_vector: tuple,
-        feedrate: float,
-    ):
-        """
-        Estimate the coordinate of the edge from sensor timestamp
-        """
-        beam_diameter = self.conf["sensor"]["beam_diameter"]  # in μm
-        sensor_response_time = self.conf["sensor"]["response_time"]  # in ms
-        # factor in sensor response time
-        sensor_timestamp -= timedelta(milliseconds=sensor_response_time)
-        timestamp_diff = sensor_timestamp - start_timestamp
-        distance = feedrate * timestamp_diff.total_seconds()
-        direction_vector = np.array(direction_vector)
-        beam_diameter = beam_diameter / 1000  # convert to mm
-        distance_with_beam_diameter = (
-            distance + beam_diameter / 2
-        )  # add half of beam radius
-        coord = np.array(xy) + distance_with_beam_diameter * direction_vector
-        # round to 3 decimal places
-        coord = np.round(coord, 3)
-        return tuple(coord)
-
     def get_expected_z_value(self, xy: tuple):
         ray_origins = np.array([[xy[0] - self.offset[0], xy[1] - self.offset[1], 100]])
         ray_directions = np.array([[0, 0, -1]])
@@ -126,14 +98,11 @@ class Result:
             if start_timestamp <= sensor_timestamp <= end_timestamp:
                 if not self.validate_sensor_output(sensor_output, start, end):
                     continue
-                direction_vector = np.array([end[0] - start[0], end[1] - start[1]])
-                distance = np.linalg.norm(direction_vector)
-                direction_vector = tuple(direction_vector / distance)
-                edge_coord = self.sensor_timestamp_to_coord(
+                edge_coord = self.mtct_data_checker.sensor_timestamp_to_coord(
                     start_timestamp,
                     sensor_timestamp,
                     start,
-                    direction_vector,
+                    end,
                     feedrate,
                 )
                 # when edges are overlapping, multiple edges can be measured

@@ -1,33 +1,18 @@
 <script lang="ts">
-	import {
-		Grid,
-		Column,
-		ProgressBar,
-		Row,
-		Button,
-		Form,
-		FormGroup,
-		TextInput
-	} from 'carbon-components-svelte';
-	import { page } from '$app/stores';
+	import { Grid, Column, ProgressBar, Row } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { BACKEND_URL } from '$lib/constants/backend';
 	import Chart from './Chart.svelte';
-	import { _ } from 'svelte-i18n';
+	import Edge from '../result/Edge.svelte';
 
+	export let data;
+	const modelId = data.modelId;
+	const processId = data.processId;
 	let shapeLoaded = false;
 	let gcodeLoaded = false;
-	let sensorLoaded = false;
-	let mtctLatency = 1000;
-	let mtLoaded = false;
-	interface Sensor {
-		x: number;
-		y: number;
-		timestamp: string;
-		output: number;
-	}
-
-	interface Mtct {
+	let edgeLoaded = false;
+	interface Edge {
+		id: number;
 		x: number;
 		y: number;
 	}
@@ -59,10 +44,8 @@
 	let lines: Line[] = [];
 	let gcodeLines: GcodeLine[] = [];
 	// let arcs: Arc[] = [];
-	let sensor: Sensor[] = [];
-	let mtct: Mtct[] = [];
-	const modelId = $page.url.searchParams.get('id');
-	const processId = $page.url.searchParams.get('process');
+	let edges: Edge[] = [];
+	let measuredEdges: Edge[] = [];
 	const load_model_shape_data = async () => {
 		const res = await fetch(`${BACKEND_URL}/model/shapes/${modelId}`);
 		const data = await res.json();
@@ -104,67 +87,42 @@
 		gcodeLoaded = true;
 	};
 
-	const updateConfig = async () => {
-		// update mtct latency
-		sensorLoaded = false;
-		loadSensorData();
-	};
-
-	const loadSensorData = async () => {
-		const res = await fetch(
-			`${BACKEND_URL}/sensor/positions/${modelId}/${processId}?mtct_latency=${mtctLatency}`
-		);
+	const load_edge_data = async () => {
+		const res = await fetch(`${BACKEND_URL}/result/edges/result/combined/${modelId}/${processId}`);
 		const data = await res.json();
-		sensor = [];
-		for (const d of data['sensor']) {
-			sensor.push({
-				x: d[1],
-				y: d[2],
-				timestamp: d[3],
-				output: d[4]
-			});
-		}
-		sensorLoaded = true;
-	};
-	const loadMtctData = async () => {
-		const res = await fetch(`${BACKEND_URL}/result/debug/mtconnect/points/${processId}`);
-		const data = await res.json();
-		for (const d of data['points']) {
-			mtct.push({
+		for (const d of data['edges']) {
+			edges.push({
+				id: d[0],
 				x: d[1],
 				y: d[2]
 			});
+			if (d[4] !== null) {
+				measuredEdges.push({
+					id: d[0],
+					x: d[4],
+					y: d[5]
+				});
+			}
 		}
-		mtLoaded = true;
+		edgeLoaded = true;
 	};
 	onMount(() => {
-		loadSensorData();
-		loadMtctData();
+		load_edge_data();
 		load_gcode_line_data();
 		load_model_shape_data();
 	});
 </script>
 
-{#if !shapeLoaded || !gcodeLoaded || !sensorLoaded || !mtLoaded || !modelId || !processId}
+{#if !shapeLoaded || !gcodeLoaded || !edgeLoaded || !modelId || !processId}
 	<ProgressBar helperText="Loading..." />
 {:else}
 	<Grid padding>
 		<Row>
 			<Column>
-				<Chart {lines} {gcodeLines} {sensor} {mtct} />
+				<Chart {lines} {gcodeLines} {edges} {measuredEdges} />
 			</Column>
 			<Column>
-				<Form>
-					<FormGroup>
-						<TextInput
-							bind:value={mtctLatency}
-							id="latency"
-							type="number"
-							labelText={$_('settings.mtconnect.latency')}
-						/>
-					</FormGroup>
-					<Button on:click={updateConfig}>{$_('common.save')}</Button>
-				</Form>
+				<Edge {modelId} {processId} />
 			</Column>
 		</Row>
 	</Grid>

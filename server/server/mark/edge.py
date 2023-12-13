@@ -239,6 +239,7 @@ class EdgePath:
     def get_edge_path(
         self,
         xyz_offset: tuple = (0, 0, 0),
+        update_data: bool = True,
     ):
         path = []
         edges = get_edges(self.mysql_config, self.model_id)
@@ -264,7 +265,8 @@ class EdgePath:
                 arc_edge_path.append(edge_id)
                 path.append(arc_edge_path)
         optimal_path = sorted(path, key=lambda point: (point[2], point[3]))
-        self.add_line_number_from_path(optimal_path)
+        if update_data:
+            self.add_line_number_from_path(optimal_path)
         return self.delete_overlap_edges(optimal_path)
 
 

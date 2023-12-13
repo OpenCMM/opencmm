@@ -43,3 +43,12 @@ def mm_to_sensor_output(mm: float):
     conf = get_config()
     sensor_middle_output = conf["sensor"]["middle_output"]
     return (mm * 798 / 3.02) * (sensor_middle_output / 9400) + sensor_middle_output
+
+
+def mm_to_sensor_output_diff(mm_diff: float):
+    """
+    Convert mm to sensor output difference
+    """
+    conf = get_config()
+    sensor_middle_output = conf["sensor"]["middle_output"]
+    return (mm_diff * 798 / 3.02) * (sensor_middle_output / 9400)

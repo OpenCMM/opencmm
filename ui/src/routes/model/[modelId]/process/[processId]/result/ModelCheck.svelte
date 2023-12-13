@@ -61,7 +61,7 @@
 
 					let arcId = 1;
 					for (const arc_info of arcs) {
-						const [, radius, cx, cy, cz, rradius, rcx, rcy, rcz] = arc_info;
+						const [, , cx, cy, cz, , rcx, rcy, rcz] = arc_info;
 						const center = new THREE.Vector3(cx, cy, cz);
 						const measuredCenter = new THREE.Vector3(rcx, rcy, rcz);
 						const centerMesh = getSphereMesh(0.3, 0xfcba03);

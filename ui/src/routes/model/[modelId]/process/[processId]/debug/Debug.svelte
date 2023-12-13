@@ -20,7 +20,7 @@
 		scene.background = new THREE.Color(0x3b3939);
 
 		// Camera
-		const camera = new THREE.PerspectiveCamera(50, 1000 / 1000, 1, 500);
+		const camera = new THREE.PerspectiveCamera(50, 800 / 800, 1, 500);
 
 		camera.position.set(0, 0, 300);
 
@@ -51,7 +51,7 @@
 			if (res.status === 200) {
 				const points = res.data['points'];
 				for (const _point of points) {
-					const [_id, x, y, _z] = _point;
+					const [, x, y] = _point;
 					const point = new THREE.Vector3(x, y, 0.0);
 					const pointMesh = getSphereMesh(0.3, 0xfcba03);
 					pointMesh.position.copy(point);
@@ -93,7 +93,7 @@
 
 		// Renderer
 		const renderer = new THREE.WebGLRenderer({ antialias: true });
-		renderer.setSize(800, 800);
+		renderer.setSize(600, 600);
 
 		container.appendChild(renderer.domElement);
 

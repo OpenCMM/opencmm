@@ -10,12 +10,13 @@ mqtt:
   username: opencmm
 mtconnect:
   interval: 700 # ms
-  latency: 2600 # ms
+  latency: 3000 # ms
   url: http://192.168.0.19:5000/current?path=//Components
   device: MITSUBISHI1
+  disable: true
 sensor:
   interval: 10 # ms
-  threshold: 1000
+  threshold: 3.0
   beam_diameter: 120 # μm
   middle_output: 9400
   response_time: 10.0 # ms

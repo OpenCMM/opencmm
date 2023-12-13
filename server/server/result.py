@@ -1,15 +1,12 @@
 import mysql.connector
-from server.config import MYSQL_CONFIG, get_config
+from server.config import MYSQL_CONFIG
 import numpy as np
 from server.model import get_model_data
 from server.mark.slope import get_angle
 from server.measure.sensor import (
     sensor_output_diff_to_mm,
     sensor_output_to_mm,
-    get_sensor_data,
 )
-from server.measure.mtconnect import MtctDataChecker
-from datetime import datetime, timedelta
 
 
 def fetch_edges(model_id: int):
@@ -301,62 +298,3 @@ def fetch_slope_results(model_id: int, process_id: int):
     cursor.close()
     cnx.close()
     return slopes
-
-
-def fetch_all_sensor_data(model_id: int, process_id: int, mtct_latency: float = None):
-    mtct_data_checker = MtctDataChecker(MYSQL_CONFIG, model_id, process_id)
-    lines = mtct_data_checker.estimate_timestamps_from_mtct_data(mtct_latency)
-    sensor_data = get_sensor_data(process_id, MYSQL_CONFIG)
-    sensor_data_with_coordinates = []
-    for row in sensor_data:
-        timestamp = row[2]
-        sensor_output = row[3]
-        for line in lines:
-            if line[1] <= timestamp <= line[2]:
-                start = (line[3], line[4])
-                end = (line[5], line[6])
-                if start == end:
-                    continue
-                direction_vector = np.array([end[0] - start[0], end[1] - start[1]])
-                distance = np.linalg.norm(direction_vector)
-                direction_vector = tuple(direction_vector / distance)
-                sensor_coord = sensor_timestamp_to_coord(
-                    line[1],
-                    timestamp,
-                    start,
-                    direction_vector,
-                    line[7],
-                )
-                sensor_data_with_coordinates.append(
-                    [line[0], *sensor_coord, timestamp, sensor_output]
-                )
-
-    return sensor_data_with_coordinates
-
-
-def sensor_timestamp_to_coord(
-    start_timestamp: datetime,
-    sensor_timestamp: datetime,
-    xy: tuple,
-    direction_vector: tuple,
-    feedrate: float,
-):
-    """
-    Estimate the coordinate of the edge from sensor timestamp
-    """
-    conf = get_config()
-    beam_diameter = conf["sensor"]["beam_diameter"]  # in μm
-    sensor_response_time = conf["sensor"]["response_time"]  # in ms
-    # factor in sensor response time
-    sensor_timestamp -= timedelta(milliseconds=sensor_response_time)
-    timestamp_diff = sensor_timestamp - start_timestamp
-    distance = feedrate * timestamp_diff.total_seconds()
-    direction_vector = np.array(direction_vector)
-    beam_diameter = beam_diameter / 1000  # convert to mm
-    distance_with_beam_diameter = (
-        distance + beam_diameter / 2
-    )  # add half of beam radius
-    coord = np.array(xy) + distance_with_beam_diameter * direction_vector
-    # round to 3 decimal places
-    coord = np.round(coord, 3)
-    return tuple(coord)

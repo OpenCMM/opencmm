@@ -1,26 +1,80 @@
 from server.listener import listener_start
 from server.config import (
-    MQTT_PASSWORD,
-    MQTT_USERNAME,
     MYSQL_CONFIG,
-    PROCESS_CONTROL_TOPIC,
 )
-import paho.mqtt.publish as publish
+from server.listener import status
 from time import sleep
-import pytest
+import threading
+from .mockmtctagent import start_mock_mtct_agent
+import shutil
+from .mocksensor import start_mock_sensor
+from fastapi.testclient import TestClient
+from server.main import app
+
+client = TestClient(app)
 
 
-@pytest.mark.skip(reason="skip listener test")
 def test_listener_start():
+    # copy step.STL and create a new file named step2.STL
+    source_file = "tests/fixtures/stl/step.STL"
+    destination_file = "tests/fixtures/stl/step-integration-tests.STL"
+
+    shutil.copyfile(source_file, destination_file)
+
+    # upload step2.STL
+    with open(destination_file, "rb") as f:
+        response = client.post("/upload/3dmodel", files={"file": f})
+        assert response.status_code == 200
+        model_id = response.json()["model_id"]
+
+    job_info = {
+        "three_d_model_id": model_id,
+        "measurement_range": 2.0,
+        "measure_feedrate": 100.0,
+        "move_feedrate": 1000.0,
+        "x_offset": 0.0,
+        "y_offset": 0.0,
+        "z_offset": 0.0,
+        "send_gcode": False,
+    }
+    response = client.post("/setup/data", json=job_info)
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+    mqtt_log_path = "tests/fixtures/mqtt/process6.json"
+
+    mtct_mock_agent_th = threading.Thread(
+        target=start_mock_mtct_agent,
+        args=((mqtt_log_path,)),
+    )
+
+    sensor_csv_path = "tests/fixtures/csv/sensor.csv"
+    sensor_mock = threading.Thread(
+        target=start_mock_sensor,
+        args=(sensor_csv_path,),
+    )
+
+    mtct_mock_agent_th.start()
+    sensor_mock.start()
+    process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
     listener_start(
         MYSQL_CONFIG,
-        1,
+        process_id,
     )
 
-    sleep(2)
-    publish.single(
-        PROCESS_CONTROL_TOPIC,
-        "stop",
-        hostname="localhost",
-        auth={"username": MQTT_USERNAME, "password": MQTT_PASSWORD},
-    )
+    sleep(10)
+
+    mtct_mock_agent_th.join()
+    sensor_mock.join()
+
+
+# def test_mtct_mock_agent():
+#     mqtt_log_path = "tests/fixtures/mqtt/process6.json"
+
+#     mtct_mock_agent_th = threading.Thread(
+#         target=start_mock_mtct_agent,
+#         args=((mqtt_log_path,)),
+#     )
+#     mtct_mock_agent_th.start()
+#     sleep(10)
+#     mtct_mock_agent_th.join()

@@ -7,8 +7,11 @@ client = TestClient(app)
 
 
 def test_load():
-    sample_size = get_config()["edge"]["arc"]["number"]
+    conf = get_config()
+    sample_size = conf["edge"]["arc"]["number"]
     assert sample_size == 4
+    mtct_disable = conf["mtconnect"]["disable"]
+    assert mtct_disable is True
 
 
 @pytest.mark.skip(reason="not implemented")

@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { BACKEND_URL } from '$lib/constants/backend';
 	import axios from 'axios';
-	import { Form, FormGroup, TextInput, Button, Loading } from 'carbon-components-svelte';
+	import { Form, FormGroup, Button, Loading, NumberInput } from 'carbon-components-svelte';
 	import { ToastNotification } from 'carbon-components-svelte';
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	let interval = 700;
-	let threshold = 1000;
+	let threshold = 3.0;
 	let beamDiameter = 120.0;
 	let middleOutput = 9400.0;
 	let responseTime = 10.0;
@@ -63,42 +63,42 @@
 {:else}
 	<Form>
 		<FormGroup>
-			<TextInput
+			<NumberInput
 				bind:value={interval}
 				id="interval"
-				type="number"
-				labelText={$_('settings.sensor.interval')}
+				min={0}
+				label={$_('settings.sensor.interval')}
 			/>
-			<TextInput
+			<NumberInput
 				bind:value={threshold}
 				id="threshold"
-				type="number"
-				labelText={$_('settings.sensor.threshold')}
+				min={0}
+				step={0.01}
+				label={$_('settings.sensor.threshold')}
 			/>
-			<TextInput
+			<NumberInput
 				bind:value={beamDiameter}
 				id="beamDiameter"
-				type="number"
-				labelText={$_('settings.sensor.beamDiameter')}
+				min={0}
+				label={$_('settings.sensor.beamDiameter')}
 			/>
-			<TextInput
+			<NumberInput
 				bind:value={middleOutput}
 				id="middleOutput"
-				type="number"
-				labelText={$_('settings.sensor.middleOutput')}
+				label={$_('settings.sensor.middleOutput')}
 			/>
-			<TextInput
+			<NumberInput
 				bind:value={responseTime}
 				id="responseTime"
-				type="number"
-				labelText={$_('settings.sensor.responseTime')}
+				min={0}
+				label={$_('settings.sensor.responseTime')}
 			/>
-			<TextInput
+			<NumberInput
 				bind:value={tolerance}
 				id="tolerance"
-				type="number"
-				step="0.01"
-				labelText={$_('settings.sensor.tolerance')}
+				step={0.01}
+				min={0}
+				label={$_('settings.sensor.tolerance')}
 			/>
 		</FormGroup>
 		<Button on:click={saveSettings}>{$_('common.save')}</Button>

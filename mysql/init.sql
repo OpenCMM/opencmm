@@ -21,9 +21,10 @@ CREATE TABLE IF NOT EXISTS `process` (
   `x_offset` FLOAT NOT NULL,
   `y_offset` FLOAT NOT NULL,
   `z_offset` FLOAT NOT NULL,
-  `measurement_range` FLOAT NOT NULL,
-  `measure_feedrate` FLOAT NOT NULL,
-  `move_feedrate` FLOAT NOT NULL,
+  `measurement_range` FLOAT,
+  `measure_feedrate` FLOAT,
+  `move_feedrate` FLOAT,
+  `mtct_latency` FLOAT,
   `start` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `end` TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -171,6 +172,7 @@ CREATE TABLE IF NOT EXISTS `mtconnect` (
   `z` FLOAT NOT NULL,
   `line` varchar(255) NOT NULL, 
   `feedrate` FLOAT NOT NULL,
+  `line_timestamp` TIMESTAMP(3),
   PRIMARY KEY (`id`),
   FOREIGN KEY (`process_id`) REFERENCES `process` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
