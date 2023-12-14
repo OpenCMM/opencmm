@@ -45,7 +45,8 @@ class Result:
         self.conf = get_config()
 
         self.mtct_data_checker = MtctDataChecker(mysql_config, model_id, process_id)
-        self.mtct_lines = self.mtct_data_checker.estimate_timestamps_from_mtct_data()
+        mtct_lines = self.mtct_data_checker.estimate_timestamps_from_mtct_data()
+        self.mtct_lines = self.mtct_data_checker.adjust_delays(mtct_lines)
         sensor_data = get_sensor_data(process_id, mysql_config)
         self.np_sensor_data = np.array(sensor_data)
 

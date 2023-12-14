@@ -326,6 +326,25 @@ class MtctDataChecker:
             lines_with_coordinates = self.remove_duplicate_lines(lines_with_coordinates)
         return np.array(lines_with_coordinates)
 
+    def adjust_delays(self, lines):
+        """
+        Change timestamps with delays deviated from the average
+        """
+        avg, delays = self.get_average_delay_between_lines()
+        # get deviated delays
+        deviated_delays = []
+        for delay in delays:
+            if delay[2] > avg * 2:
+                deviated_delays.append(delay)
+        for line in lines:
+            for deviated_delay in deviated_delays:
+                # switch deviated delay to the average
+                if line[0] == deviated_delay[1]:
+                    line[1] -= timedelta(seconds=deviated_delay[2] - avg)
+                    line[2] -= timedelta(seconds=deviated_delay[2] - avg)
+                    break
+        return lines
+
     def get_delay(self, lines):
         prev_line_end = lines[0][2]
         prev_line_number = lines[0][0]
@@ -486,6 +505,7 @@ class MtctDataChecker:
             mtct_latency = self.mtct_latency
 
         lines = self.estimate_timestamps_from_mtct_data(mtct_latency)
+        lines = self.adjust_delays(lines)
         sensor_data = get_sensor_data(self.process_id, self.mysql_config)
         sensor_data_with_coordinates = []
         for row in sensor_data:

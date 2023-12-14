@@ -271,7 +271,6 @@ async def setup_data(settings: GcodeSettings):
         gcode_settings,
         offset,
         settings.send_gcode,
-        settings.path_algorithm,
     )
 
     return {"status": "ok"}

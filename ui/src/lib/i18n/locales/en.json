@@ -92,32 +92,32 @@
 			"edge": {
 				"title": "Edge",
 				"coordinate": "Coordinate",
-				"rcoordinate": "Estimated coordinate"
+				"rcoordinate": "Measured coordinate"
 			},
 			"line": {
 				"title": "Line",
 				"length": "Length",
-				"rlength": "Estimated length",
+				"rlength": "Measured length",
 				"lengthDiff": "Difference"
 			},
 			"arc": {
 				"title": "Arc",
 				"radius": "Radius",
 				"center": "Center",
-				"rradius": "Estimated radius",
+				"rradius": "Measured radius",
 				"radiusDiff": "Difference",
-				"rcenter": "Estimated center"
+				"rcenter": "Measured center"
 			},
 			"step": {
 				"title": "Step",
 				"height": "Height",
-				"rheight": "Estimated height",
+				"rheight": "Measured height",
 				"heightDiff": "Difference"
 			},
 			"slope": {
 				"title": "Slope",
 				"angle": "Angle",
-				"rangle": "Estimated angle",
+				"rangle": "Measured angle",
 				"angleDiff": "Difference"
 			}
 		}
