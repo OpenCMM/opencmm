@@ -260,6 +260,16 @@ def test_update_data_after_measurement_step_fluctuating_data():
 
 
 def test_with_many_edges_on_circle():
+    new_edge_detection_config = {
+        "arc_number": 8,
+        "line_number": 4,
+    }
+    response = client.post(
+        "/update/edge_detection_config", json=new_edge_detection_config
+    )
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
     filename = "more-edges.stl"
     source_file = "tests/fixtures/stl/sample.stl"
     destination_file = f"tests/fixtures/stl/{filename}"
@@ -270,15 +280,6 @@ def test_with_many_edges_on_circle():
         response = client.post("/upload/3dmodel", files={"file": f})
         assert response.status_code == 200
         model_id = response.json()["model_id"]
-    new_edge_detection_config = {
-        "arc_number": 8,
-        "line_number": 4,
-    }
-    response = client.post(
-        "/update/edge_detection_config", json=new_edge_detection_config
-    )
-    assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
 
     job_info = {
         "three_d_model_id": model_id,

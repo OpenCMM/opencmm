@@ -45,7 +45,7 @@
 			<DataTable title={$_('home.process.title')} rows={processes} {headers}>
 				<svelte:fragment slot="cell" let:cell>
 					{#if cell.key === 'id'}
-						<Link href={`/model/${modelId}/process/${cell.value}`}>
+						<Link href={`/model/${modelId}/process/${cell.value}/result`}>
 							{cell.value}
 						</Link>
 					{:else if cell.key === 'datetime'}

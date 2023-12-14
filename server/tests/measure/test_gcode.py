@@ -50,6 +50,16 @@ def test_is_point_on_line_debug():
 
 
 def test_get_true_line_number():
+    new_edge_detection_config = {
+        "arc_number": 4,
+        "line_number": 2,
+    }
+    response = client.post(
+        "/update/edge_detection_config", json=new_edge_detection_config
+    )
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
     path = "tests/fixtures/stl/sample.stl"
 
     with open(path, "rb") as f:

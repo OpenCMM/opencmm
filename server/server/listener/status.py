@@ -63,6 +63,40 @@ def get_process_status(mysql_config: dict, process_id: int):
     return process_status
 
 
+def get_process_info(mysql_config: dict, process_id: int):
+    mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
+    mysql_cur = mysql_conn.cursor()
+    query = (
+        "SELECT model_id, status, error, start, end, measurement_range, "
+        "measure_feedrate, move_feedrate, mtct_latency FROM process WHERE id = %s"
+    )
+    mysql_cur.execute(query, (process_id,))
+    process_info = mysql_cur.fetchone()
+    mysql_cur.close()
+    mysql_conn.close()
+    if process_info is None:
+        return None
+    start = process_info[3]
+    end = process_info[4]
+    if end is None:
+        duration = None
+    else:
+        duration = end - start
+    process_info = {
+        "model_id": process_info[0],
+        "status": process_info[1],
+        "error": process_info[2],
+        "start": start,
+        "end": end,
+        "duration": duration,
+        "measurement_range": process_info[5],
+        "measure_feedrate": process_info[6],
+        "move_feedrate": process_info[7],
+        "mtct_latency": process_info[8],
+    }
+    return process_info
+
+
 def get_running_process(model_id: int, mysql_config: dict):
     mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
     mysql_cur = mysql_conn.cursor()

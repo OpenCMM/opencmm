@@ -88,6 +88,7 @@
 		},
 		"result": {
 			"title": "測定結果",
+			"measurementTime": "測定時間",
 			"edge": {
 				"title": "点",
 				"coordinate": "座標",
@@ -181,6 +182,7 @@
 		"saveFailed": "保存に失敗しました",
 		"delete": "削除",
 		"ok": "OK",
+		"seconds": "秒",
 		"arc": "円弧",
 		"line": "線",
 		"step": "段差",

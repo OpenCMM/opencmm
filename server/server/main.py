@@ -578,9 +578,9 @@ async def fetch_next_prev_process(model_id: int, process_id: int):
     return {"prev": prev, "next": next}
 
 
-@app.get("/get_measurement_status/{process_id}")
-async def get_measurement_status(process_id: int):
-    return status.get_process_status(MYSQL_CONFIG, process_id)
+@app.get("/get_process_info/{process_id}")
+async def fetch_process_info(process_id: int):
+    return status.get_process_info(MYSQL_CONFIG, process_id)
 
 
 @app.get("/get_first_machine")
