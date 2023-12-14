@@ -4,6 +4,7 @@ from server.listener import status
 from fastapi.testclient import TestClient
 from server.main import app
 import pytest
+import shutil
 from .mockdata import (
     create_mock_data,
     create_mock_missing_data,
@@ -91,8 +92,9 @@ def test_update_data_after_measurement_with_arc_multiple_edges():
 
 
 def test_different_gcode_params():
+    model_id = 3
     job_info = {
-        "three_d_model_id": 3,
+        "three_d_model_id": model_id,
         "measurement_range": 2.5,
         "measure_feedrate": 100.0,
         "move_feedrate": 2000.0,
@@ -106,7 +108,6 @@ def test_different_gcode_params():
     assert response.json() == {"status": "ok"}
 
     filename = "demo.STL"
-    model_id = 3
     process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
     create_mock_multiple_edges(filename, process_id)
     update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)
@@ -115,8 +116,9 @@ def test_different_gcode_params():
 
 
 def test_different_gcode_params_with_arc():
+    model_id = 4
     job_info = {
-        "three_d_model_id": 4,
+        "three_d_model_id": model_id,
         "measurement_range": 2.5,
         "measure_feedrate": 100.0,
         "move_feedrate": 2000.0,
@@ -130,7 +132,6 @@ def test_different_gcode_params_with_arc():
     assert response.json() == {"status": "ok"}
 
     filename = "sample.stl"
-    model_id = 4
     process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
     create_mock_multiple_edges(filename, process_id)
     update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)
@@ -256,6 +257,48 @@ def test_update_data_after_measurement_step_fluctuating_data():
     estimated_angle = slopes[0][2]
     assert angle == 45.0
     print("estimated_angle", estimated_angle)
+
+
+def test_with_many_edges_on_circle():
+    filename = "more-edges.stl"
+    source_file = "tests/fixtures/stl/sample.stl"
+    destination_file = f"tests/fixtures/stl/{filename}"
+
+    shutil.copyfile(source_file, destination_file)
+
+    with open(destination_file, "rb") as f:
+        response = client.post("/upload/3dmodel", files={"file": f})
+        assert response.status_code == 200
+        model_id = response.json()["model_id"]
+    new_edge_detection_config = {
+        "arc_number": 8,
+        "line_number": 4,
+    }
+    response = client.post(
+        "/update/edge_detection_config", json=new_edge_detection_config
+    )
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+    job_info = {
+        "three_d_model_id": model_id,
+        "measurement_range": 1.2,
+        "measure_feedrate": 50.0,
+        "move_feedrate": 1000.0,
+        "x_offset": 50.0,
+        "y_offset": -65.0,
+        "z_offset": -10.0,
+        "send_gcode": False,
+    }
+    response = client.post("/setup/data", json=job_info)
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+    process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
+    create_mock_multiple_edges(filename, process_id)
+    update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)
+    process_result = status.get_process_status(MYSQL_CONFIG, process_id)
+    assert process_result[2] == "done"
 
 
 def test_delete_model_after_measurement():
