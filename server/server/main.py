@@ -1,6 +1,7 @@
-from server.type.sensor import SensorConfig
-from server.type.mtconnect import MTConnectConfig
-from server.type.measurement import (
+from server.type import (
+    MTConnectConfig,
+    SensorConfig,
+    GcodeSettings,
     EdgeDetectionConfig,
     MeasurementConfig,
     MeasurementConfigWithProgram,
@@ -18,8 +19,6 @@ from server.prepare import (
     process_stl,
     program_number_to_model_id,
 )
-from pydantic import BaseModel
-from typing import Optional
 from server import result
 from server.listener import (
     listener_start,
@@ -50,17 +49,6 @@ from server.mark.gcode import model_id_to_program_number, get_gcode_filename
 from server import machine
 from server.mark.trace import get_first_line_number_for_tracing
 import asyncio
-
-
-class JobInfo(BaseModel):
-    three_d_model_id: int
-    measurement_range: float
-    measure_feedrate: float
-    move_feedrate: float
-    x_offset: Optional[float] = 0.0
-    y_offset: Optional[float] = 0.0
-    z_offset: Optional[float] = 0.0
-    send_gcode: Optional[bool] = True
 
 
 app = FastAPI()
@@ -264,25 +252,26 @@ async def load_gcode(model_id: str):
 
 
 @app.post("/setup/data")
-async def setup_data(job_info: JobInfo):
+async def setup_data(settings: GcodeSettings):
     """Find verticies, generate gcode"""
 
-    filename = model_id_to_filename(job_info.three_d_model_id)
+    filename = model_id_to_filename(settings.three_d_model_id)
     if not model_exists(filename):
         raise HTTPException(status_code=400, detail="No model uploaded")
-    offset = (job_info.x_offset, job_info.y_offset, job_info.z_offset)
+    offset = (settings.x_offset, settings.y_offset, settings.z_offset)
     gcode_settings = (
-        job_info.measurement_range,
-        job_info.measure_feedrate,
-        job_info.move_feedrate,
+        settings.measurement_range,
+        settings.measure_feedrate,
+        settings.move_feedrate,
     )
     process_stl(
         MYSQL_CONFIG,
-        job_info.three_d_model_id,
+        settings.three_d_model_id,
         filename,
         gcode_settings,
         offset,
-        job_info.send_gcode,
+        settings.send_gcode,
+        settings.path_algorithm,
     )
 
     return {"status": "ok"}
