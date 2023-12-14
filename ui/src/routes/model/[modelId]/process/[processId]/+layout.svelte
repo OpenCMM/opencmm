@@ -38,10 +38,8 @@
 			text={$_('home.process.title')}
 			icon={DataTable}
 		/>
-		<SideNavMenu text="Menu">
-			<SideNavMenuItem href="/" text="Link 1" />
-			<SideNavMenuItem href="/" text="Link 2" />
-			<SideNavMenuItem href="/" text="Link 3" />
+		<SideNavMenu text={$_('common.advanced')}>
+			<SideNavMenuItem href={`${baseUri}/delays`} text="MTConnect Delays" />
 		</SideNavMenu>
 	</SideNavItems>
 </SideNav>

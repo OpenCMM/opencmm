@@ -187,6 +187,7 @@
 		"line": "Line",
 		"step": "Step",
 		"slope": "Slope",
-		"deleteModel": "Delete 3D model"
+		"deleteModel": "Delete 3D model",
+		"advanced": "Advanced"
 	}
 }

@@ -187,6 +187,7 @@
 		"line": "線",
 		"step": "段差",
 		"slope": "傾斜",
-		"deleteModel": "3Dモデルを削除"
+		"deleteModel": "3Dモデルを削除",
+		"advanced": "詳細"
 	}
 }

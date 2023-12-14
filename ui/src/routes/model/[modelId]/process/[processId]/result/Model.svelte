@@ -74,11 +74,14 @@
 	};
 
 	let duration = 0;
-	let start = "";
+	let start = '';
 	const loadProcessInfo = async () => {
 		axios.get(`${BACKEND_URL}/get_process_info/${processId}`).then((res) => {
 			if (res.status === 200) {
-				duration = res.data['duration'];
+				const _duration = res.data['duration'];
+				if (_duration !== null) {
+					duration = _duration;
+				}
 				const _start = res.data['start'];
 				start = moment(_start).fromNow();
 			}
@@ -132,12 +135,13 @@
 					</h1>
 				</Column>
 				<Column>
-					{start} 
+					{start}
 				</Column>
 				<Column>
 					{#if duration !== 0}
-					{$_('home.result.measurementTime')}:
-						{duration} {$_('common.seconds')}
+						{$_('home.result.measurementTime')}:
+						{duration}
+						{$_('common.seconds')}
 					{/if}
 				</Column>
 				<Column>

@@ -56,7 +56,7 @@
 {:else if lines.length === 0}
 	No line data
 {:else}
-	<DataTable size="short" {headers} rows={lines} {pageSize} {page} />
+	<DataTable title="MTConnect Time" size="short" {headers} rows={lines} {pageSize} {page} />
 	<Pagination
 		bind:pageSize
 		bind:page
