@@ -450,8 +450,8 @@ async def websocket_endpoint(websocket: WebSocket):
 
 
 @app.get("/result/edges/{model_id}")
-async def get_result_edges(model_id: int):
-    edges = result.fetch_edges(model_id)
+async def get_result_edges(model_id: int, with_offset: bool = False):
+    edges = result.fetch_edges(model_id, with_offset)
     return {"edges": edges}
 
 

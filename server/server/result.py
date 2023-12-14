@@ -9,7 +9,7 @@ from server.measure.sensor import (
 )
 
 
-def fetch_edges(model_id: int):
+def fetch_edges(model_id: int, with_offset: bool = False):
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
     cursor = cnx.cursor()
 
@@ -19,8 +19,16 @@ def fetch_edges(model_id: int):
 	"""
     cursor.execute(query, (model_id,))
     points = cursor.fetchall()
+    points = [list(point) for point in points]
     cursor.close()
     cnx.close()
+    if with_offset:
+        model_data = get_model_data(model_id)
+        offset = model_data[3:6]
+        for point in points:
+            point[2] = round(offset[0] + point[2], 3)
+            point[3] = round(offset[1] + point[3], 3)
+            point[4] = round(offset[2] + point[4], 3)
     return points
 
 

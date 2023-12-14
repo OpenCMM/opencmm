@@ -7,9 +7,11 @@
 	import { page } from '$app/stores';
 	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
+	import GcodeD3 from '../../components/GcodeD3.svelte';
 
 	const modelId = $page.url.searchParams.get('id');
 	let loaded = false;
+	let processId = '';
 
 	interface ModelInfo {
 		id: number;
@@ -54,6 +56,7 @@
 		</ProgressIndicator>
 	</div>
 	<StartSensor {modelId} />
+	<GcodeD3 {modelId} {processId} />
 {/if}
 
 <style>

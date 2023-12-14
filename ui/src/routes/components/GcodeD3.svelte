@@ -23,7 +23,7 @@
 	let width = 740 - margin.left - margin.right;
 	let height = 700 - margin.top - margin.bottom;
 	const edgeRadius = 4;
-	const edgeColor = '#134715';
+	const edgeColor = '#ffd000';
 	const measuredEdgeColor = '#2bbda4';
 	const lineWidth = 2;
 	const gridWidth = 1;
@@ -211,25 +211,25 @@
 		dot.on('mouseover', function (event, d) {
 			tooltip.transition().duration(200).style('opacity', 0.9);
 			tooltip
-				.html(`(${d['x']}, ${d['y']})`)
+				.html(`(${d['x']}, ${d['y']}, ${d['z']})`)
 				.style('left', event.pageX + 'px')
 				.style('top', event.pageY - 28 + 'px');
 		});
 
 		dot.on('mouseout', function () {
-			tooltip.transition().duration(500).style('opacity', 0);
+			tooltip.transition().duration(200).style('opacity', 0);
 		});
 
 		measuredDot.on('mouseover', function (event, d) {
 			tooltip.transition().duration(200).style('opacity', 0.9);
 			tooltip
-				.html(`(${d['x']}, ${d['y']})`)
+				.html(`(${d['x']}, ${d['y']}, ${d['z']})`)
 				.style('left', event.pageX + 'px')
 				.style('top', event.pageY - 28 + 'px');
 		});
 
 		measuredDot.on('mouseout', function () {
-			tooltip.transition().duration(500).style('opacity', 0);
+			tooltip.transition().duration(200).style('opacity', 0);
 		});
 	});
 </script>
