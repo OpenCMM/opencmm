@@ -386,6 +386,8 @@ class MtctDataChecker:
             add_missing=False, remove_duplicate=True
         )
         delays = self.get_delay(lines)
+        if not delays:
+            return 0, []
         delays = np.array(delays)
         return self.robust_mean(delays[:, 2]), delays
 

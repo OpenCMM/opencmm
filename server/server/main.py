@@ -509,9 +509,13 @@ async def get_result_slopes(model_id: int, process_id: int):
 
 
 @app.get("/result/mtconnect/lines")
-async def get_timestamps_on_lines(model_id: int, process_id: int):
+async def get_timestamps_on_lines(
+    model_id: int, process_id: int, adjusted: bool = True
+):
     mtct_data_checker = MtctDataChecker(MYSQL_CONFIG, model_id, process_id)
     lines = mtct_data_checker.estimate_timestamps_from_mtct_data()
+    if adjusted:
+        lines = mtct_data_checker.adjust_delays(lines)
     return {"lines": lines.tolist()}
 
 
