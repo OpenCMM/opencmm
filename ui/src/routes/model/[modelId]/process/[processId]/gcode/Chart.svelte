@@ -12,8 +12,8 @@
 
 	let svg;
 	let margin = { top: 20, right: 20, bottom: 30, left: 40 };
-	let width = 840 - margin.left - margin.right;
-	let height = 800 - margin.top - margin.bottom;
+	let width = 740 - margin.left - margin.right;
+	let height = 700 - margin.top - margin.bottom;
 	const edgeRadius = 4;
 	const edgeColor = '#134715';
 	const measuredEdgeColor = '#2bbda4';
