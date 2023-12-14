@@ -32,7 +32,6 @@
 			`${BACKEND_URL}/result/arcs?model_id=${modelId}&process_id=${processId}`
 		);
 		const data = await res.json();
-		console.log(data);
 		let idx = 1;
 		for (const d of data['arcs']) {
 			row.push({

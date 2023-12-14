@@ -43,5 +43,5 @@
 {:else if missingData.length === 0}
 	No missing data
 {:else}
-	<DataTable size="short" {headers} rows={missingData} />
+	<DataTable title="Missing MTConnect Data" size="short" {headers} rows={missingData} />
 {/if}

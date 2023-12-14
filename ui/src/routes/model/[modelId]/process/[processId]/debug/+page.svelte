@@ -4,10 +4,8 @@
 	import { onMount } from 'svelte';
 	import axios from 'axios';
 	import { BACKEND_URL } from '$lib/constants/backend';
-	import MissingData from './MissingData.svelte';
-	import MtctLines from './MtctLines.svelte';
-	import DelayBetweenLines from './DelayBetweenLines.svelte';
-	import MissingLineDiff from './MissingLineDiff.svelte';
+	import MissingData from '../../../../../components/MissingData.svelte';
+	import MtctLines from '../../../../../components/MtctLines.svelte';
 
 	export let data;
 	const modelId = data.modelId;
@@ -36,8 +34,6 @@
 				<Column>
 					<MissingData {modelId} {processId} />
 					<MtctLines {modelId} {processId} />
-					<DelayBetweenLines {modelId} {processId} />
-					<MissingLineDiff {modelId} {processId} />
 				</Column>
 			</Row>
 		</Grid>

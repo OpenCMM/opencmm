@@ -26,6 +26,8 @@ def get_start_end_points_from_line_number(gcode: list, line: int):
     if line < 3:
         raise LineNumberTooSmall(f"Line number {line} is too small")
     line -= 3
+    if line >= len(gcode):
+        raise LineNumberTooSmall(f"Line number {line} is too big")
     row = gcode[line]
     if row[0] == "G4":
         # start point is the same as the end point of the previous line

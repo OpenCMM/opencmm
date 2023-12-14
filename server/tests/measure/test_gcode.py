@@ -50,6 +50,16 @@ def test_is_point_on_line_debug():
 
 
 def test_get_true_line_number():
+    new_edge_detection_config = {
+        "arc_number": 4,
+        "line_number": 2,
+    }
+    response = client.post(
+        "/update/edge_detection_config", json=new_edge_detection_config
+    )
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
     path = "tests/fixtures/stl/sample.stl"
 
     with open(path, "rb") as f:
@@ -87,13 +97,6 @@ def test_get_true_line_number():
     xy = (1.668, -43.333)
     line = 8
     assert get_true_line_number(xy, line, gcode) == 6
-
-
-def test_get_true_line_number_debug():
-    gcode = load_gcode("data/gcode/sample.stl.gcode")
-    xy = (33.333, -129.61)
-    line = 29
-    assert get_true_line_number(xy, line, gcode, None) == 28
 
 
 def test_get_true_line_and_feedrate():

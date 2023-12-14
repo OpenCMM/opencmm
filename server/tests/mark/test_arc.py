@@ -2,7 +2,7 @@ from server.mark.point import Shape
 from server.mark.arc import (
     add_measured_arc_info,
     fit_circle,
-    to_arc_info,
+    get_arc_info,
     get_edges_for_arc,
 )
 from server.config import MYSQL_CONFIG
@@ -21,7 +21,7 @@ def test_get_arc_info():
     shape = Shape("tests/fixtures/stl/sample.stl")
     lines, arcs = shape.get_shapes()
     for arc_points in arcs:
-        to_arc_info(1, arc_points)
+        get_arc_info(arc_points)
 
 
 def test_get_edges_for_arc():

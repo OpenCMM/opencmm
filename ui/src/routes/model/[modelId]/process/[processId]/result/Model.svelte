@@ -21,6 +21,7 @@
 	import { redirectToFilePage } from '$lib/access/path';
 	import { _ } from 'svelte-i18n';
 	import axios from 'axios';
+	import moment from 'moment';
 	import Slope from './Slope.svelte';
 
 	export let modelId: string;
@@ -72,6 +73,20 @@
 		});
 	};
 
+	let duration = 0;
+	let start = '';
+	const loadProcessInfo = async () => {
+		axios.get(`${BACKEND_URL}/get_process_info/${processId}`).then((res) => {
+			if (res.status === 200) {
+				const _duration = res.data['duration'];
+				if (_duration !== null) {
+					duration = _duration;
+				}
+				const _start = res.data['start'];
+				start = moment(_start).fromNow();
+			}
+		});
+	};
 	let nextProcess: string;
 	let previousProcess: string;
 	const loadProcesses = async () => {
@@ -84,7 +99,7 @@
 	};
 	const goToDifferentPage = (nextProcess: string) => {
 		processId = nextProcess;
-		window.location.href = `/model/${modelId}/process/${nextProcess}`;
+		window.location.href = `/model/${modelId}/process/${nextProcess}/result`;
 	};
 
 	let recomputeSuccess = false;
@@ -103,6 +118,7 @@
 	onMount(() => {
 		loadModelInfo();
 		loadModelTableData();
+		loadProcessInfo();
 		loadProcesses();
 	});
 </script>
@@ -117,6 +133,16 @@
 					<h1>
 						{modelInfo.name}
 					</h1>
+				</Column>
+				<Column>
+					{start}
+				</Column>
+				<Column>
+					{#if duration !== 0}
+						{$_('home.result.measurementTime')}:
+						{duration}
+						{$_('common.seconds')}
+					{/if}
 				</Column>
 				<Column>
 					<Button icon={Calculator} on:click={recomputeStart}>

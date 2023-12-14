@@ -1,6 +1,5 @@
 import trimesh
 import numpy as np
-from .point import round_shape_values
 from trimesh.graph import face_adjacency
 
 
@@ -80,7 +79,7 @@ class Shape:
 
         return coplanar_facets
 
-    def get_lines_and_arcs(self, decimal_places: int = 3, arc_threshold: int = 1):
+    def get_lines_and_arcs(self, arc_threshold: int = 1):
         shapes = self.get_shapes()
         lines = []
         arcs = []
@@ -106,10 +105,6 @@ class Shape:
                         arc_group.append(point)
 
                 previous_length = line_length
-
-            # round to decimal places
-            line_group = round_shape_values(line_group, decimal_places)
-            arc_group = round_shape_values(arc_group, decimal_places)
 
             if line_group:
                 lines.append(line_group)

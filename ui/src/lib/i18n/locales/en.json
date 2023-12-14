@@ -88,6 +88,7 @@
 		},
 		"result": {
 			"title": "Result",
+			"measurementTime": "Measurement time",
 			"edge": {
 				"title": "Edge",
 				"coordinate": "Coordinate",
@@ -181,10 +182,12 @@
 		"saveFailed": "Save failed",
 		"delete": "Delete",
 		"ok": "OK",
+		"seconds": "seconds",
 		"arc": "Arc",
 		"line": "Line",
 		"step": "Step",
 		"slope": "Slope",
-		"deleteModel": "Delete 3D model"
+		"deleteModel": "Delete 3D model",
+		"advanced": "Advanced"
 	}
 }

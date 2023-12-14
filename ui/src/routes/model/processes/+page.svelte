@@ -13,11 +13,19 @@
 		id: number;
 		datetime: string;
 		status: number;
+		measurementRange?: number;
+		measureFeedrate?: number;
+		moveFeedrate?: number;
+		mtctLatency?: number;
 	}
 	const headers = [
 		{ key: 'id', value: 'id' },
 		{ key: 'datetime', value: $_('home.process.datetime') },
-		{ key: 'status', value: $_('home.process.status') }
+		{ key: 'status', value: $_('home.process.status') },
+		{ key: 'measurementRange', value: $_('home.setup.measurementRange.label') },
+		{ key: 'measureFeedrate', value: $_('home.setup.measureFeedRate.label') },
+		{ key: 'moveFeedrate', value: $_('home.setup.moveFeedRate.label') },
+		{ key: 'mtctLatency', value: $_('settings.mtconnect.latency') }
 	];
 	let processes: Process[] = [];
 	onMount(() => {
@@ -28,7 +36,11 @@
 					processes.push({
 						id: p[0],
 						datetime: p[7],
-						status: p[2]
+						status: p[2],
+						measurementRange: p[9],
+						measureFeedrate: p[10],
+						moveFeedrate: p[11],
+						mtctLatency: p[12] || ''
 					});
 				}
 				loaded = true;
@@ -45,7 +57,7 @@
 			<DataTable title={$_('home.process.title')} rows={processes} {headers}>
 				<svelte:fragment slot="cell" let:cell>
 					{#if cell.key === 'id'}
-						<Link href={`/model/${modelId}/process/${cell.value}`}>
+						<Link href={`/model/${modelId}/process/${cell.value}/result`}>
 							{cell.value}
 						</Link>
 					{:else if cell.key === 'datetime'}

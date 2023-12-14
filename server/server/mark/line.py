@@ -2,6 +2,7 @@ import numpy as np
 import mysql.connector
 from mysql.connector.errors import IntegrityError
 from itertools import combinations
+from server.config import get_config
 
 
 def get_parallel_lines(lines):
@@ -132,9 +133,9 @@ def import_edges(edge_list: list, mysql_config: dict):
     cnx.close()
 
 
-def import_edges_from_sides(
-    sides: list, mysql_config: dict, number_of_edges_per_side: int = 2
-):
+def import_edges_from_sides(sides: list, mysql_config: dict):
+    conf = get_config()
+    number_of_edges_per_side = conf["edge"]["line"]["number"]
     edge_list = to_edge_list(sides, number_of_edges_per_side)
     import_edges(edge_list, mysql_config)
 
