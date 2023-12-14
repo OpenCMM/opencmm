@@ -35,7 +35,7 @@
 	});
 </script>
 
-{#if !loaded}
+{#if !loaded || !modelId}
 	<Loading />
 {:else}
 	<h1>

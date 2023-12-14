@@ -27,9 +27,9 @@
 	<Loading />
 {:else}
 	<div id="instruction">
-		<h2>
+		<h3>
 			{$_('home.start.howto.instruction')}
-		</h2>
+		</h3>
 		<h2>{gcodeFilename}</h2>
 		<p>{$_('home.start.howto.programNumber')}: {programNumber}</p>
 	</div>

@@ -19,8 +19,6 @@
 	export let data;
 	const modelId = data.modelId;
 	const processId = data.processId;
-	let shapeLoaded = false;
-	let gcodeLoaded = false;
 	let sensorLoaded = false;
 	let mtctLatency = 0;
 	let mtLoaded = false;
@@ -36,77 +34,8 @@
 		x: number;
 		y: number;
 	}
-
-	interface Line {
-		id: number;
-		x1: number;
-		y1: number;
-		x2: number;
-		y2: number;
-	}
-
-	// interface Arc {
-	// 	id: number;
-	// 	radius: number;
-	// 	cx: number;
-	// 	cy: number;
-	// }
-
-	interface GcodeLine {
-		id: number; // line number
-		x1: number;
-		y1: number;
-		x2: number;
-		y2: number;
-		feedrate: number;
-	}
-
-	let lines: Line[] = [];
-	let gcodeLines: GcodeLine[] = [];
-	// let arcs: Arc[] = [];
 	let sensor: Sensor[] = [];
 	let mtct: Mtct[] = [];
-	const load_model_shape_data = async () => {
-		const res = await fetch(`${BACKEND_URL}/model/shapes/${modelId}`);
-		const data = await res.json();
-
-		for (const d of data['lines']) {
-			lines.push({
-				id: d[0],
-				x1: d[1],
-				y1: d[2],
-				x2: d[3],
-				y2: d[4]
-			});
-		}
-		// for (const d of data['arcs']) {
-		// 	arcs.push({
-		// 		id: d[0],
-		// 		radius: d[1],
-		// 		cx: d[2],
-		// 		cy: d[3]
-		// 	});
-		// }
-		shapeLoaded = true;
-	};
-
-	const load_gcode_line_data = async () => {
-		const res = await fetch(`${BACKEND_URL}/gcode/lines/${modelId}`);
-		const data = await res.json();
-
-		for (const d of data['lines']) {
-			gcodeLines.push({
-				id: d[0],
-				x1: d[1],
-				y1: d[2],
-				x2: d[3],
-				y2: d[4],
-				feedrate: d[5]
-			});
-		}
-		gcodeLoaded = true;
-	};
-
 	const applyConfig = async () => {
 		// apply mtct latency
 		sensorLoaded = false;
@@ -156,21 +85,19 @@
 		}
 		mtLoaded = true;
 	};
-	onMount(() => {
+	onMount(async () => {
 		loadSensorData();
 		loadMtctData();
-		load_gcode_line_data();
-		load_model_shape_data();
 	});
 </script>
 
-{#if !shapeLoaded || !gcodeLoaded || !sensorLoaded || !mtLoaded || !modelId || !processId}
+{#if !sensorLoaded || !mtLoaded || !modelId || !processId}
 	<ProgressBar helperText="Loading..." />
 {:else}
 	<Grid padding>
 		<Row>
 			<Column>
-				<Chart {lines} {gcodeLines} {sensor} {mtct} />
+				<Chart {modelId} {sensor} {mtct} />
 			</Column>
 			<Column>
 				<Form>
