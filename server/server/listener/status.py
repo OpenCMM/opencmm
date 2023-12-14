@@ -4,6 +4,8 @@ from server.model import get_model_data
 
 def start_measuring(model_id: int, mysql_config: dict, status: str):
     model_data = get_model_data(model_id)
+    if model_data is None:
+        return None
     offset = (model_data[3], model_data[4], model_data[5])
     measurement_range = model_data[6]
     measure_feedrate = model_data[7]

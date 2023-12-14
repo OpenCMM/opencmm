@@ -337,6 +337,11 @@ async def start_measurement(
 
     tracing_start_line = get_first_line_number_for_tracing(MYSQL_CONFIG, model_id)
     process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
+    if process_id is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid model_id",
+        )
     background_tasks.add_task(
         listener_start,
         MYSQL_CONFIG,
@@ -365,6 +370,11 @@ async def start_measurement_with_program_name(
 
     tracing_start_line = get_first_line_number_for_tracing(MYSQL_CONFIG, model_id)
     process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
+    if process_id is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid model_id",
+        )
     background_tasks.add_task(
         listener_start,
         MYSQL_CONFIG,
