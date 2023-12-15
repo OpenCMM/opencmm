@@ -11,7 +11,6 @@ from server.config import (
 )
 from server.mark.edge import (
     import_edge_results,
-    get_edge_id_from_line_number,
     delete_edge_results,
 )
 from server.mark.gcode import get_gcode_filename
@@ -74,9 +73,11 @@ class Result:
             sensor_timestamp = sensor_row[2]
             sensor_output = sensor_row[3]
             if start_timestamp <= sensor_timestamp <= end_timestamp:
-                if not self.mtct_data_checker.validate_sensor_output(
-                    sensor_output, start, end
-                ):
+                (
+                    sensor_output_valid,
+                    edge_ids,
+                ) = self.mtct_data_checker.validate_sensor_output(sensor_output, line)
+                if not sensor_output_valid:
                     continue
                 edge_coord = self.mtct_data_checker.sensor_timestamp_to_coord(
                     start_timestamp,
@@ -85,11 +86,14 @@ class Result:
                     end,
                     feedrate,
                 )
-                # when edges are overlapping, multiple edges can be measured
-                # for a single line
-                edge_ids = get_edge_id_from_line_number(
-                    self.mysql_config, self.model_id, line
-                )
+                """
+                when edges are overlapping, multiple edges can be measured
+                for a single line
+                """
+                # edge_ids = get_edge_id_from_line_number(
+                #     self.mysql_config, self.model_id, line
+                # )
+
                 # ignore the rest of the sensor data
                 # multiple edges can be measured due to the following reasons:
                 # - noise (can be reduced by increasing the sensor threshold)

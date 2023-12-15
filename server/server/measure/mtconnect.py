@@ -585,9 +585,11 @@ class MtctDataChecker:
         location = locations[np.argmax(locations[:, 2])]
         return location[2] + self.offset[2]
 
-    def validate_sensor_output(self, sensor_output: float, start: tuple, end: tuple):
+    def validate_sensor_output_with_trimesh(
+        self, sensor_output: float, start: tuple, end: tuple
+    ):
         """
-        Validate sensor output
+        Validate sensor output using trimesh ray intersection
 
         Args:
             sensor_output: Sensor output
@@ -607,6 +609,48 @@ class MtctDataChecker:
         if -35 <= expected_z <= 35:
             return abs(measured_z - expected_z) < self.config["sensor"]["tolerance"]
         return sensor_output > 18800
+
+    def get_edge_coordinates_from_line_number(self, line_number: int):
+        cnx = mysql.connector.connect(**self.mysql_config, database="coord")
+        cursor = cnx.cursor()
+        query = "SELECT id, x, y, z FROM edge WHERE line = %s " "AND model_id = %s"
+        cursor.execute(query, (line_number, self.model_id))
+        rows = cursor.fetchall()
+        if not rows:
+            return None
+        cursor.close()
+        cnx.close()
+        return rows
+
+    def validate_sensor_output(self, sensor_output: float, line_number: int):
+        """
+        Validate sensor output using edge table data
+
+        Args:
+            sensor_output: Sensor output
+            line_number: Line number
+
+        Returns:
+            True if the sensor output is valid, False otherwise
+            Edge ids
+        """
+        measured_z = sensor_output_to_mm(sensor_output)
+        edges = self.get_edge_coordinates_from_line_number(line_number)
+        if not edges:
+            return False, None
+        # expected_z is the highest z value of the edges
+        expected_z = max([edge[3] for edge in edges]) + self.offset[2]
+
+        edge_ids = [edge[0] for edge in edges]
+        # sensor outputs >18800 when there is no workpiece in the sensor range
+        if expected_z is None:
+            return sensor_output > 18800, edge_ids
+        if -35 <= expected_z <= 35:
+            return (
+                abs(measured_z - expected_z) < self.config["sensor"]["tolerance"],
+                edge_ids,
+            )
+        return sensor_output > 18800, edge_ids
 
     def get_only_edge_detection_lines(self, lines):
         edge_detection_lines = []
@@ -650,7 +694,10 @@ class MtctDataChecker:
                     if start == end:
                         continue
 
-                    if not self.validate_sensor_output(sensor_output, start, end):
+                    sensor_output_valid, _ = self.validate_sensor_output(
+                        sensor_output, line_number
+                    )
+                    if not sensor_output_valid:
                         continue
 
                     feedrate = line[7]

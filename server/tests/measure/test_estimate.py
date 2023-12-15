@@ -18,17 +18,10 @@ z = 10.0
 
 
 @pytest.mark.skip(reason="Only for local testing")
-def test_get_expected_z_value():
-    result = Result(MYSQL_CONFIG, 3, 2)
-    z = result.get_expected_z_value((0, 0))
-    assert z == 0.0
-
-
-@pytest.mark.skip(reason="Only for local testing")
-def test_validate_sensor_output():
+def test_validate_sensor_output_with_trimesh():
     result = Result(MYSQL_CONFIG, 1, 2)
-    assert result.validate_sensor_output(9400, (-2.5, 0), (2.5, 0))
-    assert not result.validate_sensor_output(18900, (-20.5, 0), (2.5, 0))
+    assert result.validate_sensor_output_with_trimesh(9400, (-2.5, 0), (2.5, 0))
+    assert not result.validate_sensor_output_with_trimesh(18900, (-20.5, 0), (2.5, 0))
 
 
 def test_update_data_after_measurement():

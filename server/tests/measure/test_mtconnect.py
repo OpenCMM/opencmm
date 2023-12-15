@@ -10,6 +10,20 @@ from datetime import datetime, timedelta
 import csv
 
 
+@pytest.mark.skip(reason="Only for local testing")
+def test_get_expected_z_value():
+    mtct_data_checker = MtctDataChecker(MYSQL_CONFIG, 1, 2)
+    z = mtct_data_checker.get_expected_z_value((0, 0))
+    assert z == 0.0
+
+
+@pytest.mark.skip(reason="Only for local testing")
+def test_get_expected_z_value_debug():
+    mtct_data_checker = MtctDataChecker(MYSQL_CONFIG, 1, 2)
+    z = mtct_data_checker.get_expected_z_value((50.224, -86))
+    assert z == 0.0
+
+
 def test_update_mtct_latency():
     update_mtct_latency(MYSQL_CONFIG, 1, None)
 
