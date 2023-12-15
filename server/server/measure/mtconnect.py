@@ -523,16 +523,16 @@ class MtctDataChecker:
         mtct_latency, edge_count, avg_distance = self.find_mtct_latency(
             mtct_latency_range, step
         )
+
         if edge_count != 0:
             logger.info(
                 (
-                    f"mtct_latency: {mtct_latency} edge_count: {edge_count}, "
+                    f"mtct_latency: {mtct_latency} edge_count: {edge_count} "
                     f"avg_distance: {avg_distance}"
                 )
             )
-            return
-        self.mtct_latency = mtct_latency
-        update_mtct_latency(self.mysql_config, self.process_id, mtct_latency)
+            self.mtct_latency = mtct_latency
+            update_mtct_latency(self.mysql_config, self.process_id, mtct_latency)
 
     def get_sensor_data_with_coordinates(self, mtct_latency: float = None):
         """
@@ -608,6 +608,21 @@ class MtctDataChecker:
             return abs(measured_z - expected_z) < self.config["sensor"]["tolerance"]
         return sensor_output > 18800
 
+    def get_only_edge_detection_lines(self, lines):
+        edge_detection_lines = []
+        for line in lines:
+            line_number = line[0]
+            # Edge detection
+            if (
+                not self.first_line_for_tracing
+                or line_number < self.first_line_for_tracing - 2
+            ):
+                if line_number % 2 != 0:
+                    # Not measuring
+                    continue
+                edge_detection_lines.append(line)
+        return edge_detection_lines
+
     def sensor_data_count_and_distance_when_measuring(self, mtct_latency: float):
         """
         Get sensor data count when measuring
@@ -616,48 +631,45 @@ class MtctDataChecker:
         distances = []
         lines = self.estimate_timestamps_from_mtct_data(mtct_latency)
         lines = self.adjust_delays(lines)
+        edge_detection_lines = self.get_only_edge_detection_lines(lines)
         sensor_data = get_sensor_data(self.process_id, self.mysql_config)
+        prev_line_number = None
         for row in sensor_data:
             sensor_timestamp = row[2]
             sensor_output = row[3]
-            for line in lines:
+            for line in edge_detection_lines:
                 line_number = line[0]
-                # Edge detection
-                if (
-                    not self.first_line_for_tracing
-                    or line_number < self.first_line_for_tracing - 2
-                ):
-                    if line_number % 2 != 0:
-                        # Not measuring
+                # One edge per line
+                if line_number == prev_line_number:
+                    continue
+                start_timestamp = line[1]
+                end_timestamp = line[2]
+                if start_timestamp <= sensor_timestamp <= end_timestamp:
+                    start = (line[3], line[4])
+                    end = (line[5], line[6])
+                    if start == end:
                         continue
 
-                    start_timestamp = line[1]
-                    end_timestamp = line[2]
-                    if start_timestamp <= sensor_timestamp <= end_timestamp:
-                        start = (line[3], line[4])
-                        end = (line[5], line[6])
-                        if start == end:
-                            continue
+                    if not self.validate_sensor_output(sensor_output, start, end):
+                        continue
 
-                        if not self.validate_sensor_output(sensor_output, start, end):
-                            continue
-
-                        feedrate = line[7]
-                        measured_edge_coord = self.sensor_timestamp_to_coord(
-                            start_timestamp,
-                            sensor_timestamp,
-                            start,
-                            end,
-                            feedrate,
+                    feedrate = line[7]
+                    measured_edge_coord = self.sensor_timestamp_to_coord(
+                        start_timestamp,
+                        sensor_timestamp,
+                        start,
+                        end,
+                        feedrate,
+                    )
+                    edge_coord = (np.array(start) + np.array(end)) / 2
+                    distances.append(
+                        np.linalg.norm(
+                            np.array(measured_edge_coord) - np.array(edge_coord)
                         )
-                        edge_coord = (np.array(start) + np.array(end)) / 2
-                        distances.append(
-                            np.linalg.norm(
-                                np.array(measured_edge_coord) - np.array(edge_coord)
-                            )
-                        )
-                        count += 1
-                        break
+                    )
+                    count += 1
+                    prev_line_number = line_number
+                    break
 
         if count == 0:
             return 0, 1000
