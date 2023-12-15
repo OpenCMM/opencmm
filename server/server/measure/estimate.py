@@ -15,7 +15,7 @@ from server.mark.edge import (
     delete_edge_results,
 )
 from server.mark.gcode import get_gcode_filename
-from .sensor import get_sensor_data, sensor_output_to_mm
+from .sensor import get_sensor_data
 from server.model import get_model_data
 import numpy as np
 from .gcode import (
@@ -62,29 +62,6 @@ class Result:
         self.z = self.mtct_data_checker.np_mtconnect_data[0][5]
         self.first_line_for_tracing = self.mtct_data_checker.first_line_for_tracing
 
-    def get_expected_z_value(self, xy: tuple):
-        ray_origins = np.array([[xy[0] - self.offset[0], xy[1] - self.offset[1], 100]])
-        ray_directions = np.array([[0, 0, -1]])
-        locations = self.mesh.ray.intersects_location(
-            ray_origins=ray_origins, ray_directions=ray_directions
-        )[0]
-        if len(locations) == 0:
-            return None
-        # location with the highest z value is the closest point
-        location = locations[np.argmax(locations[:, 2])]
-        return location[2] + self.offset[2]
-
-    def validate_sensor_output(self, sensor_output: float, start: tuple, end: tuple):
-        measured_z = sensor_output_to_mm(sensor_output)
-        edge_xy = (np.array(start) + np.array(end)) / 2
-        expected_z = self.get_expected_z_value(edge_xy)
-        # sensor outputs >18800 when there is no workpiece in the sensor range
-        if expected_z is None:
-            return sensor_output > 18800
-        if -35 <= expected_z <= 35:
-            return abs(measured_z - expected_z) < self.conf["sensor"]["tolerance"]
-        return sensor_output > 18800
-
     def get_edge_results(self, start_timestamp, end_timestamp, line):
         """
         Estimate the exact coordinate of the edge from mtconnect data and
@@ -98,7 +75,9 @@ class Result:
             sensor_timestamp = sensor_row[2]
             sensor_output = sensor_row[3]
             if start_timestamp <= sensor_timestamp <= end_timestamp:
-                if not self.validate_sensor_output(sensor_output, start, end):
+                if not self.mtct_data_checker.validate_sensor_output(
+                    sensor_output, start, end
+                ):
                     continue
                 edge_coord = self.mtct_data_checker.sensor_timestamp_to_coord(
                     start_timestamp,

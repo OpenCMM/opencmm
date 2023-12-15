@@ -1,8 +1,10 @@
 import mysql.connector
 from server.model import get_model_data
 from server.mark.gcode import get_gcode_filename
-from server.config import GCODE_PATH, get_config
-from .sensor import get_sensor_data
+from server.listener import status
+from server.config import GCODE_PATH, MODEL_PATH, get_config
+import trimesh
+from .sensor import get_sensor_data, sensor_output_to_mm
 from server.measure.gcode import (
     load_gcode,
     get_true_line_number,
@@ -83,6 +85,11 @@ class MtctDataChecker:
         self.model_id = model_id
         self.process_id = process_id
         self.model_row = get_model_data(model_id)
+        filename = self.model_row[1]
+        self.stl_filepath = f"{MODEL_PATH}/{filename}"
+        self.mesh = trimesh.load(self.stl_filepath)
+        process_status = status.get_process_status(mysql_config, process_id)
+        self.offset = (process_status[4], process_status[5], process_status[6])
         self.load_gcode()
         mtconnect_data = get_mtconnect_data(self.process_id, self.mysql_config)
         self.np_mtconnect_data = np.array(mtconnect_data)
@@ -537,6 +544,29 @@ class MtctDataChecker:
                     break
 
         return sensor_data_with_coordinates, mtct_latency
+
+    def get_expected_z_value(self, xy: tuple):
+        ray_origins = np.array([[xy[0] - self.offset[0], xy[1] - self.offset[1], 100]])
+        ray_directions = np.array([[0, 0, -1]])
+        locations = self.mesh.ray.intersects_location(
+            ray_origins=ray_origins, ray_directions=ray_directions
+        )[0]
+        if len(locations) == 0:
+            return None
+        # location with the highest z value is the closest point
+        location = locations[np.argmax(locations[:, 2])]
+        return location[2] + self.offset[2]
+
+    def validate_sensor_output(self, sensor_output: float, start: tuple, end: tuple):
+        measured_z = sensor_output_to_mm(sensor_output)
+        edge_xy = (np.array(start) + np.array(end)) / 2
+        expected_z = self.get_expected_z_value(edge_xy)
+        # sensor outputs >18800 when there is no workpiece in the sensor range
+        if expected_z is None:
+            return sensor_output > 18800
+        if -35 <= expected_z <= 35:
+            return abs(measured_z - expected_z) < self.conf["sensor"]["tolerance"]
+        return sensor_output > 18800
 
 
 def update_mtct_latency(mysql_config: dict, process_id: int, mtct_latency: float):
