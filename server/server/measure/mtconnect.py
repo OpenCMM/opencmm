@@ -565,7 +565,7 @@ class MtctDataChecker:
         if expected_z is None:
             return sensor_output > 18800
         if -35 <= expected_z <= 35:
-            return abs(measured_z - expected_z) < self.conf["sensor"]["tolerance"]
+            return abs(measured_z - expected_z) < self.config["sensor"]["tolerance"]
         return sensor_output > 18800
 
 
