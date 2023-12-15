@@ -1,9 +1,17 @@
-from server.measure.mtconnect import check_if_mtconnect_data_is_missing, MtctDataChecker
+from server.measure.mtconnect import (
+    check_if_mtconnect_data_is_missing,
+    MtctDataChecker,
+    update_mtct_latency,
+)
 from server.config import MYSQL_CONFIG, get_config
 import pytest
 import numpy as np
 from datetime import datetime, timedelta
 import csv
+
+
+def test_update_mtct_latency():
+    update_mtct_latency(MYSQL_CONFIG, 1, None)
 
 
 @pytest.mark.skip(reason="Only for local testing")

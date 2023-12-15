@@ -22,7 +22,7 @@ from .gcode import (
     load_gcode,
     get_start_end_points_from_line_number,
 )
-from .mtconnect import MtctDataChecker
+from .mtconnect import MtctDataChecker, update_mtct_latency
 from server.mark import arc, pair
 from server.mark.trace import (
     get_trace_line_id_from_line_number,
@@ -245,6 +245,7 @@ def recompute(mysql_config: dict, process_id: int):
     arc.delete_measured_arc_info(mysql_config, process_id)
     pair.delete_measured_length(mysql_config, process_id)
     delete_trace_line_results(mysql_config, process_id)
+    update_mtct_latency(mysql_config, process_id, None)
 
     process_data = status.get_process_status(mysql_config, process_id)
     model_id = process_data[1]

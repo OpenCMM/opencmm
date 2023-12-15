@@ -530,7 +530,9 @@ class MtctDataChecker:
                     f"avg_distance: {avg_distance}"
                 )
             )
+            return
         self.mtct_latency = mtct_latency
+        update_mtct_latency(self.mysql_config, self.process_id, mtct_latency)
 
     def get_sensor_data_with_coordinates(self, mtct_latency: float = None):
         """
