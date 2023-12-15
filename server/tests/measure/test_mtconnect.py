@@ -7,6 +7,17 @@ import csv
 
 
 @pytest.mark.skip(reason="Only for local testing")
+def test_find_mtct_latency():
+    mtct_data_checker = MtctDataChecker(MYSQL_CONFIG, 2, 4)
+    mtct_latency_range = (2800, 3200)
+    step = 20
+    mtct_latency, edge_count, avg_distance = mtct_data_checker.find_mtct_latency(
+        mtct_latency_range, step
+    )
+    print(mtct_latency, edge_count, avg_distance)
+
+
+@pytest.mark.skip(reason="Only for local testing")
 def test_check_if_mtconnect_data_is_missing():
     check_if_mtconnect_data_is_missing(MYSQL_CONFIG, 4, 20)
 

@@ -15,6 +15,9 @@ mtconnect:
   url: https://demo.metalogi.io/current?path=//Components
   device: MITSUBISHI1
   disable: true
+  latency_start: 2500
+  latency_end: 3500
+  latency_step: 100
 sensor:
   interval: 10 # ms
   threshold: 3.0
