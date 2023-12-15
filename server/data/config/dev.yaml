@@ -21,7 +21,7 @@ sensor:
   beam_diameter: 120.0 # μm
   middle_output: 9400
   response_time: 15.0 # ms
-  tolerance: 0.3
+  tolerance: 0.6
 trace:
   min_measure_count: 5
   max_feedrate: 2500 # mm/min

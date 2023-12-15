@@ -54,7 +54,8 @@ class Result:
         filename = model_row[1]
         self.stl_filepath = f"{MODEL_PATH}/{filename}"
         self.mesh = trimesh.load(self.stl_filepath)
-        self.offset = (model_row[3], model_row[4], model_row[5])
+        process_status = status.get_process_status(mysql_config, process_id)
+        self.offset = (process_status[4], process_status[5], process_status[6])
         gcode_filename = get_gcode_filename(filename)
         gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
         self.gcode = load_gcode(gcode_file_path)
