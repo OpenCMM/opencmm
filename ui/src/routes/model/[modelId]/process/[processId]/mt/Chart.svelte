@@ -1,12 +1,18 @@
 <script>
 	import { onMount } from 'svelte';
 	import * as d3 from 'd3';
+	import { loadGcodeLineData } from '$lib/db/loadGcode';
+	import { loadModelShapeData } from '$lib/db/loadModel';
 
 	// visualize two list of xy coordinates with d3
 
-	export let lines = [];
+	/**
+	 * @type {string}
+	 */
+	export let modelId;
+	let lines = [];
+	let gcodeLines = [];
 	// export let arcs = [];
-	export let gcodeLines = [];
 	export let sensor = [];
 	export let mtct = [];
 
@@ -22,7 +28,10 @@
 	const lineWidth = 2;
 	const gridWidth = 1;
 
-	onMount(() => {
+	onMount(async () => {
+		gcodeLines = await loadGcodeLineData(modelId);
+		lines = await loadModelShapeData(modelId);
+
 		svg = d3
 			.select('#chart-container')
 			.append('svg')
@@ -207,7 +216,6 @@
 			.style('fill', mtColor);
 
 		dot.on('mouseover', function (event, d) {
-			d3.select(this).style('fill', '#fcba03');
 			tooltip.transition().duration(200).style('opacity', 0.9);
 			tooltip
 				.html(`(${d['x']}, ${d['y']}) ${d['output']} ${d['timestamp']}`)
@@ -216,20 +224,10 @@
 		});
 
 		dot.on('mouseout', function () {
-			d3.select(this).style('fill', function (d) {
-				if (d.output > 18800) {
-					return offRangeColor;
-				} else if (d.output < 9500 && d.output > 9300) {
-					return baseHeightColor;
-				} else {
-					return edgeColor;
-				}
-			});
 			tooltip.transition().duration(500).style('opacity', 0);
 		});
 
 		mtDot.on('mouseover', function (event, d) {
-			d3.select(this).style('fill', 'blue');
 			tooltip.transition().duration(200).style('opacity', 0.9);
 			tooltip
 				.html(`(${d['x']}, ${d['y']})`)
@@ -238,7 +236,6 @@
 		});
 
 		mtDot.on('mouseout', function () {
-			d3.select(this).style('fill', mtColor);
 			tooltip.transition().duration(500).style('opacity', 0);
 		});
 	});

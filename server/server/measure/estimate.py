@@ -11,7 +11,6 @@ from server.config import (
 )
 from server.mark.edge import (
     import_edge_results,
-    get_edge_id_from_line_number,
     delete_edge_results,
 )
 from server.mark.gcode import get_gcode_filename
@@ -22,7 +21,7 @@ from .gcode import (
     load_gcode,
     get_start_end_points_from_line_number,
 )
-from .mtconnect import MtctDataChecker
+from .mtconnect import MtctDataChecker, update_mtct_latency
 from server.mark import arc, pair
 from server.mark.trace import (
     get_trace_line_id_from_line_number,
@@ -45,7 +44,8 @@ class Result:
         self.conf = get_config()
 
         self.mtct_data_checker = MtctDataChecker(mysql_config, model_id, process_id)
-        self.mtct_lines = self.mtct_data_checker.estimate_timestamps_from_mtct_data()
+        mtct_lines = self.mtct_data_checker.estimate_timestamps_from_mtct_data()
+        self.mtct_lines = self.mtct_data_checker.adjust_delays(mtct_lines)
         sensor_data = get_sensor_data(process_id, mysql_config)
         self.np_sensor_data = np.array(sensor_data)
 
@@ -53,35 +53,12 @@ class Result:
         filename = model_row[1]
         self.stl_filepath = f"{MODEL_PATH}/{filename}"
         self.mesh = trimesh.load(self.stl_filepath)
-        self.offset = (model_row[3], model_row[4], model_row[5])
+        process_status = status.get_process_status(mysql_config, process_id)
+        self.offset = (process_status[4], process_status[5], process_status[6])
         gcode_filename = get_gcode_filename(filename)
         gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
         self.gcode = load_gcode(gcode_file_path)
-        self.z = self.mtct_data_checker.np_mtconnect_data[0][5]
         self.first_line_for_tracing = self.mtct_data_checker.first_line_for_tracing
-
-    def get_expected_z_value(self, xy: tuple):
-        ray_origins = np.array([[xy[0] - self.offset[0], xy[1] - self.offset[1], 100]])
-        ray_directions = np.array([[0, 0, -1]])
-        locations = self.mesh.ray.intersects_location(
-            ray_origins=ray_origins, ray_directions=ray_directions
-        )[0]
-        if len(locations) == 0:
-            return None
-        # location with the highest z value is the closest point
-        location = locations[np.argmax(locations[:, 2])]
-        return location[2] + self.offset[2]
-
-    def validate_sensor_output(self, sensor_output: float, start: tuple, end: tuple):
-        measured_z = sensor_output_to_mm(sensor_output)
-        edge_xy = (np.array(start) + np.array(end)) / 2
-        expected_z = self.get_expected_z_value(edge_xy)
-        # sensor outputs >18800 when there is no workpiece in the sensor range
-        if expected_z is None:
-            return sensor_output > 18800
-        if -35 <= expected_z <= 35:
-            return abs(measured_z - expected_z) < self.conf["sensor"]["tolerance"]
-        return sensor_output > 18800
 
     def get_edge_results(self, start_timestamp, end_timestamp, line):
         """
@@ -96,7 +73,11 @@ class Result:
             sensor_timestamp = sensor_row[2]
             sensor_output = sensor_row[3]
             if start_timestamp <= sensor_timestamp <= end_timestamp:
-                if not self.validate_sensor_output(sensor_output, start, end):
+                (
+                    sensor_output_valid,
+                    edge_ids,
+                ) = self.mtct_data_checker.validate_sensor_output(sensor_output, line)
+                if not sensor_output_valid:
                     continue
                 edge_coord = self.mtct_data_checker.sensor_timestamp_to_coord(
                     start_timestamp,
@@ -105,17 +86,21 @@ class Result:
                     end,
                     feedrate,
                 )
-                # when edges are overlapping, multiple edges can be measured
-                # for a single line
-                edge_ids = get_edge_id_from_line_number(
-                    self.mysql_config, self.model_id, line
-                )
+                """
+                when edges are overlapping, multiple edges can be measured
+                for a single line
+                """
+                # edge_ids = get_edge_id_from_line_number(
+                #     self.mysql_config, self.model_id, line
+                # )
+
                 # ignore the rest of the sensor data
                 # multiple edges can be measured due to the following reasons:
                 # - noise (can be reduced by increasing the sensor threshold)
                 # - sensor restart
                 # - timestamp is not accurate
                 results = []
+                measured_z = round(sensor_output_to_mm(sensor_output), 3)
                 for edge_id in edge_ids:
                     results.append(
                         (
@@ -123,7 +108,7 @@ class Result:
                             self.process_id,
                             edge_coord[0],
                             edge_coord[1],
-                            self.z,
+                            measured_z,
                         )
                     )
                 return results
@@ -264,6 +249,7 @@ def recompute(mysql_config: dict, process_id: int):
     arc.delete_measured_arc_info(mysql_config, process_id)
     pair.delete_measured_length(mysql_config, process_id)
     delete_trace_line_results(mysql_config, process_id)
+    update_mtct_latency(mysql_config, process_id, None)
 
     process_data = status.get_process_status(mysql_config, process_id)
     model_id = process_data[1]

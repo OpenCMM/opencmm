@@ -1,8 +1,10 @@
 import mysql.connector
 from server.model import get_model_data
 from server.mark.gcode import get_gcode_filename
-from server.config import GCODE_PATH, get_config
-from .sensor import get_sensor_data
+from server.listener import status
+from server.config import GCODE_PATH, MODEL_PATH, get_config
+import trimesh
+from .sensor import get_sensor_data, sensor_output_to_mm
 from server.measure.gcode import (
     load_gcode,
     get_true_line_number,
@@ -17,6 +19,10 @@ from server.mark.trace import get_trace_ids
 from server.prepare import create_gcode_path
 import numpy as np
 from datetime import datetime
+import logging
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
+logger = logging.getLogger(__name__)
 
 
 def get_mtconnect_data(process_id: int, mysql_config: dict):
@@ -83,6 +89,11 @@ class MtctDataChecker:
         self.model_id = model_id
         self.process_id = process_id
         self.model_row = get_model_data(model_id)
+        filename = self.model_row[1]
+        self.stl_filepath = f"{MODEL_PATH}/{filename}"
+        self.mesh = trimesh.load(self.stl_filepath)
+        process_status = status.get_process_status(mysql_config, process_id)
+        self.offset = (process_status[4], process_status[5], process_status[6])
         self.load_gcode()
         mtconnect_data = get_mtconnect_data(self.process_id, self.mysql_config)
         self.np_mtconnect_data = np.array(mtconnect_data)
@@ -93,7 +104,7 @@ class MtctDataChecker:
             self.mysql_config, self.model_id
         )
         self.config = get_config()
-        self.mtct_latency = self.get_mtct_latency()
+        self.set_mtct_latency()
 
     def load_gcode(self):
         current_gcode_settings = self.get_current_gcode_settings()
@@ -326,6 +337,25 @@ class MtctDataChecker:
             lines_with_coordinates = self.remove_duplicate_lines(lines_with_coordinates)
         return np.array(lines_with_coordinates)
 
+    def adjust_delays(self, lines):
+        """
+        Change timestamps with delays deviated from the average
+        """
+        avg, delays = self.get_average_delay_between_lines()
+        # get deviated delays
+        deviated_delays = []
+        for delay in delays:
+            if delay[2] > avg * 2:
+                deviated_delays.append(delay)
+        for line in lines:
+            for deviated_delay in deviated_delays:
+                # switch deviated delay to the average
+                if line[0] == deviated_delay[1]:
+                    line[1] -= timedelta(seconds=deviated_delay[2] - avg)
+                    line[2] -= timedelta(seconds=deviated_delay[2] - avg)
+                    break
+        return lines
+
     def get_delay(self, lines):
         prev_line_end = lines[0][2]
         prev_line_number = lines[0][0]
@@ -367,6 +397,8 @@ class MtctDataChecker:
             add_missing=False, remove_duplicate=True
         )
         delays = self.get_delay(lines)
+        if not delays:
+            return 0, []
         delays = np.array(delays)
         return self.robust_mean(delays[:, 2]), delays
 
@@ -472,11 +504,35 @@ class MtctDataChecker:
         coord = np.round(coord, 3)
         return tuple(coord)
 
-    def get_mtct_latency(self):
+    def set_mtct_latency(self):
+        """
+        Set mtconnect latency
+        """
         mtct_latency_from_process = self.get_mtct_latency_from_process()
         if mtct_latency_from_process:
-            return self.get_mtct_latency_from_process()
-        return self.config["mtconnect"]["latency"]
+            self.mtct_latency = self.get_mtct_latency_from_process()
+            return
+        # load the default mtct latency
+        self.mtct_latency = self.config["mtconnect"]["latency"]
+        # find the best mtct latency
+        mtct_latency_range = (
+            self.config["mtconnect"]["latency_start"],
+            self.config["mtconnect"]["latency_end"],
+        )
+        step = self.config["mtconnect"]["latency_step"]
+        mtct_latency, edge_count, avg_distance = self.find_mtct_latency(
+            mtct_latency_range, step
+        )
+
+        if edge_count != 0:
+            logger.info(
+                (
+                    f"mtct_latency: {mtct_latency} edge_count: {edge_count} "
+                    f"avg_distance: {avg_distance}"
+                )
+            )
+            self.mtct_latency = mtct_latency
+            update_mtct_latency(self.mysql_config, self.process_id, mtct_latency)
 
     def get_sensor_data_with_coordinates(self, mtct_latency: float = None):
         """
@@ -486,6 +542,7 @@ class MtctDataChecker:
             mtct_latency = self.mtct_latency
 
         lines = self.estimate_timestamps_from_mtct_data(mtct_latency)
+        lines = self.adjust_delays(lines)
         sensor_data = get_sensor_data(self.process_id, self.mysql_config)
         sensor_data_with_coordinates = []
         for row in sensor_data:
@@ -515,6 +572,175 @@ class MtctDataChecker:
                     break
 
         return sensor_data_with_coordinates, mtct_latency
+
+    def get_expected_z_value(self, xy: tuple):
+        ray_origins = np.array([[xy[0] - self.offset[0], xy[1] - self.offset[1], 100]])
+        ray_directions = np.array([[0, 0, -1]])
+        locations = self.mesh.ray.intersects_location(
+            ray_origins=ray_origins, ray_directions=ray_directions
+        )[0]
+        if len(locations) == 0:
+            return None
+        # location with the highest z value is the closest point
+        location = locations[np.argmax(locations[:, 2])]
+        return location[2] + self.offset[2]
+
+    def validate_sensor_output_with_trimesh(
+        self, sensor_output: float, start: tuple, end: tuple
+    ):
+        """
+        Validate sensor output using trimesh ray intersection
+
+        Args:
+            sensor_output: Sensor output
+            start: Start coordinate of the line
+            end: End coordinate of the line
+
+        Returns:
+            True if the sensor output is valid, False otherwise
+        """
+        measured_z = sensor_output_to_mm(sensor_output)
+        # measuring edge is the middle point of the line
+        edge_xy = (np.array(start) + np.array(end)) / 2
+        expected_z = self.get_expected_z_value(edge_xy)
+        # sensor outputs >18800 when there is no workpiece in the sensor range
+        if expected_z is None:
+            return sensor_output > 18800
+        if -35 <= expected_z <= 35:
+            return abs(measured_z - expected_z) < self.config["sensor"]["tolerance"]
+        return sensor_output > 18800
+
+    def get_edge_coordinates_from_line_number(self, line_number: int):
+        cnx = mysql.connector.connect(**self.mysql_config, database="coord")
+        cursor = cnx.cursor()
+        query = "SELECT id, x, y, z FROM edge WHERE line = %s " "AND model_id = %s"
+        cursor.execute(query, (line_number, self.model_id))
+        rows = cursor.fetchall()
+        if not rows:
+            return None
+        cursor.close()
+        cnx.close()
+        return rows
+
+    def validate_sensor_output(self, sensor_output: float, line_number: int):
+        """
+        Validate sensor output using edge table data
+
+        Args:
+            sensor_output: Sensor output
+            line_number: Line number
+
+        Returns:
+            True if the sensor output is valid, False otherwise
+            Edge ids
+        """
+        measured_z = sensor_output_to_mm(sensor_output)
+        edges = self.get_edge_coordinates_from_line_number(line_number)
+        if not edges:
+            return False, None
+        # expected_z is the highest z value of the edges
+        expected_z = max([edge[3] for edge in edges]) + self.offset[2]
+
+        edge_ids = [edge[0] for edge in edges]
+        # sensor outputs >18800 when there is no workpiece in the sensor range
+        if expected_z is None:
+            return sensor_output > 18800, edge_ids
+        if -35 <= expected_z <= 35:
+            return (
+                abs(measured_z - expected_z) < self.config["sensor"]["tolerance"],
+                edge_ids,
+            )
+        return sensor_output > 18800, edge_ids
+
+    def get_only_edge_detection_lines(self, lines):
+        edge_detection_lines = []
+        for line in lines:
+            line_number = line[0]
+            # Edge detection
+            if (
+                not self.first_line_for_tracing
+                or line_number < self.first_line_for_tracing - 2
+            ):
+                if line_number % 2 != 0:
+                    # Not measuring
+                    continue
+                edge_detection_lines.append(line)
+        return edge_detection_lines
+
+    def sensor_data_count_and_distance_when_measuring(self, mtct_latency: float):
+        """
+        Get sensor data count when measuring
+        """
+        count = 0
+        distances = []
+        lines = self.estimate_timestamps_from_mtct_data(mtct_latency)
+        lines = self.adjust_delays(lines)
+        edge_detection_lines = self.get_only_edge_detection_lines(lines)
+        sensor_data = get_sensor_data(self.process_id, self.mysql_config)
+        prev_line_number = None
+        for row in sensor_data:
+            sensor_timestamp = row[2]
+            sensor_output = row[3]
+            for line in edge_detection_lines:
+                line_number = line[0]
+                # One edge per line
+                if line_number == prev_line_number:
+                    continue
+                start_timestamp = line[1]
+                end_timestamp = line[2]
+                if start_timestamp <= sensor_timestamp <= end_timestamp:
+                    start = (line[3], line[4])
+                    end = (line[5], line[6])
+                    if start == end:
+                        continue
+
+                    sensor_output_valid, _ = self.validate_sensor_output(
+                        sensor_output, line_number
+                    )
+                    if not sensor_output_valid:
+                        continue
+
+                    feedrate = line[7]
+                    measured_edge_coord = self.sensor_timestamp_to_coord(
+                        start_timestamp,
+                        sensor_timestamp,
+                        start,
+                        end,
+                        feedrate,
+                    )
+                    edge_coord = (np.array(start) + np.array(end)) / 2
+                    distances.append(
+                        np.linalg.norm(
+                            np.array(measured_edge_coord) - np.array(edge_coord)
+                        )
+                    )
+                    count += 1
+                    prev_line_number = line_number
+                    break
+
+        if count == 0:
+            return 0, 1000
+        np_distances = np.array(distances)
+        return count, np.mean(np_distances)
+
+    def find_mtct_latency(self, latency_range: tuple, step: float):
+        """
+        Find mtconnect latency
+        """
+        count_and_avg_distance = []
+
+        for i in range(int((latency_range[1] - latency_range[0]) / step)):
+            _mtct_latency = latency_range[0] + i * step
+            (
+                sensor_data_count,
+                avg_distance,
+            ) = self.sensor_data_count_and_distance_when_measuring(_mtct_latency)
+            count_and_avg_distance.append(
+                [_mtct_latency, sensor_data_count, avg_distance]
+            )
+
+        count_and_avg_distance.sort(key=lambda x: (-x[1], x[2]))
+        return count_and_avg_distance[0]
 
 
 def update_mtct_latency(mysql_config: dict, process_id: int, mtct_latency: float):

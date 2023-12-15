@@ -15,13 +15,16 @@ mtconnect:
   url: https://demo.metalogi.io/current?path=//Components
   device: MITSUBISHI1
   disable: true
+  latency_start: 2500
+  latency_end: 3500
+  latency_step: 100
 sensor:
   interval: 10 # ms
   threshold: 3.0
   beam_diameter: 120.0 # μm
   middle_output: 9400
   response_time: 15.0 # ms
-  tolerance: 0.3
+  tolerance: 0.6
 trace:
   min_measure_count: 5
   max_feedrate: 2500 # mm/min

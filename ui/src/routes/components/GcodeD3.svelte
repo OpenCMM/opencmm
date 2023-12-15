@@ -1,26 +1,38 @@
 <script>
 	import { onMount } from 'svelte';
 	import * as d3 from 'd3';
+	import { loadGcodeLineData } from '$lib/db/loadGcode';
+	import { loadModelShapeData } from '$lib/db/loadModel';
+	import { loadEdgeData } from '$lib/db/loadEdges';
 
 	// visualize two list of xy coordinates with d3
 
-	export let lines = [];
-	// export let arcs = [];
-	export let gcodeLines = [];
-	export let edges = [];
-	export let measuredEdges = [];
+	let lines = [];
+	let gcodeLines = [];
+	/**
+	 * @type {string}
+	 */
+	export let modelId;
+	/**
+	 * @type {string}
+	 */
+	export let processId;
 
 	let svg;
 	let margin = { top: 20, right: 20, bottom: 30, left: 40 };
-	let width = 840 - margin.left - margin.right;
-	let height = 800 - margin.top - margin.bottom;
+	let width = 740 - margin.left - margin.right;
+	let height = 700 - margin.top - margin.bottom;
 	const edgeRadius = 4;
-	const edgeColor = '#134715';
+	const edgeColor = '#ffd000';
 	const measuredEdgeColor = '#2bbda4';
 	const lineWidth = 2;
 	const gridWidth = 1;
 
-	onMount(() => {
+	onMount(async () => {
+		gcodeLines = await loadGcodeLineData(modelId);
+		lines = await loadModelShapeData(modelId);
+		const { edges, measuredEdges } = await loadEdgeData(modelId, processId);
+
 		svg = d3
 			.select('#chart-container')
 			.append('svg')
@@ -197,31 +209,27 @@
 			.style('fill', measuredEdgeColor);
 
 		dot.on('mouseover', function (event, d) {
-			d3.select(this).style('fill', '#fcba03');
 			tooltip.transition().duration(200).style('opacity', 0.9);
 			tooltip
-				.html(`(${d['x']}, ${d['y']})`)
+				.html(`(${d['x']}, ${d['y']}, ${d['z']})`)
 				.style('left', event.pageX + 'px')
 				.style('top', event.pageY - 28 + 'px');
 		});
 
 		dot.on('mouseout', function () {
-			d3.select(this).style('fill', edgeColor);
-			tooltip.transition().duration(500).style('opacity', 0);
+			tooltip.transition().duration(200).style('opacity', 0);
 		});
 
 		measuredDot.on('mouseover', function (event, d) {
-			d3.select(this).style('fill', 'blue');
 			tooltip.transition().duration(200).style('opacity', 0.9);
 			tooltip
-				.html(`(${d['x']}, ${d['y']})`)
+				.html(`(${d['x']}, ${d['y']}, ${d['z']})`)
 				.style('left', event.pageX + 'px')
 				.style('top', event.pageY - 28 + 'px');
 		});
 
 		measuredDot.on('mouseout', function () {
-			d3.select(this).style('fill', measuredEdgeColor);
-			tooltip.transition().duration(500).style('opacity', 0);
+			tooltip.transition().duration(200).style('opacity', 0);
 		});
 	});
 </script>

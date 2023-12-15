@@ -18,6 +18,7 @@ mysql-connector-python = "^8.2.0"
 pyyaml = "^6.0.1"
 trimesh = "^4.0.5"
 rtree = "^1.1.0"
+networkx = "^3.2.1"
 
 
 [tool.poetry.group.dev.dependencies]

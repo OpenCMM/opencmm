@@ -53,9 +53,6 @@ def test_setup_data_only_lines():
         "measurement_range": 2.5,
         "measure_feedrate": 100.0,
         "move_feedrate": 1000.0,
-        "x_offset": 0.0,
-        "y_offset": 0.0,
-        "z_offset": 0.0,
         "send_gcode": False,
     }
     response = client.post("/setup/data", json=job_info)
@@ -69,9 +66,6 @@ def test_setup_data_only_lines_again():
         "measurement_range": 2.5,
         "measure_feedrate": 100.0,
         "move_feedrate": 1000.0,
-        "x_offset": 0.0,
-        "y_offset": 0.0,
-        "z_offset": 0.0,
         "send_gcode": False,
     }
     response = client.post("/setup/data", json=job_info)
@@ -85,9 +79,6 @@ def test_setup_data_wtih_arcs():
         "measurement_range": 2.5,
         "measure_feedrate": 100.0,
         "move_feedrate": 1000.0,
-        "x_offset": 0.0,
-        "y_offset": 0.0,
-        "z_offset": 0.0,
         "send_gcode": False,
     }
     response = client.post("/setup/data", json=job_info)
@@ -142,9 +133,6 @@ def test_setup_data_with_step_and_slope():
         "measurement_range": 2.5,
         "measure_feedrate": 100.0,
         "move_feedrate": 1000.0,
-        "x_offset": 0.0,
-        "y_offset": 0.0,
-        "z_offset": 0.0,
         "send_gcode": False,
     }
     response = client.post("/setup/data", json=job_info)
@@ -198,9 +186,6 @@ def test_delete_model_data():
         "measurement_range": 2.5,
         "measure_feedrate": 100.0,
         "move_feedrate": 1000.0,
-        "x_offset": 0.0,
-        "y_offset": 0.0,
-        "z_offset": 0.0,
         "send_gcode": False,
     }
     response = client.post("/setup/data", json=job_info)

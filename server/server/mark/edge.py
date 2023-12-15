@@ -1,5 +1,6 @@
 import mysql.connector
 from server.config import MODEL_PATH
+import networkx as nx
 from .line import get_side
 from .arc import get_arc
 import math
@@ -264,7 +265,24 @@ class EdgePath:
                 )
                 arc_edge_path.append(edge_id)
                 path.append(arc_edge_path)
+
         optimal_path = sorted(path, key=lambda point: (point[2], point[3]))
+        # calculate the shortest path
+        G = nx.Graph()
+        for i, row in enumerate(optimal_path):
+            G.add_node(i, pos=(row[2], row[3]))
+        for i in range(len(optimal_path)):
+            for j in range(i + 1, len(optimal_path)):
+                weight = (
+                    (optimal_path[i][2] - optimal_path[j][2]) ** 2
+                    + (optimal_path[i][3] - optimal_path[j][3]) ** 2
+                ) ** 0.5
+                G.add_edge(i, j, weight=weight)
+
+        # Find the optimal path using the Travelling Salesman Problem (TSP)
+        tour = nx.approximation.traveling_salesman_problem(G, cycle=False)
+        optimal_path = [optimal_path[node] for node in tour]
+
         if update_data:
             self.add_line_number_from_path(optimal_path)
         return self.delete_overlap_edges(optimal_path)

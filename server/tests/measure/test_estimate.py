@@ -1,4 +1,4 @@
-from server.measure.estimate import update_data_after_measurement, Result
+from server.measure.estimate import update_data_after_measurement, Result, recompute
 from server.config import MYSQL_CONFIG
 from server.listener import status
 from fastapi.testclient import TestClient
@@ -18,17 +18,10 @@ z = 10.0
 
 
 @pytest.mark.skip(reason="Only for local testing")
-def test_get_expected_z_value():
-    result = Result(MYSQL_CONFIG, 3, 2)
-    z = result.get_expected_z_value((0, 0))
-    assert z == 0.0
-
-
-@pytest.mark.skip(reason="Only for local testing")
-def test_validate_sensor_output():
+def test_validate_sensor_output_with_trimesh():
     result = Result(MYSQL_CONFIG, 1, 2)
-    assert result.validate_sensor_output(9400, (-2.5, 0), (2.5, 0))
-    assert not result.validate_sensor_output(18900, (-20.5, 0), (2.5, 0))
+    assert result.validate_sensor_output_with_trimesh(9400, (-2.5, 0), (2.5, 0))
+    assert not result.validate_sensor_output_with_trimesh(18900, (-20.5, 0), (2.5, 0))
 
 
 def test_update_data_after_measurement():
@@ -163,12 +156,40 @@ def test_update_data_after_measurement_perfect_data():
         assert abs(radius - estimated_radius) < 0.005
 
 
+perfect_data_with_arc_process_id = None
+
+
 def test_update_data_after_measurement_perfect_data_with_arc():
+    global perfect_data_with_arc_process_id
     filename = "sample.stl"
     model_id = 4
     process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
     create_mock_perfect_data(filename, process_id)
     update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)
+    process_result = status.get_process_status(MYSQL_CONFIG, process_id)
+    assert process_result[2] == "done"
+
+    response = client.get(f"/result/lines?model_id={model_id}&process_id={process_id}")
+    assert response.status_code == 200
+    lines = response.json()["lines"]
+    for [_id, length, estimated_length] in lines:
+        assert abs(length - estimated_length) < 0.005
+
+    response = client.get(f"/result/arcs?model_id={model_id}&process_id={process_id}")
+    assert response.status_code == 200
+    arcs = response.json()["arcs"]
+    for arc in arcs:
+        radius = arc[1]
+        estimated_radius = arc[5]
+        assert abs(radius - estimated_radius) < 0.01
+
+    perfect_data_with_arc_process_id = process_id
+
+
+def test_update_data_after_measurement_perfect_data_with_arc_recompute():
+    model_id = 4
+    process_id = perfect_data_with_arc_process_id
+    recompute(MYSQL_CONFIG, process_id)
     process_result = status.get_process_status(MYSQL_CONFIG, process_id)
     assert process_result[2] == "done"
 
@@ -207,12 +228,42 @@ def test_update_data_after_measurement_missing_mtconnect_data_with_arc():
     assert process_result[2] == "done"
 
 
+step_slope_process_id = None
+
+
 def test_update_data_after_measurement_step():
+    global step_slope_process_id
     filename = "step.STL"
     model_id = 5
     process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
     create_mock_data(filename, process_id)
     update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)
+    process_result = status.get_process_status(MYSQL_CONFIG, process_id)
+    assert process_result[2] == "done"
+
+    response = client.get(f"/result/steps?model_id={model_id}&process_id={process_id}")
+    assert response.status_code == 200
+    steps = response.json()["steps"]
+    height = steps[0][1]
+    estimated_height = steps[0][2]
+    assert height == 3.0
+    assert abs(height - estimated_height) < 0.07
+
+    response = client.get(f"/result/slopes?model_id={model_id}&process_id={process_id}")
+    assert response.status_code == 200
+    slopes = response.json()["slopes"]
+    angle = slopes[0][1]
+    estimated_angle = slopes[0][2]
+    assert angle == 45.0
+    assert abs(angle - estimated_angle) < 0.1
+
+    step_slope_process_id = process_id
+
+
+def test_update_data_after_measurement_step_recompute():
+    recompute(MYSQL_CONFIG, step_slope_process_id)
+    model_id = 5
+    process_id = step_slope_process_id
     process_result = status.get_process_status(MYSQL_CONFIG, process_id)
     assert process_result[2] == "done"
 

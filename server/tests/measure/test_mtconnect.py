@@ -1,9 +1,42 @@
-from server.measure.mtconnect import check_if_mtconnect_data_is_missing, MtctDataChecker
+from server.measure.mtconnect import (
+    check_if_mtconnect_data_is_missing,
+    MtctDataChecker,
+    update_mtct_latency,
+)
 from server.config import MYSQL_CONFIG, get_config
 import pytest
 import numpy as np
 from datetime import datetime, timedelta
 import csv
+
+
+@pytest.mark.skip(reason="Only for local testing")
+def test_get_expected_z_value():
+    mtct_data_checker = MtctDataChecker(MYSQL_CONFIG, 1, 2)
+    z = mtct_data_checker.get_expected_z_value((0, 0))
+    assert z == 0.0
+
+
+@pytest.mark.skip(reason="Only for local testing")
+def test_get_expected_z_value_debug():
+    mtct_data_checker = MtctDataChecker(MYSQL_CONFIG, 1, 2)
+    z = mtct_data_checker.get_expected_z_value((50.224, -86))
+    assert z == 0.0
+
+
+def test_update_mtct_latency():
+    update_mtct_latency(MYSQL_CONFIG, 1, None)
+
+
+@pytest.mark.skip(reason="Only for local testing")
+def test_find_mtct_latency():
+    mtct_data_checker = MtctDataChecker(MYSQL_CONFIG, 2, 4)
+    mtct_latency_range = (2800, 3200)
+    step = 20
+    mtct_latency, edge_count, avg_distance = mtct_data_checker.find_mtct_latency(
+        mtct_latency_range, step
+    )
+    print(mtct_latency, edge_count, avg_distance)
 
 
 @pytest.mark.skip(reason="Only for local testing")
