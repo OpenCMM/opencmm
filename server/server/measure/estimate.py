@@ -15,7 +15,7 @@ from server.mark.edge import (
     delete_edge_results,
 )
 from server.mark.gcode import get_gcode_filename
-from .sensor import get_sensor_data
+from .sensor import get_sensor_data, sensor_output_to_mm
 from server.model import get_model_data
 import numpy as np
 from .gcode import (
@@ -59,7 +59,6 @@ class Result:
         gcode_filename = get_gcode_filename(filename)
         gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
         self.gcode = load_gcode(gcode_file_path)
-        self.z = self.mtct_data_checker.np_mtconnect_data[0][5]
         self.first_line_for_tracing = self.mtct_data_checker.first_line_for_tracing
 
     def get_edge_results(self, start_timestamp, end_timestamp, line):
@@ -97,6 +96,7 @@ class Result:
                 # - sensor restart
                 # - timestamp is not accurate
                 results = []
+                measured_z = round(sensor_output_to_mm(sensor_output), 3)
                 for edge_id in edge_ids:
                     results.append(
                         (
@@ -104,7 +104,7 @@ class Result:
                             self.process_id,
                             edge_coord[0],
                             edge_coord[1],
-                            self.z,
+                            measured_z,
                         )
                     )
                 return results
