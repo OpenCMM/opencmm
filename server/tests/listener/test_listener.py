@@ -2,6 +2,7 @@ from server.listener import listener_start
 from server.config import (
     MYSQL_CONFIG,
 )
+import pytest
 from server.listener import status
 from time import sleep
 import threading
@@ -68,13 +69,14 @@ def test_listener_start():
     sensor_mock.join()
 
 
-# def test_mtct_mock_agent():
-#     mqtt_log_path = "tests/fixtures/mqtt/process6.json"
+@pytest.mark.skip(reason="Only for local testing")
+def test_mtct_mock_agent():
+    mqtt_log_path = "tests/fixtures/mqtt/process6.json"
 
-#     mtct_mock_agent_th = threading.Thread(
-#         target=start_mock_mtct_agent,
-#         args=((mqtt_log_path,)),
-#     )
-#     mtct_mock_agent_th.start()
-#     sleep(10)
-#     mtct_mock_agent_th.join()
+    mtct_mock_agent_th = threading.Thread(
+        target=start_mock_mtct_agent,
+        args=((mqtt_log_path,)),
+    )
+    mtct_mock_agent_th.start()
+    sleep(100)
+    mtct_mock_agent_th.join()

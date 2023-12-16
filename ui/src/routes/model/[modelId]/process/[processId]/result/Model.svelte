@@ -152,6 +152,10 @@
 			</Column>
 			<Column>
 				<OverflowMenu>
+					<OverflowMenuItem
+						text={$_('home.file.3dmodel.createGcode')}
+						href={`/file/setup?id=${modelId}`}
+					/>
 					<OverflowMenuItem danger text={$_('common.deleteModel')} on:click={deleteModel} />
 				</OverflowMenu>
 			</Column>
