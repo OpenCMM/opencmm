@@ -290,6 +290,12 @@ class MtctDataChecker:
         new_lines.append(current_line)
         return new_lines
 
+    def waiting_line_in_line_candidates(self, line_candidates):
+        for line_candidate in line_candidates:
+            if line_candidate[0] == self.first_line_for_tracing - 2:
+                return True
+        return False
+
     def estimate_timestamps_from_mtct_data(
         self,
         mtconnect_latency: float = None,
@@ -309,6 +315,9 @@ class MtctDataChecker:
             if not line_candidates:
                 continue
 
+            if self.waiting_line_in_line_candidates(line_candidates):
+                # cannot tell the exact timestamp because coordinates are the same
+                continue
             _line_rows = [
                 self.to_line_row(line_candidate, xy, timestamp)
                 for line_candidate in line_candidates

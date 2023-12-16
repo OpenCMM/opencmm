@@ -29,6 +29,9 @@ def get_edges(mysql_config: dict, model_id: int):
 
 
 def get_edges_by_side_id(side_id: int, mysql_config: dict, process_id: int):
+    """
+    Get edge results by side_id and process_id
+    """
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     query = (
