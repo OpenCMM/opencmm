@@ -1,6 +1,5 @@
 <script lang="ts">
 	import DataTable from 'carbon-icons-svelte/lib/DataTable.svelte';
-	import Add from 'carbon-icons-svelte/lib/Add.svelte';
 	import { page } from '$app/stores';
 	import ChartLineData from 'carbon-icons-svelte/lib/ChartLineData.svelte';
 	import {
@@ -35,11 +34,6 @@
 			text={$_('common.gcode')}
 			href={`${baseUri}/gcode`}
 			icon={ChartStepper}
-		/>
-		<SideNavLink
-			text={$_('home.file.3dmodel.createGcode')}
-			href={`/file/setup?id=${modelId}`}
-			icon={Add}
 		/>
 		<SideNavLink
 			isSelected={$page.url.pathname === `${baseUri}/debug`}
