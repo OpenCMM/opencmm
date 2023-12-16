@@ -1,6 +1,7 @@
 import math
 import mysql.connector
 from .edge import get_edges_by_side_id
+from itertools import combinations
 
 
 def get_pairs(model_id: int, mysql_config: dict):
@@ -62,22 +63,31 @@ def unique_tuples(list_of_tuples):
     return unique_tuples
 
 
-def validate_measured_edges(edges1, edges2):
-    edges1 = unique_tuples(edges1)
-    edges2 = unique_tuples(edges2)
+def to_line_edge_list(edge_results1, edge_results2):
+    line_edge_list = []
+    edges1 = unique_tuples(edge_results1)
+    edges2 = unique_tuples(edge_results2)
+    if not edges1 or not edges2:
+        return []
     edge1_count = len(edges1)
     edge2_count = len(edges2)
-    if edge1_count == 2 and edge2_count == 2:
-        return [
-            [edges1, edges2[0]],
-            [edges1, edges2[1]],
-            [edges2, edges1[0]],
-            [edges2, edges1[1]],
-        ]
-    if edge1_count == 2 and edge2_count == 1:
-        return [[edges1, edges2[0]]]
-    if edge2_count == 2 and edge1_count == 1:
-        return [[edges2, edges1[0]]]
+    if edge1_count == 1 and edge2_count == 1:
+        return []
+    if edge1_count > 1:
+        # add two of edges1 and one of edges2
+        # combinations of edges1
+        for i, j in combinations(range(edge1_count), 2):
+            for edge2 in edges2:
+                line_edge_list.append([[edges1[i], edges1[j]], edge2])
+
+    if edge2_count > 1:
+        # add two of edges2 and one of edges1
+        # combinations of edges2
+        for i, j in combinations(range(edge2_count), 2):
+            for edge1 in edges1:
+                line_edge_list.append([[edges2[i], edges2[j]], edge1])
+
+    return line_edge_list
 
 
 def add_line_length(model_id: int, mysql_config: dict, process_id: int):
@@ -88,10 +98,10 @@ def add_line_length(model_id: int, mysql_config: dict, process_id: int):
         side2 = sides[1]
         length = point_to_line_distance([side1[0:3], side1[3:6]], side2[0:3])
         total_measured_length = 0
-        edges1 = get_edges_by_side_id(side1[6], mysql_config, process_id)
-        edges2 = get_edges_by_side_id(side2[6], mysql_config, process_id)
+        edge_results1 = get_edges_by_side_id(side1[6], mysql_config, process_id)
+        edge_results2 = get_edges_by_side_id(side2[6], mysql_config, process_id)
         sample_size = 0
-        line_edge_list = validate_measured_edges(edges1, edges2)
+        line_edge_list = to_line_edge_list(edge_results1, edge_results2)
         if not line_edge_list:
             continue
         for [edges, edge] in line_edge_list:

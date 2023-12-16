@@ -291,6 +291,9 @@ class MtctDataChecker:
         return new_lines
 
     def waiting_line_in_line_candidates(self, line_candidates):
+        if not self.first_line_for_tracing:
+            # wait line only exists when tracing(step height & slope angle measurement)
+            return False
         for line_candidate in line_candidates:
             if line_candidate[0] == self.first_line_for_tracing - 2:
                 return True
