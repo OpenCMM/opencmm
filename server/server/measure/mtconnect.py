@@ -329,6 +329,8 @@ class MtctDataChecker:
                         lines.append(_line_row)
                         break
 
+        if not lines:
+            return []
         lines = self.remove_falsely_added_last_lines(lines)
         if add_missing:
             lines = self.add_missing_timestamps(lines)

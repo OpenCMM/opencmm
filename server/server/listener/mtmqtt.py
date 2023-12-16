@@ -172,11 +172,15 @@ def listen_data_with_mqtt(
             logger.info(_msg)
             client.publish(LISTENER_LOG_TOPIC, _msg)
             client.unsubscribe(PROCESS_CONTROL_TOPIC)
-            logger.info("mtconnect data imported")
             if len(mt_data_list) == 0:
-                logger.warning("listen_data_with_mqtt(): No data to import")
+                _msg = "listen_data_with_mqtt(): No data to import"
+                logger.warning(_msg)
             else:
                 import_mtconnect_data(mysql_config, mt_data_list)
+                _msg = "listen_data_with_mqtt(): import data"
+                logger.info(_msg)
+
+            status.update_process_status(mysql_config, process_id, _msg)
             client.publish(
                 IMPORT_MTCONNECT_TOPIC, json.dumps({"process_id": process_id})
             )

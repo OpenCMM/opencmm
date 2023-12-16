@@ -19,7 +19,7 @@ mtconnect:
   latency_end: 3500
   latency_step: 100
 sensor:
-  interval: 10 # ms
+  interval: 0 # ms
   threshold: 3.0
   beam_diameter: 120 # μm
   middle_output: 9400
