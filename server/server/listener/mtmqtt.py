@@ -141,8 +141,11 @@ def listen_data_with_mqtt(
     def on_message(client, userdata, msg):
         if msg.topic == mqtt_listener.topic:
             try:
-                row = mqtt_listener.parse_mtct_data(msg.payload.decode("utf-8"))
-                mt_data_list.append(row)
+                _current_row = mqtt_listener.parse_mtct_data(
+                    msg.payload.decode("utf-8")
+                )
+                if len(mt_data_list) == 0 or mt_data_list[-1] != _current_row:
+                    mt_data_list.append(_current_row)
             except json.decoder.JSONDecodeError:
                 logger.warning("Failed to decode JSON payload")
                 status.update_process_status(
