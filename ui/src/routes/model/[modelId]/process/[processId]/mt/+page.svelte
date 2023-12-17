@@ -27,7 +27,7 @@
 		x: number;
 		y: number;
 		timestamp: string;
-		output: number;
+		output: number | undefined;
 	}
 
 	interface Mtct {

@@ -21,7 +21,7 @@ import numpy as np
 from datetime import datetime
 import logging
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -562,6 +562,11 @@ class MtctDataChecker:
         for row in sensor_data:
             sensor_timestamp = row[2]
             sensor_output = row[3]
+            if sensor_output > 18800:
+                # no workpiece in the sensor range
+                sensor_output = None
+            else:
+                sensor_output = round(sensor_output_to_mm(row[3]), 3)
             for line in lines:
                 start_timestamp = line[1]
                 end_timestamp = line[2]
