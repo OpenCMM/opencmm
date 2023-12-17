@@ -11,6 +11,17 @@ import csv
 
 
 @pytest.mark.skip(reason="Only for local testing")
+def test_start_end_timestamps_from_mtct_data():
+    mtct_data_checker = MtctDataChecker(MYSQL_CONFIG, 1, 3)
+    lines = mtct_data_checker.start_end_timestamps_from_mtct_data()
+    print(lines)
+    actual_feedrate_list = mtct_data_checker.to_actual_feedrate_np_array(lines)
+    print(actual_feedrate_list)
+    avg_per_diff = mtct_data_checker.avg_feedrate_diff_percentage(actual_feedrate_list)
+    print(avg_per_diff)
+
+
+@pytest.mark.skip(reason="Only for local testing")
 def test_get_expected_z_value():
     mtct_data_checker = MtctDataChecker(MYSQL_CONFIG, 1, 2)
     z = mtct_data_checker.get_expected_z_value((0, 0))

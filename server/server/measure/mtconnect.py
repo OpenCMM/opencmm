@@ -233,6 +233,10 @@ class MtctDataChecker:
         end_timestamp = get_timestamp_at_point(xy, end, feedrate, timestamp, False)
         return [line_candidate[0], start_timestamp, end_timestamp]
 
+    def to_line_row_for_analysis(self, line_candidate, xy, timestamp):
+        feedrate = line_candidate[1]
+        return [line_candidate[0], xy[0], xy[1], feedrate, timestamp]
+
     def get_travel_time(self, start, end, feedrate_per_min):
         travel_time_in_sec = (
             np.linalg.norm(np.array(start) - np.array(end)) / feedrate_per_min * 60
@@ -298,6 +302,75 @@ class MtctDataChecker:
             if line_candidate[0] == self.first_line_for_tracing - 2:
                 return True
         return False
+
+    def start_end_timestamps_from_mtct_data(
+        self,
+    ):
+        lines = []
+
+        for row in self.np_mtconnect_data:
+            xy = (row[3], row[4])
+            line = int(row[6])
+            timestamp = row[2]
+            line_candidates = get_true_line_and_feedrate(
+                xy, line, self.gcode, self.first_line_for_tracing
+            )
+            if not line_candidates:
+                continue
+
+            if self.waiting_line_in_line_candidates(line_candidates):
+                # cannot tell the exact timestamp because coordinates are the same
+                continue
+            _line_rows = [
+                self.to_line_row_for_analysis(line_candidate, xy, timestamp)
+                for line_candidate in line_candidates
+            ]
+            if len(_line_rows) == 1:
+                lines.append(_line_rows[0])
+            else:
+                # multiple lines are possible
+                # estimate which line is more likely from the previous line
+                previous_line = lines[-1]
+                estimated_line = self.estimate_line_numbers_from_previous_line(
+                    previous_line, timestamp
+                )
+                if not estimated_line:
+                    continue
+                for _line_row in _line_rows:
+                    if _line_row[0] == estimated_line:
+                        lines.append(_line_row)
+                        break
+
+        if not lines:
+            return []
+        lines = self.remove_falsely_added_last_lines(lines)
+        return np.array(lines)
+
+    def to_actual_feedrate_np_array(self, lines):
+        actual_feedrate_list = []
+        prev_line = lines[0]
+        for i in range(1, len(lines)):
+            line = lines[i]
+            line_number = line[0]
+            # [line_candidate[0], xy[0], xy[1], feedrate, timestamp]
+            if line_number == prev_line[0]:
+                commanded_feedrate = prev_line[3]
+                distance = np.linalg.norm(
+                    np.array(line[1:3]) - np.array(prev_line[1:3])
+                )
+                time_diff = line[4] - prev_line[4]
+                actual_feedrate = distance / time_diff.total_seconds()
+                actual_feedrate_list.append(
+                    [line[0], commanded_feedrate, actual_feedrate]
+                )
+            prev_line = line
+        return np.array(actual_feedrate_list)
+
+    def avg_feedrate_diff_percentage(self, feedrate_diff_np_array):
+        cmd_feedrate = feedrate_diff_np_array[:, 1]
+        act_feedrate = feedrate_diff_np_array[:, 2]
+        percentage_diff = (act_feedrate - cmd_feedrate) / cmd_feedrate * 100
+        return percentage_diff.mean()
 
     def estimate_timestamps_from_mtct_data(
         self,
@@ -524,7 +597,7 @@ class MtctDataChecker:
         """
         mtct_latency_from_process = self.get_mtct_latency_from_process()
         if mtct_latency_from_process:
-            self.mtct_latency = self.get_mtct_latency_from_process()
+            self.mtct_latency = mtct_latency_from_process
             return
         # load the default mtct latency
         self.mtct_latency = self.config["mtconnect"]["latency"]
