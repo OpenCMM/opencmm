@@ -104,6 +104,7 @@ class MtctDataChecker:
             self.mysql_config, self.model_id
         )
         self.config = get_config()
+        self.not_in_range_output = self.config["sensor"]["not_in_range_output"]
         self.set_mtct_latency()
 
     def load_gcode(self):
@@ -635,7 +636,7 @@ class MtctDataChecker:
         for row in sensor_data:
             sensor_timestamp = row[2]
             sensor_output = row[3]
-            if sensor_output > 18800:
+            if sensor_output > self.not_in_range_output:
                 # no workpiece in the sensor range
                 sensor_output = None
             else:
@@ -695,12 +696,13 @@ class MtctDataChecker:
         # measuring edge is the middle point of the line
         edge_xy = (np.array(start) + np.array(end)) / 2
         expected_z = self.get_expected_z_value(edge_xy)
-        # sensor outputs >18800 when there is no workpiece in the sensor range
+        # sensor outputs more than self.not_in_range_output
+        # when there is no workpiece in the sensor range
         if expected_z is None:
-            return sensor_output > 18800
+            return sensor_output > self.not_in_range_output
         if -35 <= expected_z <= 35:
             return abs(measured_z - expected_z) < self.config["sensor"]["tolerance"]
-        return sensor_output > 18800
+        return sensor_output > self.not_in_range_output
 
     def get_edge_coordinates_from_line_number(self, line_number: int):
         cnx = mysql.connector.connect(**self.mysql_config, database="coord")
@@ -734,15 +736,16 @@ class MtctDataChecker:
         expected_z = max([edge[3] for edge in edges]) + self.offset[2]
 
         edge_ids = [edge[0] for edge in edges]
-        # sensor outputs >18800 when there is no workpiece in the sensor range
+        # sensor outputs more than self.not_in_range_output
+        # when there is no workpiece in the sensor range
         if expected_z is None:
-            return sensor_output > 18800, edge_ids
+            return sensor_output > self.not_in_range_output, edge_ids
         if -35 <= expected_z <= 35:
             return (
                 abs(measured_z - expected_z) < self.config["sensor"]["tolerance"],
                 edge_ids,
             )
-        return sensor_output > 18800, edge_ids
+        return sensor_output > self.not_in_range_output, edge_ids
 
     def get_only_edge_detection_lines(self, lines):
         edge_detection_lines = []
