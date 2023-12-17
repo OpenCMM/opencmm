@@ -17,7 +17,7 @@ from server.config import (
 import logging
 from server.measure.sensor import mm_to_sensor_output_diff
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 sensor_online = False
