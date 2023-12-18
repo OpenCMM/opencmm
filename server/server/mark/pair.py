@@ -1,4 +1,4 @@
-import math
+import numpy as np
 import mysql.connector
 from .edge import get_edges_by_side_id
 from itertools import combinations
@@ -15,40 +15,36 @@ def get_pairs(model_id: int, mysql_config: dict):
     return pairs
 
 
-def point_to_line_distance(edges_on_the_same_line: list, point: tuple):
-    [line_point1, line_point2] = edges_on_the_same_line
-    x1, y1, z1 = line_point1
-    x2, y2, z2 = line_point2
-    x, y, z = point
+def point_to_line_distance(edges_on_the_same_line, point):
+    """
+    Calculate the distance between a point and a line
 
-    # Calculate the direction vector of the line
-    line_direction = (x2 - x1, y2 - y1, z2 - z1)
+    Parameters
+    ----------
+    edges_on_the_same_line : list
+        list of two edges on the same line
+    point : list
+        list of the point
 
-    # Calculate the vector from line_point1 to the point
-    to_point_vector = (x - x1, y - y1, z - z1)
+    Returns
+    -------
+    float
+        distance between the point and the line
+    """
+    line_point1, line_point2 = edges_on_the_same_line
+    A = np.array(line_point1)
+    B = np.array(line_point2)
+    P = np.array(point)
 
-    # Calculate the dot product of the to_point_vector and the line_direction
-    dot_product = sum(a * b for a, b in zip(to_point_vector, line_direction))
+    # Calculate the vector AP and vector AB
+    AP = P - A
+    AB = B - A
 
-    # Calculate the magnitude of the line_direction vector squared
-    line_length_squared = sum(a * a for a in line_direction)
+    # Calculate the cross product (AP x AB)
+    cross_product = np.cross(AP, AB)
 
-    # Calculate the parameter t, which is the distance
-    # along the line to the closest point
-    t = dot_product / line_length_squared
-
-    if t < 0:
-        # Closest point is the first line endpoint
-        closest_point = line_point1
-    elif t > 1:
-        # Closest point is the second line endpoint
-        closest_point = line_point2
-    else:
-        # Closest point is along the line
-        closest_point = (x1 + t * (x2 - x1), y1 + t * (y2 - y1), z1 + t * (z2 - z1))
-
-    # Calculate the distance between the point and the closest point on the line
-    distance = math.sqrt(sum((a - b) ** 2 for a, b in zip(point, closest_point)))
+    # Calculate the distance
+    distance = np.linalg.norm(cross_product) / np.linalg.norm(AB)
 
     return distance
 
@@ -97,21 +93,20 @@ def add_line_length(model_id: int, mysql_config: dict, process_id: int):
         side1 = sides[0]
         side2 = sides[1]
         length = point_to_line_distance([side1[0:3], side1[3:6]], side2[0:3])
-        total_measured_length = 0
         edge_results1 = get_edges_by_side_id(side1[6], mysql_config, process_id)
         edge_results2 = get_edges_by_side_id(side2[6], mysql_config, process_id)
-        sample_size = 0
         line_edge_list = to_line_edge_list(edge_results1, edge_results2)
         if not line_edge_list:
             continue
+        distances = []
         for [edges, edge] in line_edge_list:
             # check if edge is not None
             if edge and edge[0] and edge[1]:
-                sample_size += 1
-                total_measured_length += point_to_line_distance(edges, edge)
-        if sample_size == 0:
+                distances.append(point_to_line_distance(edges, edge))
+        if len(distances) == 0:
             continue
-        measured_length = round(total_measured_length / sample_size, 3)
+        measured_length = np.mean(distances)
+        measured_length = float(np.round(measured_length, 3))
         add_measured_length(pair_id, length, measured_length, mysql_config, process_id)
 
 

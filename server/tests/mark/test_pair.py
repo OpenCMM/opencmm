@@ -8,9 +8,9 @@ from server.config import MYSQL_CONFIG
 model_id = 1
 
 
-@pytest.mark.skip(reason="not implemented")
+@pytest.mark.skip(reason="Only for local testing")
 def test_add_line_length():
-    add_line_length(model_id, MYSQL_CONFIG)
+    add_line_length(model_id, MYSQL_CONFIG, 3)
 
 
 @pytest.mark.skip(reason="not implemented")
