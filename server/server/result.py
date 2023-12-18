@@ -178,6 +178,8 @@ def fetch_lines(model_id: int, process_id: int):
 
 
 def fetch_arcs(model_id: int, process_id: int):
+    model_data = get_model_data(model_id)
+    offset = model_data[3:6]
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
     cursor = cnx.cursor()
 
@@ -192,8 +194,13 @@ def fetch_arcs(model_id: int, process_id: int):
 	"""
     cursor.execute(query, (process_id, model_id))
     for arc in cursor:
+        center_coord_with_offset = [
+            arc[2] + offset[0],
+            arc[3] + offset[1],
+            arc[4] + offset[2],
+        ]
         arcs.append(
-            (arc[0], arc[1], arc[2], arc[3], arc[4], arc[5], arc[6], arc[7], arc[8])
+            (arc[0], arc[1], *center_coord_with_offset, arc[5], arc[6], arc[7], arc[8])
         )
 
     cursor.close()
