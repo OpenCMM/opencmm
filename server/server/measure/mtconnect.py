@@ -784,7 +784,6 @@ class MtctDataChecker:
         """
         Get sensor data count when measuring
         """
-        count = 0
         distances = []
         # lines = self.adjust_delays(lines)
         prev_line_number = None
@@ -829,14 +828,13 @@ class MtctDataChecker:
                 distances.append(
                     np.linalg.norm(np.array(measured_edge_coord) - np.array(edge_coord))
                 )
-                count += 1
                 prev_line_number = line_number
                 break
 
-        if count == 0:
+        if len(distances) == 0:
             return 0, 1000
         np_distances = np.array(distances)
-        return count, np.mean(np_distances)
+        return len(distances), np.mean(np_distances)
 
     def find_mtct_latency(self, latency_range: tuple, step: float):
         """

@@ -1,9 +1,7 @@
 import paho.mqtt.client as mqtt
 from server.listener import status
 from server.config import (
-    GCODE_PATH,
     LISTENER_LOG_TOPIC,
-    MODEL_PATH,
     MQTT_BROKER_URL,
     MQTT_PASSWORD,
     MQTT_USERNAME,
@@ -13,12 +11,9 @@ from server.mark.edge import (
     import_edge_results,
     delete_edge_results,
 )
-from server.mark.gcode import get_gcode_filename
-from .sensor import get_sensor_data, sensor_output_to_mm
-from server.model import get_model_data
+from .sensor import sensor_output_to_mm
 import numpy as np
 from .gcode import (
-    load_gcode,
     get_start_end_points_from_line_number,
 )
 from .mtconnect import MtctDataChecker, update_mtct_latency
@@ -44,17 +39,7 @@ class Result:
         self.mtct_data_checker = MtctDataChecker(mysql_config, model_id, process_id)
         self.mtct_lines = self.mtct_data_checker.estimate_timestamps_from_mtct_data()
         # self.mtct_lines = self.mtct_data_checker.adjust_delays(mtct_lines)
-        sensor_data = get_sensor_data(process_id, mysql_config)
-        self.np_sensor_data = np.array(sensor_data)
-
-        model_row = get_model_data(model_id)
-        filename = model_row[1]
-        self.stl_filepath = f"{MODEL_PATH}/{filename}"
-        process_status = status.get_process_status(mysql_config, process_id)
-        self.offset = (process_status[4], process_status[5], process_status[6])
-        gcode_filename = get_gcode_filename(filename)
-        gcode_file_path = f"{GCODE_PATH}/{gcode_filename}"
-        self.gcode = load_gcode(gcode_file_path)
+        self.np_sensor_data = np.array(self.mtct_data_checker.sensor_data)
         self.first_line_for_tracing = self.mtct_data_checker.first_line_for_tracing
 
     def get_edge_results(self, start_timestamp, end_timestamp, line):
@@ -63,7 +48,9 @@ class Result:
         sensor data using timestamp
         """
         # feedrate = row[7] # feedrate from MTConnect is not accurate
-        (start, end, feedrate) = get_start_end_points_from_line_number(self.gcode, line)
+        (start, end, feedrate) = get_start_end_points_from_line_number(
+            self.mtct_data_checker.gcode, line
+        )
 
         # get sensor data that is between start and end timestamp
         sensor_data_during_line = self.np_sensor_data[
