@@ -762,6 +762,17 @@ class MtctDataChecker:
                 edge_detection_lines.append(line)
         return edge_detection_lines
 
+    def get_sensor_data(self):
+        return get_sensor_data(self.process_id, self.mysql_config)
+
+    def filter_out_not_in_range_output(self, sensor_data):
+        np_sensor_data = np.array(sensor_data)
+        # filter out sensor data with output more than not_in_range_output
+        np_sensor_data = np_sensor_data[
+            np_sensor_data[:, 3] <= self.not_in_range_output
+        ]
+        return np_sensor_data
+
     def sensor_data_count_and_distance_when_measuring(self, mtct_latency: float):
         """
         Get sensor data count when measuring
@@ -769,49 +780,55 @@ class MtctDataChecker:
         count = 0
         distances = []
         lines = self.estimate_timestamps_from_mtct_data(mtct_latency)
-        lines = self.adjust_delays(lines)
+        # lines = self.adjust_delays(lines)
         edge_detection_lines = self.get_only_edge_detection_lines(lines)
         sensor_data = get_sensor_data(self.process_id, self.mysql_config)
+        np_sensor_data = self.filter_out_not_in_range_output(sensor_data)
         prev_line_number = None
-        for row in sensor_data:
-            sensor_timestamp = row[2]
-            sensor_output = row[3]
-            for line in edge_detection_lines:
-                line_number = line[0]
+
+        for line in edge_detection_lines:
+            line_number = line[0]
+            start_timestamp = line[1]
+            end_timestamp = line[2]
+            start = (line[3], line[4])
+            end = (line[5], line[6])
+            feedrate = line[7]
+
+            sensor_data_during_line = np_sensor_data[
+                np.logical_and(
+                    np_sensor_data[:, 2] >= start_timestamp,
+                    np_sensor_data[:, 2] <= end_timestamp,
+                )
+            ]
+
+            for row in sensor_data_during_line:
+                sensor_timestamp = row[2]
+                sensor_output = row[3]
+
                 # One edge per line
                 if line_number == prev_line_number:
                     continue
-                start_timestamp = line[1]
-                end_timestamp = line[2]
-                if start_timestamp <= sensor_timestamp <= end_timestamp:
-                    start = (line[3], line[4])
-                    end = (line[5], line[6])
-                    if start == end:
-                        continue
 
-                    sensor_output_valid, _ = self.validate_sensor_output(
-                        sensor_output, line_number
-                    )
-                    if not sensor_output_valid:
-                        continue
+                sensor_output_valid, _ = self.validate_sensor_output(
+                    sensor_output, line_number
+                )
+                if not sensor_output_valid:
+                    continue
 
-                    feedrate = line[7]
-                    measured_edge_coord = self.sensor_timestamp_to_coord(
-                        start_timestamp,
-                        sensor_timestamp,
-                        start,
-                        end,
-                        feedrate,
-                    )
-                    edge_coord = (np.array(start) + np.array(end)) / 2
-                    distances.append(
-                        np.linalg.norm(
-                            np.array(measured_edge_coord) - np.array(edge_coord)
-                        )
-                    )
-                    count += 1
-                    prev_line_number = line_number
-                    break
+                measured_edge_coord = self.sensor_timestamp_to_coord(
+                    start_timestamp,
+                    sensor_timestamp,
+                    start,
+                    end,
+                    feedrate,
+                )
+                edge_coord = (np.array(start) + np.array(end)) / 2
+                distances.append(
+                    np.linalg.norm(np.array(measured_edge_coord) - np.array(edge_coord))
+                )
+                count += 1
+                prev_line_number = line_number
+                break
 
         if count == 0:
             return 0, 1000
