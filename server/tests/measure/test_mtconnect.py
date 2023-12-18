@@ -11,6 +11,10 @@ import csv
 from server.listener import status
 from server.listener.mt.reader import import_mtconnect_data
 import mysql.connector
+from fastapi.testclient import TestClient
+from server.main import app
+
+client = TestClient(app)
 
 
 @pytest.mark.skip(reason="Only for local testing")
@@ -185,10 +189,6 @@ def test_check_missing_lines():
     assert avg_diff < 0.005
 
 
-sample_stl_model_id = 4
-step_stl_model_id = 5
-
-
 def import_sensor_data(mysql_config: dict, sensor_data_list):
     # Perform a bulk insert
     mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
@@ -208,20 +208,53 @@ def import_sensor_data(mysql_config: dict, sensor_data_list):
 
 
 def import_mtct_sensor_data_from_csv():
-    files = ["process3.csv", "process6.csv"]
-    for file in files:
-        process_id = status.start_measuring(
-            sample_stl_model_id, MYSQL_CONFIG, "running"
-        )
+    # import 3d models
+    path = "tests/fixtures/stl/sample.stl"
+    with open(path, "rb") as f:
+        response = client.post("/upload/3dmodel", files={"file": f})
+        assert response.status_code == 200
+        res = response.json()
+        assert res["status"] == "ok"
+        sample_stl_model_id = res["model_id"]
+
+    path = "tests/fixtures/stl/step.STL"
+    with open(path, "rb") as f:
+        response = client.post("/upload/3dmodel", files={"file": f})
+        assert response.status_code == 200
+        res = response.json()
+        assert res["status"] == "ok"
+        step_stl_model_id = res["model_id"]
+
+    files = [
+        [sample_stl_model_id, "process3.csv", (50, -65, -10)],
+        [step_stl_model_id, "process6.csv", (0, 0, 0)],
+    ]
+    for [model_id, filename, offset] in files:
+        # create a gcode file
+        job_info = {
+            "three_d_model_id": model_id,
+            "measurement_range": 2.0,
+            "measure_feedrate": 50.0,
+            "move_feedrate": 1000.0,
+            "x_offset": offset[0],
+            "y_offset": offset[1],
+            "z_offset": offset[2],
+            "send_gcode": False,
+        }
+        response = client.post("/setup/data", json=job_info)
+        assert response.status_code == 200
+        assert response.json() == {"status": "ok"}
+
+        process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
         mtct_data = []
-        with open(f"tests/fixtures/csv/mtct/{file}", newline="") as csvfile:
+        with open(f"tests/fixtures/csv/mtct/{filename}", newline="") as csvfile:
             reader = csv.reader(csvfile)
             for row in reader:
                 _row = [process_id, *row]
                 mtct_data.append(_row)
             import_mtconnect_data(MYSQL_CONFIG, mtct_data)
 
-        with open(f"tests/fixtures/csv/sensor/{file}", newline="") as csvfile:
+        with open(f"tests/fixtures/csv/sensor/{filename}", newline="") as csvfile:
             sensor_data = []
             reader = csv.reader(csvfile)
             for row in reader:

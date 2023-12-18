@@ -310,6 +310,34 @@ def test_update_data_after_measurement_step_fluctuating_data():
     print("estimated_angle", estimated_angle)
 
 
+def test_with_correct_sample_model():
+    filename = "hole.stl"
+    with open(f"tests/fixtures/stl/{filename}", "rb") as f:
+        response = client.post("/upload/3dmodel", files={"file": f})
+        assert response.status_code == 200
+        model_id = response.json()["model_id"]
+
+    job_info = {
+        "three_d_model_id": model_id,
+        "measurement_range": 2.0,
+        "measure_feedrate": 50.0,
+        "move_feedrate": 1000.0,
+        "x_offset": 50.0,
+        "y_offset": -65.0,
+        "z_offset": -10.0,
+        "send_gcode": False,
+    }
+    response = client.post("/setup/data", json=job_info)
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+    process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
+    create_mock_multiple_edges(filename, process_id)
+    update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)
+    process_result = status.get_process_status(MYSQL_CONFIG, process_id)
+    assert process_result[2] == "done"
+
+
 def test_with_many_edges_on_circle():
     new_edge_detection_config = {
         "arc_number": 8,
