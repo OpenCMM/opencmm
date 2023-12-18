@@ -105,6 +105,10 @@ class MtctDataChecker:
         )
         self.config = get_config()
         self.not_in_range_output = self.config["sensor"]["not_in_range_output"]
+        self.sensor_data = get_sensor_data(self.process_id, self.mysql_config)
+        self.only_valid_sensor_data = self.filter_out_not_in_range_output(
+            self.sensor_data
+        )
         self.set_mtct_latency()
 
     def load_gcode(self):
@@ -631,9 +635,8 @@ class MtctDataChecker:
 
         lines = self.estimate_timestamps_from_mtct_data(mtct_latency)
         lines = self.adjust_delays(lines)
-        sensor_data = get_sensor_data(self.process_id, self.mysql_config)
         sensor_data_with_coordinates = []
-        for row in sensor_data:
+        for row in self.sensor_data:
             sensor_timestamp = row[2]
             sensor_output = row[3]
             if sensor_output > self.not_in_range_output:
@@ -773,17 +776,37 @@ class MtctDataChecker:
         ]
         return np_sensor_data
 
-    def sensor_data_count_and_distance_when_measuring(self, mtct_latency: float):
+    def slide_timestamps(self, lines, slide_time: float):
+        """
+        Slide timestamps by slide_time
+        """
+        new_lines = []
+        for line in lines:
+            line_number = line[0]
+            start_timestamp = line[1]
+            end_timestamp = line[2]
+            start = (line[3], line[4])
+            end = (line[5], line[6])
+            feedrate = line[7]
+            new_lines.append(
+                [
+                    line_number,
+                    start_timestamp - timedelta(seconds=slide_time),
+                    end_timestamp - timedelta(seconds=slide_time),
+                    *start,
+                    *end,
+                    feedrate,
+                ]
+            )
+        return new_lines
+
+    def sensor_data_count_and_distance_when_measuring(self, edge_detection_lines):
         """
         Get sensor data count when measuring
         """
         count = 0
         distances = []
-        lines = self.estimate_timestamps_from_mtct_data(mtct_latency)
         # lines = self.adjust_delays(lines)
-        edge_detection_lines = self.get_only_edge_detection_lines(lines)
-        sensor_data = get_sensor_data(self.process_id, self.mysql_config)
-        np_sensor_data = self.filter_out_not_in_range_output(sensor_data)
         prev_line_number = None
 
         for line in edge_detection_lines:
@@ -794,10 +817,10 @@ class MtctDataChecker:
             end = (line[5], line[6])
             feedrate = line[7]
 
-            sensor_data_during_line = np_sensor_data[
+            sensor_data_during_line = self.only_valid_sensor_data[
                 np.logical_and(
-                    np_sensor_data[:, 2] >= start_timestamp,
-                    np_sensor_data[:, 2] <= end_timestamp,
+                    self.only_valid_sensor_data[:, 2] >= start_timestamp,
+                    self.only_valid_sensor_data[:, 2] <= end_timestamp,
                 )
             ]
 
@@ -840,13 +863,16 @@ class MtctDataChecker:
         Find mtconnect latency
         """
         count_and_avg_distance = []
-
-        for i in range(int((latency_range[1] - latency_range[0]) / step)):
+        lines = self.estimate_timestamps_from_mtct_data(latency_range[0])
+        edge_detection_lines = self.get_only_edge_detection_lines(lines)
+        loop_count = int((latency_range[1] - latency_range[0]) / step)
+        for i in range(loop_count):
             _mtct_latency = latency_range[0] + i * step
             (
                 sensor_data_count,
                 avg_distance,
-            ) = self.sensor_data_count_and_distance_when_measuring(_mtct_latency)
+            ) = self.sensor_data_count_and_distance_when_measuring(edge_detection_lines)
+            edge_detection_lines = self.slide_timestamps(edge_detection_lines, step)
             count_and_avg_distance.append(
                 [_mtct_latency, sensor_data_count, avg_distance]
             )
