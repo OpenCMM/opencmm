@@ -8,6 +8,17 @@ import pytest
 import numpy as np
 from datetime import datetime, timedelta
 import csv
+from server.listener import status
+from server.listener.mt.reader import import_mtconnect_data
+import mysql.connector
+
+
+@pytest.mark.skip(reason="Only for local testing")
+def test_filter_out_not_in_range_output():
+    mtct_data_checker = MtctDataChecker(MYSQL_CONFIG, 1, 3)
+    sensor_data = mtct_data_checker.get_sensor_data()
+    np_sensor_data = mtct_data_checker.filter_out_not_in_range_output(sensor_data)
+    print(np_sensor_data)
 
 
 @pytest.mark.skip(reason="Only for local testing")
@@ -172,3 +183,52 @@ def test_check_missing_lines():
     mtct_data_checker = MtctDataChecker(MYSQL_CONFIG, 2, 4)
     avg_diff = mtct_data_checker.missing_line_travel_time_diff()
     assert avg_diff < 0.005
+
+
+sample_stl_model_id = 4
+step_stl_model_id = 5
+
+
+def import_sensor_data(mysql_config: dict, sensor_data_list):
+    # Perform a bulk insert
+    mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
+    mysql_cur = mysql_conn.cursor()
+
+    query = (
+        "INSERT INTO sensor(process_id, timestamp, distance) "
+        "VALUES (%s, FROM_UNIXTIME(%s), %s)"
+    )
+    mysql_cur.executemany(
+        query,
+        sensor_data_list,
+    )
+    mysql_conn.commit()
+    mysql_cur.close()
+    mysql_conn.close()
+
+
+def import_mtct_sensor_data_from_csv():
+    files = ["process3.csv", "process6.csv"]
+    for file in files:
+        process_id = status.start_measuring(
+            sample_stl_model_id, MYSQL_CONFIG, "running"
+        )
+        mtct_data = []
+        with open(f"tests/fixtures/csv/mtct/{file}", newline="") as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                _row = [process_id, *row]
+                mtct_data.append(_row)
+            import_mtconnect_data(MYSQL_CONFIG, mtct_data)
+
+        with open(f"tests/fixtures/csv/sensor/{file}", newline="") as csvfile:
+            sensor_data = []
+            reader = csv.reader(csvfile)
+            for row in reader:
+                _row = [process_id, *row]
+                sensor_data.append(_row)
+            import_sensor_data(MYSQL_CONFIG, sensor_data)
+
+
+def test_import_mtct_sensor_data_from_csv():
+    import_mtct_sensor_data_from_csv()

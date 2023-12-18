@@ -6,7 +6,9 @@ from server.config import (
     PROCESS_CONTROL_TOPIC,
     MQTT_BROKER_URL,
     get_config,
+    MYSQL_CONFIG,
 )
+from server.measure.mtconnect import get_mtconnect_data
 from time import sleep
 
 
@@ -45,3 +47,13 @@ class MockMtctAgent:
 def start_mock_mtct_agent(mqtt_log_path: str):
     mock_mtct_agent = MockMtctAgent(mqtt_log_path)
     mock_mtct_agent.start()
+
+
+def save_mtct_data_as_csv(process_id: int, destination_file: str):
+    mtct_data = get_mtconnect_data(process_id, MYSQL_CONFIG)
+    # remove id, process_id
+    mtct_data = [row[2:] for row in mtct_data]
+    # save as csv
+    with open(f"tests/fixtures/csv/mtct/{destination_file}", "w") as f:
+        for row in mtct_data:
+            f.write(",".join(map(str, row)) + "\n")

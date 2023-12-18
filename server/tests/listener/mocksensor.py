@@ -1,4 +1,3 @@
-import mysql.connector
 import paho.mqtt.client as mqtt
 import json
 from server.config import (
@@ -9,20 +8,16 @@ from server.config import (
     MYSQL_CONFIG,
     RECEIVE_DATA_TOPIC,
 )
+from server.measure.sensor import get_sensor_data
 
 
-def save_sensor_data_as_csv():
-    cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
-    cursor = cnx.cursor()
-    query = "SELECT * FROM sensor WHERE process_id = %s"
-    cursor.execute(query, (4,))
-    sensor = cursor.fetchall()
-    cursor.close()
-    cnx.close()
-
+def save_sensor_data_as_csv(process_id: int, destination_file: str):
+    sensor_data = get_sensor_data(process_id, MYSQL_CONFIG)
+    # remove id, process_id
+    sensor_data = [row[2:] for row in sensor_data]
     # save as csv
-    with open("tests/fixtures/sensor.csv", "w") as f:
-        for row in sensor:
+    with open(f"tests/fixtures/csv/{destination_file}", "w") as f:
+        for row in sensor_data:
             f.write(",".join(map(str, row)) + "\n")
 
 
