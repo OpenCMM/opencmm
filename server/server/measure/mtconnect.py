@@ -20,6 +20,7 @@ from server.prepare import create_gcode_path
 import numpy as np
 from datetime import datetime
 import logging
+from time import time
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -612,10 +613,14 @@ class MtctDataChecker:
             self.config["mtconnect"]["latency_end"],
         )
         step = self.config["mtconnect"]["latency_step"]
-        mtct_latency, edge_count, avg_distance = self.find_mtct_latency(
+
+        find_mtct_latency_start_time = time()
+        mtct_latency, edge_count, avg_distance, edge_results = self.find_mtct_latency(
             mtct_latency_range, step
         )
-
+        logger.info(
+            "find_mtct_latency took %s seconds", time() - find_mtct_latency_start_time
+        )
         if edge_count != 0:
             logger.info(
                 (
@@ -624,6 +629,7 @@ class MtctDataChecker:
                 )
             )
             self.mtct_latency = mtct_latency
+            self.edge_results = edge_results
             update_mtct_latency(self.mysql_config, self.process_id, mtct_latency)
 
     def get_sensor_data_with_coordinates(self, mtct_latency: float = None):
@@ -730,11 +736,15 @@ class MtctDataChecker:
         Returns:
             True if the sensor output is valid, False otherwise
             Edge ids
+            Edge coordinates
+            measured_z
         """
         measured_z = sensor_output_to_mm(sensor_output)
         edges = self.get_edge_coordinates_from_line_number(line_number)
         if not edges:
-            return False, None
+            return False, None, None, None
+        edge_coord = edges[0][1:3]
+        edge_coord = (edge_coord[0] + self.offset[0], edge_coord[1] + self.offset[1])
         # expected_z is the highest z value of the edges
         expected_z = max([edge[3] for edge in edges]) + self.offset[2]
 
@@ -742,13 +752,25 @@ class MtctDataChecker:
         # sensor outputs more than self.not_in_range_output
         # when there is no workpiece in the sensor range
         if expected_z is None:
-            return sensor_output > self.not_in_range_output, edge_ids
+            return (
+                sensor_output > self.not_in_range_output,
+                edge_ids,
+                edge_coord,
+                measured_z,
+            )
         if -35 <= expected_z <= 35:
             return (
                 abs(measured_z - expected_z) < self.config["sensor"]["tolerance"],
                 edge_ids,
+                edge_coord,
+                measured_z,
             )
-        return sensor_output > self.not_in_range_output, edge_ids
+        return (
+            sensor_output > self.not_in_range_output,
+            edge_ids,
+            edge_coord,
+            measured_z,
+        )
 
     def get_only_edge_detection_lines(self, lines: np.array):
         # Edge detection
@@ -785,6 +807,7 @@ class MtctDataChecker:
         Get sensor data count when measuring
         """
         distances = []
+        edge_results = []
         # lines = self.adjust_delays(lines)
         prev_line_number = None
 
@@ -811,9 +834,12 @@ class MtctDataChecker:
                 if line_number == prev_line_number:
                     continue
 
-                sensor_output_valid, _ = self.validate_sensor_output(
-                    sensor_output, line_number
-                )
+                (
+                    sensor_output_valid,
+                    edge_ids,
+                    edge_coord,
+                    measured_z,
+                ) = self.validate_sensor_output(sensor_output, line_number)
                 if not sensor_output_valid:
                     continue
 
@@ -824,17 +850,36 @@ class MtctDataChecker:
                     end,
                     feedrate,
                 )
-                edge_coord = (np.array(start) + np.array(end)) / 2
                 distances.append(
                     np.linalg.norm(np.array(measured_edge_coord) - np.array(edge_coord))
                 )
+                """
+                when edges are overlapping, multiple edges can be measured
+                for a single line
+                """
+                for edge_id in edge_ids:
+                    measured_z = round(measured_z, 3)
+                    edge_results.append(
+                        (
+                            edge_id,
+                            self.process_id,
+                            measured_edge_coord[0],
+                            measured_edge_coord[1],
+                            measured_z,
+                        )
+                    )
+                # ignore the rest of the sensor data
+                # multiple edges can be measured due to the following reasons:
+                # - noise (can be reduced by increasing the sensor threshold)
+                # - sensor restart
+                # - timestamp is not accurate
                 prev_line_number = line_number
                 break
 
         if len(distances) == 0:
-            return 0, 1000
+            return 0, 1000, edge_results
         np_distances = np.array(distances)
-        return len(distances), np.mean(np_distances)
+        return len(distances), np.mean(np_distances), edge_results
 
     def find_mtct_latency(self, latency_range: tuple, step: float):
         """
@@ -849,10 +894,11 @@ class MtctDataChecker:
             (
                 sensor_data_count,
                 avg_distance,
+                edge_results,
             ) = self.sensor_data_count_and_distance_when_measuring(edge_detection_lines)
             edge_detection_lines = self.slide_timestamps(edge_detection_lines, step)
             count_and_avg_distance.append(
-                [_mtct_latency, sensor_data_count, avg_distance]
+                [_mtct_latency, sensor_data_count, avg_distance, edge_results]
             )
 
         count_and_avg_distance.sort(key=lambda x: (-x[1], x[2]))
