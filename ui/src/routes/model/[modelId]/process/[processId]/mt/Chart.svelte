@@ -190,9 +190,9 @@
 				return y(d.y);
 			})
 			.style('fill', function (d) {
-				if (d.output > 18800) {
+				if (!d.output) {
 					return offRangeColor;
-				} else if (d.output < 9500 && d.output > 9300) {
+				} else if (d.output < 1.3 && d.output > -1.3) {
 					return baseHeightColor;
 				} else {
 					return edgeColor;
@@ -218,7 +218,7 @@
 		dot.on('mouseover', function (event, d) {
 			tooltip.transition().duration(200).style('opacity', 0.9);
 			tooltip
-				.html(`(${d['x']}, ${d['y']}) ${d['output']} ${d['timestamp']}`)
+				.html(`(${d['x']}, ${d['y']}, ${d['output']}) ${d['timestamp']}`)
 				.style('left', event.pageX + 'px')
 				.style('top', event.pageY - 28 + 'px');
 		});

@@ -11,6 +11,8 @@ import shutil
 from .mocksensor import start_mock_sensor
 from fastapi.testclient import TestClient
 from server.main import app
+from .mocksensor import save_sensor_data_as_csv
+from .mockmtctagent import save_mtct_data_as_csv
 
 client = TestClient(app)
 
@@ -80,3 +82,14 @@ def test_mtct_mock_agent():
     mtct_mock_agent_th.start()
     sleep(100)
     mtct_mock_agent_th.join()
+
+
+@pytest.mark.skip(reason="Only for local testing")
+def test_save_sensor_data_as_csv():
+    save_sensor_data_as_csv(6, "process6.csv")
+
+
+@pytest.mark.skip(reason="Only for local testing")
+def test_save_mtct_data_as_csv():
+    save_mtct_data_as_csv(6, "process6.csv")
+    save_mtct_data_as_csv(3, "process3.csv")

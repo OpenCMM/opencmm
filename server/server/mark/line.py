@@ -56,20 +56,36 @@ def to_side_list(model_id: int, pairs: np.ndarray, pair_id: int):
     return side_list
 
 
+def point_to_line_distance(line_points, point):
+    assert len(line_points) == 2, "line_points must have two points"
+    A = line_points[0]
+    B = line_points[1]
+    P = point
+
+    # Calculate the vector AP and vector AB
+    AP = P - A
+    AB = B - A
+
+    # Calculate the cross product (AP x AB)
+    cross_product = np.cross(AP, AB)
+
+    # Calculate the distance
+    distance = np.linalg.norm(cross_product) / np.linalg.norm(AB)
+
+    return distance
+
+
 def import_sides(model_id: int, pairs: np.ndarray, pair_type: str, mysql_config: dict):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
     for pair in pairs:
-        pair_id = import_pair(model_id, pair_type, mysql_config)
+        pair_id = import_pair(model_id, pair_type, pair, cnx, cursor)
         side_list = to_side_list(model_id, pair, pair_id)
         insert_query = (
             "INSERT INTO side (x0, y0, z0, x1, y1, z1, model_id, pair_id)"
             " VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
         )
-        try:
-            cursor.executemany(insert_query, side_list)
-        except IntegrityError:
-            print("Error: unable to import lines")
+        cursor.executemany(insert_query, side_list)
         cnx.commit()
     cursor.close()
     cnx.close()
@@ -200,20 +216,19 @@ def import_lines_from_paired_lines_on_facets(
     import_edges_from_sides(sides, mysql_config)
 
 
-def import_pair(model_id: int, pair_type: str, mysql_config: dict) -> int:
-    cnx = mysql.connector.connect(**mysql_config, database="coord")
-    cursor = cnx.cursor()
-    insert_query = "INSERT INTO pair (model_id, type) VALUES (%s, %s)"
+def import_pair(model_id: int, pair_type: str, pair, cnx, cursor) -> int:
+    assert len(pair) == 2, "pair must have two lines"
+    length = point_to_line_distance(pair[0], pair[1][0])
+    insert_query = "INSERT INTO pair (model_id, type, length) VALUES (%s, %s, %s)"
     cursor.execute(
         insert_query,
         (
             model_id,
             pair_type,
+            length,
         ),
     )
     cnx.commit()
-    cursor.close()
-    cnx.close()
     return cursor.lastrowid
 
 

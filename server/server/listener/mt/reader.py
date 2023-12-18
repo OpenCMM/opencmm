@@ -22,7 +22,7 @@ from server.listener import status
 import paho.mqtt.client as mqtt
 from .parse import mtconnect_table_row_data
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 

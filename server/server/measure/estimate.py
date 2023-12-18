@@ -9,6 +9,7 @@ from server.config import (
     MQTT_USERNAME,
     get_config,
 )
+from time import time
 from server.mark.edge import (
     import_edge_results,
     delete_edge_results,
@@ -32,7 +33,7 @@ import logging
 from scipy.ndimage import uniform_filter1d
 import trimesh
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -44,8 +45,8 @@ class Result:
         self.conf = get_config()
 
         self.mtct_data_checker = MtctDataChecker(mysql_config, model_id, process_id)
-        mtct_lines = self.mtct_data_checker.estimate_timestamps_from_mtct_data()
-        self.mtct_lines = self.mtct_data_checker.adjust_delays(mtct_lines)
+        self.mtct_lines = self.mtct_data_checker.estimate_timestamps_from_mtct_data()
+        # self.mtct_lines = self.mtct_data_checker.adjust_delays(mtct_lines)
         sensor_data = get_sensor_data(process_id, mysql_config)
         self.np_sensor_data = np.array(sensor_data)
 
@@ -244,17 +245,21 @@ def update_data_after_measurement(
 
 
 def recompute(mysql_config: dict, process_id: int):
+    start_time = time()
+    logger.info("recompute() started")
     # remove previous results
     delete_edge_results(mysql_config, process_id)
     arc.delete_measured_arc_info(mysql_config, process_id)
     pair.delete_measured_length(mysql_config, process_id)
     delete_trace_line_results(mysql_config, process_id)
     update_mtct_latency(mysql_config, process_id, None)
+    logger.info("delete previous results")
 
     process_data = status.get_process_status(mysql_config, process_id)
     model_id = process_data[1]
     result = Result(mysql_config, model_id, process_id)
     edge_update_list, trace_line_update_list = result.compute_updating_data()
+    logger.info("compute_updating_data() done")
 
     edge_count = len(edge_update_list)
     if edge_count == 0:
@@ -264,8 +269,10 @@ def recompute(mysql_config: dict, process_id: int):
             "Error at update_data_after_measurement()",
             "No edge found",
         )
+        logger.warning("No edge found")
         return
     import_edge_results(edge_update_list, mysql_config)
+    logger.info("import_edge_results() done")
     if trace_line_update_list:
         import_trace_line_results(mysql_config, trace_line_update_list)
 
@@ -277,6 +284,7 @@ def recompute(mysql_config: dict, process_id: int):
         arc.add_measured_arc_info(model_id, mysql_config, process_id)
         status.update_process_status(mysql_config, process_id, "done")
         logger.info("done")
+        logger.info(f"recompute() took {time() - start_time} seconds")
     except Exception as e:
         logger.warning(e)
         status.update_process_status(

@@ -178,6 +178,8 @@ def fetch_lines(model_id: int, process_id: int):
 
 
 def fetch_arcs(model_id: int, process_id: int):
+    model_data = get_model_data(model_id)
+    offset = model_data[3:6]
     cnx = mysql.connector.connect(**MYSQL_CONFIG, database="coord")
     cursor = cnx.cursor()
 
@@ -192,8 +194,13 @@ def fetch_arcs(model_id: int, process_id: int):
 	"""
     cursor.execute(query, (process_id, model_id))
     for arc in cursor:
+        center_coord_with_offset = [
+            arc[2] + offset[0],
+            arc[3] + offset[1],
+            arc[4] + offset[2],
+        ]
         arcs.append(
-            (arc[0], arc[1], arc[2], arc[3], arc[4], arc[5], arc[6], arc[7], arc[8])
+            (arc[0], arc[1], *center_coord_with_offset, arc[5], arc[6], arc[7], arc[8])
         )
 
     cursor.close()
@@ -248,6 +255,9 @@ def fetch_step_results(model_id: int, process_id: int):
             previous_distance = trace[6]
             current_trace_id = trace[0]
         else:
+            if not trace[6]:
+                steps.append((trace[0], trace[3], None))
+                continue
             output_diff = abs(trace[6] - previous_distance)
             diff = sensor_output_diff_to_mm(output_diff)
             steps.append((trace[0], trace[3], diff))
@@ -255,6 +265,16 @@ def fetch_step_results(model_id: int, process_id: int):
     cursor.close()
     cnx.close()
     return steps
+
+
+def angle_can_be_measured(trace):
+    data = []
+    for row in trace:
+        if row[8]:
+            data.append(row)
+    if len(data) < 2:
+        return False
+    return True
 
 
 def fetch_slope_results(model_id: int, process_id: int):
@@ -289,8 +309,13 @@ def fetch_slope_results(model_id: int, process_id: int):
         previous_point = None
         angle = trace[0][3]
         trace_id = trace[0][0]
-        assert len(trace) > 2
+        if not angle_can_be_measured(trace):
+            slopes.append((trace_id, angle, None))
+            continue
+
         for row in trace:
+            if not row[8]:
+                continue
             z = sensor_output_to_mm(row[8]) + 100
             current_point = np.array([row[5], row[6], z])
             if previous_point is None:

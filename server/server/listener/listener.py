@@ -7,7 +7,7 @@ from . import hakaru, mt
 from .mtmqtt import listen_data_with_mqtt
 import logging
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 

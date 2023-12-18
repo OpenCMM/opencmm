@@ -21,7 +21,7 @@ import numpy as np
 from datetime import datetime
 import logging
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s:%(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -104,6 +104,7 @@ class MtctDataChecker:
             self.mysql_config, self.model_id
         )
         self.config = get_config()
+        self.not_in_range_output = self.config["sensor"]["not_in_range_output"]
         self.set_mtct_latency()
 
     def load_gcode(self):
@@ -233,6 +234,10 @@ class MtctDataChecker:
         end_timestamp = get_timestamp_at_point(xy, end, feedrate, timestamp, False)
         return [line_candidate[0], start_timestamp, end_timestamp]
 
+    def to_line_row_for_analysis(self, line_candidate, xy, timestamp):
+        feedrate = line_candidate[1]
+        return [line_candidate[0], xy[0], xy[1], feedrate, timestamp]
+
     def get_travel_time(self, start, end, feedrate_per_min):
         travel_time_in_sec = (
             np.linalg.norm(np.array(start) - np.array(end)) / feedrate_per_min * 60
@@ -290,6 +295,84 @@ class MtctDataChecker:
         new_lines.append(current_line)
         return new_lines
 
+    def waiting_line_in_line_candidates(self, line_candidates):
+        if not self.first_line_for_tracing:
+            # wait line only exists when tracing(step height & slope angle measurement)
+            return False
+        for line_candidate in line_candidates:
+            if line_candidate[0] == self.first_line_for_tracing - 2:
+                return True
+        return False
+
+    def start_end_timestamps_from_mtct_data(
+        self,
+    ):
+        lines = []
+
+        for row in self.np_mtconnect_data:
+            xy = (row[3], row[4])
+            line = int(row[6])
+            timestamp = row[2]
+            line_candidates = get_true_line_and_feedrate(
+                xy, line, self.gcode, self.first_line_for_tracing
+            )
+            if not line_candidates:
+                continue
+
+            if self.waiting_line_in_line_candidates(line_candidates):
+                # cannot tell the exact timestamp because coordinates are the same
+                continue
+            _line_rows = [
+                self.to_line_row_for_analysis(line_candidate, xy, timestamp)
+                for line_candidate in line_candidates
+            ]
+            if len(_line_rows) == 1:
+                lines.append(_line_rows[0])
+            else:
+                # multiple lines are possible
+                # estimate which line is more likely from the previous line
+                previous_line = lines[-1]
+                estimated_line = self.estimate_line_numbers_from_previous_line(
+                    previous_line, timestamp
+                )
+                if not estimated_line:
+                    continue
+                for _line_row in _line_rows:
+                    if _line_row[0] == estimated_line:
+                        lines.append(_line_row)
+                        break
+
+        if not lines:
+            return []
+        lines = self.remove_falsely_added_last_lines(lines)
+        return np.array(lines)
+
+    def to_actual_feedrate_np_array(self, lines):
+        actual_feedrate_list = []
+        prev_line = lines[0]
+        for i in range(1, len(lines)):
+            line = lines[i]
+            line_number = line[0]
+            # [line_candidate[0], xy[0], xy[1], feedrate, timestamp]
+            if line_number == prev_line[0]:
+                commanded_feedrate = prev_line[3]
+                distance = np.linalg.norm(
+                    np.array(line[1:3]) - np.array(prev_line[1:3])
+                )
+                time_diff = line[4] - prev_line[4]
+                actual_feedrate = distance / time_diff.total_seconds()
+                actual_feedrate_list.append(
+                    [line[0], commanded_feedrate, actual_feedrate]
+                )
+            prev_line = line
+        return np.array(actual_feedrate_list)
+
+    def avg_feedrate_diff_percentage(self, feedrate_diff_np_array):
+        cmd_feedrate = feedrate_diff_np_array[:, 1]
+        act_feedrate = feedrate_diff_np_array[:, 2]
+        percentage_diff = (act_feedrate - cmd_feedrate) / cmd_feedrate * 100
+        return percentage_diff.mean()
+
     def estimate_timestamps_from_mtct_data(
         self,
         mtconnect_latency: float = None,
@@ -309,6 +392,9 @@ class MtctDataChecker:
             if not line_candidates:
                 continue
 
+            if self.waiting_line_in_line_candidates(line_candidates):
+                # cannot tell the exact timestamp because coordinates are the same
+                continue
             _line_rows = [
                 self.to_line_row(line_candidate, xy, timestamp)
                 for line_candidate in line_candidates
@@ -512,7 +598,7 @@ class MtctDataChecker:
         """
         mtct_latency_from_process = self.get_mtct_latency_from_process()
         if mtct_latency_from_process:
-            self.mtct_latency = self.get_mtct_latency_from_process()
+            self.mtct_latency = mtct_latency_from_process
             return
         # load the default mtct latency
         self.mtct_latency = self.config["mtconnect"]["latency"]
@@ -550,6 +636,11 @@ class MtctDataChecker:
         for row in sensor_data:
             sensor_timestamp = row[2]
             sensor_output = row[3]
+            if sensor_output > self.not_in_range_output:
+                # no workpiece in the sensor range
+                sensor_output = None
+            else:
+                sensor_output = round(sensor_output_to_mm(row[3]), 3)
             for line in lines:
                 start_timestamp = line[1]
                 end_timestamp = line[2]
@@ -605,12 +696,13 @@ class MtctDataChecker:
         # measuring edge is the middle point of the line
         edge_xy = (np.array(start) + np.array(end)) / 2
         expected_z = self.get_expected_z_value(edge_xy)
-        # sensor outputs >18800 when there is no workpiece in the sensor range
+        # sensor outputs more than self.not_in_range_output
+        # when there is no workpiece in the sensor range
         if expected_z is None:
-            return sensor_output > 18800
+            return sensor_output > self.not_in_range_output
         if -35 <= expected_z <= 35:
             return abs(measured_z - expected_z) < self.config["sensor"]["tolerance"]
-        return sensor_output > 18800
+        return sensor_output > self.not_in_range_output
 
     def get_edge_coordinates_from_line_number(self, line_number: int):
         cnx = mysql.connector.connect(**self.mysql_config, database="coord")
@@ -644,15 +736,16 @@ class MtctDataChecker:
         expected_z = max([edge[3] for edge in edges]) + self.offset[2]
 
         edge_ids = [edge[0] for edge in edges]
-        # sensor outputs >18800 when there is no workpiece in the sensor range
+        # sensor outputs more than self.not_in_range_output
+        # when there is no workpiece in the sensor range
         if expected_z is None:
-            return sensor_output > 18800, edge_ids
+            return sensor_output > self.not_in_range_output, edge_ids
         if -35 <= expected_z <= 35:
             return (
                 abs(measured_z - expected_z) < self.config["sensor"]["tolerance"],
                 edge_ids,
             )
-        return sensor_output > 18800, edge_ids
+        return sensor_output > self.not_in_range_output, edge_ids
 
     def get_only_edge_detection_lines(self, lines):
         edge_detection_lines = []
@@ -669,6 +762,17 @@ class MtctDataChecker:
                 edge_detection_lines.append(line)
         return edge_detection_lines
 
+    def get_sensor_data(self):
+        return get_sensor_data(self.process_id, self.mysql_config)
+
+    def filter_out_not_in_range_output(self, sensor_data):
+        np_sensor_data = np.array(sensor_data)
+        # filter out sensor data with output more than not_in_range_output
+        np_sensor_data = np_sensor_data[
+            np_sensor_data[:, 3] <= self.not_in_range_output
+        ]
+        return np_sensor_data
+
     def sensor_data_count_and_distance_when_measuring(self, mtct_latency: float):
         """
         Get sensor data count when measuring
@@ -676,49 +780,55 @@ class MtctDataChecker:
         count = 0
         distances = []
         lines = self.estimate_timestamps_from_mtct_data(mtct_latency)
-        lines = self.adjust_delays(lines)
+        # lines = self.adjust_delays(lines)
         edge_detection_lines = self.get_only_edge_detection_lines(lines)
         sensor_data = get_sensor_data(self.process_id, self.mysql_config)
+        np_sensor_data = self.filter_out_not_in_range_output(sensor_data)
         prev_line_number = None
-        for row in sensor_data:
-            sensor_timestamp = row[2]
-            sensor_output = row[3]
-            for line in edge_detection_lines:
-                line_number = line[0]
+
+        for line in edge_detection_lines:
+            line_number = line[0]
+            start_timestamp = line[1]
+            end_timestamp = line[2]
+            start = (line[3], line[4])
+            end = (line[5], line[6])
+            feedrate = line[7]
+
+            sensor_data_during_line = np_sensor_data[
+                np.logical_and(
+                    np_sensor_data[:, 2] >= start_timestamp,
+                    np_sensor_data[:, 2] <= end_timestamp,
+                )
+            ]
+
+            for row in sensor_data_during_line:
+                sensor_timestamp = row[2]
+                sensor_output = row[3]
+
                 # One edge per line
                 if line_number == prev_line_number:
                     continue
-                start_timestamp = line[1]
-                end_timestamp = line[2]
-                if start_timestamp <= sensor_timestamp <= end_timestamp:
-                    start = (line[3], line[4])
-                    end = (line[5], line[6])
-                    if start == end:
-                        continue
 
-                    sensor_output_valid, _ = self.validate_sensor_output(
-                        sensor_output, line_number
-                    )
-                    if not sensor_output_valid:
-                        continue
+                sensor_output_valid, _ = self.validate_sensor_output(
+                    sensor_output, line_number
+                )
+                if not sensor_output_valid:
+                    continue
 
-                    feedrate = line[7]
-                    measured_edge_coord = self.sensor_timestamp_to_coord(
-                        start_timestamp,
-                        sensor_timestamp,
-                        start,
-                        end,
-                        feedrate,
-                    )
-                    edge_coord = (np.array(start) + np.array(end)) / 2
-                    distances.append(
-                        np.linalg.norm(
-                            np.array(measured_edge_coord) - np.array(edge_coord)
-                        )
-                    )
-                    count += 1
-                    prev_line_number = line_number
-                    break
+                measured_edge_coord = self.sensor_timestamp_to_coord(
+                    start_timestamp,
+                    sensor_timestamp,
+                    start,
+                    end,
+                    feedrate,
+                )
+                edge_coord = (np.array(start) + np.array(end)) / 2
+                distances.append(
+                    np.linalg.norm(np.array(measured_edge_coord) - np.array(edge_coord))
+                )
+                count += 1
+                prev_line_number = line_number
+                break
 
         if count == 0:
             return 0, 1000
