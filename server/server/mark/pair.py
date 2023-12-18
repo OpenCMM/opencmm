@@ -92,7 +92,6 @@ def add_line_length(model_id: int, mysql_config: dict, process_id: int):
         sides = get_sides_by_pair_id(pair_id, mysql_config)
         side1 = sides[0]
         side2 = sides[1]
-        length = point_to_line_distance([side1[0:3], side1[3:6]], side2[0:3])
         edge_results1 = get_edges_by_side_id(side1[6], mysql_config, process_id)
         edge_results2 = get_edges_by_side_id(side2[6], mysql_config, process_id)
         line_edge_list = to_line_edge_list(edge_results1, edge_results2)
@@ -107,7 +106,7 @@ def add_line_length(model_id: int, mysql_config: dict, process_id: int):
             continue
         measured_length = np.mean(distances)
         measured_length = float(np.round(measured_length, 3))
-        add_measured_length(pair_id, length, measured_length, mysql_config, process_id)
+        add_measured_length(pair_id, measured_length, mysql_config, process_id)
 
 
 def get_sides_by_pair_id(pair_id: int, mysql_config: dict):
@@ -123,17 +122,12 @@ def get_sides_by_pair_id(pair_id: int, mysql_config: dict):
 
 def add_measured_length(
     pair_id: int,
-    length: float,
     measured_length: float,
     mysql_config: dict,
     process_id: int,
 ):
     cnx = mysql.connector.connect(**mysql_config, database="coord")
     cursor = cnx.cursor()
-    query = "UPDATE pair SET length = %s WHERE id = %s"
-    cursor.execute(query, (length, pair_id))
-    cnx.commit()
-
     query = "INSERT INTO pair_result (pair_id, process_id, length) VALUES (%s, %s, %s)"
     cursor.execute(query, (pair_id, process_id, measured_length))
     cnx.commit()
