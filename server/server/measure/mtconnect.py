@@ -750,19 +750,14 @@ class MtctDataChecker:
             )
         return sensor_output > self.not_in_range_output, edge_ids
 
-    def get_only_edge_detection_lines(self, lines):
-        edge_detection_lines = []
-        for line in lines:
-            line_number = line[0]
-            # Edge detection
-            if (
-                not self.first_line_for_tracing
-                or line_number < self.first_line_for_tracing - 2
-            ):
-                if line_number % 2 != 0:
-                    # Not measuring
-                    continue
-                edge_detection_lines.append(line)
+    def get_only_edge_detection_lines(self, lines: np.array):
+        # Edge detection
+        line_numbers = lines[:, 0]
+        mask = (
+            not self.first_line_for_tracing
+            or line_numbers < self.first_line_for_tracing - 2
+        ) & (line_numbers % 2 != 0)
+        edge_detection_lines = lines[~mask]
         return edge_detection_lines
 
     def get_sensor_data(self):
@@ -776,29 +771,14 @@ class MtctDataChecker:
         ]
         return np_sensor_data
 
-    def slide_timestamps(self, lines, slide_time: float):
+    def slide_timestamps(self, lines: np.array, slide_time: float):
         """
         Slide timestamps by slide_time
         """
-        new_lines = []
-        for line in lines:
-            line_number = line[0]
-            start_timestamp = line[1]
-            end_timestamp = line[2]
-            start = (line[3], line[4])
-            end = (line[5], line[6])
-            feedrate = line[7]
-            new_lines.append(
-                [
-                    line_number,
-                    start_timestamp - timedelta(seconds=slide_time),
-                    end_timestamp - timedelta(seconds=slide_time),
-                    *start,
-                    *end,
-                    feedrate,
-                ]
-            )
-        return new_lines
+        lines[:, 1:3] = np.array(lines[:, 1:3], dtype="datetime64[s]") - np.timedelta64(
+            int(slide_time), "s"
+        )
+        return lines
 
     def sensor_data_count_and_distance_when_measuring(self, edge_detection_lines):
         """
