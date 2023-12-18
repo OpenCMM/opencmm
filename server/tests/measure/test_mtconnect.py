@@ -4,6 +4,7 @@ from server.measure.mtconnect import (
     update_mtct_latency,
 )
 from server.config import MYSQL_CONFIG, get_config
+from server.measure.estimate import update_data_after_measurement, recompute
 import pytest
 import numpy as np
 from datetime import datetime, timedelta
@@ -194,10 +195,7 @@ def import_sensor_data(mysql_config: dict, sensor_data_list):
     mysql_conn = mysql.connector.connect(**mysql_config, database="coord")
     mysql_cur = mysql_conn.cursor()
 
-    query = (
-        "INSERT INTO sensor(process_id, timestamp, distance) "
-        "VALUES (%s, FROM_UNIXTIME(%s), %s)"
-    )
+    query = "INSERT INTO sensor(process_id, timestamp, distance) " "VALUES (%s, %s, %s)"
     mysql_cur.executemany(
         query,
         sensor_data_list,
@@ -210,6 +208,9 @@ def import_sensor_data(mysql_config: dict, sensor_data_list):
 def datetime_str_to_datetime_obj(datetime_str: str):
     datetime_obj = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M:%S.%f")
     return datetime_obj
+
+
+model_id_and_process_id = []
 
 
 def import_mtct_sensor_data_from_csv():
@@ -251,6 +252,7 @@ def import_mtct_sensor_data_from_csv():
         assert response.json() == {"status": "ok"}
 
         process_id = status.start_measuring(model_id, MYSQL_CONFIG, "running")
+        model_id_and_process_id.append([model_id, process_id])
         mtct_data = []
         with open(f"tests/fixtures/csv/mtct/{filename}", newline="") as csvfile:
             reader = csv.reader(csvfile)
@@ -272,3 +274,13 @@ def import_mtct_sensor_data_from_csv():
 
 def test_import_mtct_sensor_data_from_csv():
     import_mtct_sensor_data_from_csv()
+
+
+def test_update_data_after_measurement():
+    for [model_id, process_id] in model_id_and_process_id:
+        update_data_after_measurement(MYSQL_CONFIG, process_id, model_id)
+
+
+def test_recompute():
+    for [_, process_id] in model_id_and_process_id:
+        recompute(MYSQL_CONFIG, process_id)
