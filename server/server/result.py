@@ -255,6 +255,9 @@ def fetch_step_results(model_id: int, process_id: int):
             previous_distance = trace[6]
             current_trace_id = trace[0]
         else:
+            if not trace[6]:
+                steps.append((trace[0], trace[3], None))
+                continue
             output_diff = abs(trace[6] - previous_distance)
             diff = sensor_output_diff_to_mm(output_diff)
             steps.append((trace[0], trace[3], diff))
@@ -262,6 +265,16 @@ def fetch_step_results(model_id: int, process_id: int):
     cursor.close()
     cnx.close()
     return steps
+
+
+def angle_can_be_measured(trace):
+    data = []
+    for row in trace:
+        if row[8]:
+            data.append(row)
+    if len(data) < 2:
+        return False
+    return True
 
 
 def fetch_slope_results(model_id: int, process_id: int):
@@ -296,8 +309,13 @@ def fetch_slope_results(model_id: int, process_id: int):
         previous_point = None
         angle = trace[0][3]
         trace_id = trace[0][0]
-        assert len(trace) > 2
+        if not angle_can_be_measured(trace):
+            slopes.append((trace_id, angle, None))
+            continue
+
         for row in trace:
+            if not row[8]:
+                continue
             z = sensor_output_to_mm(row[8]) + 100
             current_point = np.array([row[5], row[6], z])
             if previous_point is None:

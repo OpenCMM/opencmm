@@ -207,6 +207,11 @@ def import_sensor_data(mysql_config: dict, sensor_data_list):
     mysql_conn.close()
 
 
+def datetime_str_to_datetime_obj(datetime_str: str):
+    datetime_obj = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M:%S.%f")
+    return datetime_obj
+
+
 def import_mtct_sensor_data_from_csv():
     # import 3d models
     path = "tests/fixtures/stl/sample.stl"
@@ -250,6 +255,7 @@ def import_mtct_sensor_data_from_csv():
         with open(f"tests/fixtures/csv/mtct/{filename}", newline="") as csvfile:
             reader = csv.reader(csvfile)
             for row in reader:
+                row[0] = datetime_str_to_datetime_obj(row[0])
                 _row = [process_id, *row]
                 mtct_data.append(_row)
             import_mtconnect_data(MYSQL_CONFIG, mtct_data)
@@ -258,6 +264,7 @@ def import_mtct_sensor_data_from_csv():
             sensor_data = []
             reader = csv.reader(csvfile)
             for row in reader:
+                row[0] = datetime_str_to_datetime_obj(row[0])
                 _row = [process_id, *row]
                 sensor_data.append(_row)
             import_sensor_data(MYSQL_CONFIG, sensor_data)
