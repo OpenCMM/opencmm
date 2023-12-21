@@ -798,7 +798,7 @@ class MtctDataChecker:
         Slide timestamps by slide_time
         """
         lines[:, 1:3] = np.array(lines[:, 1:3], dtype="datetime64[s]") - np.timedelta64(
-            int(slide_time), "s"
+            int(slide_time), "ms"
         )
         return lines
 
