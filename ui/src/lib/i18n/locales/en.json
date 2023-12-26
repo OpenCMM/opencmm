@@ -123,7 +123,8 @@
 		}
 	},
 	"menu": {
-		"settings": "Settings"
+		"settings": "Settings",
+		"sendFile": "Send a file"
 	},
 	"settings": {
 		"language": {
@@ -180,6 +181,8 @@
 		"apply": "Apply",
 		"saveSuccess": "Saved successfully",
 		"saveFailed": "Save failed",
+		"sendSuccess": "Sent successfully",
+		"sendFailed": "Send failed",
 		"delete": "Delete",
 		"ok": "OK",
 		"seconds": "seconds",

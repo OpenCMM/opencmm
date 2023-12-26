@@ -25,6 +25,7 @@
 			<HeaderAction bind:isOpen>
 				<HeaderPanelLinks>
 					<HeaderPanelLink href="/settings/language">{$_('menu.settings')}</HeaderPanelLink>
+					<HeaderPanelLink href="/sendfile">{$_('menu.sendFile')}</HeaderPanelLink>
 				</HeaderPanelLinks>
 			</HeaderAction>
 		</HeaderUtilities>
