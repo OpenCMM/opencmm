@@ -32,7 +32,7 @@ from server.measure.mtconnect import (
     update_mtct_latency,
 )
 from server.measure.gcode import get_gcode_line_path
-from server.config import MYSQL_CONFIG, MODEL_PATH, get_config, update_conf
+from server.config import MYSQL_CONFIG, MODEL_PATH, TMP_PATH, get_config, update_conf
 from server.model import (
     get_3dmodel_data,
     get_recent_3dmodel_data,
@@ -583,6 +583,23 @@ def get_first_machine():
         machine.insert_machine(MYSQL_CONFIG, machine.MachineInfo(*first_machine))
         return first_machine
     return machines[0]
+
+
+@app.post("/send/file")
+async def send_file(file: UploadFile):
+    """Send a file to the CNC machine"""
+    filepath = f"{TMP_PATH}/{file.filename}"
+    with open(filepath, "wb") as buffer:
+        buffer.write(await file.read())
+
+    machines = machine.get_machines(MYSQL_CONFIG)
+    if len(machines) == 0:
+        raise HTTPException(status_code=400, detail="No machine registered")
+
+    machine_info = machines[0]
+    machine.send_file_with_smbclient(machine_info, filepath)
+    os.remove(filepath)
+    return {"status": "ok", "filename": file.filename}
 
 
 @app.post("/update_machine")

@@ -123,7 +123,8 @@
 		}
 	},
 	"menu": {
-		"settings": "設定"
+		"settings": "設定",
+		"sendFile": "ファイル送信"
 	},
 	"settings": {
 		"language": {
@@ -180,6 +181,8 @@
 		"apply": "適用",
 		"saveSuccess": "保存しました",
 		"saveFailed": "保存に失敗しました",
+		"sendSuccess": "送信しました",
+		"sendFailed": "送信に失敗しました",
 		"delete": "削除",
 		"ok": "OK",
 		"seconds": "秒",
