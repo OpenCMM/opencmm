@@ -179,7 +179,6 @@ def update_trace_config(_conf: TraceConfig):
 @app.post("/upload/3dmodel")
 async def upload_3dmodel(file: UploadFile):
     """Upload 3d model file"""
-    # save image
     file_extension = file.filename.split(".")[-1]
     if file_extension not in ["stl", "STL"]:
         raise HTTPException(status_code=400, detail="File extension not supported")
