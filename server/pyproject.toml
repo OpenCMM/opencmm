@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.13"
-fastapi = "^0.106.0"
+fastapi = {extras = ["all"], version = "^0.106.0"}
 uvicorn = {extras = ["standard"], version = "^0.23.2"}
 scipy = "^1.11.1"
 paho-mqtt = "^1.6.1"
@@ -19,7 +19,6 @@ pyyaml = "^6.0.1"
 trimesh = "^4.0.5"
 rtree = "^1.1.0"
 networkx = "^3.2.1"
-python-multipart = "^0.0.6"
 
 
 [tool.poetry.group.dev.dependencies]
