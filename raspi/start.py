@@ -33,7 +33,7 @@ in8 = 6
 # careful lowering this, at some point you run into the mechanical limitation of how quick your motor can move
 step_sleep = 0.002
 
-one_step_rotation = int(4096/128)
+one_step_rotation = int(4096 / 128)
 step_count_rotation_motor = 4096  # 5.625*(1/64) per step, 4096 steps is 360°
 step_count_lifting_motor = 512  # 45°
 
@@ -65,11 +65,13 @@ def setup_pins(motor_pins):
     for pin in motor_pins:
         GPIO.output(pin, GPIO.LOW)
 
+
 def take_picture(picam2) -> bytes:
     data = io.BytesIO()
     picam2.capture_file(data, format="jpeg")
     image_data = data.getvalue()
     return image_data
+
 
 def cleanup():
     for pin in motor_pins:
@@ -96,6 +98,7 @@ def move_motor(step_count, direction, step_sleep, motor_pins):
         cleanup()
         exit(1)
 
+
 async def main():
     # establish the websockets connection
     uri = "ws://192.168.72.219:8765"
@@ -116,7 +119,7 @@ async def main():
         # lifting the scanner up by 45°
         move_motor(step_count_lifting_motor, direction, step_sleep, lifting_motor_pins)
         for i in range(3):
-        # for i in range(128):
+            # for i in range(128):
             move_motor(one_step_rotation, direction, step_sleep, rotation_motor_pins)
             # take a picture
             print(f"taking a picture - {i+1}/128")
@@ -140,12 +143,15 @@ async def main():
         # lowering the scanner by 45°
         move_motor(step_count_lifting_motor, direction, step_sleep, lifting_motor_pins)
         # rotating the scanner by 360° in the opposite direction
-        move_motor(step_count_rotation_motor, direction, step_sleep, rotation_motor_pins)
+        move_motor(
+            step_count_rotation_motor, direction, step_sleep, rotation_motor_pins
+        )
 
         print("done")
 
         picam2.stop()
         cleanup()
         exit(0)
+
 
 asyncio.run(main())
