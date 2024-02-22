@@ -6,13 +6,15 @@ Take pictures with raspberry pi high quality camera
 
 1. lift the scanner up by 45°
 2. rotate the scanner by 2.815°
-3. take a picture
+3. take a picture and send it to the server over websockets
 4. keep rotating the scanner by 2.815° and taking pictures until the scanner has rotated 360°
 5. lower the scanner by 45°
 6. rotate the scanner by 360° in the opposite direction
 """
 import RPi.GPIO as GPIO
 from picamera2 import Picamera2
+import websockets
+import asyncio
 import time
 import io
 
@@ -93,39 +95,45 @@ def move_motor(step_count, direction, step_sleep, motor_pins):
         cleanup()
         exit(1)
 
-def main():
-    direction = False  # True for clockwise, False for counter-clockwise
-    setup_pins(motor_pins)
-    picam2 = Picamera2()
-    is_full = False
-    if is_full:
-        picam2.configure(picam2.create_still_configuration())
-    else:
-        picam2.configure(picam2.create_preview_configuration())
-    picam2.start()
+async def main():
+    # establish the websockets connection
+    uri = "ws://192.168.72.219:8765"
+    async with websockets.connect(uri) as websocket:
+        direction = False  # True for clockwise, False for counter-clockwise
+        setup_pins(motor_pins)
+        picam2 = Picamera2()
+        is_full = False
+        if is_full:
+            picam2.configure(picam2.create_still_configuration())
+        else:
+            picam2.configure(picam2.create_preview_configuration())
+        picam2.start()
+        print("camera started")
 
-    time.sleep(1)
+        time.sleep(1)
 
-    # lifting the scanner up by 45°
-    move_motor(step_count_lifting_motor, direction, step_sleep, lifting_motor_pins)
-    for i in range(128):
-        move_motor(one_step_rotation, direction, step_sleep, rotation_motor_pins)
-        # take a picture
-        print(f"taking a picture - {i+1}/128")
-        take_picture(picam2)
+        # lifting the scanner up by 45°
+        move_motor(step_count_lifting_motor, direction, step_sleep, lifting_motor_pins)
+        for i in range(3):
+        # for i in range(128):
+            move_motor(one_step_rotation, direction, step_sleep, rotation_motor_pins)
+            # take a picture
+            print(f"taking a picture - {i+1}/128")
+            image_data = take_picture(picam2)
+            await websocket.send(image_data.getvalue())
 
-    # reversing direction
-    direction = not direction
+        # reversing direction
+        direction = not direction
 
-    # lowering the scanner by 45°
-    move_motor(step_count_lifting_motor, direction, step_sleep, lifting_motor_pins)
-    # rotating the scanner by 360° in the opposite direction
-    move_motor(step_count_rotation_motor, direction, step_sleep, rotation_motor_pins)
+        # lowering the scanner by 45°
+        move_motor(step_count_lifting_motor, direction, step_sleep, lifting_motor_pins)
+        # rotating the scanner by 360° in the opposite direction
+        move_motor(step_count_rotation_motor, direction, step_sleep, rotation_motor_pins)
 
-    print("done")
+        print("done")
 
-    picam2.stop()
-    cleanup()
-    exit(0)
+        picam2.stop()
+        cleanup()
+        exit(0)
 
-main()
+asyncio.run(main())
