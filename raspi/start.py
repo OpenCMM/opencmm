@@ -2,6 +2,7 @@
 
 """
 Use two 28BYJ-48 stepper motors to rotate and lift the scanner
+Take pictures with raspberry pi high quality camera
 
 1. lift the scanner up by 45°
 2. rotate the scanner by 2.815°
@@ -11,7 +12,9 @@ Use two 28BYJ-48 stepper motors to rotate and lift the scanner
 6. rotate the scanner by 360° in the opposite direction
 """
 import RPi.GPIO as GPIO
+from picamera2 import Picamera2
 import time
+import io
 
 # rotation motor
 in1 = 17
@@ -32,7 +35,6 @@ one_step_rotation = int(4096/128)
 step_count_rotation_motor = 4096  # 5.625*(1/64) per step, 4096 steps is 360°
 step_count_lifting_motor = 512  # 45°
 
-direction = False  # True for clockwise, False for counter-clockwise
 
 # defining stepper motor sequence (found in documentation http://www.4tronix.co.uk/arduino/Stepper-Motors.php)
 step_sequence = [
@@ -61,9 +63,10 @@ def setup_pins(motor_pins):
     for pin in motor_pins:
         GPIO.output(pin, GPIO.LOW)
 
-
-setup_pins(motor_pins)
-
+def take_picture(picam2):
+    data = io.BytesIO()
+    picam2.capture_file(data, format="jpeg")
+    return data
 
 def cleanup():
     for pin in motor_pins:
@@ -90,24 +93,39 @@ def move_motor(step_count, direction, step_sleep, motor_pins):
         cleanup()
         exit(1)
 
-time.sleep(1)
+def main():
+    direction = False  # True for clockwise, False for counter-clockwise
+    setup_pins(motor_pins)
+    picam2 = Picamera2()
+    is_full = False
+    if is_full:
+        picam2.configure(picam2.create_still_configuration())
+    else:
+        picam2.configure(picam2.create_preview_configuration())
+    picam2.start()
 
-# lifting the scanner up by 45°
-move_motor(step_count_lifting_motor, direction, step_sleep, lifting_motor_pins)
-for i in range(128):
-    move_motor(one_step_rotation, direction, step_sleep, rotation_motor_pins)
-    # take a picture
-    print(f"taking a picture - {i+1}/128")
+    time.sleep(1)
 
-# reversing direction
-direction = not direction
+    # lifting the scanner up by 45°
+    move_motor(step_count_lifting_motor, direction, step_sleep, lifting_motor_pins)
+    for i in range(128):
+        move_motor(one_step_rotation, direction, step_sleep, rotation_motor_pins)
+        # take a picture
+        print(f"taking a picture - {i+1}/128")
+        take_picture(picam2)
 
-# lowering the scanner by 45°
-move_motor(step_count_lifting_motor, direction, step_sleep, lifting_motor_pins)
-# rotating the scanner by 360° in the opposite direction
-move_motor(step_count_rotation_motor, direction, step_sleep, rotation_motor_pins)
+    # reversing direction
+    direction = not direction
 
-print("done")
+    # lowering the scanner by 45°
+    move_motor(step_count_lifting_motor, direction, step_sleep, lifting_motor_pins)
+    # rotating the scanner by 360° in the opposite direction
+    move_motor(step_count_rotation_motor, direction, step_sleep, rotation_motor_pins)
 
-cleanup()
-exit(0)
+    print("done")
+
+    picam2.stop()
+    cleanup()
+    exit(0)
+
+main()
