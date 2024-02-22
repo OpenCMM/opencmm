@@ -65,10 +65,11 @@ def setup_pins(motor_pins):
     for pin in motor_pins:
         GPIO.output(pin, GPIO.LOW)
 
-def take_picture(picam2):
+def take_picture(picam2) -> bytes:
     data = io.BytesIO()
     picam2.capture_file(data, format="jpeg")
-    return data
+    image_data = data.getvalue()
+    return image_data
 
 def cleanup():
     for pin in motor_pins:
@@ -120,7 +121,18 @@ async def main():
             # take a picture
             print(f"taking a picture - {i+1}/128")
             image_data = take_picture(picam2)
-            await websocket.send(image_data.getvalue())
+            chunk_size = 1024  # Set the desired chunk size
+
+            # Calculate the total number of chunks
+            total_chunks = (len(image_data) + chunk_size - 1) // chunk_size
+            await websocket.send(f"sending {total_chunks} chunks of data - {i+1}/128")
+
+            # Send data in smaller chunks
+            for i in range(total_chunks):
+                start = i * chunk_size
+                end = (i + 1) * chunk_size
+                chunk = image_data[start:end]
+                await websocket.send(chunk)
 
         # reversing direction
         direction = not direction
