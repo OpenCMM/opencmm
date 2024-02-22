@@ -1,42 +1,33 @@
 # opencmm
 ![Test](https://github.com/OpenCMM/opencmm/actions/workflows/ci.yml/badge.svg)
 ![UI](https://github.com/OpenCMM/opencmm/actions/workflows/ui.yml/badge.svg)
+<a href="CONTRIBUTING.md#pull-requests"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
 
-An opensource on-machine CMM (Coordinate Measuring Machine) system
+
+<a href="https://www.youtube.com/@OpenCMM/featured"><img src="https://img.shields.io/youtube/channel/views/UCwVZLMiXavABD-91c5CtPog?style=social" alt="YouTube Channel Subscribers" /></a>
+<a href="https://twitter.com/OpenCMM"><img src="https://img.shields.io/twitter/follow/OpenCMM.svg?style=social" alt="Twitter Follow" /></a>
+[TikTok](https:/www.youtube.com/@OpenCMM/featured)
+[Blog](https://opencmm.xyz/blog)
+
+An opensource on-machine 3D Scanner CMM (Coordinate Measuring Machine) system
 
 ## Introduction
-This project is an opensource on-machine CMM (Coordinate Measuring Machine) system. It can be used to measure the workpiece on the CNC machine without removing the workpiece from the machine.
+This project is an opensource on-machine CMM (Coordinate Measuring Machine) system.
 
-![a laser triagulation sensor](https://opencmm.xyz/assets/images/sensor-55b7cf98350f293eba2c2b9d593bdd4f.png)
+![OpenCMM](https://opencmm.xyz/assets/images/prototype1-ede5c0b4a7b3f6675197cf3c44098ec5.png)
 
-## How it works:
+## Features
+This is a list of features that we are aiming to implement in the OpenCMM project.
 
-1. exports a stl file from a cad/cam software
-2. upload the stl file
-3. send gcode to the cnc machine
-4. start the cnc machine with the gcode
-5. see the result with the desktop app
+### Automatic Scan
+OpenCMM automatically scans the workpiece after the machining process, reducing measurement time and enhancing measurement accuracy.
 
-## Prerequisites
+### 50µm Accuracy
+While 3D scanners are generally less accurate than touch probes, OpenCMM will provide enough accuracy to check if the workpiece meets the general machining tolerance.
 
-- CNC machine that supports [MTConnect](https://www.mtconnect.org/)
-- [C++ Agent](https://github.com/mtconnect/cppagent)
-- A computer with 4GB RAM and 10GB free disk space
-- Docker >= 24.0.7
-- Docker-compose >= 1.29.2
-- OpenCMM device (We plan to release the device)
+### Universal Compatibility
+OpenCMM is compatible with any CNC machine, requiring no wiring or modifications. It seamlessly integrates with 3-axis and 5-axis machines, as well as machines from any brand.
 
-## Installation
-Clone the repository
-```bash
-git clone https://github.com/OpenCMM/opencmm.git
-cd opencmm
-```
 
-## Quick Start
-```bash
-docker-compose up -d
-```
-
-## Goal
-10 micron precision
+## Development Status
+OpenCMM is currently in the early stages of development. Both hardware and software are being developed in parallel. For software development, we are using Blender to simulate the 3D scanning process.
