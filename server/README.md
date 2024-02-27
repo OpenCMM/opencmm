@@ -19,3 +19,8 @@ poetry run ruff check .
 ```bash
 poetry export -f requirements.txt --output requirements.txt
 ```
+
+# Calibration of the camera
+```bash
+poetry run python calibration.py
+```
