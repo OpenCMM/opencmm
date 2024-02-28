@@ -1,4 +1,4 @@
-# opencmm
+# OpenCMM
 ![Test](https://github.com/OpenCMM/opencmm/actions/workflows/ci.yml/badge.svg)
 ![UI](https://github.com/OpenCMM/opencmm/actions/workflows/ui.yml/badge.svg)
 <a href="CONTRIBUTING.md#pull-requests"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
@@ -6,7 +6,7 @@
 
 <a href="https://www.youtube.com/@OpenCMM/featured"><img src="https://img.shields.io/youtube/channel/views/UCwVZLMiXavABD-91c5CtPog?style=social" alt="YouTube Channel Subscribers" /></a>
 <a href="https://twitter.com/OpenCMM"><img src="https://img.shields.io/twitter/follow/OpenCMM.svg?style=social" alt="Twitter Follow" /></a>
-[TikTok](https:/www.youtube.com/@OpenCMM/featured)
+[TikTok](https://www.tiktok.com/@opencmm)
 [Blog](https://opencmm.xyz/blog)
 
 An opensource on-machine 3D Scanner CMM (Coordinate Measuring Machine) system

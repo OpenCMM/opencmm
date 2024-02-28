@@ -17,6 +17,7 @@ import websockets
 import asyncio
 import time
 import io
+import sys
 
 # rotation motor
 in1 = 17
@@ -99,14 +100,14 @@ def move_motor(step_count, direction, step_sleep, motor_pins):
         exit(1)
 
 
-async def main():
+async def main(total_images):
     # establish the websockets connection
-    uri = "ws://192.168.72.219:8765"
+    uri = "ws://192.168.10.110:8765"
     async with websockets.connect(uri) as websocket:
         direction = False  # True for clockwise, False for counter-clockwise
         setup_pins(motor_pins)
         picam2 = Picamera2()
-        is_full = True
+        is_full = False
         if is_full:
             picam2.configure(picam2.create_still_configuration())
         else:
@@ -118,17 +119,20 @@ async def main():
 
         # lifting the scanner up by 45°
         move_motor(step_count_lifting_motor, direction, step_sleep, lifting_motor_pins)
-        for i in range(3):
+
+        for i in range(total_images):
             # for i in range(128):
             move_motor(one_step_rotation, direction, step_sleep, rotation_motor_pins)
             # take a picture
-            print(f"taking a picture - {i+1}/128")
+            print(f"taking a picture - {i+1}/{total_images}")
             image_data = take_picture(picam2)
             chunk_size = 1024  # Set the desired chunk size
 
             # Calculate the total number of chunks
             total_chunks = (len(image_data) + chunk_size - 1) // chunk_size
-            await websocket.send(f"sending {total_chunks} chunks of data - {i+1}/128")
+            await websocket.send(
+                f"sending {total_chunks} chunks of data - {i+1}/{total_images}"
+            )
 
             # Send data in smaller chunks
             for i in range(total_chunks):
@@ -143,9 +147,8 @@ async def main():
 
         # lowering the scanner by 45°
         move_motor(step_count_lifting_motor, direction, step_sleep, lifting_motor_pins)
-        # rotating the scanner by 360° in the opposite direction
         move_motor(
-            step_count_rotation_motor, direction, step_sleep, rotation_motor_pins
+            one_step_rotation * total_images, direction, step_sleep, rotation_motor_pins
         )
 
         print("done")
@@ -155,4 +158,9 @@ async def main():
         exit(0)
 
 
-asyncio.run(main())
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python platform_extrinsics.py <total_images>")
+        sys.exit(1)
+    total_images = int(sys.argv[1])
+    asyncio.run(main(total_images))
