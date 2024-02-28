@@ -6,7 +6,14 @@ import asyncio
 async def server(websocket):
     idx = 0
     image_data = b""
+    waiting_image = False
     while True:
+        # read console input
+        if not waiting_image:
+            message = input("Enter message: ")
+            await websocket.send(message) 
+            waiting_image = True
+
         data = await websocket.recv()
         if isinstance(data, bytes):
             # concatenate the image data
@@ -20,6 +27,9 @@ async def server(websocket):
                     print(f"Saved image {idx}.jpg")
                     idx += 1
                     image_data = b""
+                
+                waiting_image = False
+
             else:
                 print(f"Received: {data}")
 
