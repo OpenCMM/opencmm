@@ -1,4 +1,7 @@
 #!/usr/bin/python
+"""
+Test two servo motors
+"""
 import RPi.GPIO as GPIO
 import time
 
@@ -23,9 +26,12 @@ for servo_pin in servo_pins:
 servo0_pwm = GPIO.PWM(servo0, frequency)
 servo1_pwm = GPIO.PWM(servo1, frequency)
 
+servo0_initial_duty_cycle = 2.5
+servo1_initial_duty_cycle = 12.5
+
 # Start PWM with the duty cycle that corresponds to 0 degrees
-servo0_pwm.start(2.5)
-servo1_pwm.start(12.5)
+servo0_pwm.start(servo0_initial_duty_cycle)
+servo1_pwm.start(servo1_initial_duty_cycle)
 
 try:
     # move servo0 to 180 degrees
@@ -39,8 +45,8 @@ try:
 except KeyboardInterrupt:
     print("KeyboardInterrupt")
     # move to 0 degrees
-    servo0_pwm.ChangeDutyCycle(2.5)
-    servo1_pwm.ChangeDutyCycle(2.5)
+    servo0_pwm.ChangeDutyCycle(servo0_initial_duty_cycle)
+    servo1_pwm.ChangeDutyCycle(servo1_initial_duty_cycle)
 
     time.sleep(1)
 

@@ -1,14 +1,14 @@
 #!/usr/bin/python3
 
 """
-Use two 28BYJ-48 stepper motors to rotate and lift the scanner
+Use one 28BYJ-48 stepper motors to rotate and two servo motors to extend/close the scanner
 Take pictures with raspberry pi high quality camera
 
-1. lift the scanner up by 45°
+1. extend the scanner using two servo motors
 2. rotate the scanner by 2.815°
 3. take a picture and send it to the server over websockets
 4. keep rotating the scanner by 2.815° and taking pictures until the scanner has rotated 360°
-5. lower the scanner by 45°
+5. close the scanner using two servo motors
 6. rotate the scanner by 360° in the opposite direction
 """
 import RPi.GPIO as GPIO
@@ -24,18 +24,20 @@ in2 = 18
 in3 = 27
 in4 = 22
 
-# lifting motor
-in5 = 26
-in6 = 19
-in7 = 13
-in8 = 6
+
+# servo motors
+# move camera
+servo0 = 3
+# move laser1
+servo1 = 4
+# Set the PWM frequency (Hz)
+frequency = 50
 
 # careful lowering this, at some point you run into the mechanical limitation of how quick your motor can move
 step_sleep = 0.002
 
 one_step_rotation = int(4096 / 128)
 step_count_rotation_motor = 4096  # 5.625*(1/64) per step, 4096 steps is 360°
-step_count_lifting_motor = 512  # 45°
 
 
 # defining stepper motor sequence (found in documentation http://www.4tronix.co.uk/arduino/Stepper-Motors.php)
@@ -51,8 +53,6 @@ step_sequence = [
 ]
 
 rotation_motor_pins = [in1, in2, in3, in4]
-lifting_motor_pins = [in5, in6, in7, in8]
-motor_pins = [in1, in2, in3, in4, in5, in6, in7, in8]
 
 
 def setup_pins(motor_pins):
@@ -61,9 +61,31 @@ def setup_pins(motor_pins):
     for pin in motor_pins:
         GPIO.setup(pin, GPIO.OUT)
 
+
+    # Setup GPIO pin for servo motor
+    GPIO.setup(servo0, GPIO.OUT)
+    GPIO.setup(servo1, GPIO.OUT)
+
     # initializing
     for pin in motor_pins:
         GPIO.output(pin, GPIO.LOW)
+
+def extend_scanner(servo0_pwm, servo1_pwm):
+    # move servo0 to 180 degrees
+    servo0_pwm.ChangeDutyCycle(12.5)
+    # move servo1 to 140 degrees counter-clockwise
+    servo1_pwm.ChangeDutyCycle(5.0)
+
+def close_scanner(servo0_pwm, servo1_pwm):
+    # move to 0 degrees
+    servo0_pwm.ChangeDutyCycle(2.5)
+    servo1_pwm.ChangeDutyCycle(12.5)
+
+    time.sleep(1)
+
+    # Clean up GPIO on Ctrl+C
+    servo0_pwm.stop()
+    servo1_pwm.stop()
 
 
 def take_picture(picam2) -> bytes:
@@ -74,7 +96,7 @@ def take_picture(picam2) -> bytes:
 
 
 def cleanup():
-    for pin in motor_pins:
+    for pin in rotation_motor_pins:
         GPIO.output(pin, GPIO.LOW)
     GPIO.cleanup()
 
@@ -101,10 +123,10 @@ def move_motor(step_count, direction, step_sleep, motor_pins):
 
 async def main():
     # establish the websockets connection
-    uri = "ws://192.168.72.219:8765"
+    uri = "ws://ubuntu-main.local:8765"
     async with websockets.connect(uri) as websocket:
         direction = False  # True for clockwise, False for counter-clockwise
-        setup_pins(motor_pins)
+        setup_pins(rotation_motor_pins)
         picam2 = Picamera2()
         is_full = True
         if is_full:
@@ -116,8 +138,16 @@ async def main():
 
         time.sleep(1)
 
-        # lifting the scanner up by 45°
-        move_motor(step_count_lifting_motor, direction, step_sleep, lifting_motor_pins)
+        # Create PWM instance
+        servo0_pwm = GPIO.PWM(servo0, frequency)
+        servo1_pwm = GPIO.PWM(servo1, frequency)
+
+        # Start PWM with the duty cycle that corresponds to 0 degrees
+        servo0_pwm.start(2.5)
+        servo1_pwm.start(12.5)
+
+        extend_scanner(servo0_pwm, servo1_pwm)
+
         for i in range(3):
             # for i in range(128):
             move_motor(one_step_rotation, direction, step_sleep, rotation_motor_pins)
@@ -141,8 +171,8 @@ async def main():
         # reversing direction
         direction = not direction
 
-        # lowering the scanner by 45°
-        move_motor(step_count_lifting_motor, direction, step_sleep, lifting_motor_pins)
+        # move the scanner to the starting position
+        close_scanner(servo0_pwm, servo1_pwm)
         # rotating the scanner by 360° in the opposite direction
         move_motor(
             step_count_rotation_motor, direction, step_sleep, rotation_motor_pins
